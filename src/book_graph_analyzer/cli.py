@@ -379,21 +379,16 @@ def extract_relationships_cmd(
     rel_counts: dict[str, int] = defaultdict(int)
     total_relationships = 0
 
-    with Progress(
-        SpinnerColumn(),
-        TextColumn("[progress.description]{task.description}"),
-        BarColumn(),
-        TaskProgressColumn(),
-        console=console,
-    ) as progress:
-        task = progress.add_task("Extracting relationships...", total=len(entity_results))
-
-        for i, rel_result in enumerate(rel_extractor.extract_from_results(entity_results)):
-            relationship_results.append(rel_result)
-            for rel in rel_result.relationships:
-                rel_counts[rel.predicate.value] += 1
-                total_relationships += 1
-            progress.update(task, completed=i + 1)
+    total_to_process = len(entity_results)
+    for i, rel_result in enumerate(rel_extractor.extract_from_results(entity_results)):
+        relationship_results.append(rel_result)
+        for rel in rel_result.relationships:
+            rel_counts[rel.predicate.value] += 1
+            total_relationships += 1
+        
+        # Simple progress indicator every 100 passages
+        if (i + 1) % 100 == 0 or i + 1 == total_to_process:
+            console.print(f"  Processed {i + 1}/{total_to_process} passages, found {total_relationships} relationships")
 
     # Display results
     console.print(f"\n[bold green]OK Extraction complete![/bold green]\n")
@@ -413,20 +408,22 @@ def extract_relationships_cmd(
     for rel_type, count in sorted(rel_counts.items(), key=lambda x: -x[1])[:15]:
         console.print(f"  {rel_type}: {count:,}")
 
-    # Sample relationships
-    console.print("\n[bold]Sample relationships:[/bold]")
+    # Sample relationships - only show ones with resolved entities
+    console.print("\n[bold]Sample relationships (resolved entities only):[/bold]")
     sample_count = 0
     for result in relationship_results:
         for rel in result.relationships:
             if sample_count >= 10:
                 break
-            subj = rel.subject_id or rel.subject_text
-            obj = rel.object_id or rel.object_text
-            console.print(f"  ({subj})-[{rel.predicate.value}]->({obj})")
-            console.print(f"    [dim]\"{result.passage_text[:80]}...\"[/dim]")
-            sample_count += 1
+            # Only show relationships where both entities are resolved
+            if rel.subject_id and rel.object_id:
+                console.print(f"  ({rel.subject_id})-[{rel.predicate.value}]->({rel.object_id})")
+                sample_count += 1
         if sample_count >= 10:
             break
+    
+    if sample_count == 0:
+        console.print("  [dim]No fully resolved relationships to display[/dim]")
 
     # Save output
     if output:
