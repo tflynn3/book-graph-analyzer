@@ -1175,6 +1175,217 @@ def voice_quotes(results_path: str, character: str, limit: int) -> None:
     console.print(f"\n[dim]Total lines: {profile.total_lines}[/dim]")
 
 
+# ============================================================================
+# Pipeline Commands - Unified Analysis
+# ============================================================================
+
+@main.group()
+def pipeline() -> None:
+    """Unified analysis pipelines - run multiple phases together."""
+    pass
+
+
+@pipeline.command(name="full")
+@click.argument("path", type=click.Path(exists=True))
+@click.option("--title", "-t", help="Book title")
+@click.option("--author", "-a", default="Unknown", help="Author name")
+@click.option("--no-neo4j", is_flag=True, help="Skip writing to Neo4j")
+@click.option("--output-dir", "-o", type=click.Path(), help="Output directory for JSON files")
+def pipeline_full(path: str, title: str | None, author: str, no_neo4j: bool, output_dir: str | None) -> None:
+    """Run full analysis pipeline: entities, style, and voice.
+    
+    Processes a book through all analysis phases and writes results
+    to Neo4j (if available) and JSON files.
+    
+    Example:
+        bga pipeline full data/texts/the_hobbit.txt -t "The Hobbit" -a "Tolkien" -o output/
+    """
+    from book_graph_analyzer.ingest.loader import load_book
+    from book_graph_analyzer.ingest.splitter import split_into_passages
+    from book_graph_analyzer.extract import EntityExtractor, RelationshipExtractor
+    from book_graph_analyzer.style import StyleAnalyzer
+    from book_graph_analyzer.voice import VoiceAnalyzer
+    from book_graph_analyzer.graph.writer import GraphWriter
+    from book_graph_analyzer.graph.connection import check_neo4j_connection
+
+    file_path = Path(path)
+    book_title = title or file_path.stem.replace("_", " ").replace("-", " ").title()
+    book_id = book_title.lower().replace(" ", "_").replace("'", "")
+
+    console.print(f"[bold]Full Analysis Pipeline[/bold]")
+    console.print(f"  Book: {book_title}")
+    console.print(f"  Author: {author}")
+    console.print(f"  Source: {file_path}")
+    
+    # Check Neo4j
+    neo4j_available = not no_neo4j and check_neo4j_connection()
+    if not no_neo4j and not neo4j_available:
+        console.print(f"  [yellow]Neo4j not available - will save to JSON only[/yellow]")
+    elif neo4j_available:
+        console.print(f"  [green]Neo4j connected[/green]")
+    
+    console.print()
+
+    # Setup output directory
+    if output_dir:
+        out_path = Path(output_dir)
+        out_path.mkdir(parents=True, exist_ok=True)
+    else:
+        out_path = Path("data/output") / book_id
+        out_path.mkdir(parents=True, exist_ok=True)
+
+    # =========================================================================
+    # Phase 1: Load and Split
+    # =========================================================================
+    console.print("[bold]Phase 1: Loading text...[/bold]")
+    
+    with console.status("Loading book..."):
+        text = load_book(file_path)
+    console.print(f"  Loaded {len(text):,} characters")
+
+    with console.status("Splitting into passages..."):
+        passages = split_into_passages(text, book_title)
+    console.print(f"  Split into {len(passages):,} passages")
+
+    # =========================================================================
+    # Phase 2-3: Entity & Relationship Extraction
+    # =========================================================================
+    console.print("\n[bold]Phase 2-3: Entity & Relationship Extraction...[/bold]")
+    
+    extractor = EntityExtractor(use_llm=False)  # Fast mode
+    rel_extractor = RelationshipExtractor(resolver=extractor.resolver, use_llm=False)
+
+    entity_results = []
+    relationship_results = []
+    
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        BarColumn(),
+        TaskProgressColumn(),
+        console=console,
+    ) as progress:
+        task = progress.add_task("Extracting entities...", total=len(passages))
+        
+        for passage in passages:
+            results = extractor.extract_from_passage(passage)
+            if results:
+                entity_results.append(results)
+                
+                # Extract relationships
+                rel_result = rel_extractor.extract_relationships(
+                    text=passage.text,
+                    passage_id=passage.id,
+                    entities=results.entities,
+                )
+                if rel_result.relationships:
+                    relationship_results.append(rel_result)
+            
+            progress.update(task, advance=1)
+
+    # Count unique entities
+    entity_ids = set()
+    for result in entity_results:
+        for entity in result.entities:
+            if entity.canonical_id:
+                entity_ids.add(entity.canonical_id)
+    
+    total_rels = sum(len(r.relationships) for r in relationship_results)
+    console.print(f"  Unique entities: {len(entity_ids)}")
+    console.print(f"  Relationships: {total_rels}")
+
+    # =========================================================================
+    # Phase 4: Style Analysis
+    # =========================================================================
+    console.print("\n[bold]Phase 4: Style Analysis...[/bold]")
+    
+    style_analyzer = StyleAnalyzer()
+    
+    with console.status("Analyzing style..."):
+        fingerprint = style_analyzer.analyze_text(text, author_name=author, source_name=file_path.name)
+    
+    console.print(f"  Avg sentence length: {fingerprint.sentence_length_dist.mean:.1f} words")
+    console.print(f"  Flesch-Kincaid Grade: {fingerprint.flesch_kincaid_grade:.1f}")
+    console.print(f"  Dialogue ratio: {fingerprint.dialogue_ratio*100:.1f}%")
+
+    # Save style fingerprint
+    style_path = out_path / "style_fingerprint.json"
+    style_analyzer.save_fingerprint(fingerprint, style_path)
+
+    # =========================================================================
+    # Phase 5: Voice Analysis
+    # =========================================================================
+    console.print("\n[bold]Phase 5: Voice Analysis...[/bold]")
+    
+    voice_analyzer = VoiceAnalyzer(min_lines_for_profile=3)
+    
+    with console.status("Analyzing character voices..."):
+        voice_result = voice_analyzer.analyze_text(text, source_name=file_path.name)
+    
+    console.print(f"  Dialogue lines: {voice_result.total_dialogue_lines}")
+    console.print(f"  Attribution rate: {voice_result.attribution_rate*100:.1f}%")
+    console.print(f"  Character profiles: {voice_result.total_characters}")
+
+    # Save voice analysis
+    voice_path = out_path / "voice_profiles.json"
+    voice_analyzer.save_results(voice_result, voice_path)
+
+    # =========================================================================
+    # Write to Neo4j
+    # =========================================================================
+    if neo4j_available:
+        console.print("\n[bold]Writing to Neo4j...[/bold]")
+        
+        writer = GraphWriter()
+        
+        with console.status("Writing book style..."):
+            writer.write_book_style(book_id, book_title, author, fingerprint)
+        console.print("  Book style written")
+
+        with console.status("Writing entities and relationships..."):
+            stats = writer.write_extraction_results(
+                entity_results=entity_results,
+                relationship_results=relationship_results,
+                book=book_title,
+            )
+        console.print(f"  Entities: {stats['entities_written']}")
+        console.print(f"  Relationships: {stats['relationships_written']}")
+
+        # Build entity ID map for voice profiles
+        entity_map = {}
+        for result in entity_results:
+            for entity in result.entities:
+                if entity.canonical_id and entity.canonical_name:
+                    entity_map[entity.canonical_name] = entity.canonical_id
+                    # Also map extracted text
+                    entity_map[entity.extracted.text] = entity.canonical_id
+
+        with console.status("Writing voice profiles..."):
+            voice_stats = writer.write_voice_analysis_results(
+                voice_result=voice_result,
+                book_id=book_id,
+                entity_id_map=entity_map,
+            )
+        console.print(f"  Voice profiles: {voice_stats['profiles_written']}")
+
+        writer.close()
+
+    # =========================================================================
+    # Summary
+    # =========================================================================
+    console.print("\n[bold green]Pipeline Complete![/bold green]")
+    console.print(f"\nOutput saved to: {out_path}")
+    console.print(f"  - style_fingerprint.json")
+    console.print(f"  - voice_profiles.json")
+    
+    if neo4j_available:
+        console.print(f"\nNeo4j populated with:")
+        console.print(f"  - Book node with style metrics")
+        console.print(f"  - {len(entity_ids)} entity nodes")
+        console.print(f"  - {total_rels} relationships")
+        console.print(f"  - {voice_result.total_characters} character voice profiles")
+
+
 if __name__ == "__main__":
     main()
 
