@@ -508,6 +508,173 @@ def extract_rel_test(text: str, no_llm: bool) -> None:
         console.print("\n[yellow]No relationships found[/yellow]")
 
 
+# ============================================================================
+# Analyze Command (Generic Zero-Seed Extraction)
+# ============================================================================
+
+@main.command()
+@click.argument("path", type=click.Path(exists=True))
+@click.option("--title", "-t", help="Book title")
+@click.option("--no-llm", is_flag=True, help="Disable LLM-based extraction")
+@click.option("--output", "-o", type=click.Path(), help="Output file for results (JSON)")
+def analyze(path: str, title: str | None, no_llm: bool, output: str | None) -> None:
+    """Analyze a book with zero-seed generic extraction.
+    
+    This command extracts entities and relationships without requiring
+    a pre-seeded entity database. Works on any novel.
+    """
+    from book_graph_analyzer.extract import GenericExtractor
+
+    file_path = Path(path)
+    book_title = title or file_path.stem.replace("_", " ").replace("-", " ").title()
+
+    console.print(f"[bold]Analyzing:[/bold] {book_title}")
+    console.print(f"[dim]Source: {file_path}[/dim]")
+    console.print(f"[dim]Mode: Zero-seed generic extraction[/dim]")
+    console.print(f"[dim]LLM: {'disabled' if no_llm else 'enabled'}[/dim]\n")
+
+    extractor = GenericExtractor(use_llm=not no_llm)
+
+    # Progress tracking
+    current_phase = ""
+    def progress_callback(phase: str, current: int, total: int, message: str) -> None:
+        nonlocal current_phase
+        if phase != current_phase:
+            current_phase = phase
+            console.print(f"\n[bold]Phase: {phase.title()}[/bold]")
+        if current > 0 and (current % 500 == 0 or current == total):
+            console.print(f"  {message} ({current}/{total})")
+
+    # Run analysis
+    analysis = extractor.analyze_book(
+        file_path=file_path,
+        title=book_title,
+        progress_callback=progress_callback,
+    )
+
+    # Display results
+    console.print(f"\n[bold green]OK Analysis complete![/bold green]\n")
+
+    # Entity stats
+    table = Table(title="Entity Statistics")
+    table.add_column("Metric", style="cyan")
+    table.add_column("Value", style="green", justify="right")
+
+    table.add_row("Total passages", f"{analysis.total_passages:,}")
+    table.add_row("Unique entities", f"{len(analysis.entity_clusters):,}")
+    table.add_row("Total mentions", f"{analysis.total_mentions:,}")
+    table.add_row("Total relationships", f"{len(analysis.relationships):,}")
+
+    console.print(table)
+
+    # Entities by type
+    by_type = {}
+    for cluster in analysis.entity_clusters.values():
+        by_type[cluster.entity_type] = by_type.get(cluster.entity_type, 0) + 1
+
+    console.print("\n[bold]Entities by type:[/bold]")
+    for etype, count in sorted(by_type.items(), key=lambda x: -x[1]):
+        console.print(f"  {etype}: {count:,}")
+
+    # Top entities
+    console.print("\n[bold]Top entities (by mentions):[/bold]")
+    top_entities = sorted(
+        analysis.entity_clusters.values(),
+        key=lambda c: c.mention_count,
+        reverse=True,
+    )[:15]
+    
+    for cluster in top_entities:
+        aliases_str = ""
+        if cluster.aliases:
+            # Filter and encode aliases for safe printing
+            alias_list = [a.encode('ascii', 'replace').decode('ascii') for a in list(cluster.aliases)[:3]]
+            aliases_str = f" (aliases: {', '.join(alias_list)})"
+        name = cluster.canonical_name.encode('ascii', 'replace').decode('ascii')
+        console.print(f"  [{cluster.entity_type}] {name}: {cluster.mention_count} mentions{aliases_str}")
+
+    # Relationship stats
+    if analysis.relationships:
+        console.print("\n[bold]Relationships by type:[/bold]")
+        for rel_type, count in sorted(analysis.relationship_counts.items(), key=lambda x: -x[1])[:10]:
+            console.print(f"  {rel_type}: {count:,}")
+
+        # Sample relationships
+        console.print("\n[bold]Sample relationships:[/bold]")
+        sample_count = 0
+        for rel in analysis.relationships:
+            if rel.subject_id and rel.object_id and sample_count < 10:
+                console.print(f"  ({rel.subject_id})-[{rel.predicate.value}]->({rel.object_id})")
+                sample_count += 1
+
+    # Save output
+    if output:
+        output_path = Path(output)
+        
+        # Export to JSON
+        output_data = {
+            "title": analysis.title,
+            "stats": {
+                "total_passages": analysis.total_passages,
+                "unique_entities": len(analysis.entity_clusters),
+                "total_mentions": analysis.total_mentions,
+                "total_relationships": len(analysis.relationships),
+                "entities_by_type": by_type,
+                "relationship_counts": analysis.relationship_counts,
+            },
+            "entities": [
+                {
+                    "id": c.id,
+                    "canonical_name": c.canonical_name,
+                    "type": c.entity_type,
+                    "mentions": c.mention_count,
+                    "aliases": list(c.aliases),
+                }
+                for c in sorted(analysis.entity_clusters.values(), key=lambda x: -x.mention_count)
+            ],
+            "relationships": [
+                {
+                    "subject_id": r.subject_id,
+                    "predicate": r.predicate.value,
+                    "object_id": r.object_id,
+                    "passage_id": r.passage_id,
+                }
+                for r in analysis.relationships
+                if r.subject_id and r.object_id
+            ],
+        }
+
+        with open(output_path, "w") as f:
+            json.dump(output_data, f, indent=2)
+
+        console.print(f"\n[green]OK[/green] Results saved to {output_path}")
+
+        # Also export seed file for future use
+        seed_path = output_path.with_suffix(".seeds.json")
+        seed_data = {
+            "characters": [
+                {"id": c.id, "canonical_name": c.canonical_name, "aliases": list(c.aliases)}
+                for c in analysis.entity_clusters.values()
+                if c.entity_type == "character" and c.mention_count >= 3
+            ],
+            "places": [
+                {"id": c.id, "canonical_name": c.canonical_name, "aliases": list(c.aliases)}
+                for c in analysis.entity_clusters.values()
+                if c.entity_type == "place" and c.mention_count >= 2
+            ],
+            "objects": [
+                {"id": c.id, "canonical_name": c.canonical_name, "aliases": list(c.aliases)}
+                for c in analysis.entity_clusters.values()
+                if c.entity_type == "object" and c.mention_count >= 2
+            ],
+        }
+        
+        with open(seed_path, "w") as f:
+            json.dump(seed_data, f, indent=2)
+        
+        console.print(f"[green]OK[/green] Seed file saved to {seed_path} (for future re-analysis)")
+
+
 if __name__ == "__main__":
     main()
 
