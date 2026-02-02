@@ -298,5 +298,152 @@
     "titles": ["Dark Lord"],
     "gender": "male",
     "description": "The first Dark Lord, mightiest of the Valar who fell"
+  },
+  {
+    "id": "fili",
+    "canonical_name": "Fíli",
+    "aliases": ["Fili"],
+    "race": "Dwarf",
+    "gender": "male",
+    "description": "Nephew of Thorin, member of Thorin's Company"
+  },
+  {
+    "id": "kili",
+    "canonical_name": "Kíli",
+    "aliases": ["Kili"],
+    "race": "Dwarf",
+    "gender": "male",
+    "description": "Nephew of Thorin, member of Thorin's Company"
+  },
+  {
+    "id": "dwalin",
+    "canonical_name": "Dwalin",
+    "aliases": [],
+    "race": "Dwarf",
+    "gender": "male",
+    "description": "Member of Thorin's Company, brother of Balin"
+  },
+  {
+    "id": "oin",
+    "canonical_name": "Óin",
+    "aliases": ["Oin"],
+    "race": "Dwarf",
+    "gender": "male",
+    "description": "Member of Thorin's Company"
+  },
+  {
+    "id": "nori",
+    "canonical_name": "Nori",
+    "aliases": [],
+    "race": "Dwarf",
+    "gender": "male",
+    "description": "Member of Thorin's Company"
+  },
+  {
+    "id": "dori",
+    "canonical_name": "Dori",
+    "aliases": [],
+    "race": "Dwarf",
+    "gender": "male",
+    "description": "Member of Thorin's Company"
+  },
+  {
+    "id": "ori",
+    "canonical_name": "Ori",
+    "aliases": [],
+    "race": "Dwarf",
+    "gender": "male",
+    "description": "Member of Thorin's Company"
+  },
+  {
+    "id": "bifur",
+    "canonical_name": "Bifur",
+    "aliases": [],
+    "race": "Dwarf",
+    "gender": "male",
+    "description": "Member of Thorin's Company"
+  },
+  {
+    "id": "bofur",
+    "canonical_name": "Bofur",
+    "aliases": [],
+    "race": "Dwarf",
+    "gender": "male",
+    "description": "Member of Thorin's Company"
+  },
+  {
+    "id": "bombur",
+    "canonical_name": "Bombur",
+    "aliases": [],
+    "race": "Dwarf",
+    "gender": "male",
+    "description": "Member of Thorin's Company, known for his weight"
+  },
+  {
+    "id": "dain",
+    "canonical_name": "Dáin Ironfoot",
+    "aliases": ["Dain", "Dáin II", "Dain Ironfoot", "King Dáin"],
+    "race": "Dwarf",
+    "titles": ["King under the Mountain"],
+    "gender": "male",
+    "description": "Lord of the Iron Hills, became King under the Mountain after Thorin"
+  },
+  {
+    "id": "bert_troll",
+    "canonical_name": "Bert",
+    "aliases": [],
+    "race": "Troll",
+    "gender": "male",
+    "description": "One of the three trolls who captured the Dwarves"
+  },
+  {
+    "id": "tom_troll",
+    "canonical_name": "Tom (Troll)",
+    "aliases": [],
+    "race": "Troll",
+    "gender": "male",
+    "description": "One of the three trolls who captured the Dwarves"
+  },
+  {
+    "id": "william_troll",
+    "canonical_name": "William",
+    "aliases": ["Bill", "Bill Huggins"],
+    "race": "Troll",
+    "gender": "male",
+    "description": "One of the three trolls who captured the Dwarves"
+  },
+  {
+    "id": "great_goblin",
+    "canonical_name": "Great Goblin",
+    "aliases": ["the Great Goblin"],
+    "race": "Goblin",
+    "titles": ["Great Goblin"],
+    "gender": "male",
+    "description": "Leader of the goblins of Goblin-town"
+  },
+  {
+    "id": "lord_eagles",
+    "canonical_name": "Lord of the Eagles",
+    "aliases": ["the Lord of the Eagles", "the Great Eagle"],
+    "race": "Eagle",
+    "gender": "male",
+    "description": "Lord of the Great Eagles who rescued the Company"
+  },
+  {
+    "id": "bolg",
+    "canonical_name": "Bolg",
+    "aliases": [],
+    "race": "Orc",
+    "gender": "male",
+    "description": "Son of Azog, led the goblin army in the Battle of Five Armies"
+  },
+  {
+    "id": "azog",
+    "canonical_name": "Azog",
+    "aliases": ["Azog the Defiler"],
+    "race": "Orc",
+    "titles": ["the Defiler"],
+    "gender": "male",
+    "description": "Orc chieftain who killed Thrór"
   }
 ]
