@@ -675,6 +675,300 @@ def analyze(path: str, title: str | None, no_llm: bool, output: str | None) -> N
         console.print(f"[green]OK[/green] Seed file saved to {seed_path} (for future re-analysis)")
 
 
+# ============================================================================
+# Style Analysis Commands (Phase 4)
+# ============================================================================
+
+@main.group()
+def style() -> None:
+    """Style analysis commands - extract author fingerprints."""
+    pass
+
+
+@style.command(name="analyze")
+@click.argument("path", type=click.Path(exists=True))
+@click.option("--author", "-a", default="Unknown", help="Author name")
+@click.option("--output", "-o", type=click.Path(), help="Output file for fingerprint (JSON)")
+@click.option("--verbose", "-v", is_flag=True, help="Show detailed output")
+def style_analyze(path: str, author: str, output: str | None, verbose: bool) -> None:
+    """Analyze a text file and extract its style fingerprint.
+    
+    Example:
+        bga style analyze data/texts/the_hobbit.txt -a "J.R.R. Tolkien" -o hobbit_style.json
+    """
+    from book_graph_analyzer.style import StyleAnalyzer
+
+    file_path = Path(path)
+    
+    console.print(f"[bold]Style Analysis:[/bold] {file_path.name}")
+    console.print(f"[dim]Author: {author}[/dim]\n")
+
+    # Progress callback
+    def progress_callback(progress):
+        if verbose:
+            console.print(f"  [{progress.phase}] {progress.message}")
+
+    analyzer = StyleAnalyzer(progress_callback=progress_callback if verbose else None)
+    
+    with console.status("Analyzing style..."):
+        fingerprint = analyzer.analyze_file(file_path, author_name=author)
+    
+    # Display summary
+    console.print(fingerprint.summary())
+    
+    # Save if output specified
+    if output:
+        output_path = Path(output)
+        analyzer.save_fingerprint(fingerprint, output_path)
+        console.print(f"\n[green]OK[/green] Fingerprint saved to {output_path}")
+
+
+@style.command(name="compare")
+@click.argument("file1", type=click.Path(exists=True))
+@click.argument("file2", type=click.Path(exists=True))
+@click.option("--json-input", "-j", is_flag=True, help="Input files are JSON fingerprints (not text)")
+@click.option("--author1", "-a1", default="Author 1", help="Name for first author")
+@click.option("--author2", "-a2", default="Author 2", help="Name for second author")
+def style_compare(file1: str, file2: str, json_input: bool, author1: str, author2: str) -> None:
+    """Compare style fingerprints of two texts or fingerprint files.
+    
+    Examples:
+        bga style compare book1.txt book2.txt -a1 "Tolkien" -a2 "Lewis"
+        bga style compare tolkien.json lewis.json -j
+    """
+    from book_graph_analyzer.style import StyleAnalyzer
+
+    analyzer = StyleAnalyzer()
+    
+    if json_input:
+        # Load pre-computed fingerprints
+        fp1 = analyzer.load_fingerprint(file1)
+        fp2 = analyzer.load_fingerprint(file2)
+    else:
+        # Analyze texts
+        console.print("[bold]Analyzing first text...[/bold]")
+        with console.status(f"Analyzing {Path(file1).name}..."):
+            fp1 = analyzer.analyze_file(file1, author_name=author1)
+        
+        console.print("[bold]Analyzing second text...[/bold]")
+        with console.status(f"Analyzing {Path(file2).name}..."):
+            fp2 = analyzer.analyze_file(file2, author_name=author2)
+    
+    # Compare
+    comparison = analyzer.compare(fp1, fp2)
+    
+    # Display results
+    console.print(f"\n[bold]Style Comparison: {comparison['author1']} vs {comparison['author2']}[/bold]\n")
+    
+    table = Table(title="Comparison Metrics")
+    table.add_column("Metric", style="cyan")
+    table.add_column("Value", style="green")
+    
+    table.add_row("Burrows' Delta", f"{comparison['burrows_delta']:.3f}")
+    table.add_row("Similarity Score", f"{comparison['similarity_score']:.2%}")
+    table.add_row("Interpretation", comparison['interpretation'])
+    
+    console.print(table)
+    
+    # Details
+    details = comparison['details']
+    console.print("\n[bold]Details:[/bold]")
+    console.print(f"  Sentence length: {details['sentence_length']['author1_mean']:.1f} vs {details['sentence_length']['author2_mean']:.1f} words")
+    console.print(f"  Flesch-Kincaid: {details['readability']['author1_fk_grade']:.1f} vs {details['readability']['author2_fk_grade']:.1f} grade level")
+    console.print(f"  Dialogue ratio: {details['dialogue_ratio']['author1']*100:.1f}% vs {details['dialogue_ratio']['author2']*100:.1f}%")
+
+
+@style.command(name="batch")
+@click.argument("directory", type=click.Path(exists=True))
+@click.option("--author", "-a", default="Unknown", help="Author name")
+@click.option("--pattern", "-p", default="*.txt", help="File pattern to match")
+@click.option("--output", "-o", type=click.Path(), help="Output file for combined fingerprint (JSON)")
+def style_batch(directory: str, author: str, pattern: str, output: str | None) -> None:
+    """Analyze multiple files and create a combined fingerprint.
+    
+    Example:
+        bga style batch data/texts/lotr-corpus/ -a "Tolkien" -p "*.txt" -o tolkien_combined.json
+    """
+    from book_graph_analyzer.style import StyleAnalyzer
+    import glob
+    
+    dir_path = Path(directory)
+    files = list(dir_path.glob(pattern))
+    
+    if not files:
+        console.print(f"[red]No files matching '{pattern}' found in {directory}[/red]")
+        return
+    
+    console.print(f"[bold]Batch Style Analysis[/bold]")
+    console.print(f"[dim]Author: {author}[/dim]")
+    console.print(f"[dim]Files: {len(files)}[/dim]\n")
+    
+    for f in files[:10]:
+        console.print(f"  - {f.name}")
+    if len(files) > 10:
+        console.print(f"  ... and {len(files) - 10} more")
+    
+    console.print()
+    
+    analyzer = StyleAnalyzer()
+    
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        BarColumn(),
+        TaskProgressColumn(),
+        console=console,
+    ) as progress:
+        task = progress.add_task("Analyzing files...", total=len(files))
+        
+        # Custom progress callback
+        def progress_callback(p):
+            progress.update(task, description=p.message)
+        
+        analyzer.progress_callback = progress_callback
+        
+        fingerprint = analyzer.analyze_files(files, author_name=author)
+        progress.update(task, completed=len(files))
+    
+    # Display summary
+    console.print(fingerprint.summary())
+    
+    # Save if output specified
+    if output:
+        output_path = Path(output)
+        analyzer.save_fingerprint(fingerprint, output_path)
+        console.print(f"\n[green]OK[/green] Combined fingerprint saved to {output_path}")
+
+
+@style.command(name="report")
+@click.argument("fingerprint_path", type=click.Path(exists=True))
+@click.option("--output", "-o", type=click.Path(), help="Output file for report (Markdown)")
+def style_report(fingerprint_path: str, output: str | None) -> None:
+    """Generate a detailed style report from a fingerprint file.
+    
+    Example:
+        bga style report tolkien_style.json -o tolkien_report.md
+    """
+    from book_graph_analyzer.style import StyleAnalyzer
+    
+    analyzer = StyleAnalyzer()
+    fingerprint = analyzer.load_fingerprint(fingerprint_path)
+    
+    # Generate markdown report
+    report = _generate_style_report(fingerprint)
+    
+    if output:
+        output_path = Path(output)
+        with open(output_path, 'w', encoding='utf-8') as f:
+            f.write(report)
+        console.print(f"[green]OK[/green] Report saved to {output_path}")
+    else:
+        console.print(report)
+
+
+def _generate_style_report(fingerprint) -> str:
+    """Generate a markdown style report from a fingerprint."""
+    lines = [
+        f"# Style Analysis Report: {fingerprint.author_name}",
+        "",
+        "## Overview",
+        "",
+        f"- **Total Words Analyzed**: {fingerprint.total_word_count:,}",
+        f"- **Total Sentences**: {fingerprint.total_sentence_count:,}",
+        f"- **Source Texts**: {', '.join(fingerprint.source_texts)}",
+        "",
+        "## Sentence Structure",
+        "",
+    ]
+    
+    if fingerprint.sentence_length_dist:
+        sl = fingerprint.sentence_length_dist
+        lines.extend([
+            f"| Metric | Value |",
+            f"|--------|-------|",
+            f"| Mean sentence length | {sl.mean:.1f} words |",
+            f"| Median | {sl.median:.1f} words |",
+            f"| Range | {sl.min:.0f} - {sl.max:.0f} words |",
+            f"| Std deviation | {sl.std:.1f} |",
+            "",
+        ])
+    
+    lines.extend([
+        "## Style Characteristics",
+        "",
+        f"| Characteristic | Percentage |",
+        f"|----------------|------------|",
+        f"| Dialogue passages | {fingerprint.dialogue_ratio*100:.1f}% |",
+        f"| Passive voice | {fingerprint.passive_voice_ratio*100:.1f}% |",
+        f"| Questions | {fingerprint.question_ratio*100:.1f}% |",
+        f"| Exclamations | {fingerprint.exclamation_ratio*100:.1f}% |",
+        "",
+        "## Readability",
+        "",
+        f"| Metric | Score | Interpretation |",
+        f"|--------|-------|----------------|",
+        f"| Flesch Reading Ease | {fingerprint.flesch_reading_ease:.1f} | {_interpret_flesch(fingerprint.flesch_reading_ease)} |",
+        f"| Flesch-Kincaid Grade | {fingerprint.flesch_kincaid_grade:.1f} | Grade {int(fingerprint.flesch_kincaid_grade)} reading level |",
+        f"| Gunning Fog | {fingerprint.gunning_fog:.1f} | {int(fingerprint.gunning_fog)} years of education |",
+        "",
+    ])
+    
+    if fingerprint.vocabulary_profile:
+        vp = fingerprint.vocabulary_profile
+        lines.extend([
+            "## Vocabulary",
+            "",
+            f"| Metric | Value |",
+            f"|--------|-------|",
+            f"| Unique words | {vp.unique_words:,} |",
+            f"| Type-token ratio | {vp.type_token_ratio:.3f} |",
+            f"| Average word length | {vp.avg_word_length:.2f} chars |",
+            f"| Hapax legomena | {vp.hapax_count:,} ({vp.hapax_ratio*100:.1f}%) |",
+            "",
+        ])
+        
+        if vp.archaisms_found:
+            lines.extend([
+                "### Archaic Language",
+                "",
+                f"Archaisms found: {', '.join(vp.archaisms_found)}",
+                "",
+                f"Density: {fingerprint.archaism_density:.2f} per 1000 words",
+                "",
+            ])
+    
+    if fingerprint.passage_type_distribution:
+        lines.extend([
+            "## Passage Types",
+            "",
+            f"| Type | Percentage |",
+            f"|------|------------|",
+        ])
+        for ptype, ratio in sorted(fingerprint.passage_type_distribution.items(), key=lambda x: -x[1]):
+            lines.append(f"| {ptype.title()} | {ratio*100:.1f}% |")
+        lines.append("")
+    
+    return "\n".join(lines)
+
+
+def _interpret_flesch(score: float) -> str:
+    """Interpret Flesch Reading Ease score."""
+    if score >= 90:
+        return "Very easy (5th grade)"
+    elif score >= 80:
+        return "Easy (6th grade)"
+    elif score >= 70:
+        return "Fairly easy (7th grade)"
+    elif score >= 60:
+        return "Standard (8th-9th grade)"
+    elif score >= 50:
+        return "Fairly difficult (10th-12th grade)"
+    elif score >= 30:
+        return "Difficult (college level)"
+    else:
+        return "Very difficult (college graduate)"
+
+
 if __name__ == "__main__":
     main()
 

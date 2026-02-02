@@ -1,0 +1,163 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        
+            <script src="lib/bindings/utils.js"></script>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/dist/vis-network.min.css" integrity="sha512-WgxfT5LWjfszlPHXRmBWHkV2eceiWTOBvrKCNbdgDYTHrT2AeLCGbF4sZlZw3UMN3WtL0tGUoIAKsu8mllg/XA==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+            <script src="https://cdnjs.cloudflare.com/ajax/libs/vis-network/9.1.2/dist/vis-network.min.js" integrity="sha512-LnvoEWDFrqGHlHmDD2101OrLcbsfkrzoSpvtSQtxK3RMnRV0eOkhhBN2dXHKRrUU8p2DGRTk35n4O8nWSVe1mQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+            
+        
+<center>
+<h1></h1>
+</center>
+
+<!-- <link rel="stylesheet" href="../node_modules/vis/dist/vis.min.css" type="text/css" />
+<script type="text/javascript" src="../node_modules/vis/dist/vis.js"> </script>-->
+        <link
+          href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/css/bootstrap.min.css"
+          rel="stylesheet"
+          integrity="sha384-eOJMYsd53ii+scO/bJGFsiCZc+5NDVN2yr8+0RDqr0Ql0h+rP48ckxlpbzKgwra6"
+          crossorigin="anonymous"
+        />
+        <script
+          src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta3/dist/js/bootstrap.bundle.min.js"
+          integrity="sha384-JEW9xMcG8R+pH31jmWH6WWP0WintQrMb4s7ZOdauHnUtxwoG2vI5DkLtS3qm9Ekf"
+          crossorigin="anonymous"
+        ></script>
+
+
+        <center>
+          <h1></h1>
+        </center>
+        <style type="text/css">
+
+             #mynetwork {
+                 width: 100%;
+                 height: 800px;
+                 background-color: #222222;
+                 border: 1px solid lightgray;
+                 position: relative;
+                 float: left;
+             }
+
+             
+
+             
+
+             
+        </style>
+    </head>
+
+
+    <body>
+        <div class="card" style="width: 100%">
+            
+            
+            <div id="mynetwork" class="card-body"></div>
+        </div>
+
+        
+        
+
+        <script type="text/javascript">
+
+              // initialize global variables.
+              var edges;
+              var nodes;
+              var allNodes;
+              var allEdges;
+              var nodeColors;
+              var originalNodes;
+              var network;
+              var container;
+              var options, data;
+              var filter = {
+                  item : '',
+                  property : '',
+                  value : []
+              };
+
+              
+
+              
+
+              // This method is responsible for drawing the graph, returns the drawn network
+              function drawGraph() {
+                  var container = document.getElementById('mynetwork');
+
+                  
+
+                  // parsing and collecting nodes and edges from the python
+                  nodes = new vis.DataSet([{"color": "#9E9E9E", "font": {"color": "white"}, "id": "smaug_107", "label": "Smaug", "shape": "dot", "size": 24, "title": "Smaug\nType: unknown\nMentions: 71"}, {"color": "#9E9E9E", "font": {"color": "white"}, "id": "bilbo_14", "label": "Bilbo", "shape": "dot", "size": 50, "title": "Bilbo\nType: unknown\nMentions: 471"}, {"color": "#4CAF50", "font": {"color": "white"}, "id": "baggins_2", "label": "Baggins", "shape": "dot", "size": 15, "title": "Baggins\nType: character\nMentions: 27"}, {"color": "#4CAF50", "font": {"color": "white"}, "id": "well_130", "label": "\u00e2\u20ac\u0153Well", "shape": "dot", "size": 15, "title": "\u00e2\u20ac\u0153Well\nType: character\nMentions: 26"}, {"color": "#4CAF50", "font": {"color": "white"}, "id": "gandalf_15", "label": "Gandalf", "shape": "dot", "size": 29, "title": "Gandalf\nType: character\nMentions: 95"}, {"color": "#9E9E9E", "font": {"color": "white"}, "id": "dain_743", "label": "Dain", "shape": "dot", "size": 14, "title": "Dain\nType: unknown\nMentions: 21"}, {"color": "#9E9E9E", "font": {"color": "white"}, "id": "the_lonely_mountain_204", "label": "the Lonely Mountain", "shape": "dot", "size": 12, "title": "the Lonely Mountain\nType: unknown\nMentions: 11"}, {"color": "#9E9E9E", "font": {"color": "white"}, "id": "west_103", "label": "West", "shape": "dot", "size": 13, "title": "West\nType: unknown\nMentions: 18"}, {"color": "#9E9E9E", "font": {"color": "white"}, "id": "thorin_56", "label": "Thorin", "shape": "dot", "size": 43, "title": "Thorin\nType: unknown\nMentions: 168"}, {"color": "#4CAF50", "font": {"color": "white"}, "id": "gollum_285", "label": "Gollum", "shape": "dot", "size": 23, "title": "Gollum\nType: character\nMentions: 68"}, {"color": "#4CAF50", "font": {"color": "white"}, "id": "balin_40", "label": "Balin", "shape": "dot", "size": 22, "title": "Balin\nType: character\nMentions: 61"}, {"color": "#9E9E9E", "font": {"color": "white"}, "id": "bombur_55", "label": "Bombur", "shape": "dot", "size": 21, "title": "Bombur\nType: unknown\nMentions: 55"}, {"color": "#4CAF50", "font": {"color": "white"}, "id": "beorn_411", "label": "Beorn", "shape": "dot", "size": 20, "title": "Beorn\nType: character\nMentions: 53"}, {"color": "#4CAF50", "font": {"color": "white"}, "id": "bard_706", "label": "Bard", "shape": "dot", "size": 18, "title": "Bard\nType: character\nMentions: 43"}, {"color": "#4CAF50", "font": {"color": "white"}, "id": "fili_45", "label": "Fili", "shape": "dot", "size": 18, "title": "Fili\nType: character\nMentions: 41"}, {"color": "#9E9E9E", "font": {"color": "white"}, "id": "mr_baggins_26", "label": "Mr. Baggins", "shape": "dot", "size": 17, "title": "Mr. Baggins\nType: unknown\nMentions: 37"}, {"color": "#9E9E9E", "font": {"color": "white"}, "id": "mountain_109", "label": "Mountain", "shape": "dot", "size": 17, "title": "Mountain\nType: unknown\nMentions: 36"}, {"color": "#4CAF50", "font": {"color": "white"}, "id": "kili_44", "label": "Kili", "shape": "dot", "size": 17, "title": "Kili\nType: character\nMentions: 35"}, {"color": "#4CAF50", "font": {"color": "white"}, "id": "the_shadow_68", "label": "the shadow", "shape": "dot", "size": 16, "title": "the shadow\nType: character\nMentions: 31"}, {"color": "#4CAF50", "font": {"color": "white"}, "id": "dale_113", "label": "Dale", "shape": "dot", "size": 16, "title": "Dale\nType: character\nMentions: 31"}, {"color": "#9E9E9E", "font": {"color": "white"}, "id": "north_121", "label": "North", "shape": "dot", "size": 15, "title": "North\nType: unknown\nMentions: 27"}, {"color": "#4CAF50", "font": {"color": "white"}, "id": "mirkwood_101", "label": "Mirkwood", "shape": "dot", "size": 15, "title": "Mirkwood\nType: character\nMentions: 26"}, {"color": "#4CAF50", "font": {"color": "white"}, "id": "bert_165", "label": "Bert", "shape": "dot", "size": 15, "title": "Bert\nType: character\nMentions: 26"}, {"color": "#9E9E9E", "font": {"color": "white"}, "id": "dori_48", "label": "Dori", "shape": "dot", "size": 14, "title": "Dori\nType: unknown\nMentions: 24"}, {"color": "#9E9E9E", "font": {"color": "white"}, "id": "south_115", "label": "South", "shape": "dot", "size": 14, "title": "South\nType: unknown\nMentions: 23"}, {"color": "#4CAF50", "font": {"color": "white"}, "id": "shadow_311", "label": "shadow", "shape": "dot", "size": 14, "title": "shadow\nType: character\nMentions: 23"}, {"color": "#9E9E9E", "font": {"color": "white"}, "id": "bofur_54", "label": "Bofur", "shape": "dot", "size": 14, "title": "Bofur\nType: unknown\nMentions: 21"}, {"color": "#4CAF50", "font": {"color": "white"}, "id": "william_163", "label": "William", "shape": "dot", "size": 14, "title": "William\nType: character\nMentions: 21"}, {"color": "#4CAF50", "font": {"color": "white"}, "id": "hill_0", "label": "Hill", "shape": "dot", "size": 14, "title": "Hill\nType: character\nMentions: 20"}, {"color": "#9E9E9E", "font": {"color": "white"}, "id": "i_dont_125", "label": "I don\u00e2\u20ac\u2122t", "shape": "dot", "size": 14, "title": "I don\u00e2\u20ac\u2122t\nType: unknown\nMentions: 20"}, {"color": "#9E9E9E", "font": {"color": "white"}, "id": "elrond_227", "label": "Elrond", "shape": "dot", "size": 14, "title": "Elrond\nType: unknown\nMentions: 20"}, {"color": "#4CAF50", "font": {"color": "white"}, "id": "wargs_363", "label": "Wargs", "shape": "dot", "size": 14, "title": "Wargs\nType: character\nMentions: 20"}, {"color": "#9E9E9E", "font": {"color": "white"}, "id": "bifur_53", "label": "Bifur", "shape": "dot", "size": 13, "title": "Bifur\nType: unknown\nMentions: 19"}, {"color": "#9E9E9E", "font": {"color": "white"}, "id": "east_110", "label": "East", "shape": "dot", "size": 13, "title": "East\nType: unknown\nMentions: 19"}, {"color": "#4CAF50", "font": {"color": "white"}, "id": "tom_170", "label": "Tom", "shape": "dot", "size": 13, "title": "Tom\nType: character\nMentions: 19"}, {"color": "#9E9E9E", "font": {"color": "white"}, "id": "gate_608", "label": "Gate", "shape": "dot", "size": 13, "title": "Gate\nType: unknown\nMentions: 19"}, {"color": "#4CAF50", "font": {"color": "white"}, "id": "dwalin_42", "label": "Dwalin", "shape": "dot", "size": 13, "title": "Dwalin\nType: character\nMentions: 18"}, {"color": "#9E9E9E", "font": {"color": "white"}, "id": "won_21", "label": "won\u00e2\u20ac", "shape": "dot", "size": 13, "title": "won\u00e2\u20ac\nType: unknown\nMentions: 17"}, {"color": "#9E9E9E", "font": {"color": "white"}, "id": "i_155", "label": "I\u00e2\u20ac", "shape": "dot", "size": 13, "title": "I\u00e2\u20ac\nType: unknown\nMentions: 16"}, {"color": "#4CAF50", "font": {"color": "white"}, "id": "bilbo_baggins_5", "label": "Bilbo Baggins", "shape": "dot", "size": 12, "title": "Bilbo Baggins\nType: character\nMentions: 13"}, {"color": "#4CAF50", "font": {"color": "white"}, "id": "gloin_52", "label": "Gloin", "shape": "dot", "size": 12, "title": "Gloin\nType: character\nMentions: 13"}, {"color": "#9E9E9E", "font": {"color": "white"}, "id": "goblin_128", "label": "Goblin", "shape": "dot", "size": 12, "title": "Goblin\nType: unknown\nMentions: 13"}, {"color": "#9E9E9E", "font": {"color": "white"}, "id": "the_misty_mountains_202", "label": "the Misty Mountains", "shape": "dot", "size": 12, "title": "the Misty Mountains\nType: unknown\nMentions: 13"}, {"color": "#9E9E9E", "font": {"color": "white"}, "id": "laketown_542", "label": "Lake-town", "shape": "dot", "size": 12, "title": "Lake-town\nType: unknown\nMentions: 13"}, {"color": "#9E9E9E", "font": {"color": "white"}, "id": "that_62", "label": "That\u00e2\u20ac", "shape": "dot", "size": 12, "title": "That\u00e2\u20ac\nType: unknown\nMentions: 12"}, {"color": "#9E9E9E", "font": {"color": "white"}, "id": "lake_567", "label": "Lake", "shape": "dot", "size": 12, "title": "Lake\nType: unknown\nMentions: 12"}, {"color": "#9E9E9E", "font": {"color": "white"}, "id": "thorin_63", "label": "Thorin\u00e2\u20ac", "shape": "dot", "size": 12, "title": "Thorin\u00e2\u20ac\nType: unknown\nMentions: 11"}, {"color": "#9E9E9E", "font": {"color": "white"}, "id": "thrain_129", "label": "Thrain", "shape": "dot", "size": 12, "title": "Thrain\nType: unknown\nMentions: 11"}, {"color": "#9E9E9E", "font": {"color": "white"}, "id": "the_great_goblin_265", "label": "the Great Goblin", "shape": "dot", "size": 12, "title": "the Great Goblin\nType: unknown\nMentions: 11"}, {"color": "#9E9E9E", "font": {"color": "white"}, "id": "thorin_oakenshield_57", "label": "Thorin Oakenshield", "shape": "dot", "size": 12, "title": "Thorin Oakenshield\nType: unknown\nMentions: 10"}, {"color": "#4CAF50", "font": {"color": "white"}, "id": "let_98", "label": "let\u00e2\u20ac", "shape": "dot", "size": 12, "title": "let\u00e2\u20ac\nType: character\nMentions: 10"}, {"color": "#4CAF50", "font": {"color": "white"}, "id": "oin_and_gloin_158", "label": "Oin and Gloin", "shape": "dot", "size": 12, "title": "Oin and Gloin\nType: character\nMentions: 10"}, {"color": "#9E9E9E", "font": {"color": "white"}, "id": "forest_river_541", "label": "Forest River", "shape": "dot", "size": 12, "title": "Forest River\nType: unknown\nMentions: 10"}]);
+                  edges = new vis.DataSet([{"arrows": "to", "from": "smaug_107", "label": "SPOKE_TO", "title": "SPOKE_TO", "to": "bilbo_14", "width": 1}, {"arrows": "to", "from": "baggins_2", "label": "SPOKE_TO", "title": "SPOKE_TO", "to": "bilbo_14", "width": 1}, {"arrows": "to", "from": "well_130", "label": "SPOKE_TO", "title": "SPOKE_TO", "to": "gandalf_15", "width": 1}, {"arrows": "to", "from": "dain_743", "label": "TRAVELED_TO", "title": "TRAVELED_TO", "to": "the_lonely_mountain_204", "width": 1}, {"arrows": "to", "from": "west_103", "label": "TRAVELED_TO", "title": "TRAVELED_TO", "to": "west_103", "width": 1}]);
+
+                  nodeColors = {};
+                  allNodes = nodes.get({ returnType: "Object" });
+                  for (nodeId in allNodes) {
+                    nodeColors[nodeId] = allNodes[nodeId].color;
+                  }
+                  allEdges = edges.get({ returnType: "Object" });
+                  // adding nodes and edges to the graph
+                  data = {nodes: nodes, edges: edges};
+
+                  var options = {
+    "configure": {
+        "enabled": false
+    },
+    "edges": {
+        "color": {
+            "inherit": true
+        },
+        "smooth": {
+            "enabled": true,
+            "type": "dynamic"
+        }
+    },
+    "interaction": {
+        "dragNodes": true,
+        "hideEdgesOnDrag": false,
+        "hideNodesOnDrag": false
+    },
+    "physics": {
+        "barnesHut": {
+            "avoidOverlap": 0,
+            "centralGravity": 0.3,
+            "damping": 0.09,
+            "gravitationalConstant": -3000,
+            "springConstant": 0.05,
+            "springLength": 200
+        },
+        "enabled": true,
+        "stabilization": {
+            "enabled": true,
+            "fit": true,
+            "iterations": 1000,
+            "onlyDynamicEdges": false,
+            "updateInterval": 50
+        }
+    }
+};
+
+                  
+
+
+                  
+
+                  network = new vis.Network(container, data, options);
+
+                  
+
+                  
+
+                  
+
+
+                  
+
+                  return network;
+
+              }
+              drawGraph();
+        </script>
+    </body>
+</html>
