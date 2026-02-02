@@ -1386,6 +1386,285 @@ def pipeline_full(path: str, title: str | None, author: str, no_neo4j: bool, out
         console.print(f"  - {voice_result.total_characters} character voice profiles")
 
 
+# ============================================================================
+# Corpus Commands (Phase 6)
+# ============================================================================
+
+@main.group()
+def corpus() -> None:
+    """Manage multi-book corpus analysis."""
+    pass
+
+
+@corpus.command(name="create")
+@click.argument("name")
+@click.option("--author", "-a", required=True, help="Author name")
+def corpus_create(name: str, author: str) -> None:
+    """Create a new corpus for an author's works.
+    
+    Example:
+        bga corpus create tolkien_works -a "J.R.R. Tolkien"
+    """
+    from book_graph_analyzer.corpus import CorpusManager
+    
+    manager = CorpusManager(name, author=author)
+    console.print(f"[green]Created corpus:[/green] {name}")
+    console.print(f"  Author: {author}")
+    console.print(f"  Data dir: {manager.data_dir}")
+
+
+@corpus.command(name="add")
+@click.argument("corpus_name")
+@click.argument("title")
+@click.argument("file_path", type=click.Path(exists=True))
+@click.option("--series", "-s", help="Series name")
+@click.option("--order", "-n", type=int, help="Order in series")
+def corpus_add(corpus_name: str, title: str, file_path: str, series: str | None, order: int | None) -> None:
+    """Add a book to a corpus.
+    
+    Example:
+        bga corpus add tolkien_works "The Hobbit" data/texts/the_hobbit.txt
+        bga corpus add tolkien_works "Fellowship" data/texts/fellowship.txt -s "LOTR" -n 1
+    """
+    from book_graph_analyzer.corpus import CorpusManager
+    
+    manager = CorpusManager(corpus_name)
+    book = manager.add_book(title, file_path, series=series, series_order=order)
+    
+    console.print(f"[green]Added to corpus:[/green] {title}")
+    console.print(f"  ID: {book.id}")
+    console.print(f"  File: {file_path}")
+    if series:
+        console.print(f"  Series: {series} #{order or '?'}")
+
+
+@corpus.command(name="list")
+@click.argument("corpus_name")
+def corpus_list(corpus_name: str) -> None:
+    """List books in a corpus.
+    
+    Example:
+        bga corpus list tolkien_works
+    """
+    from book_graph_analyzer.corpus import CorpusManager
+    
+    manager = CorpusManager(corpus_name)
+    console.print(manager.corpus_summary())
+
+
+@corpus.command(name="process")
+@click.argument("corpus_name")
+@click.option("--book", "-b", help="Process specific book ID only")
+@click.option("--skip-processed", is_flag=True, help="Skip already processed books")
+def corpus_process(corpus_name: str, book: str | None, skip_processed: bool) -> None:
+    """Process all books in a corpus with cross-book entity resolution.
+    
+    Example:
+        bga corpus process tolkien_works
+        bga corpus process tolkien_works -b the_hobbit
+    """
+    from book_graph_analyzer.corpus import CorpusManager, CrossBookResolver
+    from book_graph_analyzer.ingest.loader import load_book
+    from book_graph_analyzer.ingest.splitter import split_into_passages
+    from book_graph_analyzer.extract import EntityExtractor, RelationshipExtractor
+    from book_graph_analyzer.style import StyleAnalyzer
+    from book_graph_analyzer.voice import VoiceAnalyzer
+    from book_graph_analyzer.graph.writer import GraphWriter
+    from book_graph_analyzer.graph.connection import check_neo4j_connection
+    
+    manager = CorpusManager(corpus_name)
+    resolver = CrossBookResolver(corpus_name)
+    
+    # Determine which books to process
+    if book:
+        books_to_process = [manager.get_book(book)]
+        if not books_to_process[0]:
+            console.print(f"[red]Book not found: {book}[/red]")
+            return
+    elif skip_processed:
+        books_to_process = manager.get_unprocessed_books()
+    else:
+        books_to_process = manager.list_books()
+    
+    if not books_to_process:
+        console.print("[yellow]No books to process[/yellow]")
+        return
+    
+    console.print(f"[bold]Processing {len(books_to_process)} book(s) in corpus: {corpus_name}[/bold]\n")
+    
+    neo4j_ok = check_neo4j_connection()
+    if neo4j_ok:
+        writer = GraphWriter()
+    
+    for book_info in books_to_process:
+        console.print(f"\n[bold cyan]>>> {book_info.title}[/bold cyan]")
+        
+        # Load text
+        text = load_book(Path(book_info.file_path))
+        passages = split_into_passages(text, book_info.title)
+        console.print(f"  Loaded {len(text):,} chars, {len(passages):,} passages")
+        
+        # Entity extraction with cross-book resolution
+        extractor = EntityExtractor(use_llm=False)
+        rel_extractor = RelationshipExtractor(resolver=extractor.resolver, use_llm=False)
+        
+        entity_results = []
+        relationship_results = []
+        entity_ids = set()
+        
+        with console.status("Extracting entities..."):
+            for passage in passages:
+                results = extractor.extract_from_passage(passage)
+                if results:
+                    entity_results.append(results)
+                    
+                    # Resolve to corpus-wide canonical IDs
+                    for entity in results.entities:
+                        if entity.canonical_name:
+                            canonical_id = resolver.resolve(
+                                entity.canonical_name,
+                                entity.entity_type,
+                                book_info.id,
+                            )
+                            entity.canonical_id = canonical_id
+                            entity_ids.add(canonical_id)
+                    
+                    rel_result = rel_extractor.extract_relationships(
+                        text=passage.text,
+                        passage_id=passage.id,
+                        entities=results.entities,
+                    )
+                    if rel_result.relationships:
+                        relationship_results.append(rel_result)
+        
+        total_rels = sum(len(r.relationships) for r in relationship_results)
+        console.print(f"  Entities: {len(entity_ids)}, Relationships: {total_rels}")
+        
+        # Style analysis
+        style_analyzer = StyleAnalyzer()
+        fingerprint = style_analyzer.analyze_text(text, author_name=manager.corpus.author)
+        console.print(f"  Style: {fingerprint.sentence_length_dist.mean:.1f} avg words/sent, FK grade {fingerprint.flesch_kincaid_grade:.1f}")
+        
+        # Voice analysis
+        voice_analyzer = VoiceAnalyzer(min_lines_for_profile=3)
+        voice_result = voice_analyzer.analyze_text(text)
+        console.print(f"  Voice: {voice_result.total_dialogue_lines} lines, {voice_result.total_characters} profiles")
+        
+        # Update book stats
+        manager.update_book_stats(
+            book_id=book_info.id,
+            total_words=fingerprint.total_word_count,
+            total_passages=len(passages),
+            entity_count=len(entity_ids),
+            relationship_count=total_rels,
+            dialogue_lines=voice_result.total_dialogue_lines,
+            character_profiles=voice_result.total_characters,
+            avg_sentence_length=fingerprint.sentence_length_dist.mean if fingerprint.sentence_length_dist else 0,
+            flesch_kincaid_grade=fingerprint.flesch_kincaid_grade,
+        )
+        
+        # Write to Neo4j
+        if neo4j_ok:
+            writer.write_book_style(book_info.id, book_info.title, manager.corpus.author, fingerprint)
+            writer.write_extraction_results(entity_results, relationship_results, book_info.title)
+        
+        console.print(f"  [green]OK[/green] Processed")
+    
+    # Save cross-book resolver state
+    resolver.save()
+    
+    if neo4j_ok:
+        writer.close()
+    
+    console.print(f"\n[bold green]Corpus processing complete![/bold green]")
+    console.print(resolver.summary())
+
+
+@corpus.command(name="entities")
+@click.argument("corpus_name")
+@click.option("--cross-book", "-x", is_flag=True, help="Show only cross-book entities")
+@click.option("--type", "-t", "entity_type", help="Filter by type (character, place, object)")
+def corpus_entities(corpus_name: str, cross_book: bool, entity_type: str | None) -> None:
+    """Show entities resolved across books.
+    
+    Example:
+        bga corpus entities tolkien_works -x
+        bga corpus entities tolkien_works -t character
+    """
+    from book_graph_analyzer.corpus import CrossBookResolver
+    
+    resolver = CrossBookResolver(corpus_name)
+    
+    if cross_book:
+        entities = resolver.get_cross_book_entities()
+        console.print(f"[bold]Cross-Book Entities ({len(entities)})[/bold]\n")
+    elif entity_type:
+        entities = resolver.get_entities_by_type(entity_type)
+        console.print(f"[bold]{entity_type.title()} Entities ({len(entities)})[/bold]\n")
+    else:
+        entities = list(resolver.entities.values())
+        console.print(f"[bold]All Entities ({len(entities)})[/bold]\n")
+    
+    # Sort by total appearances
+    entities.sort(key=lambda e: -sum(e.appearances.values()))
+    
+    table = Table()
+    table.add_column("Name", style="cyan")
+    table.add_column("Type")
+    table.add_column("Books")
+    table.add_column("Mentions", justify="right")
+    
+    for entity in entities[:30]:
+        books = ", ".join(entity.appearances.keys())
+        mentions = sum(entity.appearances.values())
+        table.add_row(entity.canonical_name, entity.entity_type, books, str(mentions))
+    
+    console.print(table)
+    
+    if len(entities) > 30:
+        console.print(f"\n[dim]...and {len(entities) - 30} more[/dim]")
+
+
+@corpus.command(name="compare")
+@click.argument("corpus_name")
+def corpus_compare(corpus_name: str) -> None:
+    """Compare style metrics across all books in corpus.
+    
+    Example:
+        bga corpus compare tolkien_works
+    """
+    from book_graph_analyzer.corpus import CorpusManager
+    
+    manager = CorpusManager(corpus_name)
+    processed = manager.get_processed_books()
+    
+    if not processed:
+        console.print("[yellow]No processed books in corpus[/yellow]")
+        return
+    
+    console.print(f"[bold]Style Comparison: {corpus_name}[/bold]\n")
+    
+    table = Table()
+    table.add_column("Book", style="cyan")
+    table.add_column("Words", justify="right")
+    table.add_column("Avg Sent", justify="right")
+    table.add_column("FK Grade", justify="right")
+    table.add_column("Entities", justify="right")
+    table.add_column("Dialogue", justify="right")
+    
+    for book in sorted(processed, key=lambda b: b.series_order or 999):
+        table.add_row(
+            book.title[:25],
+            f"{book.total_words:,}",
+            f"{book.avg_sentence_length:.1f}",
+            f"{book.flesch_kincaid_grade:.1f}",
+            str(book.entity_count),
+            str(book.dialogue_lines),
+        )
+    
+    console.print(table)
+
+
 if __name__ == "__main__":
     main()
 
