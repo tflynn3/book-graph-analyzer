@@ -9,8 +9,7 @@ from pathlib import Path
 from typing import Iterator
 
 from ..config import get_settings
-from ..ingest.splitter import SentenceSplitter
-from ..models.passage import Passage
+from ..ingest.splitter import split_into_passages, Passage
 from .ner import NERPipeline, ExtractedEntity
 from .resolver import EntityResolver, ResolvedEntity
 
@@ -54,7 +53,6 @@ class EntityExtractor:
         self.settings = get_settings()
         self.ner = NERPipeline(use_llm=use_llm)
         self.resolver = EntityResolver(seed_dir=seed_dir)
-        self.splitter = SentenceSplitter()
 
     def extract_from_passage(self, passage: Passage) -> ExtractionResult:
         """Extract and resolve entities from a single passage.
@@ -115,11 +113,7 @@ class EntityExtractor:
             List of ExtractionResult objects
         """
         # Split into sentences
-        sentences = self.splitter.split_to_passages(
-            text,
-            book_title=book_title,
-            chapter=chapter,
-        )
+        sentences = split_into_passages(text, book_title)
 
         # Extract from each
         results = []
@@ -144,15 +138,14 @@ class EntityExtractor:
         Returns:
             Tuple of (results list, extraction statistics)
         """
-        from ..ingest.loader import TextLoader
+        from ..ingest.loader import load_book
 
-        loader = TextLoader()
-        text = loader.load(file_path)
+        text = load_book(file_path)
 
         title = book_title or file_path.stem.replace("_", " ").title()
 
         # Split into sentences
-        sentences = self.splitter.split_to_passages(text, book_title=title)
+        sentences = split_into_passages(text, title)
 
         # Track statistics
         stats = BookExtractionStats()

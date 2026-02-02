@@ -1,4 +1,4 @@
-"""Command-line interface for Book Graph Analyzer."""
+﻿"""Command-line interface for Book Graph Analyzer."""
 
 import json
 from pathlib import Path
@@ -33,9 +33,9 @@ def status() -> None:
     console.print(f"Neo4j URI: {settings.neo4j_uri}")
 
     if check_neo4j_connection():
-        console.print("[green]✓[/green] Neo4j connected")
+        console.print("[green]âœ“[/green] Neo4j connected")
     else:
-        console.print("[red]✗[/red] Neo4j not reachable")
+        console.print("[red]âœ—[/red] Neo4j not reachable")
 
     # TODO: Check for local LLM (Ollama)
     # TODO: Check for spaCy models
@@ -61,13 +61,13 @@ def ingest(path: str, title: str | None) -> None:
     with console.status("Loading book..."):
         text = load_book(file_path)
 
-    console.print(f"[green]✓[/green] Loaded {len(text):,} characters")
+    console.print(f"[green]âœ“[/green] Loaded {len(text):,} characters")
 
     # Split into passages
     with console.status("Splitting into passages..."):
         passages = split_into_passages(text, book_title)
 
-    console.print(f"[green]✓[/green] Split into {len(passages):,} passages")
+    console.print(f"[green]âœ“[/green] Split into {len(passages):,} passages")
 
     # Preview
     console.print("\n[bold]Sample passages:[/bold]")
@@ -185,7 +185,7 @@ def extract_entities(path: str, title: str | None, no_llm: bool, output: str | N
         )
 
     # Display results
-    console.print("\n[bold green]✓ Extraction complete![/bold green]\n")
+    console.print("\n[bold green]âœ“ Extraction complete![/bold green]\n")
 
     # Stats table
     table = Table(title="Extraction Statistics")
@@ -259,7 +259,7 @@ def extract_entities(path: str, title: str | None, no_llm: bool, output: str | N
         with open(output_path, "w") as f:
             json.dump(output_data, f, indent=2)
 
-        console.print(f"\n[green]✓[/green] Results saved to {output_path}")
+        console.print(f"\n[green]âœ“[/green] Results saved to {output_path}")
 
 
 @extract.command(name="test")
@@ -279,8 +279,8 @@ def extract_test(text: str, no_llm: bool) -> None:
     if results and results[0].entities:
         console.print("[bold]Extracted entities:[/bold]")
         for entity in results[0].entities:
-            status = "[green]✓[/green]" if entity.canonical_id else "[yellow]?[/yellow]"
-            canonical = f" → {entity.canonical_name}" if entity.canonical_name else ""
+            status = "[green]OK[/green]" if entity.canonical_id else "[yellow]??[/yellow]"
+            canonical = f" -> {entity.canonical_name}" if entity.canonical_name else ""
             console.print(
                 f"  {status} [{entity.entity_type}] \"{entity.extracted.text}\"{canonical}"
             )
@@ -321,3 +321,4 @@ def extract_seeds() -> None:
 
 if __name__ == "__main__":
     main()
+
