@@ -1,0 +1,302 @@
+[
+  {
+    "id": "bilbo_baggins",
+    "canonical_name": "Bilbo Baggins",
+    "aliases": ["Bilbo", "Mr. Baggins", "Burglar", "the Burglar", "Mr. Bilbo Baggins", "Ring-finder", "Barrel-rider"],
+    "race": "Hobbit",
+    "titles": ["Ring-bearer"],
+    "gender": "male",
+    "description": "A hobbit of the Shire who found the One Ring"
+  },
+  {
+    "id": "frodo_baggins",
+    "canonical_name": "Frodo Baggins",
+    "aliases": ["Frodo", "Mr. Frodo", "Ring-bearer", "the Ring-bearer", "Mr. Underhill", "Halfling", "the Halfling"],
+    "race": "Hobbit",
+    "titles": ["Ring-bearer"],
+    "gender": "male",
+    "description": "Bearer of the One Ring, nephew of Bilbo"
+  },
+  {
+    "id": "gandalf",
+    "canonical_name": "Gandalf",
+    "aliases": ["Gandalf the Grey", "Gandalf the White", "Mithrandir", "the Grey Pilgrim", "Grey Wanderer", "Stormcrow", "Greyhame", "the Grey", "the White", "Olórin", "Incánus", "Tharkûn"],
+    "race": "Maia",
+    "titles": ["the Grey", "the White", "Wizard"],
+    "gender": "male",
+    "description": "One of the Istari, wizard who guided the quest"
+  },
+  {
+    "id": "aragorn",
+    "canonical_name": "Aragorn",
+    "aliases": ["Strider", "Elessar", "Estel", "Thorongil", "the Dúnadan", "Longshanks", "Wingfoot", "King Elessar", "Aragorn son of Arathorn", "Isildur's Heir", "Elfstone"],
+    "race": "Man",
+    "titles": ["King of Gondor", "Chieftain of the Dúnedain"],
+    "gender": "male",
+    "description": "Ranger and heir to the throne of Gondor"
+  },
+  {
+    "id": "samwise_gamgee",
+    "canonical_name": "Samwise Gamgee",
+    "aliases": ["Sam", "Samwise", "Sam Gamgee", "Master Samwise", "Samwise the Brave"],
+    "race": "Hobbit",
+    "titles": ["Mayor of the Shire"],
+    "gender": "male",
+    "description": "Frodo's gardener and loyal companion"
+  },
+  {
+    "id": "gollum",
+    "canonical_name": "Gollum",
+    "aliases": ["Sméagol", "Stinker", "Slinker", "the creature", "the wretched creature"],
+    "race": "Hobbit",
+    "gender": "male",
+    "description": "Former Ring-bearer, corrupted by the One Ring"
+  },
+  {
+    "id": "legolas",
+    "canonical_name": "Legolas",
+    "aliases": ["Legolas Greenleaf", "Legolas of the Woodland Realm"],
+    "race": "Elf",
+    "titles": ["Prince of the Woodland Realm"],
+    "gender": "male",
+    "description": "Elven prince and member of the Fellowship"
+  },
+  {
+    "id": "gimli",
+    "canonical_name": "Gimli",
+    "aliases": ["Gimli son of Glóin", "Elf-friend", "Lockbearer"],
+    "race": "Dwarf",
+    "titles": ["Lord of the Glittering Caves"],
+    "gender": "male",
+    "description": "Dwarf warrior and member of the Fellowship"
+  },
+  {
+    "id": "thorin_oakenshield",
+    "canonical_name": "Thorin Oakenshield",
+    "aliases": ["Thorin", "Thorin II", "Thorin son of Thráin", "King under the Mountain"],
+    "race": "Dwarf",
+    "titles": ["King under the Mountain"],
+    "gender": "male",
+    "description": "Leader of the Company of Dwarves in the Quest of Erebor"
+  },
+  {
+    "id": "sauron",
+    "canonical_name": "Sauron",
+    "aliases": ["the Dark Lord", "the Enemy", "the Necromancer", "Lord of Mordor", "the Eye", "the Lidless Eye", "the Great Eye", "Annatar", "Gorthaur", "Lord of the Rings"],
+    "race": "Maia",
+    "titles": ["Dark Lord", "Lord of Mordor"],
+    "gender": "male",
+    "description": "The Dark Lord, creator of the One Ring"
+  },
+  {
+    "id": "saruman",
+    "canonical_name": "Saruman",
+    "aliases": ["Saruman the White", "Curunír", "Sharkey", "the White", "Saruman of Many Colours"],
+    "race": "Maia",
+    "titles": ["the White", "Head of the White Council"],
+    "gender": "male",
+    "description": "Wizard who betrayed the Free Peoples"
+  },
+  {
+    "id": "elrond",
+    "canonical_name": "Elrond",
+    "aliases": ["Elrond Half-elven", "Lord Elrond", "Master Elrond", "Elrond Peredhel"],
+    "race": "Half-elf",
+    "titles": ["Lord of Rivendell", "Master of Rivendell"],
+    "gender": "male",
+    "description": "Lord of Rivendell, keeper of Vilya"
+  },
+  {
+    "id": "galadriel",
+    "canonical_name": "Galadriel",
+    "aliases": ["Lady Galadriel", "the Lady", "Lady of Lórien", "Lady of Light", "Lady of the Golden Wood", "Artanis", "Nerwen"],
+    "race": "Elf",
+    "titles": ["Lady of Lórien"],
+    "gender": "female",
+    "description": "Lady of Lothlórien, keeper of Nenya"
+  },
+  {
+    "id": "boromir",
+    "canonical_name": "Boromir",
+    "aliases": ["Boromir son of Denethor", "Boromir of Gondor"],
+    "race": "Man",
+    "titles": ["Captain of the White Tower"],
+    "gender": "male",
+    "description": "Son of the Steward of Gondor, member of the Fellowship"
+  },
+  {
+    "id": "faramir",
+    "canonical_name": "Faramir",
+    "aliases": ["Faramir son of Denethor", "Captain Faramir"],
+    "race": "Man",
+    "titles": ["Prince of Ithilien", "Steward of Gondor"],
+    "gender": "male",
+    "description": "Brother of Boromir, Ranger of Ithilien"
+  },
+  {
+    "id": "theoden",
+    "canonical_name": "Théoden",
+    "aliases": ["Theoden", "King Théoden", "Théoden King", "the King of Rohan", "Lord of the Mark"],
+    "race": "Man",
+    "titles": ["King of Rohan", "Lord of the Mark"],
+    "gender": "male",
+    "description": "King of Rohan"
+  },
+  {
+    "id": "eowyn",
+    "canonical_name": "Éowyn",
+    "aliases": ["Eowyn", "the Lady Éowyn", "White Lady of Rohan", "Lady of the Shield-arm", "Dernhelm"],
+    "race": "Man",
+    "titles": ["Lady of Rohan"],
+    "gender": "female",
+    "description": "Niece of King Théoden, slayer of the Witch-king"
+  },
+  {
+    "id": "eomer",
+    "canonical_name": "Éomer",
+    "aliases": ["Eomer", "Éomer Éadig", "King Éomer"],
+    "race": "Man",
+    "titles": ["King of Rohan", "Marshal of the Mark"],
+    "gender": "male",
+    "description": "King of Rohan after Théoden"
+  },
+  {
+    "id": "merry",
+    "canonical_name": "Meriadoc Brandybuck",
+    "aliases": ["Merry", "Meriadoc", "Master Meriadoc", "Holdwine"],
+    "race": "Hobbit",
+    "titles": ["Master of Buckland"],
+    "gender": "male",
+    "description": "Hobbit of the Fellowship"
+  },
+  {
+    "id": "pippin",
+    "canonical_name": "Peregrin Took",
+    "aliases": ["Pippin", "Peregrin", "Pip", "the Thain", "Guard of the Citadel"],
+    "race": "Hobbit",
+    "titles": ["Thain of the Shire"],
+    "gender": "male",
+    "description": "Hobbit of the Fellowship"
+  },
+  {
+    "id": "tom_bombadil",
+    "canonical_name": "Tom Bombadil",
+    "aliases": ["Tom", "Master Tom", "Iarwain Ben-adar", "Forn", "Orald"],
+    "race": "Unknown",
+    "gender": "male",
+    "description": "Mysterious being in the Old Forest"
+  },
+  {
+    "id": "treebeard",
+    "canonical_name": "Treebeard",
+    "aliases": ["Fangorn", "Eldest"],
+    "race": "Ent",
+    "gender": "male",
+    "description": "Oldest of the Ents"
+  },
+  {
+    "id": "denethor",
+    "canonical_name": "Denethor",
+    "aliases": ["Denethor II", "Lord Denethor", "the Steward"],
+    "race": "Man",
+    "titles": ["Steward of Gondor"],
+    "gender": "male",
+    "description": "Ruling Steward of Gondor"
+  },
+  {
+    "id": "witch_king",
+    "canonical_name": "Witch-king of Angmar",
+    "aliases": ["the Witch-king", "Witch-king", "Lord of the Nazgûl", "Black Captain", "Captain of Despair", "King of Angmar", "the Morgul-lord"],
+    "race": "Man",
+    "titles": ["Lord of the Nazgûl", "King of Angmar"],
+    "gender": "male",
+    "description": "Chief of the Nazgûl"
+  },
+  {
+    "id": "smaug",
+    "canonical_name": "Smaug",
+    "aliases": ["Smaug the Golden", "Smaug the Magnificent", "the Dragon", "the Chiefest and Greatest of Calamities"],
+    "race": "Dragon",
+    "gender": "male",
+    "description": "Dragon who conquered Erebor"
+  },
+  {
+    "id": "beorn",
+    "canonical_name": "Beorn",
+    "aliases": ["the skin-changer"],
+    "race": "Skin-changer",
+    "gender": "male",
+    "description": "Skin-changer who could take bear form"
+  },
+  {
+    "id": "bard",
+    "canonical_name": "Bard the Bowman",
+    "aliases": ["Bard", "Bard I", "King Bard"],
+    "race": "Man",
+    "titles": ["King of Dale"],
+    "gender": "male",
+    "description": "Slayer of Smaug, King of Dale"
+  },
+  {
+    "id": "thranduil",
+    "canonical_name": "Thranduil",
+    "aliases": ["the Elvenking", "King of the Woodland Realm"],
+    "race": "Elf",
+    "titles": ["King of the Woodland Realm"],
+    "gender": "male",
+    "description": "King of the Wood-elves, father of Legolas"
+  },
+  {
+    "id": "radagast",
+    "canonical_name": "Radagast",
+    "aliases": ["Radagast the Brown", "the Brown"],
+    "race": "Maia",
+    "titles": ["the Brown"],
+    "gender": "male",
+    "description": "Wizard, friend of birds and beasts"
+  },
+  {
+    "id": "celeborn",
+    "canonical_name": "Celeborn",
+    "aliases": ["Lord Celeborn", "the Lord"],
+    "race": "Elf",
+    "titles": ["Lord of Lórien"],
+    "gender": "male",
+    "description": "Lord of Lothlórien, husband of Galadriel"
+  },
+  {
+    "id": "arwen",
+    "canonical_name": "Arwen",
+    "aliases": ["Arwen Undómiel", "Evenstar", "the Evenstar"],
+    "race": "Half-elf",
+    "titles": ["Queen of Gondor"],
+    "gender": "female",
+    "description": "Daughter of Elrond, Queen of Gondor"
+  },
+  {
+    "id": "gloin",
+    "canonical_name": "Glóin",
+    "aliases": ["Gloin"],
+    "race": "Dwarf",
+    "gender": "male",
+    "description": "Dwarf of Thorin's Company, father of Gimli"
+  },
+  {
+    "id": "balin",
+    "canonical_name": "Balin",
+    "aliases": ["Balin son of Fundin", "Lord of Moria"],
+    "race": "Dwarf",
+    "titles": ["Lord of Moria"],
+    "gender": "male",
+    "description": "Dwarf of Thorin's Company who led expedition to Moria"
+  },
+  {
+    "id": "morgoth",
+    "canonical_name": "Morgoth",
+    "aliases": ["Melkor", "the Dark Lord", "the Enemy", "the Great Enemy", "Dark Enemy of the World", "the Black Foe"],
+    "race": "Vala",
+    "titles": ["Dark Lord"],
+    "gender": "male",
+    "description": "The first Dark Lord, mightiest of the Valar who fell"
+  }
+]

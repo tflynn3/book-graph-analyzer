@@ -1,0 +1,165 @@
+[
+  {
+    "id": "one_ring",
+    "canonical_name": "The One Ring",
+    "aliases": ["the Ring", "the Ruling Ring", "Ring of Power", "Isildur's Bane", "the Precious", "my Precious", "the Great Ring", "the Master-ring"],
+    "type": "ring",
+    "creator_id": "sauron",
+    "properties": ["invisibility", "corruption", "extends life"],
+    "description": "The master ring created by Sauron to control all other rings"
+  },
+  {
+    "id": "sting",
+    "canonical_name": "Sting",
+    "aliases": [],
+    "type": "sword",
+    "properties": ["glows near orcs", "Elvish make"],
+    "description": "Elven blade found in the trolls' hoard, wielded by Bilbo then Frodo"
+  },
+  {
+    "id": "glamdring",
+    "canonical_name": "Glamdring",
+    "aliases": ["the Foe-hammer", "Beater"],
+    "type": "sword",
+    "properties": ["glows near orcs", "Elvish make"],
+    "description": "Elven sword wielded by Gandalf"
+  },
+  {
+    "id": "orcrist",
+    "canonical_name": "Orcrist",
+    "aliases": ["the Goblin-cleaver", "Biter"],
+    "type": "sword",
+    "properties": ["glows near orcs", "Elvish make"],
+    "description": "Elven sword wielded by Thorin"
+  },
+  {
+    "id": "anduril",
+    "canonical_name": "Andúril",
+    "aliases": ["Anduril", "the Flame of the West", "the Sword that was Broken"],
+    "type": "sword",
+    "properties": ["reforged from Narsil"],
+    "description": "Aragorn's sword, reforged from the shards of Narsil"
+  },
+  {
+    "id": "narsil",
+    "canonical_name": "Narsil",
+    "aliases": ["the Sword of Elendil", "the shards of Narsil"],
+    "type": "sword",
+    "description": "Elendil's sword, broken when he fell fighting Sauron"
+  },
+  {
+    "id": "arkenstone",
+    "canonical_name": "The Arkenstone",
+    "aliases": ["Arkenstone", "the Heart of the Mountain", "King's Jewel"],
+    "type": "jewel",
+    "description": "Great gem found beneath Erebor"
+  },
+  {
+    "id": "phial_galadriel",
+    "canonical_name": "Phial of Galadriel",
+    "aliases": ["the Star-glass", "the Light of Eärendil", "the phial"],
+    "type": "artifact",
+    "properties": ["contains light of Eärendil"],
+    "description": "Gift from Galadriel containing the light of Eärendil's star"
+  },
+  {
+    "id": "palantir",
+    "canonical_name": "Palantír",
+    "aliases": ["Palantir", "the palantír", "seeing-stone", "the Seeing Stones"],
+    "type": "artifact",
+    "properties": ["far-seeing", "communication"],
+    "description": "Seeing stones used for communication"
+  },
+  {
+    "id": "mithril_coat",
+    "canonical_name": "Mithril Coat",
+    "aliases": ["the mithril-coat", "mithril coat", "coat of mail", "the silver coat"],
+    "type": "armor",
+    "properties": ["lightweight", "impenetrable"],
+    "description": "Mail coat of mithril given to Bilbo by Thorin"
+  },
+  {
+    "id": "nenya",
+    "canonical_name": "Nenya",
+    "aliases": ["the Ring of Adamant", "the Ring of Water"],
+    "type": "ring",
+    "properties": ["preservation"],
+    "description": "One of the Three Elven Rings, worn by Galadriel"
+  },
+  {
+    "id": "vilya",
+    "canonical_name": "Vilya",
+    "aliases": ["the Ring of Air", "the Ring of Sapphire", "the Blue Ring"],
+    "type": "ring",
+    "properties": ["preservation", "healing"],
+    "description": "One of the Three Elven Rings, worn by Elrond"
+  },
+  {
+    "id": "narya",
+    "canonical_name": "Narya",
+    "aliases": ["the Ring of Fire", "the Red Ring"],
+    "type": "ring",
+    "properties": ["inspire others"],
+    "description": "One of the Three Elven Rings, worn by Gandalf"
+  },
+  {
+    "id": "silmarils",
+    "canonical_name": "Silmarils",
+    "aliases": ["the Silmarils", "Great Jewels", "Jewels of Fëanor"],
+    "type": "jewel",
+    "creator_id": "feanor",
+    "properties": ["contain light of the Two Trees"],
+    "description": "Three jewels made by Fëanor containing the light of the Two Trees"
+  },
+  {
+    "id": "horn_gondor",
+    "canonical_name": "Horn of Gondor",
+    "aliases": ["the Horn", "the great horn"],
+    "type": "artifact",
+    "description": "Horn carried by the heirs of the Stewards of Gondor"
+  },
+  {
+    "id": "horn_helm",
+    "canonical_name": "Horn of Helm Hammerhand",
+    "aliases": ["the horn of Helm"],
+    "type": "artifact",
+    "description": "Horn at Helm's Deep"
+  },
+  {
+    "id": "evenstar",
+    "canonical_name": "Evenstar",
+    "aliases": ["the Evenstar pendant"],
+    "type": "jewelry",
+    "description": "Jewel given by Arwen to Aragorn"
+  },
+  {
+    "id": "galadriels_gifts",
+    "canonical_name": "Galadriel's Gifts",
+    "aliases": [],
+    "type": "various",
+    "description": "Gifts given to the Fellowship by Galadriel"
+  },
+  {
+    "id": "black_arrow",
+    "canonical_name": "Black Arrow",
+    "aliases": ["the Black Arrow"],
+    "type": "weapon",
+    "description": "Heirloom arrow used by Bard to slay Smaug"
+  },
+  {
+    "id": "elven_rope",
+    "canonical_name": "Elven Rope",
+    "aliases": ["the rope", "hithlain"],
+    "type": "tool",
+    "properties": ["lightweight", "strong", "responds to commands"],
+    "description": "Rope from Lothlórien given to Sam"
+  },
+  {
+    "id": "lembas",
+    "canonical_name": "Lembas",
+    "aliases": ["waybread", "Elven bread", "lembas bread"],
+    "type": "food",
+    "properties": ["sustaining", "wrapped in mallorn leaves"],
+    "description": "Elven waybread for journeys"
+  }
+]

@@ -1,0 +1,275 @@
+[
+  {
+    "id": "the_shire",
+    "canonical_name": "The Shire",
+    "aliases": ["Shire", "the Shire", "Sûza"],
+    "type": "region",
+    "parent_region": "eriador",
+    "description": "Homeland of the Hobbits in Eriador"
+  },
+  {
+    "id": "bag_end",
+    "canonical_name": "Bag End",
+    "aliases": ["Bag-End"],
+    "type": "dwelling",
+    "parent_region": "hobbiton",
+    "description": "Home of the Baggins family in Hobbiton"
+  },
+  {
+    "id": "hobbiton",
+    "canonical_name": "Hobbiton",
+    "aliases": [],
+    "type": "village",
+    "parent_region": "the_shire",
+    "description": "Village in the Shire"
+  },
+  {
+    "id": "rivendell",
+    "canonical_name": "Rivendell",
+    "aliases": ["Imladris", "the Last Homely House", "the House of Elrond"],
+    "type": "settlement",
+    "parent_region": "eriador",
+    "description": "Elven refuge founded by Elrond"
+  },
+  {
+    "id": "moria",
+    "canonical_name": "Moria",
+    "aliases": ["Khazad-dûm", "the Mines of Moria", "Dwarrowdelf", "the Black Pit", "Hadhodrond"],
+    "type": "underground_city",
+    "parent_region": "misty_mountains",
+    "description": "Ancient Dwarf kingdom under the Misty Mountains"
+  },
+  {
+    "id": "lothlorien",
+    "canonical_name": "Lothlórien",
+    "aliases": ["Lórien", "Lothlorien", "the Golden Wood", "Dwimordene", "Laurelindórenan"],
+    "type": "forest",
+    "description": "Elven realm ruled by Galadriel and Celeborn"
+  },
+  {
+    "id": "mordor",
+    "canonical_name": "Mordor",
+    "aliases": ["the Black Land", "the Land of Shadow", "the Nameless Land"],
+    "type": "region",
+    "description": "Realm of Sauron in the southeast of Middle-earth"
+  },
+  {
+    "id": "mount_doom",
+    "canonical_name": "Mount Doom",
+    "aliases": ["Orodruin", "the Mountain of Fire", "Amon Amarth", "the Fiery Mountain"],
+    "type": "mountain",
+    "parent_region": "mordor",
+    "description": "Volcano in Mordor where the One Ring was forged"
+  },
+  {
+    "id": "gondor",
+    "canonical_name": "Gondor",
+    "aliases": ["the South-kingdom", "the South Kingdom"],
+    "type": "kingdom",
+    "description": "Southern kingdom of the Dúnedain"
+  },
+  {
+    "id": "minas_tirith",
+    "canonical_name": "Minas Tirith",
+    "aliases": ["the White City", "City of Kings", "Mundburg", "Minas Anor"],
+    "type": "city",
+    "parent_region": "gondor",
+    "description": "Capital of Gondor"
+  },
+  {
+    "id": "rohan",
+    "canonical_name": "Rohan",
+    "aliases": ["the Riddermark", "the Mark", "Rochand"],
+    "type": "kingdom",
+    "description": "Kingdom of the Horse-lords"
+  },
+  {
+    "id": "edoras",
+    "canonical_name": "Edoras",
+    "aliases": [],
+    "type": "city",
+    "parent_region": "rohan",
+    "description": "Capital of Rohan"
+  },
+  {
+    "id": "helms_deep",
+    "canonical_name": "Helm's Deep",
+    "aliases": ["Helms Deep", "the Hornburg", "Aglarond"],
+    "type": "fortress",
+    "parent_region": "rohan",
+    "description": "Fortress in Rohan"
+  },
+  {
+    "id": "isengard",
+    "canonical_name": "Isengard",
+    "aliases": ["Angrenost", "the Ring of Isengard"],
+    "type": "fortress",
+    "description": "Fortress of Saruman"
+  },
+  {
+    "id": "orthanc",
+    "canonical_name": "Orthanc",
+    "aliases": ["the tower of Orthanc"],
+    "type": "tower",
+    "parent_region": "isengard",
+    "description": "Tower at Isengard"
+  },
+  {
+    "id": "erebor",
+    "canonical_name": "Erebor",
+    "aliases": ["the Lonely Mountain", "the Mountain", "Kingdom under the Mountain"],
+    "type": "mountain",
+    "description": "Dwarven kingdom in the northeast"
+  },
+  {
+    "id": "dale",
+    "canonical_name": "Dale",
+    "aliases": [],
+    "type": "city",
+    "description": "City of Men near Erebor"
+  },
+  {
+    "id": "lake_town",
+    "canonical_name": "Lake-town",
+    "aliases": ["Laketown", "Esgaroth"],
+    "type": "city",
+    "description": "Town of Men on the Long Lake"
+  },
+  {
+    "id": "mirkwood",
+    "canonical_name": "Mirkwood",
+    "aliases": ["Greenwood the Great", "Greenwood", "Taur-nu-Fuin", "Taur-e-Ndaedelos"],
+    "type": "forest",
+    "description": "Great forest east of the Misty Mountains"
+  },
+  {
+    "id": "misty_mountains",
+    "canonical_name": "Misty Mountains",
+    "aliases": ["the Misty Mountains", "Hithaeglir"],
+    "type": "mountain_range",
+    "description": "Mountain range running north-south through Middle-earth"
+  },
+  {
+    "id": "fangorn",
+    "canonical_name": "Fangorn Forest",
+    "aliases": ["Fangorn", "Entwood"],
+    "type": "forest",
+    "description": "Ancient forest, home of the Ents"
+  },
+  {
+    "id": "barad_dur",
+    "canonical_name": "Barad-dûr",
+    "aliases": ["Barad-dur", "the Dark Tower", "the Tower of Sauron", "Lugbúrz"],
+    "type": "fortress",
+    "parent_region": "mordor",
+    "description": "Sauron's fortress in Mordor"
+  },
+  {
+    "id": "minas_morgul",
+    "canonical_name": "Minas Morgul",
+    "aliases": ["the Dead City", "Minas Ithil", "Tower of the Moon"],
+    "type": "city",
+    "parent_region": "mordor",
+    "description": "Fortress of the Nazgûl"
+  },
+  {
+    "id": "cirith_ungol",
+    "canonical_name": "Cirith Ungol",
+    "aliases": ["the Pass of the Spider", "the Spider's Pass"],
+    "type": "pass",
+    "parent_region": "mordor",
+    "description": "Pass into Mordor guarded by Shelob"
+  },
+  {
+    "id": "prancing_pony",
+    "canonical_name": "The Prancing Pony",
+    "aliases": ["Prancing Pony", "the Pony"],
+    "type": "inn",
+    "parent_region": "bree",
+    "description": "Inn in Bree"
+  },
+  {
+    "id": "bree",
+    "canonical_name": "Bree",
+    "aliases": [],
+    "type": "village",
+    "parent_region": "eriador",
+    "description": "Village in Eriador where Men and Hobbits dwell"
+  },
+  {
+    "id": "weathertop",
+    "canonical_name": "Weathertop",
+    "aliases": ["Amon Sûl"],
+    "type": "hill",
+    "parent_region": "eriador",
+    "description": "Hill where Frodo was wounded by the Nazgûl"
+  },
+  {
+    "id": "old_forest",
+    "canonical_name": "Old Forest",
+    "aliases": ["the Old Forest"],
+    "type": "forest",
+    "parent_region": "eriador",
+    "description": "Ancient forest east of the Shire"
+  },
+  {
+    "id": "dead_marshes",
+    "canonical_name": "Dead Marshes",
+    "aliases": ["the Dead Marshes"],
+    "type": "marshland",
+    "description": "Marshes northwest of Mordor"
+  },
+  {
+    "id": "grey_havens",
+    "canonical_name": "Grey Havens",
+    "aliases": ["Mithlond", "the Havens"],
+    "type": "port",
+    "parent_region": "eriador",
+    "description": "Elven port in the west"
+  },
+  {
+    "id": "valinor",
+    "canonical_name": "Valinor",
+    "aliases": ["the Undying Lands", "the Blessed Realm", "Aman"],
+    "type": "realm",
+    "description": "Realm of the Valar in the West"
+  },
+  {
+    "id": "middle_earth",
+    "canonical_name": "Middle-earth",
+    "aliases": ["Middle Earth", "Endor"],
+    "type": "continent",
+    "description": "The continent where the stories take place"
+  },
+  {
+    "id": "eriador",
+    "canonical_name": "Eriador",
+    "aliases": [],
+    "type": "region",
+    "parent_region": "middle_earth",
+    "description": "Region in the northwest of Middle-earth"
+  },
+  {
+    "id": "goblin_town",
+    "canonical_name": "Goblin-town",
+    "aliases": ["Goblin Town", "Goblin-gate"],
+    "type": "underground_city",
+    "parent_region": "misty_mountains",
+    "description": "Goblin stronghold in the Misty Mountains"
+  },
+  {
+    "id": "carrock",
+    "canonical_name": "The Carrock",
+    "aliases": ["Carrock"],
+    "type": "landmark",
+    "description": "Large rock in the Anduin near Beorn's house"
+  },
+  {
+    "id": "pelennor_fields",
+    "canonical_name": "Pelennor Fields",
+    "aliases": ["the Pelennor", "Pelennor"],
+    "type": "battlefield",
+    "parent_region": "gondor",
+    "description": "Fields before Minas Tirith where the great battle was fought"
+  }
+]
