@@ -1,0 +1,62 @@
+[project]
+name = "book-graph-analyzer"
+version = "0.1.0"
+description = "Analyze novels to build knowledge graphs, style fingerprints, and world bibles for creative writing"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [
+    { name = "Tom Flynn" }
+]
+keywords = ["nlp", "graph-database", "creative-writing", "tolkien", "neo4j"]
+
+dependencies = [
+    "neo4j>=5.0",
+    "spacy>=3.7",
+    "click>=8.0",
+    "pydantic>=2.0",
+    "pydantic-settings>=2.0",
+    "rich>=13.0",
+    "ebooklib>=0.18",
+    "beautifulsoup4>=4.12",
+    "nltk>=3.8",
+    "pyyaml>=6.0",
+    "httpx>=0.25",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.0",
+    "pytest-asyncio>=0.21",
+    "ruff>=0.1",
+    "mypy>=1.0",
+    "pre-commit>=3.0",
+]
+local-llm = [
+    "ollama>=0.1",
+]
+
+[project.scripts]
+bga = "book_graph_analyzer.cli:main"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/book_graph_analyzer"]
+
+[tool.ruff]
+target-version = "py311"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W", "UP"]
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+testpaths = ["tests"]
