@@ -1,0 +1,3607 @@
+{
+  "source_file": "The Hobbit (all chapters)",
+  "stats": {
+    "total_dialogue_lines": 1390,
+    "total_characters": 28,
+    "unattributed_lines": 394,
+    "attribution_rate": 0.7165467625899281
+  },
+  "top_speakers": [
+    [
+      "Bilbo",
+      130
+    ],
+    [
+      "Thorin",
+      111
+    ],
+    [
+      "he",
+      85
+    ],
+    [
+      "Gandalf",
+      74
+    ],
+    [
+      "Balin",
+      30
+    ],
+    [
+      "Beorn",
+      24
+    ],
+    [
+      "Gollum",
+      23
+    ],
+    [
+      "to",
+      21
+    ],
+    [
+      "Bert",
+      19
+    ],
+    [
+      "Bard",
+      19
+    ],
+    [
+      "the wizard",
+      18
+    ],
+    [
+      "they",
+      16
+    ],
+    [
+      "Bombur",
+      14
+    ],
+    [
+      "William",
+      13
+    ],
+    [
+      "Elrond",
+      12
+    ],
+    [
+      "Fili",
+      11
+    ],
+    [
+      "the hobbit",
+      10
+    ],
+    [
+      "in",
+      9
+    ],
+    [
+      "Tom",
+      9
+    ],
+    [
+      "Dori",
+      9
+    ]
+  ],
+  "profiles": {
+    "Bilbo": {
+      "character_name": "Bilbo",
+      "character_id": null,
+      "total_lines": 130,
+      "total_words": 1790,
+      "total_chars": 8890,
+      "avg_utterance_length": 13.76923076923077,
+      "utterance_length_std": 21.07886206037428,
+      "min_utterance_length": 1,
+      "max_utterance_length": 115,
+      "question_ratio": 0.14615384615384616,
+      "exclamation_ratio": 0.38461538461538464,
+      "statement_ratio": 0.46923076923076923,
+      "unique_words": 731,
+      "type_token_ratio": 0.4083798882681564,
+      "avg_word_length": 3.8301675977653633,
+      "contraction_ratio": 0.0,
+      "first_person_ratio": 0.07486033519553073,
+      "second_person_ratio": 0.03240223463687151,
+      "top_words": [
+        [
+          "you",
+          34
+        ],
+        [
+          "all",
+          18
+        ],
+        [
+          "your",
+          13
+        ],
+        [
+          "what",
+          13
+        ],
+        [
+          "don\u2019t",
+          10
+        ],
+        [
+          "down",
+          8
+        ],
+        [
+          "very",
+          7
+        ],
+        [
+          "there",
+          7
+        ],
+        [
+          "old",
+          7
+        ],
+        [
+          "come",
+          6
+        ],
+        [
+          "any",
+          6
+        ],
+        [
+          "well,",
+          6
+        ],
+        [
+          "never",
+          6
+        ],
+        [
+          "where",
+          6
+        ],
+        [
+          "good",
+          5
+        ],
+        [
+          "into",
+          5
+        ],
+        [
+          "you,",
+          5
+        ],
+        [
+          "after",
+          5
+        ],
+        [
+          "think",
+          5
+        ],
+        [
+          "sure",
+          5
+        ]
+      ],
+      "distinctive_words": [
+        "i",
+        "the",
+        "and",
+        "of",
+        "to",
+        "is",
+        "it",
+        "you",
+        "a",
+        "have"
+      ],
+      "signature_phrases": [
+        "and i",
+        "i don\u2019t",
+        "all the",
+        "if you",
+        "have a"
+      ],
+      "archaism_count": 0,
+      "archaisms_used": [],
+      "sample_quotes": [
+        "Would this be any good?",
+        "At yours and your family\u2019s!",
+        "All of them at once,",
+        "It seems a great big hole to me,",
+        "And I\u2019m sure the rain has got into the dry clothes and into the food- \nbags,"
+      ]
+    },
+    "he": {
+      "character_name": "he",
+      "character_id": null,
+      "total_lines": 85,
+      "total_words": 1914,
+      "total_chars": 9537,
+      "avg_utterance_length": 22.51764705882353,
+      "utterance_length_std": 22.51063863022585,
+      "min_utterance_length": 2,
+      "max_utterance_length": 97,
+      "question_ratio": 0.10588235294117647,
+      "exclamation_ratio": 0.3176470588235294,
+      "statement_ratio": 0.5764705882352941,
+      "unique_words": 743,
+      "type_token_ratio": 0.3881922675026123,
+      "avg_word_length": 3.855276907001045,
+      "contraction_ratio": 0.0,
+      "first_person_ratio": 0.047021943573667714,
+      "second_person_ratio": 0.029258098223615466,
+      "top_words": [
+        [
+          "you",
+          38
+        ],
+        [
+          "they",
+          16
+        ],
+        [
+          "your",
+          13
+        ],
+        [
+          "all",
+          12
+        ],
+        [
+          "there",
+          10
+        ],
+        [
+          "like",
+          8
+        ],
+        [
+          "what",
+          8
+        ],
+        [
+          "more",
+          8
+        ],
+        [
+          "good",
+          7
+        ],
+        [
+          "other",
+          7
+        ],
+        [
+          "don\u2019t",
+          7
+        ],
+        [
+          "think",
+          7
+        ],
+        [
+          "come",
+          7
+        ],
+        [
+          "where",
+          7
+        ],
+        [
+          "after",
+          7
+        ],
+        [
+          "when",
+          7
+        ],
+        [
+          "going",
+          6
+        ],
+        [
+          "from",
+          6
+        ],
+        [
+          "get",
+          6
+        ],
+        [
+          "it.",
+          6
+        ]
+      ],
+      "distinctive_words": [
+        "the",
+        "and",
+        "i",
+        "to",
+        "you",
+        "a",
+        "it",
+        "of",
+        "in",
+        "is"
+      ],
+      "signature_phrases": [
+        "of the",
+        "in the",
+        "but i",
+        "will be",
+        "and i"
+      ],
+      "archaism_count": 0,
+      "archaisms_used": [],
+      "sample_quotes": [
+        "And what brought you back in the nick of time?",
+        "May it soon cleave \ngoblins once again!",
+        "First I should like to know a bit more about things,",
+        "or I\u2019m mighty mistook. Lots and none at all, it is,",
+        "They\u2019re hiding in \nthe bushes with sacks,"
+      ]
+    },
+    "Gandalf": {
+      "character_name": "Gandalf",
+      "character_id": null,
+      "total_lines": 74,
+      "total_words": 1014,
+      "total_chars": 5117,
+      "avg_utterance_length": 13.702702702702704,
+      "utterance_length_std": 16.382190237538346,
+      "min_utterance_length": 1,
+      "max_utterance_length": 83,
+      "question_ratio": 0.06756756756756757,
+      "exclamation_ratio": 0.3918918918918919,
+      "statement_ratio": 0.5405405405405406,
+      "unique_words": 456,
+      "type_token_ratio": 0.44970414201183434,
+      "avg_word_length": 3.9368836291913216,
+      "contraction_ratio": 0.0,
+      "first_person_ratio": 0.028599605522682446,
+      "second_person_ratio": 0.05128205128205128,
+      "top_words": [
+        [
+          "you",
+          36
+        ],
+        [
+          "there",
+          10
+        ],
+        [
+          "good",
+          9
+        ],
+        [
+          "all",
+          9
+        ],
+        [
+          "your",
+          9
+        ],
+        [
+          "very",
+          7
+        ],
+        [
+          "more",
+          7
+        ],
+        [
+          "time",
+          6
+        ],
+        [
+          "what",
+          5
+        ],
+        [
+          "just",
+          5
+        ],
+        [
+          "back",
+          5
+        ],
+        [
+          "don\u2019t",
+          5
+        ],
+        [
+          "now",
+          4
+        ],
+        [
+          "mr.",
+          4
+        ],
+        [
+          "any",
+          4
+        ],
+        [
+          "know",
+          4
+        ],
+        [
+          "like",
+          4
+        ],
+        [
+          "well,",
+          4
+        ],
+        [
+          "goblins",
+          4
+        ],
+        [
+          "where",
+          4
+        ]
+      ],
+      "distinctive_words": [
+        "the",
+        "you",
+        "a",
+        "of",
+        "and",
+        "to",
+        "i",
+        "have",
+        "are",
+        "is"
+      ],
+      "signature_phrases": [
+        "we are",
+        "is a",
+        "of the",
+        "there is a",
+        "to be"
+      ],
+      "archaism_count": 1,
+      "archaisms_used": [
+        "ere"
+      ],
+      "sample_quotes": [
+        "Why on earth didn\u2019t you mention it before?",
+        "What a lot of things you do use Good morning for!",
+        "Of course there is a mark,",
+        "A long time before that, if I know anything about the roads East,",
+        "Also I should like to \nknow about risks, out-of-pocket expenses, time required and remuneration, and so forth"
+      ]
+    },
+    "at": {
+      "character_name": "at",
+      "character_id": null,
+      "total_lines": 6,
+      "total_words": 27,
+      "total_chars": 145,
+      "avg_utterance_length": 4.5,
+      "utterance_length_std": 2.588435821108957,
+      "min_utterance_length": 1,
+      "max_utterance_length": 7,
+      "question_ratio": 0.16666666666666666,
+      "exclamation_ratio": 0.5,
+      "statement_ratio": 0.3333333333333333,
+      "unique_words": 25,
+      "type_token_ratio": 0.9259259259259259,
+      "avg_word_length": 4.296296296296297,
+      "contraction_ratio": 0.0,
+      "first_person_ratio": 0.037037037037037035,
+      "second_person_ratio": 0.1111111111111111,
+      "top_words": [
+        [
+          "you",
+          2
+        ],
+        [
+          "good",
+          1
+        ],
+        [
+          "morning!",
+          1
+        ],
+        [
+          "knife!",
+          1
+        ],
+        [
+          "picking",
+          1
+        ],
+        [
+          "bear-tracks,",
+          1
+        ],
+        [
+          "how",
+          1
+        ],
+        [
+          "yours",
+          1
+        ],
+        [
+          "give?",
+          1
+        ],
+        [
+          "miserable",
+          1
+        ],
+        [
+          "hobbit!",
+          1
+        ],
+        [
+          "undersized",
+          1
+        ],
+        [
+          "burglar!",
+          1
+        ],
+        [
+          "mercy",
+          1
+        ],
+        [
+          "is,",
+          1
+        ]
+      ],
+      "distinctive_words": [
+        "it",
+        "you"
+      ],
+      "signature_phrases": [],
+      "archaism_count": 0,
+      "archaisms_used": [],
+      "sample_quotes": [
+        "But how is it yours to give?",
+        "You miserable \nhobbit! You undersized \u2014 burglar!",
+        "I have been picking out bear-tracks,",
+        "A mercy it is,"
+      ]
+    },
+    "the wizard": {
+      "character_name": "the wizard",
+      "character_id": null,
+      "total_lines": 18,
+      "total_words": 113,
+      "total_chars": 550,
+      "avg_utterance_length": 6.277777777777778,
+      "utterance_length_std": 3.594203757940661,
+      "min_utterance_length": 2,
+      "max_utterance_length": 14,
+      "question_ratio": 0.1111111111111111,
+      "exclamation_ratio": 0.1111111111111111,
+      "statement_ratio": 0.7777777777777778,
+      "unique_words": 88,
+      "type_token_ratio": 0.7787610619469026,
+      "avg_word_length": 3.8230088495575223,
+      "contraction_ratio": 0.0,
+      "first_person_ratio": 0.08849557522123894,
+      "second_person_ratio": 0.061946902654867256,
+      "top_words": [
+        [
+          "you",
+          6
+        ],
+        [
+          "it,",
+          2
+        ],
+        [
+          "all",
+          2
+        ],
+        [
+          "over",
+          2
+        ],
+        [
+          "where",
+          1
+        ],
+        [
+          "else",
+          1
+        ],
+        [
+          "be?",
+          1
+        ],
+        [
+          "there",
+          1
+        ],
+        [
+          "one",
+          1
+        ],
+        [
+          "point",
+          1
+        ],
+        [
+          "haven\u2019t",
+          1
+        ],
+        [
+          "noticed,",
+          1
+        ],
+        [
+          "good,",
+          1
+        ],
+        [
+          "\u2018get",
+          1
+        ],
+        [
+          "hold",
+          1
+        ],
+        [
+          "it,\u2019",
+          1
+        ],
+        [
+          "given",
+          1
+        ],
+        [
+          "your",
+          1
+        ],
+        [
+          "grandfather,",
+          1
+        ],
+        [
+          "time",
+          1
+        ]
+      ],
+      "distinctive_words": [
+        "i",
+        "you",
+        "no",
+        "was",
+        "the",
+        "over",
+        "it,",
+        "as",
+        "all",
+        "that"
+      ],
+      "signature_phrases": [
+        "i was",
+        "over the"
+      ],
+      "archaism_count": 0,
+      "archaisms_used": [],
+      "sample_quotes": [
+        "Where else should I be?",
+        "Yes, you do!",
+        "There is one point that you haven\u2019t noticed,",
+        "That would be no good,",
+        "I did not \u2018get hold of it,\u2019 I was given it,"
+      ]
+    },
+    "to": {
+      "character_name": "to",
+      "character_id": null,
+      "total_lines": 21,
+      "total_words": 146,
+      "total_chars": 724,
+      "avg_utterance_length": 6.9523809523809526,
+      "utterance_length_std": 5.589956980837961,
+      "min_utterance_length": 1,
+      "max_utterance_length": 27,
+      "question_ratio": 0.09523809523809523,
+      "exclamation_ratio": 0.6190476190476191,
+      "statement_ratio": 0.2857142857142857,
+      "unique_words": 93,
+      "type_token_ratio": 0.636986301369863,
+      "avg_word_length": 3.8424657534246576,
+      "contraction_ratio": 0.0,
+      "first_person_ratio": 0.0958904109589041,
+      "second_person_ratio": 0.0410958904109589,
+      "top_words": [
+        [
+          "you",
+          4
+        ],
+        [
+          "what",
+          3
+        ],
+        [
+          "bilbo",
+          3
+        ],
+        [
+          "get",
+          3
+        ],
+        [
+          "come",
+          3
+        ],
+        [
+          "now",
+          3
+        ],
+        [
+          "got",
+          2
+        ],
+        [
+          "here",
+          2
+        ],
+        [
+          "don\u2019t",
+          2
+        ],
+        [
+          "your",
+          2
+        ],
+        [
+          "birthday-present!",
+          2
+        ],
+        [
+          "they",
+          2
+        ],
+        [
+          "down!",
+          2
+        ],
+        [
+          "wait!",
+          2
+        ],
+        [
+          "earth",
+          1
+        ],
+        [
+          "ask",
+          1
+        ],
+        [
+          "him",
+          1
+        ],
+        [
+          "tea",
+          1
+        ],
+        [
+          "for!",
+          1
+        ],
+        [
+          "last!",
+          1
+        ]
+      ],
+      "distinctive_words": [
+        "i",
+        "to",
+        "my",
+        "you",
+        "bilbo",
+        "now",
+        "get",
+        "come",
+        "will",
+        "at"
+      ],
+      "signature_phrases": [
+        "have got",
+        "my birthday-present!",
+        "i must",
+        "must get",
+        "get to"
+      ],
+      "archaism_count": 0,
+      "archaisms_used": [],
+      "sample_quotes": [
+        "What have I, I wonder?",
+        "What on earth did I ask him to tea for!",
+        "My birthday-present! It came to me on my birthday, my precious.",
+        "a sort of watching and \nwaiting feeling,",
+        "I will give you a name,"
+      ]
+    },
+    "the hobbit": {
+      "character_name": "the hobbit",
+      "character_id": null,
+      "total_lines": 10,
+      "total_words": 49,
+      "total_chars": 233,
+      "avg_utterance_length": 4.9,
+      "utterance_length_std": 4.483302354291979,
+      "min_utterance_length": 2,
+      "max_utterance_length": 17,
+      "question_ratio": 0.4,
+      "exclamation_ratio": 0.5,
+      "statement_ratio": 0.1,
+      "unique_words": 42,
+      "type_token_ratio": 0.8571428571428571,
+      "avg_word_length": 3.7346938775510203,
+      "contraction_ratio": 0.0,
+      "first_person_ratio": 0.02040816326530612,
+      "second_person_ratio": 0.04081632653061224,
+      "top_words": [
+        [
+          "how",
+          2
+        ],
+        [
+          "far",
+          2
+        ],
+        [
+          "bilbo",
+          1
+        ],
+        [
+          "baggins",
+          1
+        ],
+        [
+          "yours!",
+          1
+        ],
+        [
+          "excuse",
+          1
+        ],
+        [
+          "me!",
+          1
+        ],
+        [
+          "what",
+          1
+        ],
+        [
+          "moon-letters?",
+          1
+        ],
+        [
+          "half",
+          1
+        ],
+        [
+          "moment,",
+          1
+        ],
+        [
+          "really",
+          1
+        ],
+        [
+          "through?",
+          1
+        ],
+        [
+          "there",
+          1
+        ],
+        [
+          "aren\u2019t",
+          1
+        ],
+        [
+          "any",
+          1
+        ],
+        [
+          "oars.",
+          1
+        ],
+        [
+          "you",
+          1
+        ],
+        [
+          "going",
+          1
+        ],
+        [
+          "push",
+          1
+        ]
+      ],
+      "distinctive_words": [
+        "to",
+        "far",
+        "how",
+        "do",
+        "are",
+        "the"
+      ],
+      "signature_phrases": [],
+      "archaism_count": 0,
+      "archaisms_used": [],
+      "sample_quotes": [
+        "Do we really have to go through?",
+        "Bilbo Baggins at yours!",
+        "Half a moment,"
+      ]
+    },
+    "Balin": {
+      "character_name": "Balin",
+      "character_id": null,
+      "total_lines": 30,
+      "total_words": 578,
+      "total_chars": 2891,
+      "avg_utterance_length": 19.266666666666666,
+      "utterance_length_std": 21.540552506814922,
+      "min_utterance_length": 1,
+      "max_utterance_length": 95,
+      "question_ratio": 0.06666666666666667,
+      "exclamation_ratio": 0.3,
+      "statement_ratio": 0.6333333333333333,
+      "unique_words": 303,
+      "type_token_ratio": 0.5242214532871973,
+      "avg_word_length": 3.885813148788927,
+      "contraction_ratio": 0.0,
+      "first_person_ratio": 0.02422145328719723,
+      "second_person_ratio": 0.012110726643598616,
+      "top_words": [
+        [
+          "you",
+          7
+        ],
+        [
+          "there",
+          6
+        ],
+        [
+          "very",
+          6
+        ],
+        [
+          "our",
+          4
+        ],
+        [
+          "old",
+          4
+        ],
+        [
+          "under",
+          3
+        ],
+        [
+          "come",
+          3
+        ],
+        [
+          "into",
+          3
+        ],
+        [
+          "well,",
+          3
+        ],
+        [
+          "more",
+          3
+        ],
+        [
+          "than",
+          3
+        ],
+        [
+          "here",
+          3
+        ],
+        [
+          "made",
+          3
+        ],
+        [
+          "they",
+          3
+        ],
+        [
+          "don\u2019t",
+          2
+        ],
+        [
+          "some",
+          2
+        ],
+        [
+          "without",
+          2
+        ],
+        [
+          "ever",
+          2
+        ],
+        [
+          "only",
+          2
+        ],
+        [
+          "got",
+          2
+        ]
+      ],
+      "distinctive_words": [
+        "the",
+        "of",
+        "and",
+        "is",
+        "a",
+        "i",
+        "we",
+        "that",
+        "it",
+        "to"
+      ],
+      "signature_phrases": [
+        "of the",
+        "in the",
+        "there were",
+        "more than",
+        "the old"
+      ],
+      "archaism_count": 0,
+      "archaisms_used": [],
+      "sample_quotes": [
+        "What have we done, O king?",
+        "I only wish he was a raven!",
+        "But I don\u2019t mind some cake \u2014 seed-cake, if you have any.",
+        "There is a dragon marked in red on the Mountain,",
+        "but it will be easy enough to find \nhim without that, if ever we arrive there."
+      ]
+    },
+    "Fili": {
+      "character_name": "Fili",
+      "character_id": null,
+      "total_lines": 11,
+      "total_words": 174,
+      "total_chars": 827,
+      "avg_utterance_length": 15.818181818181818,
+      "utterance_length_std": 16.277703657569035,
+      "min_utterance_length": 3,
+      "max_utterance_length": 53,
+      "question_ratio": 0.09090909090909091,
+      "exclamation_ratio": 0.2727272727272727,
+      "statement_ratio": 0.6363636363636364,
+      "unique_words": 111,
+      "type_token_ratio": 0.6379310344827587,
+      "avg_word_length": 3.6666666666666665,
+      "contraction_ratio": 0.0,
+      "first_person_ratio": 0.034482758620689655,
+      "second_person_ratio": 0.022988505747126436,
+      "top_words": [
+        [
+          "you",
+          4
+        ],
+        [
+          "other",
+          3
+        ],
+        [
+          "smell",
+          3
+        ],
+        [
+          "get",
+          2
+        ],
+        [
+          "side",
+          2
+        ],
+        [
+          "draw",
+          2
+        ],
+        [
+          "another",
+          2
+        ],
+        [
+          "rope",
+          2
+        ],
+        [
+          "now,",
+          2
+        ],
+        [
+          "one",
+          2
+        ],
+        [
+          "hook",
+          2
+        ],
+        [
+          "when",
+          2
+        ],
+        [
+          "apples",
+          2
+        ],
+        [
+          "some",
+          1
+        ],
+        [
+          "four,",
+          1
+        ],
+        [
+          "say",
+          1
+        ],
+        [
+          "sound,",
+          1
+        ],
+        [
+          "besides,",
+          1
+        ],
+        [
+          "saw",
+          1
+        ],
+        [
+          "them",
+          1
+        ]
+      ],
+      "distinctive_words": [
+        "the",
+        "of",
+        "and",
+        "on",
+        "in",
+        "you",
+        "i",
+        "smell",
+        "other",
+        "can"
+      ],
+      "signature_phrases": [
+        "on the",
+        "the other",
+        "on the other",
+        "in the",
+        "other side"
+      ],
+      "archaism_count": 0,
+      "archaisms_used": [],
+      "sample_quotes": [
+        "And who are these?",
+        "Let\u2019s get out of this horrible smell!",
+        "Some four, I should say by the sound,",
+        "Besides, we saw them coming along behind us \nin the distance.",
+        "you have thrown it right into the wood on the other side now. Draw it back \ngently."
+      ]
+    },
+    "Thorin": {
+      "character_name": "Thorin",
+      "character_id": null,
+      "total_lines": 111,
+      "total_words": 1931,
+      "total_chars": 9654,
+      "avg_utterance_length": 17.396396396396398,
+      "utterance_length_std": 22.107703009370564,
+      "min_utterance_length": 1,
+      "max_utterance_length": 115,
+      "question_ratio": 0.09009009009009009,
+      "exclamation_ratio": 0.36936936936936937,
+      "statement_ratio": 0.5405405405405406,
+      "unique_words": 759,
+      "type_token_ratio": 0.39306059036768515,
+      "avg_word_length": 3.8643190056965304,
+      "contraction_ratio": 0.0,
+      "first_person_ratio": 0.02589331952356292,
+      "second_person_ratio": 0.033661315380631794,
+      "top_words": [
+        [
+          "you",
+          46
+        ],
+        [
+          "our",
+          20
+        ],
+        [
+          "now",
+          10
+        ],
+        [
+          "mr.",
+          9
+        ],
+        [
+          "any",
+          8
+        ],
+        [
+          "here",
+          8
+        ],
+        [
+          "come",
+          8
+        ],
+        [
+          "what",
+          8
+        ],
+        [
+          "time",
+          8
+        ],
+        [
+          "your",
+          8
+        ],
+        [
+          "get",
+          7
+        ],
+        [
+          "there",
+          7
+        ],
+        [
+          "don\u2019t",
+          7
+        ],
+        [
+          "still",
+          7
+        ],
+        [
+          "some",
+          6
+        ],
+        [
+          "let",
+          6
+        ],
+        [
+          "far",
+          6
+        ],
+        [
+          "his",
+          6
+        ],
+        [
+          "all",
+          6
+        ],
+        [
+          "off",
+          6
+        ]
+      ],
+      "distinctive_words": [
+        "the",
+        "and",
+        "of",
+        "we",
+        "to",
+        "you",
+        "i",
+        "is",
+        "a",
+        "our"
+      ],
+      "signature_phrases": [
+        "of the",
+        "in the",
+        "if you",
+        "is the",
+        "to the"
+      ],
+      "archaism_count": 0,
+      "archaisms_used": [],
+      "sample_quotes": [
+        "but could you be more plain?",
+        "Excuse me, I left mine in the porch!",
+        "It may have been secret once,",
+        "supposing the burglar-expert gives us some ideas or suggestions.",
+        "We have long ago paid the goblins of Moria,"
+      ]
+    },
+    "Bombur": {
+      "character_name": "Bombur",
+      "character_id": null,
+      "total_lines": 14,
+      "total_words": 114,
+      "total_chars": 557,
+      "avg_utterance_length": 8.142857142857142,
+      "utterance_length_std": 5.186626929045398,
+      "min_utterance_length": 2,
+      "max_utterance_length": 20,
+      "question_ratio": 0.0,
+      "exclamation_ratio": 0.2857142857142857,
+      "statement_ratio": 0.7142857142857143,
+      "unique_words": 85,
+      "type_token_ratio": 0.7456140350877193,
+      "avg_word_length": 3.8508771929824563,
+      "contraction_ratio": 0.0,
+      "first_person_ratio": 0.07017543859649122,
+      "second_person_ratio": 0.0,
+      "top_words": [
+        [
+          "fire",
+          2
+        ],
+        [
+          "always",
+          2
+        ],
+        [
+          "it\u2019s",
+          2
+        ],
+        [
+          "pork-pie",
+          1
+        ],
+        [
+          "salad,",
+          1
+        ],
+        [
+          "silly",
+          1
+        ],
+        [
+          "time",
+          1
+        ],
+        [
+          "practising",
+          1
+        ],
+        [
+          "pinching",
+          1
+        ],
+        [
+          "pocket-picking,",
+          1
+        ],
+        [
+          "when",
+          1
+        ],
+        [
+          "what",
+          1
+        ],
+        [
+          "wanted",
+          1
+        ],
+        [
+          "food!",
+          1
+        ],
+        [
+          "daresay,",
+          1
+        ],
+        [
+          "me!",
+          1
+        ],
+        [
+          "i\u2019m",
+          1
+        ],
+        [
+          "last",
+          1
+        ],
+        [
+          "don\u2019t",
+          1
+        ],
+        [
+          "like",
+          1
+        ]
+      ],
+      "distinctive_words": [
+        "and",
+        "i",
+        "a",
+        "as",
+        "we",
+        "fire",
+        "it\u2019s",
+        "always",
+        "were",
+        "but"
+      ],
+      "signature_phrases": [
+        "as if"
+      ],
+      "archaism_count": 0,
+      "archaisms_used": [],
+      "sample_quotes": [
+        "when what we wanted \nwas fire and food!",
+        "Silly time to go practising pinching and pocket-picking,",
+        "I\u2019m always last and I don\u2019t like it,",
+        "It\u2019s somebody else\u2019s turn today.",
+        "It looks as if my dreams were coming true,"
+      ]
+    },
+    "aloud": {
+      "character_name": "aloud",
+      "character_id": null,
+      "total_lines": 5,
+      "total_words": 102,
+      "total_chars": 531,
+      "avg_utterance_length": 20.4,
+      "utterance_length_std": 36.177340974704045,
+      "min_utterance_length": 1,
+      "max_utterance_length": 85,
+      "question_ratio": 0.4,
+      "exclamation_ratio": 0.6,
+      "statement_ratio": 0.0,
+      "unique_words": 72,
+      "type_token_ratio": 0.7058823529411765,
+      "avg_word_length": 4.029411764705882,
+      "contraction_ratio": 0.0,
+      "first_person_ratio": 0.049019607843137254,
+      "second_person_ratio": 0.0392156862745098,
+      "top_words": [
+        [
+          "what",
+          4
+        ],
+        [
+          "you",
+          4
+        ],
+        [
+          "very",
+          2
+        ],
+        [
+          "bit",
+          2
+        ],
+        [
+          "much",
+          2
+        ],
+        [
+          "use",
+          2
+        ],
+        [
+          "confusticate",
+          1
+        ],
+        [
+          "bebother",
+          1
+        ],
+        [
+          "these",
+          1
+        ],
+        [
+          "dwarves!",
+          1
+        ],
+        [
+          "got",
+          1
+        ],
+        [
+          "pocket?",
+          1
+        ],
+        [
+          "well,",
+          1
+        ],
+        [
+          "barrel-rider!",
+          1
+        ],
+        [
+          "don\u2019t",
+          1
+        ],
+        [
+          "know",
+          1
+        ],
+        [
+          "occurred",
+          1
+        ],
+        [
+          "that,",
+          1
+        ],
+        [
+          "even",
+          1
+        ],
+        [
+          "steal",
+          1
+        ]
+      ],
+      "distinctive_words": [
+        "the",
+        "what",
+        "you",
+        "about",
+        "not",
+        "a",
+        "i",
+        "use",
+        "bit",
+        "much"
+      ],
+      "signature_phrases": [
+        "what about",
+        "you could",
+        "not much",
+        "much use",
+        "not much use"
+      ],
+      "archaism_count": 0,
+      "archaisms_used": [],
+      "sample_quotes": [
+        "What have I got in my pocket?",
+        "Confusticate and bebother these dwarves!"
+      ]
+    },
+    "in": {
+      "character_name": "in",
+      "character_id": null,
+      "total_lines": 9,
+      "total_words": 44,
+      "total_chars": 221,
+      "avg_utterance_length": 4.888888888888889,
+      "utterance_length_std": 2.891558595482912,
+      "min_utterance_length": 1,
+      "max_utterance_length": 9,
+      "question_ratio": 0.1111111111111111,
+      "exclamation_ratio": 0.4444444444444444,
+      "statement_ratio": 0.4444444444444444,
+      "unique_words": 40,
+      "type_token_ratio": 0.9090909090909091,
+      "avg_word_length": 3.9545454545454546,
+      "contraction_ratio": 0.0,
+      "first_person_ratio": 0.022727272727272728,
+      "second_person_ratio": 0.11363636363636363,
+      "top_words": [
+        [
+          "you",
+          2
+        ],
+        [
+          "your",
+          2
+        ],
+        [
+          "suppose",
+          1
+        ],
+        [
+          "all",
+          1
+        ],
+        [
+          "stay",
+          1
+        ],
+        [
+          "supper?",
+          1
+        ],
+        [
+          "made",
+          1
+        ],
+        [
+          "thror,",
+          1
+        ],
+        [
+          "grandfather,",
+          1
+        ],
+        [
+          "thorin,",
+          1
+        ],
+        [
+          "yes!",
+          1
+        ],
+        [
+          "only",
+          1
+        ],
+        [
+          "bat",
+          1
+        ],
+        [
+          "dropped",
+          1
+        ],
+        [
+          "torch,",
+          1
+        ],
+        [
+          "nothing",
+          1
+        ],
+        [
+          "worse!",
+          1
+        ],
+        [
+          "king",
+          1
+        ],
+        [
+          "bard!",
+          1
+        ],
+        [
+          "who",
+          1
+        ]
+      ],
+      "distinctive_words": [
+        "will",
+        "your",
+        "a",
+        "you"
+      ],
+      "signature_phrases": [],
+      "archaism_count": 0,
+      "archaisms_used": [],
+      "sample_quotes": [
+        "I suppose you will all stay to supper?",
+        "Only a bat and a dropped torch, nothing worse!",
+        "This was made by Thror, your grandfather, Thorin,",
+        "Since such is your answer,",
+        "Who are you,"
+      ]
+    },
+    "William": {
+      "character_name": "William",
+      "character_id": null,
+      "total_lines": 13,
+      "total_words": 64,
+      "total_chars": 349,
+      "avg_utterance_length": 4.923076923076923,
+      "utterance_length_std": 2.361550989693654,
+      "min_utterance_length": 2,
+      "max_utterance_length": 10,
+      "question_ratio": 0.23076923076923078,
+      "exclamation_ratio": 0.07692307692307693,
+      "statement_ratio": 0.6923076923076923,
+      "unique_words": 55,
+      "type_token_ratio": 0.859375,
+      "avg_word_length": 4.359375,
+      "contraction_ratio": 0.0,
+      "first_person_ratio": 0.046875,
+      "second_person_ratio": 0.03125,
+      "top_words": [
+        [
+          "who\u2019s",
+          2
+        ],
+        [
+          "you\u2019re",
+          2
+        ],
+        [
+          "blimey,",
+          1
+        ],
+        [
+          "bert,",
+          1
+        ],
+        [
+          "look",
+          1
+        ],
+        [
+          "what",
+          1
+        ],
+        [
+          "i\u2019ve",
+          1
+        ],
+        [
+          "copped!",
+          1
+        ],
+        [
+          "what\u2019s",
+          1
+        ],
+        [
+          "burrahobbit",
+          1
+        ],
+        [
+          "got",
+          1
+        ],
+        [
+          "pocket,",
+          1
+        ],
+        [
+          "anyways?",
+          1
+        ],
+        [
+          "wouldn\u2019t",
+          1
+        ],
+        [
+          "make",
+          1
+        ],
+        [
+          "above",
+          1
+        ],
+        [
+          "mouthful,",
+          1
+        ],
+        [
+          "poor",
+          1
+        ],
+        [
+          "little",
+          1
+        ],
+        [
+          "blighter,",
+          1
+        ]
+      ],
+      "distinctive_words": [
+        "a",
+        "who\u2019s",
+        "you\u2019re",
+        "with",
+        "to",
+        "i",
+        "the"
+      ],
+      "signature_phrases": [
+        "you\u2019re a"
+      ],
+      "archaism_count": 0,
+      "archaisms_used": [],
+      "sample_quotes": [
+        "What\u2019s a burrahobbit got to do with my pocket, anyways?",
+        "Blimey, Bert, look what I\u2019ve copped!",
+        "He wouldn\u2019t make above a mouthful,",
+        "Who\u2019s arguing but you, I\u2019d like \nto know.",
+        "Nonsense, the one with the grey stockings,"
+      ]
+    },
+    "the others": {
+      "character_name": "the others",
+      "character_id": null,
+      "total_lines": 5,
+      "total_words": 31,
+      "total_chars": 156,
+      "avg_utterance_length": 6.2,
+      "utterance_length_std": 4.494441010848846,
+      "min_utterance_length": 3,
+      "max_utterance_length": 14,
+      "question_ratio": 0.2,
+      "exclamation_ratio": 0.6,
+      "statement_ratio": 0.2,
+      "unique_words": 25,
+      "type_token_ratio": 0.8064516129032258,
+      "avg_word_length": 3.903225806451613,
+      "contraction_ratio": 0.0,
+      "first_person_ratio": 0.0,
+      "second_person_ratio": 0.03225806451612903,
+      "top_words": [
+        [
+          "him!",
+          2
+        ],
+        [
+          "all",
+          2
+        ],
+        [
+          "our",
+          2
+        ],
+        [
+          "come",
+          2
+        ],
+        [
+          "on!",
+          2
+        ],
+        [
+          "what",
+          1
+        ],
+        [
+          "it?",
+          1
+        ],
+        [
+          "shake",
+          1
+        ],
+        [
+          "wake",
+          1
+        ],
+        [
+          "they",
+          1
+        ],
+        [
+          "slain,",
+          1
+        ],
+        [
+          "ponies",
+          1
+        ],
+        [
+          "too,",
+          1
+        ],
+        [
+          "stores",
+          1
+        ],
+        [
+          "lost,",
+          1
+        ],
+        [
+          "you",
+          1
+        ],
+        [
+          "always",
+          1
+        ],
+        [
+          "foreboding",
+          1
+        ],
+        [
+          "gloomy",
+          1
+        ],
+        [
+          "things!",
+          1
+        ]
+      ],
+      "distinctive_words": [
+        "him!",
+        "on!",
+        "our",
+        "come",
+        "all",
+        "and"
+      ],
+      "signature_phrases": [
+        "and all",
+        "all our",
+        "and all our",
+        "come on!"
+      ],
+      "archaism_count": 0,
+      "archaisms_used": [],
+      "sample_quotes": [
+        "What is it?",
+        "You are always foreboding gloomy things!",
+        "They will be slain, and all our ponies too, and all our stores lost,"
+      ]
+    },
+    "they": {
+      "character_name": "they",
+      "character_id": null,
+      "total_lines": 16,
+      "total_words": 153,
+      "total_chars": 823,
+      "avg_utterance_length": 9.5625,
+      "utterance_length_std": 6.927902520484344,
+      "min_utterance_length": 1,
+      "max_utterance_length": 23,
+      "question_ratio": 0.1875,
+      "exclamation_ratio": 0.5,
+      "statement_ratio": 0.3125,
+      "unique_words": 112,
+      "type_token_ratio": 0.7320261437908496,
+      "avg_word_length": 4.2745098039215685,
+      "contraction_ratio": 0.0,
+      "first_person_ratio": 0.0,
+      "second_person_ratio": 0.058823529411764705,
+      "top_words": [
+        [
+          "you",
+          7
+        ],
+        [
+          "get",
+          3
+        ],
+        [
+          "his",
+          3
+        ],
+        [
+          "far",
+          2
+        ],
+        [
+          "all",
+          2
+        ],
+        [
+          "your",
+          2
+        ],
+        [
+          "any",
+          2
+        ],
+        [
+          "like",
+          2
+        ],
+        [
+          "burrahobbit?",
+          1
+        ],
+        [
+          "shut",
+          1
+        ],
+        [
+          "up!",
+          1
+        ],
+        [
+          "too",
+          1
+        ],
+        [
+          "fat",
+          1
+        ],
+        [
+          "through",
+          1
+        ],
+        [
+          "key-holes",
+          1
+        ],
+        [
+          "yet!",
+          1
+        ],
+        [
+          "round",
+          1
+        ],
+        [
+          "next",
+          1
+        ],
+        [
+          "corner;",
+          1
+        ],
+        [
+          "ponies",
+          1
+        ]
+      ],
+      "distinctive_words": [
+        "the",
+        "you",
+        "is",
+        "we",
+        "a",
+        "and",
+        "his",
+        "get",
+        "far",
+        "any"
+      ],
+      "signature_phrases": [
+        "to get",
+        "this is"
+      ],
+      "archaism_count": 0,
+      "archaisms_used": [],
+      "sample_quotes": [
+        "Couldn\u2019t you find someone more easy-tempered? \nHadn\u2019t you better explain it all a bit clearer?",
+        "He is too fat to get through key-holes yet!",
+        "not far round the next corner; and ponies and all could get inside.",
+        "Let your legs take their share, we have carried you far enough.",
+        "Don\u2019t tell us about dreams. Dream-dinners \naren\u2019t any good, and we can\u2019t share them."
+      ]
+    },
+    "Tom": {
+      "character_name": "Tom",
+      "character_id": null,
+      "total_lines": 9,
+      "total_words": 45,
+      "total_chars": 209,
+      "avg_utterance_length": 5,
+      "utterance_length_std": 4.242640687119285,
+      "min_utterance_length": 2,
+      "max_utterance_length": 16,
+      "question_ratio": 0.2222222222222222,
+      "exclamation_ratio": 0.4444444444444444,
+      "statement_ratio": 0.3333333333333333,
+      "unique_words": 39,
+      "type_token_ratio": 0.8666666666666667,
+      "avg_word_length": 3.6,
+      "contraction_ratio": 0.0,
+      "first_person_ratio": 0.022222222222222223,
+      "second_person_ratio": 0.044444444444444446,
+      "top_words": [
+        [
+          "yerself!",
+          3
+        ],
+        [
+          "sit",
+          2
+        ],
+        [
+          "yer",
+          1
+        ],
+        [
+          "cook",
+          1
+        ],
+        [
+          "\u2019em?",
+          1
+        ],
+        [
+          "there\u2019s",
+          1
+        ],
+        [
+          "more",
+          1
+        ],
+        [
+          "come",
+          1
+        ],
+        [
+          "yet,",
+          1
+        ],
+        [
+          "that\u2019ll",
+          1
+        ],
+        [
+          "teach",
+          1
+        ],
+        [
+          "\u2019em,",
+          1
+        ],
+        [
+          "shut",
+          1
+        ],
+        [
+          "booby",
+          1
+        ],
+        [
+          "don\u2019t",
+          1
+        ],
+        [
+          "talk",
+          1
+        ],
+        [
+          "you",
+          1
+        ],
+        [
+          "wants",
+          1
+        ],
+        [
+          "last",
+          1
+        ],
+        [
+          "one,",
+          1
+        ]
+      ],
+      "distinctive_words": [
+        "yerself!",
+        "to",
+        "sit",
+        "on"
+      ],
+      "signature_phrases": [
+        "sit on"
+      ],
+      "archaism_count": 0,
+      "archaisms_used": [],
+      "sample_quotes": [
+        "And can yer cook \u2019em?",
+        "Shut up yerself!",
+        "There\u2019s more to come yet,",
+        "That\u2019ll teach \u2019em,",
+        "It was you."
+      ]
+    },
+    "Bert": {
+      "character_name": "Bert",
+      "character_id": null,
+      "total_lines": 19,
+      "total_words": 163,
+      "total_chars": 772,
+      "avg_utterance_length": 8.578947368421053,
+      "utterance_length_std": 5.124188710568773,
+      "min_utterance_length": 2,
+      "max_utterance_length": 20,
+      "question_ratio": 0.10526315789473684,
+      "exclamation_ratio": 0.15789473684210525,
+      "statement_ratio": 0.7368421052631579,
+      "unique_words": 123,
+      "type_token_ratio": 0.754601226993865,
+      "avg_word_length": 3.6564417177914113,
+      "contraction_ratio": 0.0,
+      "first_person_ratio": 0.03680981595092025,
+      "second_person_ratio": 0.012269938650306749,
+      "top_words": [
+        [
+          "yer",
+          3
+        ],
+        [
+          "what",
+          3
+        ],
+        [
+          "till",
+          2
+        ],
+        [
+          "all,",
+          2
+        ],
+        [
+          "you\u2019re",
+          2
+        ],
+        [
+          "take",
+          2
+        ],
+        [
+          "get",
+          2
+        ],
+        [
+          "good",
+          2
+        ],
+        [
+          "try,",
+          1
+        ],
+        [
+          "p\u2019raps",
+          1
+        ],
+        [
+          "there",
+          1
+        ],
+        [
+          "more",
+          1
+        ],
+        [
+          "like",
+          1
+        ],
+        [
+          "him",
+          1
+        ],
+        [
+          "round",
+          1
+        ],
+        [
+          "about,",
+          1
+        ],
+        [
+          "make",
+          1
+        ],
+        [
+          "pie,",
+          1
+        ],
+        [
+          "d\u2019yer",
+          1
+        ],
+        [
+          "mean?",
+          1
+        ]
+      ],
+      "distinctive_words": [
+        "and",
+        "the",
+        "i",
+        "yer",
+        "no",
+        "he",
+        "what",
+        "a",
+        "to",
+        "you\u2019re"
+      ],
+      "signature_phrases": [
+        "till he",
+        "no good",
+        "it was"
+      ],
+      "archaism_count": 0,
+      "archaisms_used": [],
+      "sample_quotes": [
+        "Then what did yer say it was grey for?",
+        "I don\u2019t want to have me throat \ncut in me sleep! Hold his toes in the fire, till he talks!",
+        "P\u2019raps there are more like him round about, and we might make a pie,",
+        "Not till he says what he means by lots and none at all,",
+        "You\u2019re a fat fool, William,"
+      ]
+    },
+    "Elrond": {
+      "character_name": "Elrond",
+      "character_id": null,
+      "total_lines": 12,
+      "total_words": 185,
+      "total_chars": 929,
+      "avg_utterance_length": 15.416666666666666,
+      "utterance_length_std": 20.299835795723407,
+      "min_utterance_length": 4,
+      "max_utterance_length": 78,
+      "question_ratio": 0.08333333333333333,
+      "exclamation_ratio": 0.25,
+      "statement_ratio": 0.6666666666666666,
+      "unique_words": 120,
+      "type_token_ratio": 0.6486486486486487,
+      "avg_word_length": 3.918918918918919,
+      "contraction_ratio": 0.0,
+      "first_person_ratio": 0.02702702702702703,
+      "second_person_ratio": 0.02702702702702703,
+      "top_words": [
+        [
+          "when",
+          4
+        ],
+        [
+          "your",
+          2
+        ],
+        [
+          "you",
+          2
+        ],
+        [
+          "them,",
+          2
+        ],
+        [
+          "they",
+          2
+        ],
+        [
+          "seen",
+          2
+        ],
+        [
+          "moon",
+          2
+        ],
+        [
+          "what",
+          2
+        ],
+        [
+          "day",
+          2
+        ],
+        [
+          "them",
+          2
+        ],
+        [
+          "moon,",
+          2
+        ],
+        [
+          "durin\u2019s",
+          2
+        ],
+        [
+          "say,",
+          1
+        ],
+        [
+          "wish",
+          1
+        ],
+        [
+          "likely",
+          1
+        ],
+        [
+          "granted",
+          1
+        ],
+        [
+          "soon",
+          1
+        ],
+        [
+          "enough",
+          1
+        ],
+        [
+          "mountains!",
+          1
+        ],
+        [
+          "show",
+          1
+        ]
+      ],
+      "distinctive_words": [
+        "the",
+        "a",
+        "be",
+        "when",
+        "but",
+        "i",
+        "and",
+        "with",
+        "will",
+        "not"
+      ],
+      "signature_phrases": [
+        "to be",
+        "be seen",
+        "when the",
+        "with the",
+        "of the"
+      ],
+      "archaism_count": 0,
+      "archaisms_used": [],
+      "sample_quotes": [
+        "Then what is Durin\u2019s Day?",
+        "A wish that is likely to be granted soon enough in the mountains!",
+        "Moon-letters are rune-letters, but you cannot see them,",
+        "Stand by the grey stone when the thrush knocks.",
+        "and the setting sun with the last \nlight of Durin\u2019s Day will shine upon the key-hole."
+      ]
+    },
+    "Dori": {
+      "character_name": "Dori",
+      "character_id": null,
+      "total_lines": 9,
+      "total_words": 73,
+      "total_chars": 360,
+      "avg_utterance_length": 8.11111111111111,
+      "utterance_length_std": 6.772083217970015,
+      "min_utterance_length": 1,
+      "max_utterance_length": 23,
+      "question_ratio": 0.1111111111111111,
+      "exclamation_ratio": 0.4444444444444444,
+      "statement_ratio": 0.4444444444444444,
+      "unique_words": 57,
+      "type_token_ratio": 0.7808219178082192,
+      "avg_word_length": 3.835616438356164,
+      "contraction_ratio": 0.0,
+      "first_person_ratio": 0.0410958904109589,
+      "second_person_ratio": 0.0821917808219178,
+      "top_words": [
+        [
+          "you",
+          4
+        ],
+        [
+          "your",
+          2
+        ],
+        [
+          "from",
+          2
+        ],
+        [
+          "here,",
+          2
+        ],
+        [
+          "half",
+          1
+        ],
+        [
+          "minute!",
+          1
+        ],
+        [
+          "dropped",
+          1
+        ],
+        [
+          "him,",
+          1
+        ],
+        [
+          "goblin",
+          1
+        ],
+        [
+          "suddenly",
+          1
+        ],
+        [
+          "grabbed",
+          1
+        ],
+        [
+          "legs",
+          1
+        ],
+        [
+          "behind",
+          1
+        ],
+        [
+          "dark,",
+          1
+        ],
+        [
+          "tripped",
+          1
+        ],
+        [
+          "feet,",
+          1
+        ],
+        [
+          "kicked",
+          1
+        ],
+        [
+          "back!",
+          1
+        ],
+        [
+          "can\u2019t",
+          1
+        ],
+        [
+          "always",
+          1
+        ]
+      ],
+      "distinctive_words": [
+        "you",
+        "a",
+        "here,",
+        "up",
+        "from",
+        "if",
+        "we",
+        "your",
+        "in",
+        "have"
+      ],
+      "signature_phrases": [
+        "in the"
+      ],
+      "archaism_count": 0,
+      "archaisms_used": [],
+      "sample_quotes": [
+        "down tunnels and up trees! What do \nyou think I am? A porter?",
+        "Half a minute!",
+        "You would have dropped him,",
+        "I can\u2019t be always carrying burglars on my back,",
+        "We must move away from here,"
+      ]
+    },
+    "Gollum": {
+      "character_name": "Gollum",
+      "character_id": null,
+      "total_lines": 23,
+      "total_words": 175,
+      "total_chars": 932,
+      "avg_utterance_length": 7.608695652173913,
+      "utterance_length_std": 7.744435717660792,
+      "min_utterance_length": 1,
+      "max_utterance_length": 29,
+      "question_ratio": 0.08695652173913043,
+      "exclamation_ratio": 0.34782608695652173,
+      "statement_ratio": 0.5652173913043478,
+      "unique_words": 110,
+      "type_token_ratio": 0.6285714285714286,
+      "avg_word_length": 4.04,
+      "contraction_ratio": 0.0,
+      "first_person_ratio": 0.02857142857142857,
+      "second_person_ratio": 0.0,
+      "top_words": [
+        [
+          "it\u2019s",
+          4
+        ],
+        [
+          "ask",
+          4
+        ],
+        [
+          "curse",
+          4
+        ],
+        [
+          "got",
+          3
+        ],
+        [
+          "ss,",
+          3
+        ],
+        [
+          "yes,",
+          3
+        ],
+        [
+          "guess,",
+          3
+        ],
+        [
+          "it!",
+          3
+        ],
+        [
+          "what",
+          2
+        ],
+        [
+          "preciouss,",
+          2
+        ],
+        [
+          "yess,",
+          2
+        ],
+        [
+          "us!",
+          2
+        ],
+        [
+          "three",
+          2
+        ],
+        [
+          "precious,",
+          2
+        ],
+        [
+          "yes",
+          2
+        ],
+        [
+          "things",
+          2
+        ],
+        [
+          "no,",
+          2
+        ],
+        [
+          "gollum,",
+          2
+        ],
+        [
+          "gollum.",
+          2
+        ],
+        [
+          "it,",
+          2
+        ]
+      ],
+      "distinctive_words": [
+        "it",
+        "must",
+        "my",
+        "we",
+        "a",
+        "curse",
+        "ask",
+        "it\u2019s",
+        "ss,",
+        "guess,"
+      ],
+      "signature_phrases": [
+        "it must",
+        "curse it!",
+        "got in",
+        "ss, ss,",
+        "my preciouss,"
+      ],
+      "archaism_count": 0,
+      "archaisms_used": [],
+      "sample_quotes": [
+        "What iss he, my preciouss?",
+        "A sword, a blade which came out of Gondolin!",
+        "It\u2019s got to ask uss a quesstion, my preciouss, yes, yess, yesss. Jusst one more question to guess, \nyes, yess,",
+        "It must give us three guesseses, my preciouss, three guesseses.",
+        "Cross it is, impatient, precious,"
+      ]
+    },
+    "one": {
+      "character_name": "one",
+      "character_id": null,
+      "total_lines": 8,
+      "total_words": 185,
+      "total_chars": 971,
+      "avg_utterance_length": 23.125,
+      "utterance_length_std": 33.5194506432992,
+      "min_utterance_length": 1,
+      "max_utterance_length": 103,
+      "question_ratio": 0.25,
+      "exclamation_ratio": 0.125,
+      "statement_ratio": 0.625,
+      "unique_words": 125,
+      "type_token_ratio": 0.6756756756756757,
+      "avg_word_length": 4.102702702702703,
+      "contraction_ratio": 0.0,
+      "first_person_ratio": 0.0,
+      "second_person_ratio": 0.02702702702702703,
+      "top_words": [
+        [
+          "you",
+          3
+        ],
+        [
+          "more",
+          2
+        ],
+        [
+          "than",
+          2
+        ],
+        [
+          "unto",
+          2
+        ],
+        [
+          "thorin",
+          2
+        ],
+        [
+          "himself",
+          2
+        ],
+        [
+          "him",
+          2
+        ],
+        [
+          "our",
+          2
+        ],
+        [
+          "portion",
+          2
+        ],
+        [
+          "his",
+          2
+        ],
+        [
+          "well,",
+          1
+        ],
+        [
+          "it\u2019s",
+          1
+        ],
+        [
+          "matter",
+          1
+        ],
+        [
+          "ordinary",
+          1
+        ],
+        [
+          "questions,",
+          1
+        ],
+        [
+          "trouble",
+          1
+        ],
+        [
+          "use",
+          1
+        ],
+        [
+          "far,",
+          1
+        ],
+        [
+          "sharp",
+          1
+        ],
+        [
+          "struggle,",
+          1
+        ]
+      ],
+      "distinctive_words": [
+        "the",
+        "of",
+        "that",
+        "as",
+        "will",
+        "he",
+        "if",
+        "are",
+        "is",
+        "a"
+      ],
+      "signature_phrases": [
+        "of the",
+        "as the",
+        "are you"
+      ],
+      "archaism_count": 0,
+      "archaisms_used": [],
+      "sample_quotes": [
+        "Where\u2019s old Galion, the butler?",
+        "Look!",
+        "Oh well, if it\u2019s a matter of ordinary questions,",
+        "He \nhas been more trouble than use so far,",
+        "It was a sharp struggle, but worth it,"
+      ]
+    },
+    "the man": {
+      "character_name": "the man",
+      "character_id": null,
+      "total_lines": 5,
+      "total_words": 50,
+      "total_chars": 227,
+      "avg_utterance_length": 10,
+      "utterance_length_std": 5.1478150704935,
+      "min_utterance_length": 4,
+      "max_utterance_length": 18,
+      "question_ratio": 0.2,
+      "exclamation_ratio": 0.2,
+      "statement_ratio": 0.6,
+      "unique_words": 41,
+      "type_token_ratio": 0.82,
+      "avg_word_length": 3.52,
+      "contraction_ratio": 0.0,
+      "first_person_ratio": 0.06,
+      "second_person_ratio": 0.06,
+      "top_words": [
+        [
+          "you",
+          2
+        ],
+        [
+          "never",
+          1
+        ],
+        [
+          "heard",
+          1
+        ],
+        [
+          "him,",
+          1
+        ],
+        [
+          "then",
+          1
+        ],
+        [
+          "better",
+          1
+        ],
+        [
+          "come",
+          1
+        ],
+        [
+          "inside",
+          1
+        ],
+        [
+          "tell",
+          1
+        ],
+        [
+          "some",
+          1
+        ],
+        [
+          "it,",
+          1
+        ],
+        [
+          "won\u2019t",
+          1
+        ],
+        [
+          "take",
+          1
+        ],
+        [
+          "all",
+          1
+        ],
+        [
+          "day,",
+          1
+        ],
+        [
+          "what",
+          1
+        ],
+        [
+          "voice",
+          1
+        ],
+        [
+          "speaks",
+          1
+        ],
+        [
+          "among",
+          1
+        ],
+        [
+          "stones?",
+          1
+        ]
+      ],
+      "distinctive_words": [
+        "it",
+        "the",
+        "that",
+        "of",
+        "is",
+        "you",
+        "i"
+      ],
+      "signature_phrases": [],
+      "archaism_count": 0,
+      "archaisms_used": [],
+      "sample_quotes": [
+        "What voice is it that speaks among the stones?",
+        "It is well that I have found you!",
+        "Then you had better come inside and tell me some of it, if it won\u2019t take all day,",
+        "I will carry you down to the camp in the valley,",
+        "Never heard of him,"
+      ]
+    },
+    "Beorn": {
+      "character_name": "Beorn",
+      "character_id": null,
+      "total_lines": 24,
+      "total_words": 311,
+      "total_chars": 1524,
+      "avg_utterance_length": 12.958333333333334,
+      "utterance_length_std": 15.718942233100044,
+      "min_utterance_length": 1,
+      "max_utterance_length": 61,
+      "question_ratio": 0.08333333333333333,
+      "exclamation_ratio": 0.4583333333333333,
+      "statement_ratio": 0.4583333333333333,
+      "unique_words": 185,
+      "type_token_ratio": 0.594855305466238,
+      "avg_word_length": 3.729903536977492,
+      "contraction_ratio": 0.0,
+      "first_person_ratio": 0.05144694533762058,
+      "second_person_ratio": 0.06109324758842444,
+      "top_words": [
+        [
+          "you",
+          13
+        ],
+        [
+          "now",
+          5
+        ],
+        [
+          "one",
+          4
+        ],
+        [
+          "only",
+          3
+        ],
+        [
+          "they",
+          3
+        ],
+        [
+          "your",
+          3
+        ],
+        [
+          "come",
+          3
+        ],
+        [
+          "good",
+          3
+        ],
+        [
+          "wizards",
+          2
+        ],
+        [
+          "see",
+          2
+        ],
+        [
+          "know",
+          2
+        ],
+        [
+          "who",
+          2
+        ],
+        [
+          "what",
+          2
+        ],
+        [
+          "see!",
+          2
+        ],
+        [
+          "don\u2019t",
+          2
+        ],
+        [
+          "need",
+          2
+        ],
+        [
+          "service,",
+          2
+        ],
+        [
+          "goblins",
+          2
+        ],
+        [
+          "on,",
+          2
+        ],
+        [
+          "two",
+          2
+        ]
+      ],
+      "distinctive_words": [
+        "you",
+        "and",
+        "i",
+        "a",
+        "are",
+        "that",
+        "now",
+        "or",
+        "but",
+        "not"
+      ],
+      "signature_phrases": [
+        "who you",
+        "one or",
+        "your service,",
+        "and that",
+        "go on,"
+      ],
+      "archaism_count": 0,
+      "archaisms_used": [],
+      "sample_quotes": [
+        "Well, now I know who you are, or who you say you are. What do you want?",
+        "One or three you meant, I see!",
+        "Yes; not a bad fellow as wizards go, I believe. I used to see him now and again,",
+        "Or two? I can only see one, and a little one at that,",
+        "I don\u2019t need your service, thank you,"
+      ]
+    },
+    "the king": {
+      "character_name": "the king",
+      "character_id": null,
+      "total_lines": 7,
+      "total_words": 62,
+      "total_chars": 295,
+      "avg_utterance_length": 8.857142857142858,
+      "utterance_length_std": 4.845223470201398,
+      "min_utterance_length": 2,
+      "max_utterance_length": 15,
+      "question_ratio": 0.42857142857142855,
+      "exclamation_ratio": 0.42857142857142855,
+      "statement_ratio": 0.14285714285714285,
+      "unique_words": 49,
+      "type_token_ratio": 0.7903225806451613,
+      "avg_word_length": 3.6774193548387095,
+      "contraction_ratio": 0.0,
+      "first_person_ratio": 0.04838709677419355,
+      "second_person_ratio": 0.03225806451612903,
+      "top_words": [
+        [
+          "what",
+          3
+        ],
+        [
+          "gift,",
+          2
+        ],
+        [
+          "brought",
+          1
+        ],
+        [
+          "you",
+          1
+        ],
+        [
+          "into",
+          1
+        ],
+        [
+          "forest",
+          1
+        ],
+        [
+          "all?",
+          1
+        ],
+        [
+          "very",
+          1
+        ],
+        [
+          "well!",
+          1
+        ],
+        [
+          "last",
+          1
+        ],
+        [
+          "hear",
+          1
+        ],
+        [
+          "thorin",
+          1
+        ],
+        [
+          "oakenshield,",
+          1
+        ],
+        [
+          "fear,",
+          1
+        ],
+        [
+          "have,",
+          1
+        ],
+        [
+          "long",
+          1
+        ],
+        [
+          "time",
+          1
+        ],
+        [
+          "ago;",
+          1
+        ],
+        [
+          "got",
+          1
+        ],
+        [
+          "us?",
+          1
+        ]
+      ],
+      "distinctive_words": [
+        "o",
+        "what",
+        "i",
+        "the",
+        "gift,",
+        "but",
+        "will",
+        "we",
+        "a"
+      ],
+      "signature_phrases": [
+        "but what",
+        "gift, o"
+      ],
+      "archaism_count": 0,
+      "archaisms_used": [],
+      "sample_quotes": [
+        "But what brought you into the forest at all?",
+        "I will take your gift, O Bilbo the Magnificent!",
+        "That will be the last we shall hear of Thorin Oakenshield, I fear,"
+      ]
+    },
+    "Smaug": {
+      "character_name": "Smaug",
+      "character_id": null,
+      "total_lines": 7,
+      "total_words": 38,
+      "total_chars": 195,
+      "avg_utterance_length": 5.428571428571429,
+      "utterance_length_std": 2.2253945610567474,
+      "min_utterance_length": 2,
+      "max_utterance_length": 9,
+      "question_ratio": 0.0,
+      "exclamation_ratio": 0.42857142857142855,
+      "statement_ratio": 0.5714285714285714,
+      "unique_words": 32,
+      "type_token_ratio": 0.8421052631578947,
+      "avg_word_length": 4.078947368421052,
+      "contraction_ratio": 0.0,
+      "first_person_ratio": 0.05263157894736842,
+      "second_person_ratio": 0.10526315789473684,
+      "top_words": [
+        [
+          "don\u2019t",
+          3
+        ],
+        [
+          "your",
+          2
+        ],
+        [
+          "ha!",
+          2
+        ],
+        [
+          "well",
+          1
+        ],
+        [
+          "believe,",
+          1
+        ],
+        [
+          "hardly",
+          1
+        ],
+        [
+          "usual",
+          1
+        ],
+        [
+          "name.",
+          1
+        ],
+        [
+          "these",
+          1
+        ],
+        [
+          "sound",
+          1
+        ],
+        [
+          "creditable,",
+          1
+        ],
+        [
+          "that\u2019s",
+          1
+        ],
+        [
+          "better!",
+          1
+        ],
+        [
+          "let",
+          1
+        ],
+        [
+          "imagination",
+          1
+        ],
+        [
+          "run",
+          1
+        ],
+        [
+          "away",
+          1
+        ],
+        [
+          "you!",
+          1
+        ],
+        [
+          "talk",
+          1
+        ],
+        [
+          "me!",
+          1
+        ]
+      ],
+      "distinctive_words": [
+        "don\u2019t",
+        "ha!",
+        "so",
+        "but",
+        "your"
+      ],
+      "signature_phrases": [],
+      "archaism_count": 0,
+      "archaisms_used": [],
+      "sample_quotes": [
+        "But don\u2019t let your imagination run away with you!",
+        "So I can well believe,",
+        "but that is hardly your usual name.",
+        "These don\u2019t sound so creditable,",
+        "Ha! Ha! You admit the 'us\u2019"
+      ]
+    },
+    "Bard": {
+      "character_name": "Bard",
+      "character_id": null,
+      "total_lines": 19,
+      "total_words": 280,
+      "total_chars": 1464,
+      "avg_utterance_length": 14.736842105263158,
+      "utterance_length_std": 18.615531464234547,
+      "min_utterance_length": 1,
+      "max_utterance_length": 67,
+      "question_ratio": 0.05263157894736842,
+      "exclamation_ratio": 0.5263157894736842,
+      "statement_ratio": 0.42105263157894735,
+      "unique_words": 166,
+      "type_token_ratio": 0.5928571428571429,
+      "avg_word_length": 4.110714285714286,
+      "contraction_ratio": 0.0,
+      "first_person_ratio": 0.007142857142857143,
+      "second_person_ratio": 0.02857142857142857,
+      "top_words": [
+        [
+          "they",
+          7
+        ],
+        [
+          "you",
+          5
+        ],
+        [
+          "give",
+          3
+        ],
+        [
+          "your",
+          3
+        ],
+        [
+          "let",
+          3
+        ],
+        [
+          "our",
+          3
+        ],
+        [
+          "fools!",
+          2
+        ],
+        [
+          "before",
+          2
+        ],
+        [
+          "right",
+          2
+        ],
+        [
+          "them",
+          2
+        ],
+        [
+          "still",
+          2
+        ],
+        [
+          "their",
+          2
+        ],
+        [
+          "back",
+          2
+        ],
+        [
+          "until",
+          2
+        ],
+        [
+          "then",
+          2
+        ],
+        [
+          "from",
+          2
+        ],
+        [
+          "set",
+          2
+        ],
+        [
+          "there",
+          2
+        ],
+        [
+          "now",
+          2
+        ],
+        [
+          "mountain!",
+          2
+        ]
+      ],
+      "distinctive_words": [
+        "the",
+        "we",
+        "to",
+        "they",
+        "will",
+        "in",
+        "are",
+        "and",
+        "not",
+        "you"
+      ],
+      "signature_phrases": [
+        "we will",
+        "are not",
+        "will give",
+        "we will give",
+        "to the"
+      ],
+      "archaism_count": 1,
+      "archaisms_used": [
+        "ere"
+      ],
+      "sample_quotes": [
+        "Are you still of the same mind?",
+        "We will give you time to repent your \nwords. Gather your wisdom ere we return!",
+        "Why waste words and wrath on those unhappy creatures? Doubtless they \nperished first in fire, before Smaug came to us.",
+        "Such a fool deserves to starve.",
+        "Your own we will give back in return for our own."
+      ]
+    },
+    "Roac": {
+      "character_name": "Roac",
+      "character_id": null,
+      "total_lines": 6,
+      "total_words": 147,
+      "total_chars": 731,
+      "avg_utterance_length": 24.5,
+      "utterance_length_std": 30.191058278901057,
+      "min_utterance_length": 2,
+      "max_utterance_length": 80,
+      "question_ratio": 0.0,
+      "exclamation_ratio": 0.16666666666666666,
+      "statement_ratio": 0.8333333333333334,
+      "unique_words": 97,
+      "type_token_ratio": 0.6598639455782312,
+      "avg_word_length": 3.8435374149659864,
+      "contraction_ratio": 0.0,
+      "first_person_ratio": 0.027210884353741496,
+      "second_person_ratio": 0.027210884353741496,
+      "top_words": [
+        [
+          "they",
+          4
+        ],
+        [
+          "his",
+          2
+        ],
+        [
+          "saw",
+          2
+        ],
+        [
+          "him",
+          2
+        ],
+        [
+          "battle",
+          2
+        ],
+        [
+          "counsel",
+          2
+        ],
+        [
+          "what",
+          2
+        ],
+        [
+          "though",
+          2
+        ],
+        [
+          "likely",
+          2
+        ],
+        [
+          "you",
+          2
+        ],
+        [
+          "yes,",
+          1
+        ],
+        [
+          "dead,",
+          1
+        ],
+        [
+          "thrush,",
+          1
+        ],
+        [
+          "feathers",
+          1
+        ],
+        [
+          "never",
+          1
+        ],
+        [
+          "fall,",
+          1
+        ],
+        [
+          "die,",
+          1
+        ],
+        [
+          "trust",
+          1
+        ],
+        [
+          "words.",
+          1
+        ],
+        [
+          "fall",
+          1
+        ]
+      ],
+      "distinctive_words": [
+        "the",
+        "be",
+        "and",
+        "they",
+        "i",
+        "will",
+        "not",
+        "of",
+        "is",
+        "counsel"
+      ],
+      "signature_phrases": [
+        "saw him",
+        "of the",
+        "i will",
+        "this counsel",
+        "they are"
+      ],
+      "archaism_count": 0,
+      "archaisms_used": [],
+      "sample_quotes": [
+        "and I fear lest there be battle in the \nvalley. I do not call this counsel good. Though they are a grim folk, they are not likely to overcome \nthe host that besets you; and even if they did so, what will you gain? Winter and snow is hastening \nbehind them. How shall you be fed without the friendship and goodwill of the lands about you? The \ntreasure is likely to be your death, though the dragon is no more!",
+        "I will not say if this counsel be good or bad,",
+        "but I will do what can be done.",
+        "But they cannot reach the Mountain unmarked,",
+        "Yes, dead,"
+      ]
+    }
+  }
+}

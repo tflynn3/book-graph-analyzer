@@ -1,0 +1,11 @@
+{
+  "source_file": "the_hobbit.txt",
+  "stats": {
+    "total_dialogue_lines": 0,
+    "total_characters": 0,
+    "unattributed_lines": 0,
+    "attribution_rate": 0
+  },
+  "top_speakers": [],
+  "profiles": {}
+}

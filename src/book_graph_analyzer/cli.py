@@ -969,6 +969,212 @@ def _interpret_flesch(score: float) -> str:
         return "Very difficult (college graduate)"
 
 
+# ============================================================================
+# Voice Analysis Commands (Phase 5)
+# ============================================================================
+
+@main.group()
+def voice() -> None:
+    """Character voice analysis - extract how each character speaks."""
+    pass
+
+
+@voice.command(name="analyze")
+@click.argument("path", type=click.Path(exists=True))
+@click.option("--min-lines", "-m", default=3, help="Minimum lines for profile")
+@click.option("--output", "-o", type=click.Path(), help="Output file (JSON)")
+@click.option("--verbose", "-v", is_flag=True, help="Show detailed output")
+def voice_analyze(path: str, min_lines: int, output: str | None, verbose: bool) -> None:
+    """Extract character voice profiles from a text.
+    
+    Example:
+        bga voice analyze data/texts/the_hobbit.txt -o hobbit_voices.json
+    """
+    from book_graph_analyzer.voice import VoiceAnalyzer
+
+    file_path = Path(path)
+    
+    console.print(f"[bold]Voice Analysis:[/bold] {file_path.name}")
+    console.print(f"[dim]Min lines for profile: {min_lines}[/dim]\n")
+
+    def progress_callback(message):
+        if verbose:
+            console.print(f"  {message}")
+
+    analyzer = VoiceAnalyzer(
+        min_lines_for_profile=min_lines,
+        progress_callback=progress_callback if verbose else None,
+    )
+    
+    with console.status("Analyzing character voices..."):
+        result = analyzer.analyze_file(file_path)
+    
+    # Display results
+    console.print(f"\n[bold]Results:[/bold]")
+    console.print(f"  Total dialogue lines: {result.total_dialogue_lines:,}")
+    console.print(f"  Attribution rate: {result.attribution_rate*100:.1f}%")
+    console.print(f"  Characters with profiles: {result.total_characters}")
+    
+    # Top speakers
+    console.print(f"\n[bold]Top Speakers:[/bold]")
+    table = Table()
+    table.add_column("Character", style="cyan")
+    table.add_column("Lines", justify="right")
+    table.add_column("Avg Length", justify="right")
+    table.add_column("Questions", justify="right")
+    
+    for speaker, line_count in result.top_speakers(15):
+        profile = result.profiles.get(speaker)
+        if profile:
+            table.add_row(
+                speaker,
+                str(line_count),
+                f"{profile.avg_utterance_length:.1f}",
+                f"{profile.question_ratio*100:.0f}%"
+            )
+        else:
+            table.add_row(speaker, str(line_count), "-", "-")
+    
+    console.print(table)
+    
+    # Save if output specified
+    if output:
+        output_path = Path(output)
+        analyzer.save_results(result, output_path)
+        console.print(f"\n[green]OK[/green] Results saved to {output_path}")
+
+
+@voice.command(name="profile")
+@click.argument("results_path", type=click.Path(exists=True))
+@click.argument("character")
+def voice_profile(results_path: str, character: str) -> None:
+    """Show detailed voice profile for a character.
+    
+    Example:
+        bga voice profile hobbit_voices.json Gandalf
+    """
+    from book_graph_analyzer.voice import VoiceAnalyzer
+
+    analyzer = VoiceAnalyzer()
+    result = analyzer.load_results(results_path)
+    
+    profile = result.get_profile(character)
+    
+    if not profile:
+        # Try fuzzy match
+        available = list(result.profiles.keys())
+        console.print(f"[red]Character '{character}' not found.[/red]")
+        console.print(f"\nAvailable characters:")
+        for name in sorted(available):
+            console.print(f"  - {name}")
+        return
+    
+    console.print(profile.summary())
+
+
+@voice.command(name="compare")
+@click.argument("results_path", type=click.Path(exists=True))
+@click.argument("char1")
+@click.argument("char2")
+def voice_compare(results_path: str, char1: str, char2: str) -> None:
+    """Compare voice profiles of two characters.
+    
+    Example:
+        bga voice compare hobbit_voices.json Gandalf Bilbo
+    """
+    from book_graph_analyzer.voice import VoiceAnalyzer
+
+    analyzer = VoiceAnalyzer()
+    result = analyzer.load_results(results_path)
+    
+    profile1 = result.get_profile(char1)
+    profile2 = result.get_profile(char2)
+    
+    if not profile1:
+        console.print(f"[red]Character '{char1}' not found.[/red]")
+        return
+    if not profile2:
+        console.print(f"[red]Character '{char2}' not found.[/red]")
+        return
+    
+    comparison = analyzer.compare_voices(profile1, profile2)
+    
+    console.print(f"\n[bold]Voice Comparison: {char1} vs {char2}[/bold]\n")
+    
+    table = Table()
+    table.add_column("Metric", style="cyan")
+    table.add_column(char1, justify="right")
+    table.add_column(char2, justify="right")
+    table.add_column("Difference", justify="right")
+    
+    for metric, values in comparison["metrics"].items():
+        metric_display = metric.replace("_", " ").title()
+        if "ratio" in metric:
+            table.add_row(
+                metric_display,
+                f"{values['char1']*100:.1f}%",
+                f"{values['char2']*100:.1f}%",
+                f"{values['difference']*100:.1f}%"
+            )
+        else:
+            table.add_row(
+                metric_display,
+                f"{values['char1']:.1f}",
+                f"{values['char2']:.1f}",
+                f"{values['difference']:.1f}"
+            )
+    
+    console.print(table)
+    console.print(f"\n[bold]Similarity Score:[/bold] {comparison['similarity_score']:.2f}")
+    
+    if comparison.get("shared_distinctive_words"):
+        console.print(f"\n[bold]Shared Distinctive Words:[/bold]")
+        console.print(f"  {', '.join(comparison['shared_distinctive_words'])}")
+
+
+@voice.command(name="quotes")
+@click.argument("results_path", type=click.Path(exists=True))
+@click.argument("character")
+@click.option("--limit", "-n", default=10, help="Number of quotes to show")
+def voice_quotes(results_path: str, character: str, limit: int) -> None:
+    """Show sample quotes from a character.
+    
+    Example:
+        bga voice quotes hobbit_voices.json Gandalf -n 5
+    """
+    from book_graph_analyzer.voice import VoiceAnalyzer
+
+    analyzer = VoiceAnalyzer()
+    result = analyzer.load_results(results_path)
+    
+    profile = result.get_profile(character)
+    
+    if not profile:
+        console.print(f"[red]Character '{character}' not found.[/red]")
+        return
+    
+    console.print(f"\n[bold]Quotes from {character}:[/bold]\n")
+    
+    # Get dialogue lines for this character
+    char_lines = result.dialogue_by_speaker.get(character, [])
+    
+    if not char_lines:
+        # Fall back to sample quotes in profile
+        for quote in profile.sample_quotes[:limit]:
+            console.print(f'  "{quote}"')
+    else:
+        # Show actual lines
+        shown = 0
+        for line in char_lines:
+            if shown >= limit:
+                break
+            text = line.text if hasattr(line, 'text') else str(line)
+            console.print(f'  "{text}"')
+            shown += 1
+    
+    console.print(f"\n[dim]Total lines: {profile.total_lines}[/dim]")
+
+
 if __name__ == "__main__":
     main()
 

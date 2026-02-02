@@ -1,0 +1,1069 @@
+{
+  "source_file": "01.txt",
+  "stats": {
+    "total_dialogue_lines": 154,
+    "total_characters": 8,
+    "unattributed_lines": 39,
+    "attribution_rate": 0.7467532467532467
+  },
+  "top_speakers": [
+    [
+      "Thorin",
+      25
+    ],
+    [
+      "Gandalf",
+      15
+    ],
+    [
+      "Bilbo",
+      8
+    ],
+    [
+      "he",
+      5
+    ],
+    [
+      "the wizard",
+      5
+    ],
+    [
+      "He",
+      4
+    ],
+    [
+      "Balin",
+      3
+    ],
+    [
+      "Gloin",
+      3
+    ],
+    [
+      "to",
+      2
+    ],
+    [
+      "with",
+      2
+    ],
+    [
+      "the hobbit",
+      2
+    ],
+    [
+      "after",
+      2
+    ],
+    [
+      "the other",
+      2
+    ],
+    [
+      "Kili",
+      2
+    ],
+    [
+      "Fili",
+      2
+    ],
+    [
+      "Bifur",
+      2
+    ],
+    [
+      "in",
+      2
+    ],
+    [
+      "Do",
+      1
+    ],
+    [
+      "our Mr",
+      1
+    ],
+    [
+      "at",
+      1
+    ]
+  ],
+  "profiles": {
+    "Bilbo": {
+      "character_name": "Bilbo",
+      "character_id": null,
+      "total_lines": 8,
+      "total_words": 66,
+      "total_chars": 310,
+      "avg_utterance_length": 8.25,
+      "utterance_length_std": 13.435028842544403,
+      "min_utterance_length": 1,
+      "max_utterance_length": 41,
+      "question_ratio": 0.0,
+      "exclamation_ratio": 0.75,
+      "statement_ratio": 0.25,
+      "unique_words": 50,
+      "type_token_ratio": 0.7575757575757576,
+      "avg_word_length": 3.5757575757575757,
+      "contraction_ratio": 0.0,
+      "first_person_ratio": 0.030303030303030304,
+      "second_person_ratio": 0.06060606060606061,
+      "top_words": [
+        [
+          "all",
+          2
+        ],
+        [
+          "pipe",
+          2
+        ],
+        [
+          "good",
+          1
+        ],
+        [
+          "morning!",
+          1
+        ],
+        [
+          "them",
+          1
+        ],
+        [
+          "once,",
+          1
+        ],
+        [
+          "very",
+          1
+        ],
+        [
+          "fine",
+          1
+        ],
+        [
+          "morning",
+          1
+        ],
+        [
+          "tobacco",
+          1
+        ],
+        [
+          "doors,",
+          1
+        ],
+        [
+          "into",
+          1
+        ],
+        [
+          "bargain.",
+          1
+        ],
+        [
+          "you",
+          1
+        ],
+        [
+          "you,",
+          1
+        ],
+        [
+          "sit",
+          1
+        ],
+        [
+          "down",
+          1
+        ],
+        [
+          "fill",
+          1
+        ],
+        [
+          "mine!",
+          1
+        ],
+        [
+          "there\u2019s",
+          1
+        ]
+      ],
+      "distinctive_words": [
+        "of",
+        "a",
+        "have",
+        "and",
+        "pipe",
+        "all",
+        "at",
+        "the"
+      ],
+      "signature_phrases": [
+        "a pipe",
+        "have a"
+      ],
+      "archaism_count": 0,
+      "archaisms_used": [],
+      "sample_quotes": [
+        "At yours and your family\u2019s!",
+        "All of them at once,",
+        "It seems a great big hole to me,"
+      ]
+    },
+    "he": {
+      "character_name": "he",
+      "character_id": null,
+      "total_lines": 5,
+      "total_words": 186,
+      "total_chars": 945,
+      "avg_utterance_length": 37.2,
+      "utterance_length_std": 23.424346308915432,
+      "min_utterance_length": 11,
+      "max_utterance_length": 75,
+      "question_ratio": 0.2,
+      "exclamation_ratio": 0.2,
+      "statement_ratio": 0.6,
+      "unique_words": 123,
+      "type_token_ratio": 0.6612903225806451,
+      "avg_word_length": 3.946236559139785,
+      "contraction_ratio": 0.0,
+      "first_person_ratio": 0.06451612903225806,
+      "second_person_ratio": 0.04838709677419355,
+      "top_words": [
+        [
+          "you",
+          6
+        ],
+        [
+          "good",
+          4
+        ],
+        [
+          "like",
+          3
+        ],
+        [
+          "morning",
+          2
+        ],
+        [
+          "sailing",
+          2
+        ],
+        [
+          "used",
+          2
+        ],
+        [
+          "your",
+          2
+        ],
+        [
+          "wish",
+          1
+        ],
+        [
+          "morning,",
+          1
+        ],
+        [
+          "mean",
+          1
+        ],
+        [
+          "whether",
+          1
+        ],
+        [
+          "want",
+          1
+        ],
+        [
+          "not;",
+          1
+        ],
+        [
+          "feel",
+          1
+        ],
+        [
+          "morning;",
+          1
+        ],
+        [
+          "on?",
+          1
+        ],
+        [
+          "gandalf",
+          1
+        ],
+        [
+          "who",
+          1
+        ],
+        [
+          "responsible",
+          1
+        ],
+        [
+          "many",
+          1
+        ]
+      ],
+      "distinctive_words": [
+        "to",
+        "i",
+        "or",
+        "a",
+        "you",
+        "that",
+        "good",
+        "in",
+        "it",
+        "the"
+      ],
+      "signature_phrases": [
+        "a good",
+        "that it",
+        "is a",
+        "or that",
+        "that you"
+      ],
+      "archaism_count": 0,
+      "archaisms_used": [],
+      "sample_quotes": [
+        "Do you wish me a good morning, or mean that it is a good morning \nwhether I want it or not; or that you feel good this morning; or that it is a morning to be good on?",
+        "It is not like you, Bilbo, to keep friends waiting on the mat, and \nthen open the door like a pop-gun! Let me introduce Bifur, Bofur, Bombur, and especially Thorin!",
+        "First I should like to know a bit more about things,",
+        "Not the Gandalf who was responsible for so \nmany quiet lads and lasses going off into the Blue for mad adventures? Anything from climbing trees \nto visiting elves \u2014 or sailing in ships, sailing to other shores! Bless me, life used to be quite inter \u2014 I \nmean, you used to upset things badly in these parts once upon a time. I beg your pardon, but I had no \nidea you were still in business.",
+        "if I have overheard words that you were saying. I don\u2019t pretend to \nunderstand what you are talking about, or your reference to burglars, but I think I am right in \nbelieving"
+      ]
+    },
+    "Gandalf": {
+      "character_name": "Gandalf",
+      "character_id": null,
+      "total_lines": 15,
+      "total_words": 296,
+      "total_chars": 1468,
+      "avg_utterance_length": 19.733333333333334,
+      "utterance_length_std": 26.08904166959943,
+      "min_utterance_length": 1,
+      "max_utterance_length": 83,
+      "question_ratio": 0.06666666666666667,
+      "exclamation_ratio": 0.3333333333333333,
+      "statement_ratio": 0.6,
+      "unique_words": 170,
+      "type_token_ratio": 0.5743243243243243,
+      "avg_word_length": 3.8277027027027026,
+      "contraction_ratio": 0.0,
+      "first_person_ratio": 0.05405405405405406,
+      "second_person_ratio": 0.02702702702702703,
+      "top_words": [
+        [
+          "you",
+          6
+        ],
+        [
+          "time",
+          4
+        ],
+        [
+          "all",
+          4
+        ],
+        [
+          "there",
+          4
+        ],
+        [
+          "very",
+          3
+        ],
+        [
+          "what",
+          3
+        ],
+        [
+          "more",
+          3
+        ],
+        [
+          "know",
+          3
+        ],
+        [
+          "find",
+          2
+        ],
+        [
+          "lot",
+          2
+        ],
+        [
+          "good",
+          2
+        ],
+        [
+          "now",
+          2
+        ],
+        [
+          "little",
+          2
+        ],
+        [
+          "man",
+          2
+        ],
+        [
+          "chose",
+          2
+        ],
+        [
+          "mr.",
+          2
+        ],
+        [
+          "any",
+          2
+        ],
+        [
+          "one",
+          2
+        ],
+        [
+          "say",
+          2
+        ],
+        [
+          "wrong",
+          2
+        ]
+      ],
+      "distinctive_words": [
+        "i",
+        "the",
+        "to",
+        "a",
+        "and",
+        "of",
+        "is",
+        "you",
+        "have",
+        "time"
+      ],
+      "signature_phrases": [
+        "is a",
+        "there is a",
+        "have no",
+        "to find",
+        "a lot"
+      ],
+      "archaism_count": 0,
+      "archaisms_used": [],
+      "sample_quotes": [
+        "But in what way this one has been hidden we don\u2019t know without \ngoing to see. From what it says on the map I should guess there is a closed door which has been made \nto look exactly like the side of the Mountain. That is the usual dwarves\u2019 method \u2014 I think that is right, \nisn\u2019t it?",
+        "What a lot of things you do use Good morning for!",
+        "Of course there is a mark,",
+        "A long time before that, if I know anything about the roads East,",
+        "Also I should like to \nknow about risks, out-of-pocket expenses, time required and remuneration, and so forth"
+      ]
+    },
+    "the wizard": {
+      "character_name": "the wizard",
+      "character_id": null,
+      "total_lines": 5,
+      "total_words": 31,
+      "total_chars": 149,
+      "avg_utterance_length": 6.2,
+      "utterance_length_std": 3.420526275297414,
+      "min_utterance_length": 2,
+      "max_utterance_length": 11,
+      "question_ratio": 0.2,
+      "exclamation_ratio": 0.0,
+      "statement_ratio": 0.8,
+      "unique_words": 28,
+      "type_token_ratio": 0.9032258064516129,
+      "avg_word_length": 3.806451612903226,
+      "contraction_ratio": 0.0,
+      "first_person_ratio": 0.0967741935483871,
+      "second_person_ratio": 0.06451612903225806,
+      "top_words": [
+        [
+          "where",
+          1
+        ],
+        [
+          "else",
+          1
+        ],
+        [
+          "be?",
+          1
+        ],
+        [
+          "there",
+          1
+        ],
+        [
+          "one",
+          1
+        ],
+        [
+          "point",
+          1
+        ],
+        [
+          "you",
+          1
+        ],
+        [
+          "haven\u2019t",
+          1
+        ],
+        [
+          "noticed,",
+          1
+        ],
+        [
+          "good,",
+          1
+        ],
+        [
+          "\u2018get",
+          1
+        ],
+        [
+          "hold",
+          1
+        ],
+        [
+          "it,\u2019",
+          1
+        ],
+        [
+          "given",
+          1
+        ],
+        [
+          "it,",
+          1
+        ],
+        [
+          "your",
+          1
+        ],
+        [
+          "grandfather,",
+          1
+        ]
+      ],
+      "distinctive_words": [
+        "i",
+        "that"
+      ],
+      "signature_phrases": [],
+      "archaism_count": 0,
+      "archaisms_used": [],
+      "sample_quotes": [
+        "Where else should I be?",
+        "There is one point that you haven\u2019t noticed,",
+        "That would be no good,",
+        "I did not \u2018get hold of it,\u2019 I was given it,",
+        "Your grandfather,"
+      ]
+    },
+    "Balin": {
+      "character_name": "Balin",
+      "character_id": null,
+      "total_lines": 3,
+      "total_words": 38,
+      "total_chars": 182,
+      "avg_utterance_length": 12.666666666666666,
+      "utterance_length_std": 3.0550504633038935,
+      "min_utterance_length": 10,
+      "max_utterance_length": 16,
+      "question_ratio": 0.0,
+      "exclamation_ratio": 0.0,
+      "statement_ratio": 1.0,
+      "unique_words": 36,
+      "type_token_ratio": 0.9473684210526315,
+      "avg_word_length": 3.710526315789474,
+      "contraction_ratio": 0.0,
+      "first_person_ratio": 0.02631578947368421,
+      "second_person_ratio": 0.02631578947368421,
+      "top_words": [
+        [
+          "don\u2019t",
+          1
+        ],
+        [
+          "mind",
+          1
+        ],
+        [
+          "some",
+          1
+        ],
+        [
+          "cake",
+          1
+        ],
+        [
+          "seed-cake,",
+          1
+        ],
+        [
+          "you",
+          1
+        ],
+        [
+          "any.",
+          1
+        ],
+        [
+          "there",
+          1
+        ],
+        [
+          "dragon",
+          1
+        ],
+        [
+          "marked",
+          1
+        ],
+        [
+          "red",
+          1
+        ],
+        [
+          "mountain,",
+          1
+        ],
+        [
+          "easy",
+          1
+        ],
+        [
+          "enough",
+          1
+        ],
+        [
+          "find",
+          1
+        ],
+        [
+          "him",
+          1
+        ],
+        [
+          "without",
+          1
+        ],
+        [
+          "that,",
+          1
+        ],
+        [
+          "ever",
+          1
+        ],
+        [
+          "arrive",
+          1
+        ]
+      ],
+      "distinctive_words": [
+        "but",
+        "if"
+      ],
+      "signature_phrases": [],
+      "archaism_count": 0,
+      "archaisms_used": [],
+      "sample_quotes": [
+        "But I don\u2019t mind some cake \u2014 seed-cake, if you have any.",
+        "There is a dragon marked in red on the Mountain,",
+        "but it will be easy enough to find \nhim without that, if ever we arrive there."
+      ]
+    },
+    "He": {
+      "character_name": "He",
+      "character_id": null,
+      "total_lines": 4,
+      "total_words": 90,
+      "total_chars": 485,
+      "avg_utterance_length": 22.5,
+      "utterance_length_std": 14.200938936093863,
+      "min_utterance_length": 9,
+      "max_utterance_length": 42,
+      "question_ratio": 0.25,
+      "exclamation_ratio": 0.0,
+      "statement_ratio": 0.75,
+      "unique_words": 74,
+      "type_token_ratio": 0.8222222222222222,
+      "avg_word_length": 4.2555555555555555,
+      "contraction_ratio": 0.0,
+      "first_person_ratio": 0.03333333333333333,
+      "second_person_ratio": 0.0,
+      "top_words": [
+        [
+          "his",
+          2
+        ],
+        [
+          "from",
+          2
+        ],
+        [
+          "don\u2019t",
+          1
+        ],
+        [
+          "like",
+          1
+        ],
+        [
+          "sound",
+          1
+        ],
+        [
+          "that.",
+          1
+        ],
+        [
+          "really",
+          1
+        ],
+        [
+          "sit",
+          1
+        ],
+        [
+          "down",
+          1
+        ],
+        [
+          "minute",
+          1
+        ],
+        [
+          "collect",
+          1
+        ],
+        [
+          "wits,",
+          1
+        ],
+        [
+          "drink.",
+          1
+        ],
+        [
+          "gandalf,",
+          1
+        ],
+        [
+          "dwarves",
+          1
+        ],
+        [
+          "mr.",
+          1
+        ],
+        [
+          "baggins!",
+          1
+        ],
+        [
+          "met",
+          1
+        ],
+        [
+          "together",
+          1
+        ],
+        [
+          "house",
+          1
+        ]
+      ],
+      "distinctive_words": [
+        "and",
+        "the",
+        "a",
+        "his",
+        "from",
+        "of",
+        "\u2014",
+        "i"
+      ],
+      "signature_phrases": [],
+      "archaism_count": 0,
+      "archaisms_used": [],
+      "sample_quotes": [
+        "How could such a large door be kept secret from everybody outside, \napart from the dragon?",
+        "supposing the burglar-expert gives us some ideas or suggestions.",
+        "I don\u2019t like the sound of that. I really must sit down for a minute \nand collect my wits, and have a drink.",
+        "Gandalf, dwarves and Mr. Baggins! We are met together in the house of our friend and fellow \nconspirator, this most excellent and audacious hobbit \u2014 may the hair on his toes never fall out! all \npraise to his wine and ale! \u2014"
+      ]
+    },
+    "Thorin": {
+      "character_name": "Thorin",
+      "character_id": null,
+      "total_lines": 25,
+      "total_words": 245,
+      "total_chars": 1201,
+      "avg_utterance_length": 9.8,
+      "utterance_length_std": 14.186260959111108,
+      "min_utterance_length": 2,
+      "max_utterance_length": 68,
+      "question_ratio": 0.08,
+      "exclamation_ratio": 0.36,
+      "statement_ratio": 0.56,
+      "unique_words": 152,
+      "type_token_ratio": 0.6204081632653061,
+      "avg_word_length": 3.8,
+      "contraction_ratio": 0.0,
+      "first_person_ratio": 0.04081632653061224,
+      "second_person_ratio": 0.02040816326530612,
+      "top_words": [
+        [
+          "you",
+          4
+        ],
+        [
+          "now",
+          3
+        ],
+        [
+          "me,",
+          2
+        ],
+        [
+          "through",
+          2
+        ],
+        [
+          "some",
+          2
+        ],
+        [
+          "bring",
+          2
+        ],
+        [
+          "mine",
+          2
+        ],
+        [
+          "secret",
+          2
+        ],
+        [
+          "know",
+          2
+        ],
+        [
+          "old",
+          2
+        ],
+        [
+          "there",
+          2
+        ],
+        [
+          "long",
+          2
+        ],
+        [
+          "too",
+          2
+        ],
+        [
+          "his",
+          2
+        ],
+        [
+          "very",
+          2
+        ],
+        [
+          "haven\u2019t",
+          2
+        ],
+        [
+          "true,",
+          2
+        ],
+        [
+          "course!",
+          1
+        ],
+        [
+          "after.",
+          1
+        ],
+        [
+          "shan\u2019t",
+          1
+        ]
+      ],
+      "distinctive_words": [
+        "the",
+        "of",
+        "we",
+        "and",
+        "to",
+        "it",
+        "out",
+        "i",
+        "a",
+        "you"
+      ],
+      "signature_phrases": [
+        "of the",
+        "through the",
+        "we must",
+        "now to",
+        "mine in"
+      ],
+      "archaism_count": 0,
+      "archaisms_used": [],
+      "sample_quotes": [
+        "Where are you going?",
+        "Excuse me, I left mine in the porch!",
+        "It may have been secret once,",
+        "We have long ago paid the goblins of Moria,",
+        "we must give a thought to the \nNecromancer."
+      ]
+    },
+    "Gloin": {
+      "character_name": "Gloin",
+      "character_id": null,
+      "total_lines": 3,
+      "total_words": 105,
+      "total_chars": 528,
+      "avg_utterance_length": 35,
+      "utterance_length_std": 53.777318638995006,
+      "min_utterance_length": 1,
+      "max_utterance_length": 97,
+      "question_ratio": 0.0,
+      "exclamation_ratio": 0.3333333333333333,
+      "statement_ratio": 0.6666666666666666,
+      "unique_words": 78,
+      "type_token_ratio": 0.7428571428571429,
+      "avg_word_length": 3.8666666666666667,
+      "contraction_ratio": 0.0,
+      "first_person_ratio": 0.01904761904761905,
+      "second_person_ratio": 0.0380952380952381,
+      "top_words": [
+        [
+          "you",
+          3
+        ],
+        [
+          "yes,",
+          2
+        ],
+        [
+          "there",
+          2
+        ],
+        [
+          "burglar",
+          2
+        ],
+        [
+          "humph!",
+          1
+        ],
+        [
+          "long",
+          1
+        ],
+        [
+          "ago,",
+          1
+        ],
+        [
+          "talking",
+          1
+        ],
+        [
+          "you.",
+          1
+        ],
+        [
+          "assure",
+          1
+        ],
+        [
+          "mark",
+          1
+        ],
+        [
+          "door",
+          1
+        ],
+        [
+          "usual",
+          1
+        ],
+        [
+          "one",
+          1
+        ],
+        [
+          "trade,",
+          1
+        ],
+        [
+          "used",
+          1
+        ],
+        [
+          "be.",
+          1
+        ],
+        [
+          "wants",
+          1
+        ],
+        [
+          "good",
+          1
+        ],
+        [
+          "job,",
+          1
+        ]
+      ],
+      "distinctive_words": [
+        "a",
+        "of",
+        "the",
+        "was",
+        "that",
+        "you",
+        "and",
+        "yes,",
+        "burglar",
+        "there"
+      ],
+      "signature_phrases": [
+        "for a"
+      ],
+      "archaism_count": 0,
+      "archaisms_used": [],
+      "sample_quotes": [
+        "Humph!",
+        "Yes, yes, but that was long ago,",
+        "I was talking about you. And I assure you there is a \nmark on this door \u2014 the usual one in the trade, or used to be. Burglar wants a good job, plenty of \nExcitement and reasonable Reward, that\u2019s how it is usually read. You can say Expert Treasure-hunter \ninstead of Burglar if you like. Some of them do. It\u2019s all the same to us. Gandalf told us that there was \na man of the sort in these parts looking for a Job at once, and that he had arranged for a meeting here \nthis Wednesday tea-time."
+      ]
+    }
+  }
+}
