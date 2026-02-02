@@ -3,5 +3,6 @@
 from .extractor import EntityExtractor
 from .ner import NERPipeline
 from .resolver import EntityResolver
+from .relationships import RelationshipExtractor
 
-__all__ = ["EntityExtractor", "NERPipeline", "EntityResolver"]
+__all__ = ["EntityExtractor", "NERPipeline", "EntityResolver", "RelationshipExtractor"]
