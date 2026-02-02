@@ -1665,6 +1665,192 @@ def corpus_compare(corpus_name: str) -> None:
     console.print(table)
 
 
+# ============================================================================
+# World Bible Commands (Phase 7)
+# ============================================================================
+
+@main.group()
+def worldbible() -> None:
+    """World bible extraction - rules and patterns of fictional worlds."""
+    pass
+
+
+@worldbible.command(name="extract")
+@click.argument("path", type=click.Path(exists=True))
+@click.option("--world", "-w", required=True, help="World name (e.g., 'Middle-earth')")
+@click.option("--use-llm", is_flag=True, help="Use LLM for synthesis (requires Ollama)")
+@click.option("--output", "-o", type=click.Path(), help="Output file (JSON)")
+def worldbible_extract(path: str, world: str, use_llm: bool, output: str | None) -> None:
+    """Extract world bible from a text file.
+    
+    Example:
+        bga worldbible extract the_hobbit.txt -w "Middle-earth" -o hobbit_bible.json
+    """
+    from book_graph_analyzer.worldbible import WorldBibleExtractor, ExtractionConfig
+    
+    file_path = Path(path)
+    
+    console.print(f"[bold]World Bible Extraction[/bold]")
+    console.print(f"  World: {world}")
+    console.print(f"  Source: {file_path.name}")
+    console.print(f"  Mode: {'LLM-assisted' if use_llm else 'Keyword-based'}")
+    console.print()
+    
+    config = ExtractionConfig(use_llm=use_llm)
+    
+    def progress_callback(msg):
+        console.print(f"  {msg}")
+    
+    extractor = WorldBibleExtractor(config=config, progress_callback=progress_callback)
+    
+    bible = extractor.extract_from_file(file_path, world)
+    
+    console.print(f"\n{bible.summary()}")
+    
+    if output:
+        output_path = Path(output)
+        extractor.save_bible(bible, output_path)
+        console.print(f"\n[green]OK[/green] Saved to {output_path}")
+
+
+@worldbible.command(name="show")
+@click.argument("bible_path", type=click.Path(exists=True))
+@click.option("--category", "-c", help="Filter by category")
+def worldbible_show(bible_path: str, category: str | None) -> None:
+    """Show world bible contents.
+    
+    Example:
+        bga worldbible show hobbit_bible.json
+        bga worldbible show hobbit_bible.json -c magic
+    """
+    from book_graph_analyzer.worldbible import WorldBibleExtractor, WorldBibleCategory
+    
+    extractor = WorldBibleExtractor()
+    bible = extractor.load_bible(bible_path)
+    
+    console.print(f"[bold]=== World Bible: {bible.name} ===[/bold]\n")
+    
+    if category:
+        try:
+            cat = WorldBibleCategory(category.lower())
+            rules = bible.get_rules(cat)
+            console.print(f"[bold]{cat.value.title()} ({len(rules)} rules)[/bold]\n")
+            
+            for rule in rules:
+                console.print(f"[cyan]{rule.title}[/cyan]")
+                console.print(f"  {rule.description[:200]}{'...' if len(rule.description) > 200 else ''}")
+                console.print(f"  [dim]Sources: {len(rule.source_passages)} passages | Confidence: {rule.confidence:.0%}[/dim]")
+                console.print()
+        except ValueError:
+            console.print(f"[red]Unknown category: {category}[/red]")
+            console.print(f"Valid: {', '.join(c.value for c in WorldBibleCategory)}")
+    else:
+        # Show all categories
+        for cat in WorldBibleCategory:
+            rules = bible.get_rules(cat)
+            if rules:
+                console.print(f"[bold]{cat.value.title()} ({len(rules)} rules)[/bold]")
+                for rule in rules[:3]:
+                    console.print(f"  - {rule.title}")
+                if len(rules) > 3:
+                    console.print(f"  [dim]...and {len(rules) - 3} more[/dim]")
+                console.print()
+
+
+@worldbible.command(name="cultures")
+@click.argument("bible_path", type=click.Path(exists=True))
+@click.option("--culture", "-c", help="Show specific culture")
+def worldbible_cultures(bible_path: str, culture: str | None) -> None:
+    """Show cultural profiles from world bible.
+    
+    Example:
+        bga worldbible cultures hobbit_bible.json
+        bga worldbible cultures hobbit_bible.json -c Elves
+    """
+    from book_graph_analyzer.worldbible import WorldBibleExtractor
+    
+    extractor = WorldBibleExtractor()
+    bible = extractor.load_bible(bible_path)
+    
+    if not bible.cultures:
+        console.print("[yellow]No cultural profiles found[/yellow]")
+        return
+    
+    if culture:
+        # Find matching culture
+        profile = None
+        for c in bible.cultures.values():
+            if c.name.lower() == culture.lower():
+                profile = c
+                break
+        
+        if not profile:
+            console.print(f"[red]Culture not found: {culture}[/red]")
+            console.print(f"Available: {', '.join(c.name for c in bible.cultures.values())}")
+            return
+        
+        console.print(f"[bold]=== {profile.name} ===[/bold]\n")
+        
+        if profile.values:
+            console.print(f"[cyan]Values:[/cyan] {', '.join(profile.values)}")
+        if profile.customs:
+            console.print(f"[cyan]Customs:[/cyan] {', '.join(profile.customs)}")
+        if profile.homeland:
+            console.print(f"[cyan]Homeland:[/cyan] {profile.homeland}")
+        if profile.lifespan:
+            console.print(f"[cyan]Lifespan:[/cyan] {profile.lifespan}")
+        
+        console.print(f"\n[dim]Based on {len(profile.source_passages)} passages[/dim]")
+    else:
+        console.print(f"[bold]Cultural Profiles ({len(bible.cultures)})[/bold]\n")
+        
+        for profile in bible.cultures.values():
+            console.print(f"[cyan]{profile.name}[/cyan]")
+            console.print(f"  Passages: {len(profile.source_passages)}")
+
+
+@worldbible.command(name="query")
+@click.argument("bible_path", type=click.Path(exists=True))
+@click.argument("query")
+def worldbible_query(bible_path: str, query: str) -> None:
+    """Search world bible for relevant rules.
+    
+    Example:
+        bga worldbible query hobbit_bible.json "ring"
+        bga worldbible query hobbit_bible.json "dragon"
+    """
+    from book_graph_analyzer.worldbible import WorldBibleExtractor
+    
+    extractor = WorldBibleExtractor()
+    bible = extractor.load_bible(bible_path)
+    
+    query_lower = query.lower()
+    matches = []
+    
+    # Search rules
+    for rules in bible.rules.values():
+        for rule in rules:
+            if (query_lower in rule.title.lower() or 
+                query_lower in rule.description.lower()):
+                matches.append(('rule', rule))
+    
+    # Search cultures
+    for culture in bible.cultures.values():
+        if query_lower in culture.name.lower():
+            matches.append(('culture', culture))
+    
+    console.print(f"[bold]Results for '{query}' ({len(matches)} matches)[/bold]\n")
+    
+    for match_type, item in matches:
+        if match_type == 'rule':
+            console.print(f"[cyan][Rule][/cyan] {item.title}")
+            console.print(f"  {item.description[:150]}...")
+            console.print(f"  [dim]Category: {item.category.value}[/dim]")
+        else:
+            console.print(f"[cyan][Culture][/cyan] {item.name}")
+        console.print()
+
+
 if __name__ == "__main__":
     main()
 

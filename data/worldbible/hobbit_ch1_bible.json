@@ -1,0 +1,2225 @@
+{
+  "name": "Middle-earth",
+  "source_books": [
+    "01"
+  ],
+  "rules": {
+    "magic": [
+      {
+        "id": "magic_magic_089f7b",
+        "category": "magic",
+        "title": "References to magic",
+        "description": "Found 5 passages referencing 'magic' in the context of magic.",
+        "source_passages": [
+          {
+            "passage_id": "01_18",
+            "text": "\u201cGandalf, Gandalf! Good gracious me! Not the wandering wizard that gave Old Took a pair of \nmagic diamond studs that fastened themselves and never came undone till ordered? Not the fellow \nwho used to tell such wonderful tales at parties, about dragons and goblins and giants and the rescue of \nprincesses and the unexpected luck of widows\u2019 sons? Not the man that used to make such particularly \nexcellent fireworks! I remember those! Old Took used to have them on Midsummer\u2019s Eve. Splendid! \nThey us",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_3",
+            "text": "The mother of our particular hobbit \u2014 what is a hobbit? I suppose hobbits need some description \nnowadays, since they have become rare and shy of the Big People, as they call us. They are (or were) a \nlittle people, about half our height, and smaller than the bearded Dwarves. Hobbits have no beards. \nThere is little or no magic about them, except the ordinary everyday sort which helps them to \ndisappear quietly and quickly when large stupid folk like you and me come blundering along, making \na n",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_77",
+            "text": "As they sang the hobbit felt the love of beautiful things made by hands and by cunning and by \nmagic moving through him, a fierce and a jealous love, the desire of the hearts of dwarves. Then \nsomething Tookish woke up inside him, and he wished to go and see the great mountains, and hear the \npine-trees and the waterfalls, and explore the caves, and wear a sword instead of a walking-stick. He \nlooked out of the window. The stars were out in a dark sky above the trees. He thought of the jewels of",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_88",
+            "text": "This was Thorin\u2019 s style. He was an important dwarf. If he had been allowed, he would probably \nhave gone on like this until he was out of breath, without telling any one there anything that was not \nknown already. But he was rudely interrupted. Poor Bilbo couldn\u2019t bear it any longer. At may never \nreturn he began to feel a shriek coming up inside, and very soon it burst out like the whistle of an \nengine coming out of a tunnel. All the dwarves sprang up, knocking over the table. Gandalf struck ",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_119",
+            "text": "\u201cO very well,\u201d said Thorin. \u201cLong ago in my grandfather Thror\u2019s time our family was driven out of \nthe far North, and came back with all their wealth and their tools to this Mountain on the map. It had \nbeen discovered by my far ancestor, Thrain the Old, but now they mined and they tunnelled and they \nmade huger halls and greater workshops \u2014 and in addition I believe they found a good deal of gold and \na great many jewels too. Anyway they grew immensely rich and famous, and my grandfather was Ki",
+            "book": "01",
+            "relevance_score": 1.0
+          }
+        ],
+        "confidence": 0.7,
+        "validated": false,
+        "validator_notes": "",
+        "related_entities": [],
+        "contradicts": [],
+        "supports": [],
+        "extraction_method": "keyword"
+      },
+      {
+        "id": "magic_ring_9d226a",
+        "category": "magic",
+        "title": "References to ring",
+        "description": "Found 23 passages referencing 'ring' in the context of magic.",
+        "source_passages": [
+          {
+            "passage_id": "01_63",
+            "text": "smoke-ring from his short clay-pipe straight through each one of Thorin\u2019 s. Then Gandalf\u2019s smoke-ring \nwould go green and come back to hover over the wizard\u2019s head. He had a cloud of them about him \nalready, and in the dim light it made him look strange and sorcerous. Bilbo stood still and watched \u2014 \nhe loved smoke-rings \u2014 and then he blushed to think how proud he had been yesterday morning of the \nsmoke-rings he had sent up the wind over The Hill.",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_120",
+            "text": "\u201cUndoubtedly that was what brought the dragon. Dragons steal gold and jewels, you know, from \nmen and elves and dwarves, wherever they can find them; and they guard their plunder as long as they \nlive (which is practically for ever, unless they are killed), and never enjoy a brass ring of it. Indeed \nthey hardly know a good bit of work from a bad, though they usually have a good notion of the current \nmarket value; and they can\u2019t make a thing for themselves, not even mend a little loose scale of",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_130",
+            "text": "\u201cNever you mind. I was finding things out, as usual; and a nasty dangerous business it was. Even I, \nGandalf, only just escaped. I tried to save your father, but it was too late. He was witless and \nwandering, and had forgotten almost everything except the map and the key.\u201d",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_10",
+            "text": "\u201cAll of them at once,\u201d said Bilbo. \u201cAnd a very fine morning for a pipe of tobacco out of doors, into \nthe bargain. If you have a pipe about you, sit down and have a fill of mine! There\u2019s no hurry, we have \nall the day before us!\u201d Then Bilbo sat down on a seat by his door, crossed his legs, and blew out a \nbeautiful grey ring of smoke that sailed up into the air without breaking and floated away over The \nHill.",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_11",
+            "text": "\u201cVery pretty!\u201d said Gandalf. \u201cBut I have no time to blow smoke-rings this morning. I am looking \nfor someone to share in an adventure that I am arranging, and it\u2019s very difficult to find anyone.\u201d",
+            "book": "01",
+            "relevance_score": 1.0
+          }
+        ],
+        "confidence": 0.7,
+        "validated": false,
+        "validator_notes": "",
+        "related_entities": [],
+        "contradicts": [],
+        "supports": [],
+        "extraction_method": "keyword"
+      },
+      {
+        "id": "magic_curse_88627f",
+        "category": "magic",
+        "title": "References to curse",
+        "description": "Found 2 passages referencing 'curse' in the context of magic.",
+        "source_passages": [
+          {
+            "passage_id": "01_122",
+            "text": "that one day in the proper time I should know. After that we went away, and we have had to earn our \nlivings as best we could up and down the lands, often enough sinking as low as blacksmith-work or \neven coalmining. But we have never forgotten our stolen treasure. And even now, when I will allow \nwe have a good bit laid by and are not so badly off\u201d \u2014 here Thorin stroked the gold chain round his \nneck \u2014 \u201cwe still mean to get it back, and to bring our curses home to Smaug \u2014 if we can.",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_121",
+            "text": "\u201cThe few of us that were well outside sat and wept in hiding, and cursed Smaug; and there we were \nunexpectedly joined by my father and my grandfather with singed beards. They looked very grim but \nthey said very little. When I asked how they had got away, they told me to hold my tongue, and said",
+            "book": "01",
+            "relevance_score": 1.0
+          }
+        ],
+        "confidence": 0.5,
+        "validated": false,
+        "validator_notes": "",
+        "related_entities": [],
+        "contradicts": [],
+        "supports": [],
+        "extraction_method": "keyword"
+      },
+      {
+        "id": "magic_staff_28b74e",
+        "category": "magic",
+        "title": "References to staff",
+        "description": "Found 3 passages referencing 'staff' in the context of magic.",
+        "source_passages": [
+          {
+            "passage_id": "01_7",
+            "text": "All that the unsuspecting Bilbo saw that morning was an old man with a staff. He had a tall pointed \nblue hat, a long grey cloak, a silver scarf over which his long white beard hung down below his waist, \nand immense black boots.",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_23",
+            "text": "Gandalf in the meantime was still standing outside the door, and laughing long but quietly. After a \nwhile he stepped up, and with the spike on his staff scratched a queer sign on the hobbit\u2019s beautiful \ngreen front-door. Then he strode away, just about the time when Bilbo was finishing his second cake \nand beginning to think that he had escaped adventures very well.",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_47",
+            "text": "Bilbo rushed along the passage, very angry, and altogether bewildered and bewuthered \u2014 this was \nthe most awkward Wednesday he ever remembered. He pulled open the door with a jerk, and they all \nfell in, one on top of the other. More dwarves, four more! And there was Gandalf behind, leaning on \nhis staff and laughing. He had made quite a dent on the beautiful door; he had also, by the way, \nknocked out the secret mark that he had put there the morning before.",
+            "book": "01",
+            "relevance_score": 1.0
+          }
+        ],
+        "confidence": 0.6000000000000001,
+        "validated": false,
+        "validator_notes": "",
+        "related_entities": [],
+        "contradicts": [],
+        "supports": [],
+        "extraction_method": "keyword"
+      },
+      {
+        "id": "magic_wizard_8ba253",
+        "category": "magic",
+        "title": "References to wizard",
+        "description": "Found 7 passages referencing 'wizard' in the context of magic.",
+        "source_passages": [
+          {
+            "passage_id": "01_19",
+            "text": "\u201cWhere else should I be?\u201d said the wizard. \u201cAll the same I am pleased to find you remember \nsomething about me. You seem to remember my fireworks kindly, at any rate, and that is not without \nhope. Indeed for your old grandfather Took\u2019s sake, and for the sake of poor Belladonna, I will give \nyou what you asked for.\u201d",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_21",
+            "text": "\u201cSorry! I don\u2019t want any adventures, thank you. Not today. Good morning! But please come to tea \n\u2014 any time you like! Why not tomorrow? Come tomorrow! Good bye!\u201d With that the hobbit turned \nand scuttled inside his round green door, and shut it as quickly as he dared, not to seem rude. Wizards \nafter all are wizards.",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_86",
+            "text": "\u201cWe are met to discuss our plans, our ways, means, policy and devices. We shall soon before the \nbreak of day start on our long journey, a journey from which some of us, or perhaps all of us (except \nour friend and counsellor, the ingenious wizard Gandalf) may never return. It is a solemn moment.",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_102",
+            "text": "\u201cThere is one point that you haven\u2019t noticed,\u201d said the wizard, \u201cand that is the secret entrance. You \nsee that rune on the West side, and the hand pointing to it from the other runes? That marks a hidden \npassage to the Lower Halls.\u201d (Look at the map at the beginning of this book, and you will see there the \nrunes.)",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_113",
+            "text": "\u201cThat would be no good,\u201d said the wizard, \u201cnot without a mighty Warrior, even a Hero. I tried to \nfind one; but warriors are busy fighting one another in distant lands, and in this neighbourhood heroes \nare scarce, or simply not to be found. Swords in these parts are mostly blunt, and axes are used for \ntrees, and shields as cradles or dish-covers; and dragons are comfortably far-off (and therefore \nlegendary). That is why I settled on burglary \u2014 especially when I remembered the existence of a S",
+            "book": "01",
+            "relevance_score": 1.0
+          }
+        ],
+        "confidence": 0.7,
+        "validated": false,
+        "validator_notes": "",
+        "related_entities": [],
+        "contradicts": [],
+        "supports": [],
+        "extraction_method": "keyword"
+      }
+    ],
+    "technology": [
+      {
+        "id": "technology_tool_07e38e",
+        "category": "technology",
+        "title": "References to tool",
+        "description": "Found 4 passages referencing 'tool' in the context of technology.",
+        "source_passages": [
+          {
+            "passage_id": "01_119",
+            "text": "\u201cO very well,\u201d said Thorin. \u201cLong ago in my grandfather Thror\u2019s time our family was driven out of \nthe far North, and came back with all their wealth and their tools to this Mountain on the map. It had \nbeen discovered by my far ancestor, Thrain the Old, but now they mined and they tunnelled and they \nmade huger halls and greater workshops \u2014 and in addition I believe they found a good deal of gold and \na great many jewels too. Anyway they grew immensely rich and famous, and my grandfather was Ki",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_39",
+            "text": "\u201cGandalf for certain this time,\u201d he thought as he puffed along the passage. But it was not. It was \ntwo more dwarves, both with blue hoods, silver belts, and yellow beards; and each of them carried a \nbag of tools and a spade. In they hopped, as soon as the door began to open \u2014 Bilbo was hardly \nsurprised at all.",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_55",
+            "text": "Gandalf sat at the head of the party with the thirteen dwarves all round: and Bilbo sat on a stool at \nthe fireside, nibbling at a biscuit (his appetite was quite taken away), and trying to look as if this was \nall perfectly ordinary and not in the least an adventure. The dwarves ate and ate, and talked and talked, \nand time got on. At last they pushed their chairs back, and Bilbo made a move to collect the plates and \nglasses.",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_83",
+            "text": "\u201cOf course!\u201d said Bilbo, and sat down in a hurry. He missed the stool and sat in the fender, \nknocking over the poker and shovel with a crash.",
+            "book": "01",
+            "relevance_score": 1.0
+          }
+        ],
+        "confidence": 0.7,
+        "validated": false,
+        "validator_notes": "",
+        "related_entities": [],
+        "contradicts": [],
+        "supports": [],
+        "extraction_method": "keyword"
+      }
+    ],
+    "geography": [
+      {
+        "id": "geography_mountain_c21054",
+        "category": "geography",
+        "title": "References to mountain",
+        "description": "Found 14 passages referencing 'mountain' in the context of geography.",
+        "source_passages": [
+          {
+            "passage_id": "01_119",
+            "text": "\u201cO very well,\u201d said Thorin. \u201cLong ago in my grandfather Thror\u2019s time our family was driven out of \nthe far North, and came back with all their wealth and their tools to this Mountain on the map. It had \nbeen discovered by my far ancestor, Thrain the Old, but now they mined and they tunnelled and they \nmade huger halls and greater workshops \u2014 and in addition I believe they found a good deal of gold and \na great many jewels too. Anyway they grew immensely rich and famous, and my grandfather was Ki",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_120",
+            "text": "\u201cUndoubtedly that was what brought the dragon. Dragons steal gold and jewels, you know, from \nmen and elves and dwarves, wherever they can find them; and they guard their plunder as long as they \nlive (which is practically for ever, unless they are killed), and never enjoy a brass ring of it. Indeed \nthey hardly know a good bit of work from a bad, though they usually have a good notion of the current \nmarket value; and they can\u2019t make a thing for themselves, not even mend a little loose scale of",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_112",
+            "text": "\u201cWe might go from there up along the River Running,\u201d went on Thorin taking no notice, \u201cand so to \nthe ruins of Dale \u2014 the old town in the valley there, under the shadow of the Mountain. But we none of \nus liked the idea of the Front Gate. The river runs right out of it through the great cliff at the South of \nthe Mountain, and out of it comes the dragon too \u2014 far too often, unless he has changed his habits.\u201d",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_100",
+            "text": "\u201cI don\u2019t see that this will help us much,\u201d said Thorin disappointedly after a glance. \u201cI remember \nthe Mountain well enough and the lands about it. And I know where Mirkwood is, and the Withered \nHeath where the great dragons bred.\u201d",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_108",
+            "text": "\u201cIn lots of ways,\u201d said Gandalf. \u201cBut in what way this one has been hidden we don\u2019t know without \ngoing to see. From what it says on the map I should guess there is a closed door which has been made \nto look exactly like the side of the Mountain. That is the usual dwarves\u2019 method \u2014 I think that is right, \nisn\u2019t it?\u201d",
+            "book": "01",
+            "relevance_score": 1.0
+          }
+        ],
+        "confidence": 0.7,
+        "validated": false,
+        "validator_notes": "",
+        "related_entities": [],
+        "contradicts": [],
+        "supports": [],
+        "extraction_method": "keyword"
+      },
+      {
+        "id": "geography_river_d9a5a8",
+        "category": "geography",
+        "title": "References to river",
+        "description": "Found 2 passages referencing 'river' in the context of geography.",
+        "source_passages": [
+          {
+            "passage_id": "01_1",
+            "text": "It had a perfectly round door like a porthole, painted green, with a shiny yellow brass knob in the \nexact middle. The door opened on to a tube-shaped hall like a tunnel: a very comfortable tunnel \nwithout smoke, with panelled walls, and floors tiled and carpeted, provided with polished chairs, and \nlots and lots of pegs for hats and coats \u2014 the hobbit was fond of visitors. The tunnel wound on and on, \ngoing fairly but not quite straight into the side of the hill \u2014 The Hill, as all the people fo",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_3",
+            "text": "The mother of our particular hobbit \u2014 what is a hobbit? I suppose hobbits need some description \nnowadays, since they have become rare and shy of the Big People, as they call us. They are (or were) a \nlittle people, about half our height, and smaller than the bearded Dwarves. Hobbits have no beards. \nThere is little or no magic about them, except the ordinary everyday sort which helps them to \ndisappear quietly and quickly when large stupid folk like you and me come blundering along, making \na n",
+            "book": "01",
+            "relevance_score": 1.0
+          }
+        ],
+        "confidence": 0.5,
+        "validated": false,
+        "validator_notes": "",
+        "related_entities": [],
+        "contradicts": [],
+        "supports": [],
+        "extraction_method": "keyword"
+      },
+      {
+        "id": "geography_east_711f69",
+        "category": "geography",
+        "title": "References to east",
+        "description": "Found 7 passages referencing 'east' in the context of geography.",
+        "source_passages": [
+          {
+            "passage_id": "01_111",
+            "text": "\u201cA long time before that, if I know anything about the roads East,\u201d interrupted Gandalf.",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_33",
+            "text": "\u201cI see they have begun to arrive already,\u201d he said when he caught sight of Dwalin\u2019 s green hood \nhanging up. He hung his red one next to it, and \u201cBalin at your service!\u201d he said with his hand on his \nbreast.",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_55",
+            "text": "Gandalf sat at the head of the party with the thirteen dwarves all round: and Bilbo sat on a stool at \nthe fireside, nibbling at a biscuit (his appetite was quite taken away), and trying to look as if this was \nall perfectly ordinary and not in the least an adventure. The dwarves ate and ate, and talked and talked, \nand time got on. At last they pushed their chairs back, and Bilbo made a move to collect the plates and \nglasses.",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_94",
+            "text": "\u201cPardon me,\u201d he said, \u201cif I have overheard words that you were saying. I don\u2019t pretend to \nunderstand what you are talking about, or your reference to burglars, but I think I am right in \nbelieving\u201d (this is what he called being on his dignity) \u201cthat you think I am no good. I will show you. I \nhave no signs on my door \u2014 it was painted a week ago \u2014 , and I am quite sure you have come to the \nwrong house. As soon as I saw your funny faces on the door-step, I had my doubts. But treat it as the \nrig",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_105",
+            "text": "\u201cBecause it is too small. \u2018 Five feet high the door and three may walk abreast \u2019 say the runes, but \nSmaug could not creep into a hole that size, not even when he was a young dragon, certainly not after \ndevouring so many of the dwarves and men of Dale.\u201d",
+            "book": "01",
+            "relevance_score": 1.0
+          }
+        ],
+        "confidence": 0.7,
+        "validated": false,
+        "validator_notes": "",
+        "related_entities": [],
+        "contradicts": [],
+        "supports": [],
+        "extraction_method": "keyword"
+      },
+      {
+        "id": "geography_map_74fc5b",
+        "category": "geography",
+        "title": "References to map",
+        "description": "Found 8 passages referencing 'map' in the context of geography.",
+        "source_passages": [
+          {
+            "passage_id": "01_128",
+            "text": "\u201cYour grandfather,\u201d said the wizard slowly and grimly, \u201cgave the map to his son for safety before \nhe went to the mines of Moria. Your father went away to try his luck with the map after your \ngrandfather was killed; and lots of adventures of a most unpleasant sort he had, but he never got near \nthe Mountain. How he got there I don\u2019t know, but I found him a prisoner in the dungeons of the \nNecromancer.\u201d",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_98",
+            "text": "On the table in the light of a big lamp with a red shade he spread a piece of parchment rather like a \nmap.",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_107",
+            "text": "He loved maps, and in his hall there hung a large one of the Country Round with all his favourite \nwalks marked on it in red ink. \u201cHow could such a large door be kept secret from everybody outside, \napart from the dragon?\u201d he asked. He was only a little hobbit you must remember.",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_109",
+            "text": "\u201cAlso,\u201d went on Gandalf, \u201cI forgot to mention that with the map went a key, a small and curious \nkey. Here it is!\u201d he said, and handed to Thorin a key with a long barrel and intricate wards, made of \nsilver. \u201cKeep it safe!\u201d",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_116",
+            "text": "\u201cBless me!\u201d said Thorin, \u201chaven\u2019t you got a map? and didn\u2019t you hear our song? and haven\u2019t we \nbeen talking about all this for hours?\u201d",
+            "book": "01",
+            "relevance_score": 1.0
+          }
+        ],
+        "confidence": 0.7,
+        "validated": false,
+        "validator_notes": "",
+        "related_entities": [],
+        "contradicts": [],
+        "supports": [],
+        "extraction_method": "keyword"
+      },
+      {
+        "id": "geography_land_7a8eba",
+        "category": "geography",
+        "title": "References to land",
+        "description": "Found 3 passages referencing 'land' in the context of geography.",
+        "source_passages": [
+          {
+            "passage_id": "01_65",
+            "text": "Kili and Fili rushed for their bags and brought back little fiddles; Dori, Nori, and Ori brought out \nflutes from somewhere inside their coats; Bombur produced a drum from the hall; Bifur and Bofur \nwent out too, and came back with clarinets that they had left among the walking-sticks. Dwalin and \nBalin said: \u201cExcuse me, I left mine in the porch!\u201d \u201cJust bring mine in with you!\u201d said Thorin. They \ncame back with viols as big as themselves, and with Thorin\u2019 s harp wrapped in a green cloth. It was ",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_113",
+            "text": "\u201cThat would be no good,\u201d said the wizard, \u201cnot without a mighty Warrior, even a Hero. I tried to \nfind one; but warriors are busy fighting one another in distant lands, and in this neighbourhood heroes \nare scarce, or simply not to be found. Swords in these parts are mostly blunt, and axes are used for \ntrees, and shields as cradles or dish-covers; and dragons are comfortably far-off (and therefore \nlegendary). That is why I settled on burglary \u2014 especially when I remembered the existence of a S",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_122",
+            "text": "that one day in the proper time I should know. After that we went away, and we have had to earn our \nlivings as best we could up and down the lands, often enough sinking as low as blacksmith-work or \neven coalmining. But we have never forgotten our stolen treasure. And even now, when I will allow \nwe have a good bit laid by and are not so badly off\u201d \u2014 here Thorin stroked the gold chain round his \nneck \u2014 \u201cwe still mean to get it back, and to bring our curses home to Smaug \u2014 if we can.",
+            "book": "01",
+            "relevance_score": 1.0
+          }
+        ],
+        "confidence": 0.6000000000000001,
+        "validated": false,
+        "validator_notes": "",
+        "related_entities": [],
+        "contradicts": [],
+        "supports": [],
+        "extraction_method": "keyword"
+      },
+      {
+        "id": "geography_journey_1b93f6",
+        "category": "geography",
+        "title": "References to journey",
+        "description": "Found 3 passages referencing 'journey' in the context of geography.",
+        "source_passages": [
+          {
+            "passage_id": "01_86",
+            "text": "\u201cWe are met to discuss our plans, our ways, means, policy and devices. We shall soon before the \nbreak of day start on our long journey, a journey from which some of us, or perhaps all of us (except \nour friend and counsellor, the ingenious wizard Gandalf) may never return. It is a solemn moment.",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_137",
+            "text": "door-step your job, not to speak of getting inside the door? But I agree about bed and breakfast. I like \nsix eggs with my ham, when starting on a journey: fried not poached, and mind you don\u2019t break \u2019em.\u201d",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_138",
+            "text": "After all the others had ordered their breakfasts without so much as a please (which annoyed Bilbo \nvery much), they all got up. The hobbit had to find room for them all, and filled all his spare-rooms \nand made beds on chairs and sofas, before he got them all stowed and went to his own little bed very \ntired and not altogether happy. One thing he did make his mind up about was not to bother to get up \nvery early and cook everybody else\u2019s wretched breakfast. The Tookishness was wearing off, and ",
+            "book": "01",
+            "relevance_score": 1.0
+          }
+        ],
+        "confidence": 0.6000000000000001,
+        "validated": false,
+        "validator_notes": "",
+        "related_entities": [],
+        "contradicts": [],
+        "supports": [],
+        "extraction_method": "keyword"
+      }
+    ],
+    "history": [
+      {
+        "id": "history_war_e6d3de",
+        "category": "history",
+        "title": "References to war",
+        "description": "Found 18 passages referencing 'war' in the context of history.",
+        "source_passages": [
+          {
+            "passage_id": "01_120",
+            "text": "\u201cUndoubtedly that was what brought the dragon. Dragons steal gold and jewels, you know, from \nmen and elves and dwarves, wherever they can find them; and they guard their plunder as long as they \nlive (which is practically for ever, unless they are killed), and never enjoy a brass ring of it. Indeed \nthey hardly know a good bit of work from a bad, though they usually have a good notion of the current \nmarket value; and they can\u2019t make a thing for themselves, not even mend a little loose scale of",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_3",
+            "text": "The mother of our particular hobbit \u2014 what is a hobbit? I suppose hobbits need some description \nnowadays, since they have become rare and shy of the Big People, as they call us. They are (or were) a \nlittle people, about half our height, and smaller than the bearded Dwarves. Hobbits have no beards. \nThere is little or no magic about them, except the ordinary everyday sort which helps them to \ndisappear quietly and quickly when large stupid folk like you and me come blundering along, making \na n",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_32",
+            "text": "\u201cSo you have got here at last!\u201d That was what he was going to say to Gandalf this time. But it was \nnot Gandalf. Instead there was a very old-looking dwarf on the step with a white beard and a scarlet \nhood; and he too hopped inside as soon as the door was open, just as if he had been invited.",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_47",
+            "text": "Bilbo rushed along the passage, very angry, and altogether bewildered and bewuthered \u2014 this was \nthe most awkward Wednesday he ever remembered. He pulled open the door with a jerk, and they all \nfell in, one on top of the other. More dwarves, four more! And there was Gandalf behind, leaning on \nhis staff and laughing. He had made quite a dent on the beautiful door; he had also, by the way, \nknocked out the secret mark that he had put there the morning before.",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_58",
+            "text": "Thereupon the twelve dwarves \u2014 not Thorin, he was too important, and stayed talking to Gandalf \u2014 \njumped to their feet, and made tall piles of all the things. Off they went, not waiting for trays, \nbalancing columns of plates, each with a bottle on the top, with one hand, while the hobbit ran after \nthem almost squeaking with fright: \u201cplease be careful!\u201d and \u201cplease, don\u2019t trouble! I can manage.\u201d But \nthe dwarves only started to sing:",
+            "book": "01",
+            "relevance_score": 1.0
+          }
+        ],
+        "confidence": 0.7,
+        "validated": false,
+        "validator_notes": "",
+        "related_entities": [],
+        "contradicts": [],
+        "supports": [],
+        "extraction_method": "keyword"
+      },
+      {
+        "id": "history_age_78ca73",
+        "category": "history",
+        "title": "References to age",
+        "description": "Found 5 passages referencing 'age' in the context of history.",
+        "source_passages": [
+          {
+            "passage_id": "01_1",
+            "text": "It had a perfectly round door like a porthole, painted green, with a shiny yellow brass knob in the \nexact middle. The door opened on to a tube-shaped hall like a tunnel: a very comfortable tunnel \nwithout smoke, with panelled walls, and floors tiled and carpeted, provided with polished chairs, and \nlots and lots of pegs for hats and coats \u2014 the hobbit was fond of visitors. The tunnel wound on and on, \ngoing fairly but not quite straight into the side of the hill \u2014 The Hill, as all the people fo",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_6",
+            "text": "By some curious chance one morning long ago in the quiet of the world, when there was less noise \nand more green, and the hobbits were still numerous and prosperous, and Bilbo Baggins was standing \nat his door after breakfast smoking an enormous long wooden pipe that reached nearly down to his \nwoolly toes (neatly brushed) \u2014 Gandalf came by. Gandalf ! If you had heard only a quarter of what I \nhave heard about him, and I have only heard very little of all there is to hear, you would be prepared ",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_35",
+            "text": "\u201cCome along in, and have some tea!\u201d he managed to say after taking a deep breath.",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_39",
+            "text": "\u201cGandalf for certain this time,\u201d he thought as he puffed along the passage. But it was not. It was \ntwo more dwarves, both with blue hoods, silver belts, and yellow beards; and each of them carried a \nbag of tools and a spade. In they hopped, as soon as the door began to open \u2014 Bilbo was hardly \nsurprised at all.",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_24",
+            "text": "The next day he had almost forgotten about Gandalf. He did not remember things very well, unless \nhe put them down on his Engagement Tablet: like this: Gandalf Tea Wednesday. Yesterday he had \nbeen too flustered to do anything of the kind.",
+            "book": "01",
+            "relevance_score": 1.0
+          }
+        ],
+        "confidence": 0.7,
+        "validated": false,
+        "validator_notes": "",
+        "related_entities": [],
+        "contradicts": [],
+        "supports": [],
+        "extraction_method": "keyword"
+      },
+      {
+        "id": "history_king_fdc80c",
+        "category": "history",
+        "title": "References to king",
+        "description": "Found 13 passages referencing 'king' in the context of history.",
+        "source_passages": [
+          {
+            "passage_id": "01_95",
+            "text": "\u201cYes, yes, but that was long ago,\u201d said Gloin. \u201cI was talking about you. And I assure you there is a \nmark on this door \u2014 the usual one in the trade, or used to be. Burglar wants a good job, plenty of \nExcitement and reasonable Reward, that\u2019s how it is usually read. You can say Expert Treasure-hunter \ninstead of Burglar if you like. Some of them do. It\u2019s all the same to us. Gandalf told us that there was \na man of the sort in these parts looking for a Job at once, and that he had arranged for a ",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_119",
+            "text": "\u201cO very well,\u201d said Thorin. \u201cLong ago in my grandfather Thror\u2019s time our family was driven out of \nthe far North, and came back with all their wealth and their tools to this Mountain on the map. It had \nbeen discovered by my far ancestor, Thrain the Old, but now they mined and they tunnelled and they \nmade huger halls and greater workshops \u2014 and in addition I believe they found a good deal of gold and \na great many jewels too. Anyway they grew immensely rich and famous, and my grandfather was Ki",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_70",
+            "text": "For ancient king and elvish lord \nThere many a gleaming golden hoard \nThey shaped and wrought, and light they caught \nTo hide in gems on hilt of sword.",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_38",
+            "text": "When he got back Balin and Dwalin were talking at the table like old friends (as a matter of fact \nthey were brothers). Bilbo plumped down the beer and the cake in front of them, when loud came a \nring at the bell again, and then another ring.",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_62",
+            "text": "And of course they did none of these dreadful things, and everything was cleaned and put away safe \nas quick as lightning, while the hobbit was turning round and round in the middle of the kitchen trying \nto see what they were doing. Then they went back, and found Thorin with his feet on the fender \nsmoking a pipe. He was blowing the most enormous smoke-rings, and wherever he told one to go, it \nwent \u2014 up the chimney, or behind the clock on the mantelpiece, or under the table, or round and round",
+            "book": "01",
+            "relevance_score": 1.0
+          }
+        ],
+        "confidence": 0.7,
+        "validated": false,
+        "validator_notes": "",
+        "related_entities": [],
+        "contradicts": [],
+        "supports": [],
+        "extraction_method": "keyword"
+      },
+      {
+        "id": "history_old_074ca9",
+        "category": "history",
+        "title": "References to old",
+        "description": "Found 7 passages referencing 'old' in the context of history.",
+        "source_passages": [
+          {
+            "passage_id": "01_5",
+            "text": "Not that Belladonna Took ever had any adventures after she became Mrs. Bungo Baggins. Bungo, \nthat was Bilbo\u2019s father, built the most luxurious hobbit-hole for her (and partly with her money) that \nwas to be found either under The Hill or over The Hill or across The Water, and there they remained to \nthe end of their days. Still it is probable that Bilbo, her only son, although he looked and behaved \nexactly like a second edition of his solid and comfortable father, got something a bit queer in ",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_18",
+            "text": "\u201cGandalf, Gandalf! Good gracious me! Not the wandering wizard that gave Old Took a pair of \nmagic diamond studs that fastened themselves and never came undone till ordered? Not the fellow \nwho used to tell such wonderful tales at parties, about dragons and goblins and giants and the rescue of \nprincesses and the unexpected luck of widows\u2019 sons? Not the man that used to make such particularly \nexcellent fireworks! I remember those! Old Took used to have them on Midsummer\u2019s Eve. Splendid! \nThey us",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_52",
+            "text": "\u201cPut on a few eggs, there\u2019s a good fellow!\u201d Gandalf called after him, as the hobbit stumped off to \nthe pantries. \u201cAnd just bring out the cold chicken and pickles!\u201d",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_115",
+            "text": "\u201cFirst I should like to know a bit more about things,\u201d said he, feeling all confused and a bit shaky \ninside, but so far still Tookishly determined to go on with things. \u201cI mean about the gold and the \ndragon, and all that, and how it got there, and who it belongs to, and so on and further.\u201d",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_7",
+            "text": "All that the unsuspecting Bilbo saw that morning was an old man with a staff. He had a tall pointed \nblue hat, a long grey cloak, a silver scarf over which his long white beard hung down below his waist, \nand immense black boots.",
+            "book": "01",
+            "relevance_score": 1.0
+          }
+        ],
+        "confidence": 0.7,
+        "validated": false,
+        "validator_notes": "",
+        "related_entities": [],
+        "contradicts": [],
+        "supports": [],
+        "extraction_method": "keyword"
+      },
+      {
+        "id": "history_last_17ec7d",
+        "category": "history",
+        "title": "References to last",
+        "description": "Found 2 passages referencing 'last' in the context of history.",
+        "source_passages": [
+          {
+            "passage_id": "01_49",
+            "text": "\u201cAt your service!\u201d said Bifur, Bofur, and Bombur standing in a row. Then they hung up two yellow \nhoods and a pale green one; and also a sky-blue one with a long silver tassel. This last belonged to \nThorin, an enormously important dwarf, in fact no other than the great Thorin Oakenshield himself, \nwho was not at all pleased at falling flat on Bilbo\u2019s mat with Bifur, Bofur, and Bombur on top of him. \nFor one thing Bombur was immensely fat and heavy. Thorin indeed was very haughty, and said \nnoth",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_13",
+            "text": "\u201cGood morning!\u201d he said at last. \u201cWe don\u2019t want any adventures here, thank you! You might try \nover The Hill or across The Water.\u201d By this he meant that the conversation was at an end.",
+            "book": "01",
+            "relevance_score": 1.0
+          }
+        ],
+        "confidence": 0.5,
+        "validated": false,
+        "validator_notes": "",
+        "related_entities": [],
+        "contradicts": [],
+        "supports": [],
+        "extraction_method": "keyword"
+      },
+      {
+        "id": "history_fell_7fb4bb",
+        "category": "history",
+        "title": "References to fell",
+        "description": "Found 2 passages referencing 'fell' in the context of history.",
+        "source_passages": [
+          {
+            "passage_id": "01_69",
+            "text": "The dwarves of yore made mighty spells, \nWhile hammers fell like ringing bells \nIn places deep, where dark things sleep, \nIn hollow halls beneath the fells.",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_85",
+            "text": "\u201cGandalf, dwarves and Mr. Baggins! We are met together in the house of our friend and fellow \nconspirator, this most excellent and audacious hobbit \u2014 may the hair on his toes never fall out! all \npraise to his wine and ale! \u2014 \u201d He paused for breath and for a polite remark from the hobbit, but the \ncompliments were quite lost on poor Bilbo Baggins, who was wagging his mouth in protest at being \ncalled audacious and worst of all fellow conspirator, though no noise came out, he was so flummoxed. \nS",
+            "book": "01",
+            "relevance_score": 1.0
+          }
+        ],
+        "confidence": 0.5,
+        "validated": false,
+        "validator_notes": "",
+        "related_entities": [],
+        "contradicts": [],
+        "supports": [],
+        "extraction_method": "keyword"
+      }
+    ],
+    "races": [
+      {
+        "id": "races_ent_f98d7d",
+        "category": "races",
+        "title": "References to ent",
+        "description": "Found 9 passages referencing 'ent' in the context of races.",
+        "source_passages": [
+          {
+            "passage_id": "01_18",
+            "text": "\u201cGandalf, Gandalf! Good gracious me! Not the wandering wizard that gave Old Took a pair of \nmagic diamond studs that fastened themselves and never came undone till ordered? Not the fellow \nwho used to tell such wonderful tales at parties, about dragons and goblins and giants and the rescue of \nprincesses and the unexpected luck of widows\u2019 sons? Not the man that used to make such particularly \nexcellent fireworks! I remember those! Old Took used to have them on Midsummer\u2019s Eve. Splendid! \nThey us",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_90",
+            "text": "If you have ever seen a dragon in a pinch, you will realize that this was only poetical exaggeration \napplied to any hobbit, even to Old Took\u2019s great-grand-uncle Bullroarer, who was so huge (for a \nhobbit) that he could ride a horse. He charged the ranks of the goblins of Mount Gram in the Battle of \nthe Green Fields, and knocked their king Golfimbul\u2019s head clean off with a wooden club. It sailed a \nhundred yards through the air and went down a rabbit-hole, and in this way the battle was won and",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_85",
+            "text": "\u201cGandalf, dwarves and Mr. Baggins! We are met together in the house of our friend and fellow \nconspirator, this most excellent and audacious hobbit \u2014 may the hair on his toes never fall out! all \npraise to his wine and ale! \u2014 \u201d He paused for breath and for a polite remark from the hobbit, but the \ncompliments were quite lost on poor Bilbo Baggins, who was wagging his mouth in protest at being \ncalled audacious and worst of all fellow conspirator, though no noise came out, he was so flummoxed. \nS",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_91",
+            "text": "In the meanwhile, however, Bullroarer\u2019 s gentler descendant was reviving in the drawing-room. \nAfter a while and a drink he crept nervously to the door of the parlour. This is what he heard, Gloin \nspeaking: \u201cHumph!\u201d (or some snort more or less like that). \u201cWill he do, do you think? It is all very \nwell for Gandalf to talk about this hobbit being fierce, but one shriek like that in a moment of \nexcitement would be enough to wake the dragon and all his relatives, and kill the lot of us. I think i",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_62",
+            "text": "And of course they did none of these dreadful things, and everything was cleaned and put away safe \nas quick as lightning, while the hobbit was turning round and round in the middle of the kitchen trying \nto see what they were doing. Then they went back, and found Thorin with his feet on the fender \nsmoking a pipe. He was blowing the most enormous smoke-rings, and wherever he told one to go, it \nwent \u2014 up the chimney, or behind the clock on the mantelpiece, or under the table, or round and round",
+            "book": "01",
+            "relevance_score": 1.0
+          }
+        ],
+        "confidence": 0.7,
+        "validated": false,
+        "validator_notes": "",
+        "related_entities": [],
+        "contradicts": [],
+        "supports": [],
+        "extraction_method": "keyword"
+      },
+      {
+        "id": "races_hobbit_7e26bf",
+        "category": "races",
+        "title": "References to hobbit",
+        "description": "Found 8 passages referencing 'hobbit' in the context of races.",
+        "source_passages": [
+          {
+            "passage_id": "01_3",
+            "text": "The mother of our particular hobbit \u2014 what is a hobbit? I suppose hobbits need some description \nnowadays, since they have become rare and shy of the Big People, as they call us. They are (or were) a \nlittle people, about half our height, and smaller than the bearded Dwarves. Hobbits have no beards. \nThere is little or no magic about them, except the ordinary everyday sort which helps them to \ndisappear quietly and quickly when large stupid folk like you and me come blundering along, making \na n",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_2",
+            "text": "This hobbit was a very well-to-do hobbit, and his name was Baggins. The Bagginses had lived in \nthe neighbourhood of The Hill for time out of mind, and people considered them very respectable, not \nonly because most of them were rich, but also because they never had any adventures or did anything \nunexpected: you could tell what a Baggins would say on any question without the bother of asking \nhim. This is a story of how a Baggins had an adventure, and found himself doing and saying things \nalto",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_1",
+            "text": "It had a perfectly round door like a porthole, painted green, with a shiny yellow brass knob in the \nexact middle. The door opened on to a tube-shaped hall like a tunnel: a very comfortable tunnel \nwithout smoke, with panelled walls, and floors tiled and carpeted, provided with polished chairs, and \nlots and lots of pegs for hats and coats \u2014 the hobbit was fond of visitors. The tunnel wound on and on, \ngoing fairly but not quite straight into the side of the hill \u2014 The Hill, as all the people fo",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_5",
+            "text": "Not that Belladonna Took ever had any adventures after she became Mrs. Bungo Baggins. Bungo, \nthat was Bilbo\u2019s father, built the most luxurious hobbit-hole for her (and partly with her money) that \nwas to be found either under The Hill or over The Hill or across The Water, and there they remained to \nthe end of their days. Still it is probable that Bilbo, her only son, although he looked and behaved \nexactly like a second edition of his solid and comfortable father, got something a bit queer in ",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_6",
+            "text": "By some curious chance one morning long ago in the quiet of the world, when there was less noise \nand more green, and the hobbits were still numerous and prosperous, and Bilbo Baggins was standing \nat his door after breakfast smoking an enormous long wooden pipe that reached nearly down to his \nwoolly toes (neatly brushed) \u2014 Gandalf came by. Gandalf ! If you had heard only a quarter of what I \nhave heard about him, and I have only heard very little of all there is to hear, you would be prepared ",
+            "book": "01",
+            "relevance_score": 1.0
+          }
+        ],
+        "confidence": 0.7,
+        "validated": false,
+        "validator_notes": "",
+        "related_entities": [],
+        "contradicts": [],
+        "supports": [],
+        "extraction_method": "keyword"
+      },
+      {
+        "id": "races_man_d63088",
+        "category": "races",
+        "title": "References to man",
+        "description": "Found 4 passages referencing 'man' in the context of races.",
+        "source_passages": [
+          {
+            "passage_id": "01_12",
+            "text": "\u201cI should think so \u2014 in these parts! We are plain quiet folk and have no use for adventures. Nasty \ndisturbing uncomfortable things! Make you late for dinner! I can\u2019t think what anybody sees in them,\u201d \nsaid our Mr. Baggins, and stuck one thumb behind his braces, and blew out another even bigger \nsmokering. Then he took out his morning letters, and began to read, pretending to take no more notice \nof the old man. He had decided that he was not quite his sort, and wanted him to go away. But the ol",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_96",
+            "text": "\u201cOf course there is a mark,\u201d said Gandalf. \u201cI put it there myself. For very good reasons. You asked \nme to find the fourteenth man for your expedition, and I chose Mr. Baggins. Just let any one say I \nchose the wrong man or the wrong house, and you can stop at thirteen and have all the bad luck you \nlike, or go back to digging coal.\u201d",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_7",
+            "text": "All that the unsuspecting Bilbo saw that morning was an old man with a staff. He had a tall pointed \nblue hat, a long grey cloak, a silver scarf over which his long white beard hung down below his waist, \nand immense black boots.",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_70",
+            "text": "For ancient king and elvish lord \nThere many a gleaming golden hoard \nThey shaped and wrought, and light they caught \nTo hide in gems on hilt of sword.",
+            "book": "01",
+            "relevance_score": 1.0
+          }
+        ],
+        "confidence": 0.7,
+        "validated": false,
+        "validator_notes": "",
+        "related_entities": [],
+        "contradicts": [],
+        "supports": [],
+        "extraction_method": "keyword"
+      },
+      {
+        "id": "races_dwarf_dbeeee",
+        "category": "races",
+        "title": "References to dwarf",
+        "description": "Found 2 passages referencing 'dwarf' in the context of races.",
+        "source_passages": [
+          {
+            "passage_id": "01_29",
+            "text": "\u201cBilbo Baggins at yours!\u201d said the hobbit, too surprised to ask any questions for the moment. When \nthe silence that followed had become uncomfortable, he added: \u201cI am just about to take tea; pray come \nand have some with me.\u201d A little stiff perhaps, but he meant it kindly. And what would you do, if an \nuninvited dwarf came and hung his things up in your hall without a word of explanation?",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_88",
+            "text": "This was Thorin\u2019 s style. He was an important dwarf. If he had been allowed, he would probably \nhave gone on like this until he was out of breath, without telling any one there anything that was not \nknown already. But he was rudely interrupted. Poor Bilbo couldn\u2019t bear it any longer. At may never \nreturn he began to feel a shriek coming up inside, and very soon it burst out like the whistle of an \nengine coming out of a tunnel. All the dwarves sprang up, knocking over the table. Gandalf struck ",
+            "book": "01",
+            "relevance_score": 1.0
+          }
+        ],
+        "confidence": 0.5,
+        "validated": false,
+        "validator_notes": "",
+        "related_entities": [],
+        "contradicts": [],
+        "supports": [],
+        "extraction_method": "keyword"
+      },
+      {
+        "id": "races_dwarves_c3cc2b",
+        "category": "races",
+        "title": "References to dwarves",
+        "description": "Found 9 passages referencing 'dwarves' in the context of races.",
+        "source_passages": [
+          {
+            "passage_id": "01_43",
+            "text": "\u201cThrong!\u201d thought Mr. Baggins. \u201cI don\u2019t like the sound of that. I really must sit down for a minute \nand collect my wits, and have a drink.\u201d He had only just had a sip \u2014 in the corner, while the four \ndwarves sat round the table, and talked about mines and gold and troubles with the goblins, and the \ndepredations of dragons, and lots of other things which he did not understand, and did not want to, for \nthey sounded much too adventurous \u2014 when, ding-dong-a-ling-dang, his bell rang again, as if s",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_58",
+            "text": "Thereupon the twelve dwarves \u2014 not Thorin, he was too important, and stayed talking to Gandalf \u2014 \njumped to their feet, and made tall piles of all the things. Off they went, not waiting for trays, \nbalancing columns of plates, each with a bottle on the top, with one hand, while the hobbit ran after \nthem almost squeaking with fright: \u201cplease be careful!\u201d and \u201cplease, don\u2019t trouble! I can manage.\u201d But \nthe dwarves only started to sing:",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_77",
+            "text": "As they sang the hobbit felt the love of beautiful things made by hands and by cunning and by \nmagic moving through him, a fierce and a jealous love, the desire of the hearts of dwarves. Then \nsomething Tookish woke up inside him, and he wished to go and see the great mountains, and hear the \npine-trees and the waterfalls, and explore the caves, and wear a sword instead of a walking-stick. He \nlooked out of the window. The stars were out in a dark sky above the trees. He thought of the jewels of",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_105",
+            "text": "\u201cBecause it is too small. \u2018 Five feet high the door and three may walk abreast \u2019 say the runes, but \nSmaug could not creep into a hole that size, not even when he was a young dragon, certainly not after \ndevouring so many of the dwarves and men of Dale.\u201d",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_87",
+            "text": "Our object is, I take it, well known to us all. To the estimable Mr. Baggins, and perhaps to one or two \nof the younger dwarves (I think I should be right in naming Kili and Fili, for instance), the exact \nsituation at the moment may require a little brief explanation \u2014 \u201d",
+            "book": "01",
+            "relevance_score": 1.0
+          }
+        ],
+        "confidence": 0.7,
+        "validated": false,
+        "validator_notes": "",
+        "related_entities": [],
+        "contradicts": [],
+        "supports": [],
+        "extraction_method": "keyword"
+      },
+      {
+        "id": "races_men_f08b82",
+        "category": "races",
+        "title": "References to men",
+        "description": "Found 8 passages referencing 'men' in the context of races.",
+        "source_passages": [
+          {
+            "passage_id": "01_49",
+            "text": "\u201cAt your service!\u201d said Bifur, Bofur, and Bombur standing in a row. Then they hung up two yellow \nhoods and a pale green one; and also a sky-blue one with a long silver tassel. This last belonged to \nThorin, an enormously important dwarf, in fact no other than the great Thorin Oakenshield himself, \nwho was not at all pleased at falling flat on Bilbo\u2019s mat with Bifur, Bofur, and Bombur on top of him. \nFor one thing Bombur was immensely fat and heavy. Thorin indeed was very haughty, and said \nnoth",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_119",
+            "text": "\u201cO very well,\u201d said Thorin. \u201cLong ago in my grandfather Thror\u2019s time our family was driven out of \nthe far North, and came back with all their wealth and their tools to this Mountain on the map. It had \nbeen discovered by my far ancestor, Thrain the Old, but now they mined and they tunnelled and they \nmade huger halls and greater workshops \u2014 and in addition I believe they found a good deal of gold and \na great many jewels too. Anyway they grew immensely rich and famous, and my grandfather was Ki",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_24",
+            "text": "The next day he had almost forgotten about Gandalf. He did not remember things very well, unless \nhe put them down on his Engagement Tablet: like this: Gandalf Tea Wednesday. Yesterday he had \nbeen too flustered to do anything of the kind.",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_86",
+            "text": "\u201cWe are met to discuss our plans, our ways, means, policy and devices. We shall soon before the \nbreak of day start on our long journey, a journey from which some of us, or perhaps all of us (except \nour friend and counsellor, the ingenious wizard Gandalf) may never return. It is a solemn moment.",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_64",
+            "text": "\u201cNow for some music!\u201d said Thorin. \u201cBring out the instruments!\u201d",
+            "book": "01",
+            "relevance_score": 1.0
+          }
+        ],
+        "confidence": 0.7,
+        "validated": false,
+        "validator_notes": "",
+        "related_entities": [],
+        "contradicts": [],
+        "supports": [],
+        "extraction_method": "keyword"
+      },
+      {
+        "id": "races_elves_1a5ca0",
+        "category": "races",
+        "title": "References to elves",
+        "description": "Found 2 passages referencing 'elves' in the context of races.",
+        "source_passages": [
+          {
+            "passage_id": "01_65",
+            "text": "Kili and Fili rushed for their bags and brought back little fiddles; Dori, Nori, and Ori brought out \nflutes from somewhere inside their coats; Bombur produced a drum from the hall; Bifur and Bofur \nwent out too, and came back with clarinets that they had left among the walking-sticks. Dwalin and \nBalin said: \u201cExcuse me, I left mine in the porch!\u201d \u201cJust bring mine in with you!\u201d said Thorin. They \ncame back with viols as big as themselves, and with Thorin\u2019 s harp wrapped in a green cloth. It was ",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_72",
+            "text": "Goblets they carved there for themselves \nAnd harps of gold; where no man delves \nThere lay they long, and many a song \nWas sung unheard by men or elves.",
+            "book": "01",
+            "relevance_score": 1.0
+          }
+        ],
+        "confidence": 0.5,
+        "validated": false,
+        "validator_notes": "",
+        "related_entities": [],
+        "contradicts": [],
+        "supports": [],
+        "extraction_method": "keyword"
+      },
+      {
+        "id": "races_elf_d15767",
+        "category": "races",
+        "title": "References to elf",
+        "description": "Found 4 passages referencing 'elf' in the context of races.",
+        "source_passages": [
+          {
+            "passage_id": "01_97",
+            "text": "He scowled so angrily at Gloin that the dwarf huddled back in his chair; and when Bilbo tried to \nopen his mouth to ask a question, he turned and frowned at him and stuck out his bushy eyebrows, till \nBilbo shut his mouth tight with a snap. \u201cThat\u2019s right,\u201d said Gandalf. \u201cLet\u2019s have no more argument. I \nhave chosen Mr. Baggins and that ought to be enough for all of you. If I say he is a Burglar, a Burglar \nhe is, or will be when the time comes. There is a lot more in him than you guess, and a dea",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_93",
+            "text": "Then Mr. Baggins turned the handle and went in. The Took side had won. He suddenly felt he \nwould go without bed and breakfast to be thought fierce. As for little fellow bobbing on the mat it \nalmost made him really fierce. Many a time afterwards the Baggins part regretted what he did now, \nand he said to himself: \u201cBilbo, you were a fool; you walked right in and put your foot in it.\u201d",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_22",
+            "text": "\u201cWhat on earth did I ask him to tea for!\u201d he said to himself, as he went to the pantry. He had only \njust had breakfast, but he thought a cake or two and a drink of something would do him good after his \nfright.",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_53",
+            "text": "\u201cSeems to know as much about the inside of my larders as I do myself!\u201d thought Mr. Baggins, who \nwas feeling positively flummoxed, and was beginning to wonder whether a most wretched adventure \nhad not come right into his house. By the time he had got all the bottles and dishes and knives and \nforks and glasses and plates and spoons and things piled up on big trays, he was getting very hot, and \nred in the face, and annoyed.",
+            "book": "01",
+            "relevance_score": 1.0
+          }
+        ],
+        "confidence": 0.7,
+        "validated": false,
+        "validator_notes": "",
+        "related_entities": [],
+        "contradicts": [],
+        "supports": [],
+        "extraction_method": "keyword"
+      },
+      {
+        "id": "races_wizard_5e8b19",
+        "category": "races",
+        "title": "References to wizard",
+        "description": "Found 2 passages referencing 'wizard' in the context of races.",
+        "source_passages": [
+          {
+            "passage_id": "01_21",
+            "text": "\u201cSorry! I don\u2019t want any adventures, thank you. Not today. Good morning! But please come to tea \n\u2014 any time you like! Why not tomorrow? Come tomorrow! Good bye!\u201d With that the hobbit turned \nand scuttled inside his round green door, and shut it as quickly as he dared, not to seem rude. Wizards \nafter all are wizards.",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_19",
+            "text": "\u201cWhere else should I be?\u201d said the wizard. \u201cAll the same I am pleased to find you remember \nsomething about me. You seem to remember my fireworks kindly, at any rate, and that is not without \nhope. Indeed for your old grandfather Took\u2019s sake, and for the sake of poor Belladonna, I will give \nyou what you asked for.\u201d",
+            "book": "01",
+            "relevance_score": 1.0
+          }
+        ],
+        "confidence": 0.5,
+        "validated": false,
+        "validator_notes": "",
+        "related_entities": [],
+        "contradicts": [],
+        "supports": [],
+        "extraction_method": "keyword"
+      }
+    ],
+    "politics": [
+      {
+        "id": "politics_king_9dcc92",
+        "category": "politics",
+        "title": "References to king",
+        "description": "Found 22 passages referencing 'king' in the context of politics.",
+        "source_passages": [
+          {
+            "passage_id": "01_1",
+            "text": "It had a perfectly round door like a porthole, painted green, with a shiny yellow brass knob in the \nexact middle. The door opened on to a tube-shaped hall like a tunnel: a very comfortable tunnel \nwithout smoke, with panelled walls, and floors tiled and carpeted, provided with polished chairs, and \nlots and lots of pegs for hats and coats \u2014 the hobbit was fond of visitors. The tunnel wound on and on, \ngoing fairly but not quite straight into the side of the hill \u2014 The Hill, as all the people fo",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_32",
+            "text": "\u201cSo you have got here at last!\u201d That was what he was going to say to Gandalf this time. But it was \nnot Gandalf. Instead there was a very old-looking dwarf on the step with a white beard and a scarlet \nhood; and he too hopped inside as soon as the door was open, just as if he had been invited.",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_58",
+            "text": "Thereupon the twelve dwarves \u2014 not Thorin, he was too important, and stayed talking to Gandalf \u2014 \njumped to their feet, and made tall piles of all the things. Off they went, not waiting for trays, \nbalancing columns of plates, each with a bottle on the top, with one hand, while the hobbit ran after \nthem almost squeaking with fright: \u201cplease be careful!\u201d and \u201cplease, don\u2019t trouble! I can manage.\u201d But \nthe dwarves only started to sing:",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_70",
+            "text": "For ancient king and elvish lord \nThere many a gleaming golden hoard \nThey shaped and wrought, and light they caught \nTo hide in gems on hilt of sword.",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_79",
+            "text": "dwarves had gone away. Suddenly he found that the music and the singing had stopped, and they were \nall looking at him with eyes shining in the dark.",
+            "book": "01",
+            "relevance_score": 1.0
+          }
+        ],
+        "confidence": 0.7,
+        "validated": false,
+        "validator_notes": "",
+        "related_entities": [],
+        "contradicts": [],
+        "supports": [],
+        "extraction_method": "keyword"
+      },
+      {
+        "id": "politics_war_935fe9",
+        "category": "politics",
+        "title": "References to war",
+        "description": "Found 27 passages referencing 'war' in the context of politics.",
+        "source_passages": [
+          {
+            "passage_id": "01_3",
+            "text": "The mother of our particular hobbit \u2014 what is a hobbit? I suppose hobbits need some description \nnowadays, since they have become rare and shy of the Big People, as they call us. They are (or were) a \nlittle people, about half our height, and smaller than the bearded Dwarves. Hobbits have no beards. \nThere is little or no magic about them, except the ordinary everyday sort which helps them to \ndisappear quietly and quickly when large stupid folk like you and me come blundering along, making \na n",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_77",
+            "text": "As they sang the hobbit felt the love of beautiful things made by hands and by cunning and by \nmagic moving through him, a fierce and a jealous love, the desire of the hearts of dwarves. Then \nsomething Tookish woke up inside him, and he wished to go and see the great mountains, and hear the \npine-trees and the waterfalls, and explore the caves, and wear a sword instead of a walking-stick. He \nlooked out of the window. The stars were out in a dark sky above the trees. He thought of the jewels of",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_120",
+            "text": "\u201cUndoubtedly that was what brought the dragon. Dragons steal gold and jewels, you know, from \nmen and elves and dwarves, wherever they can find them; and they guard their plunder as long as they \nlive (which is practically for ever, unless they are killed), and never enjoy a brass ring of it. Indeed \nthey hardly know a good bit of work from a bad, though they usually have a good notion of the current \nmarket value; and they can\u2019t make a thing for themselves, not even mend a little loose scale of",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_26",
+            "text": "\u201cI am so sorry to keep you waiting!\u201d he was going to say, when he saw that it was not Gandalf at \nall. It was a dwarf with a blue beard tucked into a golden belt, and very bright eyes under his dark-",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_29",
+            "text": "\u201cBilbo Baggins at yours!\u201d said the hobbit, too surprised to ask any questions for the moment. When \nthe silence that followed had become uncomfortable, he added: \u201cI am just about to take tea; pray come \nand have some with me.\u201d A little stiff perhaps, but he meant it kindly. And what would you do, if an \nuninvited dwarf came and hung his things up in your hall without a word of explanation?",
+            "book": "01",
+            "relevance_score": 1.0
+          }
+        ],
+        "confidence": 0.7,
+        "validated": false,
+        "validator_notes": "",
+        "related_entities": [],
+        "contradicts": [],
+        "supports": [],
+        "extraction_method": "keyword"
+      }
+    ],
+    "economy": [
+      {
+        "id": "economy_rich_fcdf92",
+        "category": "economy",
+        "title": "References to rich",
+        "description": "Found 3 passages referencing 'rich' in the context of economy.",
+        "source_passages": [
+          {
+            "passage_id": "01_119",
+            "text": "\u201cO very well,\u201d said Thorin. \u201cLong ago in my grandfather Thror\u2019s time our family was driven out of \nthe far North, and came back with all their wealth and their tools to this Mountain on the map. It had \nbeen discovered by my far ancestor, Thrain the Old, but now they mined and they tunnelled and they \nmade huger halls and greater workshops \u2014 and in addition I believe they found a good deal of gold and \na great many jewels too. Anyway they grew immensely rich and famous, and my grandfather was Ki",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_2",
+            "text": "This hobbit was a very well-to-do hobbit, and his name was Baggins. The Bagginses had lived in \nthe neighbourhood of The Hill for time out of mind, and people considered them very respectable, not \nonly because most of them were rich, but also because they never had any adventures or did anything \nunexpected: you could tell what a Baggins would say on any question without the bother of asking \nhim. This is a story of how a Baggins had an adventure, and found himself doing and saying things \nalto",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_4",
+            "text": "that the Tooks were not as respectable as the Bagginses, though they were undoubtedly richer.",
+            "book": "01",
+            "relevance_score": 1.0
+          }
+        ],
+        "confidence": 0.6000000000000001,
+        "validated": false,
+        "validator_notes": "",
+        "related_entities": [],
+        "contradicts": [],
+        "supports": [],
+        "extraction_method": "keyword"
+      },
+      {
+        "id": "economy_gold_a74aba",
+        "category": "economy",
+        "title": "References to gold",
+        "description": "Found 10 passages referencing 'gold' in the context of economy.",
+        "source_passages": [
+          {
+            "passage_id": "01_45",
+            "text": "The poor little hobbit sat down in the hall and put his head in his hands, and wondered what had \nhappened, and what was going to happen, and whether they would all stay to supper. Then the bell \nrang again louder than ever, and he had to run to the door. It was not four after all, it was five. Another \ndwarf had come along while he was wondering in the hall. He had hardly turned the knob, before they \nwere all inside, bowing and saying \u201cat your service\u201d one after another. Dori, Nori, Ori, Oin, ",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_120",
+            "text": "\u201cUndoubtedly that was what brought the dragon. Dragons steal gold and jewels, you know, from \nmen and elves and dwarves, wherever they can find them; and they guard their plunder as long as they \nlive (which is practically for ever, unless they are killed), and never enjoy a brass ring of it. Indeed \nthey hardly know a good bit of work from a bad, though they usually have a good notion of the current \nmarket value; and they can\u2019t make a thing for themselves, not even mend a little loose scale of",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_43",
+            "text": "\u201cThrong!\u201d thought Mr. Baggins. \u201cI don\u2019t like the sound of that. I really must sit down for a minute \nand collect my wits, and have a drink.\u201d He had only just had a sip \u2014 in the corner, while the four \ndwarves sat round the table, and talked about mines and gold and troubles with the goblins, and the \ndepredations of dragons, and lots of other things which he did not understand, and did not want to, for \nthey sounded much too adventurous \u2014 when, ding-dong-a-ling-dang, his bell rang again, as if s",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_115",
+            "text": "\u201cFirst I should like to know a bit more about things,\u201d said he, feeling all confused and a bit shaky \ninside, but so far still Tookishly determined to go on with things. \u201cI mean about the gold and the \ndragon, and all that, and how it got there, and who it belongs to, and so on and further.\u201d",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_122",
+            "text": "that one day in the proper time I should know. After that we went away, and we have had to earn our \nlivings as best we could up and down the lands, often enough sinking as low as blacksmith-work or \neven coalmining. But we have never forgotten our stolen treasure. And even now, when I will allow \nwe have a good bit laid by and are not so badly off\u201d \u2014 here Thorin stroked the gold chain round his \nneck \u2014 \u201cwe still mean to get it back, and to bring our curses home to Smaug \u2014 if we can.",
+            "book": "01",
+            "relevance_score": 1.0
+          }
+        ],
+        "confidence": 0.7,
+        "validated": false,
+        "validator_notes": "",
+        "related_entities": [],
+        "contradicts": [],
+        "supports": [],
+        "extraction_method": "keyword"
+      },
+      {
+        "id": "economy_silver_bbeb24",
+        "category": "economy",
+        "title": "References to silver",
+        "description": "Found 4 passages referencing 'silver' in the context of economy.",
+        "source_passages": [
+          {
+            "passage_id": "01_49",
+            "text": "\u201cAt your service!\u201d said Bifur, Bofur, and Bombur standing in a row. Then they hung up two yellow \nhoods and a pale green one; and also a sky-blue one with a long silver tassel. This last belonged to \nThorin, an enormously important dwarf, in fact no other than the great Thorin Oakenshield himself, \nwho was not at all pleased at falling flat on Bilbo\u2019s mat with Bifur, Bofur, and Bombur on top of him. \nFor one thing Bombur was immensely fat and heavy. Thorin indeed was very haughty, and said \nnoth",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_7",
+            "text": "All that the unsuspecting Bilbo saw that morning was an old man with a staff. He had a tall pointed \nblue hat, a long grey cloak, a silver scarf over which his long white beard hung down below his waist, \nand immense black boots.",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_39",
+            "text": "\u201cGandalf for certain this time,\u201d he thought as he puffed along the passage. But it was not. It was \ntwo more dwarves, both with blue hoods, silver belts, and yellow beards; and each of them carried a \nbag of tools and a spade. In they hopped, as soon as the door began to open \u2014 Bilbo was hardly \nsurprised at all.",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_109",
+            "text": "\u201cAlso,\u201d went on Gandalf, \u201cI forgot to mention that with the map went a key, a small and curious \nkey. Here it is!\u201d he said, and handed to Thorin a key with a long barrel and intricate wards, made of \nsilver. \u201cKeep it safe!\u201d",
+            "book": "01",
+            "relevance_score": 1.0
+          }
+        ],
+        "confidence": 0.7,
+        "validated": false,
+        "validator_notes": "",
+        "related_entities": [],
+        "contradicts": [],
+        "supports": [],
+        "extraction_method": "keyword"
+      },
+      {
+        "id": "economy_mine_a32cd1",
+        "category": "economy",
+        "title": "References to mine",
+        "description": "Found 4 passages referencing 'mine' in the context of economy.",
+        "source_passages": [
+          {
+            "passage_id": "01_65",
+            "text": "Kili and Fili rushed for their bags and brought back little fiddles; Dori, Nori, and Ori brought out \nflutes from somewhere inside their coats; Bombur produced a drum from the hall; Bifur and Bofur \nwent out too, and came back with clarinets that they had left among the walking-sticks. Dwalin and \nBalin said: \u201cExcuse me, I left mine in the porch!\u201d \u201cJust bring mine in with you!\u201d said Thorin. They \ncame back with viols as big as themselves, and with Thorin\u2019 s harp wrapped in a green cloth. It was ",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_10",
+            "text": "\u201cAll of them at once,\u201d said Bilbo. \u201cAnd a very fine morning for a pipe of tobacco out of doors, into \nthe bargain. If you have a pipe about you, sit down and have a fill of mine! There\u2019s no hurry, we have \nall the day before us!\u201d Then Bilbo sat down on a seat by his door, crossed his legs, and blew out a \nbeautiful grey ring of smoke that sailed up into the air without breaking and floated away over The \nHill.",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_124",
+            "text": "\u201cI did not \u2018get hold of it,\u2019 I was given it,\u201d said the wizard. \u201cYour grandfather Thror was killed, you \nremember, in the mines of Moria by Azog the Goblin .\u201d",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_128",
+            "text": "\u201cYour grandfather,\u201d said the wizard slowly and grimly, \u201cgave the map to his son for safety before \nhe went to the mines of Moria. Your father went away to try his luck with the map after your \ngrandfather was killed; and lots of adventures of a most unpleasant sort he had, but he never got near \nthe Mountain. How he got there I don\u2019t know, but I found him a prisoner in the dungeons of the \nNecromancer.\u201d",
+            "book": "01",
+            "relevance_score": 1.0
+          }
+        ],
+        "confidence": 0.7,
+        "validated": false,
+        "validator_notes": "",
+        "related_entities": [],
+        "contradicts": [],
+        "supports": [],
+        "extraction_method": "keyword"
+      },
+      {
+        "id": "economy_poor_013006",
+        "category": "economy",
+        "title": "References to poor",
+        "description": "Found 3 passages referencing 'poor' in the context of economy.",
+        "source_passages": [
+          {
+            "passage_id": "01_19",
+            "text": "\u201cWhere else should I be?\u201d said the wizard. \u201cAll the same I am pleased to find you remember \nsomething about me. You seem to remember my fireworks kindly, at any rate, and that is not without \nhope. Indeed for your old grandfather Took\u2019s sake, and for the sake of poor Belladonna, I will give \nyou what you asked for.\u201d",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_85",
+            "text": "\u201cGandalf, dwarves and Mr. Baggins! We are met together in the house of our friend and fellow \nconspirator, this most excellent and audacious hobbit \u2014 may the hair on his toes never fall out! all \npraise to his wine and ale! \u2014 \u201d He paused for breath and for a polite remark from the hobbit, but the \ncompliments were quite lost on poor Bilbo Baggins, who was wagging his mouth in protest at being \ncalled audacious and worst of all fellow conspirator, though no noise came out, he was so flummoxed. \nS",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_88",
+            "text": "This was Thorin\u2019 s style. He was an important dwarf. If he had been allowed, he would probably \nhave gone on like this until he was out of breath, without telling any one there anything that was not \nknown already. But he was rudely interrupted. Poor Bilbo couldn\u2019t bear it any longer. At may never \nreturn he began to feel a shriek coming up inside, and very soon it burst out like the whistle of an \nengine coming out of a tunnel. All the dwarves sprang up, knocking over the table. Gandalf struck ",
+            "book": "01",
+            "relevance_score": 1.0
+          }
+        ],
+        "confidence": 0.6000000000000001,
+        "validated": false,
+        "validator_notes": "",
+        "related_entities": [],
+        "contradicts": [],
+        "supports": [],
+        "extraction_method": "keyword"
+      }
+    ],
+    "language": [
+      {
+        "id": "language_word_46a02c",
+        "category": "language",
+        "title": "References to word",
+        "description": "Found 5 passages referencing 'word' in the context of language.",
+        "source_passages": [
+          {
+            "passage_id": "01_70",
+            "text": "For ancient king and elvish lord \nThere many a gleaming golden hoard \nThey shaped and wrought, and light they caught \nTo hide in gems on hilt of sword.",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_29",
+            "text": "\u201cBilbo Baggins at yours!\u201d said the hobbit, too surprised to ask any questions for the moment. When \nthe silence that followed had become uncomfortable, he added: \u201cI am just about to take tea; pray come \nand have some with me.\u201d A little stiff perhaps, but he meant it kindly. And what would you do, if an \nuninvited dwarf came and hung his things up in your hall without a word of explanation?",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_77",
+            "text": "As they sang the hobbit felt the love of beautiful things made by hands and by cunning and by \nmagic moving through him, a fierce and a jealous love, the desire of the hearts of dwarves. Then \nsomething Tookish woke up inside him, and he wished to go and see the great mountains, and hear the \npine-trees and the waterfalls, and explore the caves, and wear a sword instead of a walking-stick. He \nlooked out of the window. The stars were out in a dark sky above the trees. He thought of the jewels of",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_94",
+            "text": "\u201cPardon me,\u201d he said, \u201cif I have overheard words that you were saying. I don\u2019t pretend to \nunderstand what you are talking about, or your reference to burglars, but I think I am right in \nbelieving\u201d (this is what he called being on his dignity) \u201cthat you think I am no good. I will show you. I \nhave no signs on my door \u2014 it was painted a week ago \u2014 , and I am quite sure you have come to the \nwrong house. As soon as I saw your funny faces on the door-step, I had my doubts. But treat it as the \nrig",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_113",
+            "text": "\u201cThat would be no good,\u201d said the wizard, \u201cnot without a mighty Warrior, even a Hero. I tried to \nfind one; but warriors are busy fighting one another in distant lands, and in this neighbourhood heroes \nare scarce, or simply not to be found. Swords in these parts are mostly blunt, and axes are used for \ntrees, and shields as cradles or dish-covers; and dragons are comfortably far-off (and therefore \nlegendary). That is why I settled on burglary \u2014 especially when I remembered the existence of a S",
+            "book": "01",
+            "relevance_score": 1.0
+          }
+        ],
+        "confidence": 0.7,
+        "validated": false,
+        "validator_notes": "",
+        "related_entities": [],
+        "contradicts": [],
+        "supports": [],
+        "extraction_method": "keyword"
+      },
+      {
+        "id": "language_name_54fdf8",
+        "category": "language",
+        "title": "References to name",
+        "description": "Found 5 passages referencing 'name' in the context of language.",
+        "source_passages": [
+          {
+            "passage_id": "01_2",
+            "text": "This hobbit was a very well-to-do hobbit, and his name was Baggins. The Bagginses had lived in \nthe neighbourhood of The Hill for time out of mind, and people considered them very respectable, not \nonly because most of them were rich, but also because they never had any adventures or did anything \nunexpected: you could tell what a Baggins would say on any question without the bother of asking \nhim. This is a story of how a Baggins had an adventure, and found himself doing and saying things \nalto",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_16",
+            "text": "\u201cNot at all, not at all, my dear sir! Let me see, I don\u2019t think I know your name?\u201d",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_17",
+            "text": "\u201cYes, yes, my dear sir \u2014 and I do know your name, Mr. Bilbo Baggins. And you do know my name, \nthough you don\u2019t remember that I belong to it. I am Gandalf, and Gandalf means me! To think that I \nshould have lived to be good-morninged by Belladonna Took\u2019s son, as if I was selling buttons at the \ndoor!\u201d",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_45",
+            "text": "The poor little hobbit sat down in the hall and put his head in his hands, and wondered what had \nhappened, and what was going to happen, and whether they would all stay to supper. Then the bell \nrang again louder than ever, and he had to run to the door. It was not four after all, it was five. Another \ndwarf had come along while he was wondering in the hall. He had hardly turned the knob, before they \nwere all inside, bowing and saying \u201cat your service\u201d one after another. Dori, Nori, Ori, Oin, ",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_126",
+            "text": "\u201cWell, your father gave me this to give to you; and if I have chosen my own time and way for \nhanding it over, you can hardly blame me, considering the trouble I had to find you. Your father could \nnot remember his own name when he gave me the paper, and he never told me yours; so on the whole I \nthink I ought to be praised and thanked! Here it is,\u201d said he handing the map to Thorin.",
+            "book": "01",
+            "relevance_score": 1.0
+          }
+        ],
+        "confidence": 0.7,
+        "validated": false,
+        "validator_notes": "",
+        "related_entities": [],
+        "contradicts": [],
+        "supports": [],
+        "extraction_method": "keyword"
+      },
+      {
+        "id": "language_speak_2ec854",
+        "category": "language",
+        "title": "References to speak",
+        "description": "Found 4 passages referencing 'speak' in the context of language.",
+        "source_passages": [
+          {
+            "passage_id": "01_84",
+            "text": "\u201cHush!\u201d said Gandalf. \u201cLet Thorin speak!\u201d And this is how Thorin began.",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_91",
+            "text": "In the meanwhile, however, Bullroarer\u2019 s gentler descendant was reviving in the drawing-room. \nAfter a while and a drink he crept nervously to the door of the parlour. This is what he heard, Gloin \nspeaking: \u201cHumph!\u201d (or some snort more or less like that). \u201cWill he do, do you think? It is all very \nwell for Gandalf to talk about this hobbit being fierce, but one shriek like that in a moment of \nexcitement would be enough to wake the dragon and all his relatives, and kill the lot of us. I think i",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_119",
+            "text": "\u201cO very well,\u201d said Thorin. \u201cLong ago in my grandfather Thror\u2019s time our family was driven out of \nthe far North, and came back with all their wealth and their tools to this Mountain on the map. It had \nbeen discovered by my far ancestor, Thrain the Old, but now they mined and they tunnelled and they \nmade huger halls and greater workshops \u2014 and in addition I believe they found a good deal of gold and \na great many jewels too. Anyway they grew immensely rich and famous, and my grandfather was Ki",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_137",
+            "text": "door-step your job, not to speak of getting inside the door? But I agree about bed and breakfast. I like \nsix eggs with my ham, when starting on a journey: fried not poached, and mind you don\u2019t break \u2019em.\u201d",
+            "book": "01",
+            "relevance_score": 1.0
+          }
+        ],
+        "confidence": 0.7,
+        "validated": false,
+        "validator_notes": "",
+        "related_entities": [],
+        "contradicts": [],
+        "supports": [],
+        "extraction_method": "keyword"
+      },
+      {
+        "id": "language_rune_95022d",
+        "category": "language",
+        "title": "References to rune",
+        "description": "Found 2 passages referencing 'rune' in the context of language.",
+        "source_passages": [
+          {
+            "passage_id": "01_102",
+            "text": "\u201cThere is one point that you haven\u2019t noticed,\u201d said the wizard, \u201cand that is the secret entrance. You \nsee that rune on the West side, and the hand pointing to it from the other runes? That marks a hidden \npassage to the Lower Halls.\u201d (Look at the map at the beginning of this book, and you will see there the \nrunes.)",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_105",
+            "text": "\u201cBecause it is too small. \u2018 Five feet high the door and three may walk abreast \u2019 say the runes, but \nSmaug could not creep into a hole that size, not even when he was a young dragon, certainly not after \ndevouring so many of the dwarves and men of Dale.\u201d",
+            "book": "01",
+            "relevance_score": 1.0
+          }
+        ],
+        "confidence": 0.5,
+        "validated": false,
+        "validator_notes": "",
+        "related_entities": [],
+        "contradicts": [],
+        "supports": [],
+        "extraction_method": "keyword"
+      }
+    ],
+    "themes": [
+      {
+        "id": "themes_dark_c2e302",
+        "category": "themes",
+        "title": "References to dark",
+        "description": "Found 7 passages referencing 'dark' in the context of themes.",
+        "source_passages": [
+          {
+            "passage_id": "01_77",
+            "text": "As they sang the hobbit felt the love of beautiful things made by hands and by cunning and by \nmagic moving through him, a fierce and a jealous love, the desire of the hearts of dwarves. Then \nsomething Tookish woke up inside him, and he wished to go and see the great mountains, and hear the \npine-trees and the waterfalls, and explore the caves, and wear a sword instead of a walking-stick. He \nlooked out of the window. The stars were out in a dark sky above the trees. He thought of the jewels of",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_67",
+            "text": "The dark filled all the room, and the fire died down, and the shadows were lost, and still they \nplayed on. And suddenly first one and then another began to sing as they played, deep-throated singing \nof the dwarves in the deep places of their ancient homes; and this is like a fragment of their song, if it \ncan be like their song without their music.",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_26",
+            "text": "\u201cI am so sorry to keep you waiting!\u201d he was going to say, when he saw that it was not Gandalf at \nall. It was a dwarf with a blue beard tucked into a golden belt, and very bright eyes under his dark-",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_65",
+            "text": "Kili and Fili rushed for their bags and brought back little fiddles; Dori, Nori, and Ori brought out \nflutes from somewhere inside their coats; Bombur produced a drum from the hall; Bifur and Bofur \nwent out too, and came back with clarinets that they had left among the walking-sticks. Dwalin and \nBalin said: \u201cExcuse me, I left mine in the porch!\u201d \u201cJust bring mine in with you!\u201d said Thorin. They \ncame back with viols as big as themselves, and with Thorin\u2019 s harp wrapped in a green cloth. It was ",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_69",
+            "text": "The dwarves of yore made mighty spells, \nWhile hammers fell like ringing bells \nIn places deep, where dark things sleep, \nIn hollow halls beneath the fells.",
+            "book": "01",
+            "relevance_score": 1.0
+          }
+        ],
+        "confidence": 0.7,
+        "validated": false,
+        "validator_notes": "",
+        "related_entities": [],
+        "contradicts": [],
+        "supports": [],
+        "extraction_method": "keyword"
+      },
+      {
+        "id": "themes_good_a0c9f8",
+        "category": "themes",
+        "title": "References to good",
+        "description": "Found 19 passages referencing 'good' in the context of themes.",
+        "source_passages": [
+          {
+            "passage_id": "01_18",
+            "text": "\u201cGandalf, Gandalf! Good gracious me! Not the wandering wizard that gave Old Took a pair of \nmagic diamond studs that fastened themselves and never came undone till ordered? Not the fellow \nwho used to tell such wonderful tales at parties, about dragons and goblins and giants and the rescue of \nprincesses and the unexpected luck of widows\u2019 sons? Not the man that used to make such particularly \nexcellent fireworks! I remember those! Old Took used to have them on Midsummer\u2019s Eve. Splendid! \nThey us",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_122",
+            "text": "that one day in the proper time I should know. After that we went away, and we have had to earn our \nlivings as best we could up and down the lands, often enough sinking as low as blacksmith-work or \neven coalmining. But we have never forgotten our stolen treasure. And even now, when I will allow \nwe have a good bit laid by and are not so badly off\u201d \u2014 here Thorin stroked the gold chain round his \nneck \u2014 \u201cwe still mean to get it back, and to bring our curses home to Smaug \u2014 if we can.",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_3",
+            "text": "The mother of our particular hobbit \u2014 what is a hobbit? I suppose hobbits need some description \nnowadays, since they have become rare and shy of the Big People, as they call us. They are (or were) a \nlittle people, about half our height, and smaller than the bearded Dwarves. Hobbits have no beards. \nThere is little or no magic about them, except the ordinary everyday sort which helps them to \ndisappear quietly and quickly when large stupid folk like you and me come blundering along, making \na n",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_8",
+            "text": "\u201cGood Morning!\u201d said Bilbo, and he meant it. The sun was shining, and the grass was very green. \nBut Gandalf looked at him from under long bushy eyebrows that stuck out further than the brim of his \nshady hat.",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_9",
+            "text": "\u201cWhat do you mean?\u201d he said. \u201cDo you wish me a good morning, or mean that it is a good morning \nwhether I want it or not; or that you feel good this morning; or that it is a morning to be good on?\u201d",
+            "book": "01",
+            "relevance_score": 1.0
+          }
+        ],
+        "confidence": 0.7,
+        "validated": false,
+        "validator_notes": "",
+        "related_entities": [],
+        "contradicts": [],
+        "supports": [],
+        "extraction_method": "keyword"
+      },
+      {
+        "id": "themes_light_45351b",
+        "category": "themes",
+        "title": "References to light",
+        "description": "Found 8 passages referencing 'light' in the context of themes.",
+        "source_passages": [
+          {
+            "passage_id": "01_63",
+            "text": "smoke-ring from his short clay-pipe straight through each one of Thorin\u2019 s. Then Gandalf\u2019s smoke-ring \nwould go green and come back to hover over the wizard\u2019s head. He had a cloud of them about him \nalready, and in the dim light it made him look strange and sorcerous. Bilbo stood still and watched \u2014 \nhe loved smoke-rings \u2014 and then he blushed to think how proud he had been yesterday morning of the \nsmoke-rings he had sent up the wind over The Hill.",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_66",
+            "text": "The dark came into the room from the little window that opened in the side of The Hill; the \nfirelight flickered \u2014 it was April \u2014 and still they played on, while the shadow of Gandalf\u2019s beard \nwagged against the wall.",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_88",
+            "text": "This was Thorin\u2019 s style. He was an important dwarf. If he had been allowed, he would probably \nhave gone on like this until he was out of breath, without telling any one there anything that was not \nknown already. But he was rudely interrupted. Poor Bilbo couldn\u2019t bear it any longer. At may never \nreturn he began to feel a shriek coming up inside, and very soon it burst out like the whistle of an \nengine coming out of a tunnel. All the dwarves sprang up, knocking over the table. Gandalf struck ",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_97",
+            "text": "He scowled so angrily at Gloin that the dwarf huddled back in his chair; and when Bilbo tried to \nopen his mouth to ask a question, he turned and frowned at him and stuck out his bushy eyebrows, till \nBilbo shut his mouth tight with a snap. \u201cThat\u2019s right,\u201d said Gandalf. \u201cLet\u2019s have no more argument. I \nhave chosen Mr. Baggins and that ought to be enough for all of you. If I say he is a Burglar, a Burglar \nhe is, or will be when the time comes. There is a lot more in him than you guess, and a dea",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_62",
+            "text": "And of course they did none of these dreadful things, and everything was cleaned and put away safe \nas quick as lightning, while the hobbit was turning round and round in the middle of the kitchen trying \nto see what they were doing. Then they went back, and found Thorin with his feet on the fender \nsmoking a pipe. He was blowing the most enormous smoke-rings, and wherever he told one to go, it \nwent \u2014 up the chimney, or behind the clock on the mantelpiece, or under the table, or round and round",
+            "book": "01",
+            "relevance_score": 1.0
+          }
+        ],
+        "confidence": 0.7,
+        "validated": false,
+        "validator_notes": "",
+        "related_entities": [],
+        "contradicts": [],
+        "supports": [],
+        "extraction_method": "keyword"
+      },
+      {
+        "id": "themes_quest_43d00c",
+        "category": "themes",
+        "title": "References to quest",
+        "description": "Found 3 passages referencing 'quest' in the context of themes.",
+        "source_passages": [
+          {
+            "passage_id": "01_2",
+            "text": "This hobbit was a very well-to-do hobbit, and his name was Baggins. The Bagginses had lived in \nthe neighbourhood of The Hill for time out of mind, and people considered them very respectable, not \nonly because most of them were rich, but also because they never had any adventures or did anything \nunexpected: you could tell what a Baggins would say on any question without the bother of asking \nhim. This is a story of how a Baggins had an adventure, and found himself doing and saying things \nalto",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_29",
+            "text": "\u201cBilbo Baggins at yours!\u201d said the hobbit, too surprised to ask any questions for the moment. When \nthe silence that followed had become uncomfortable, he added: \u201cI am just about to take tea; pray come \nand have some with me.\u201d A little stiff perhaps, but he meant it kindly. And what would you do, if an \nuninvited dwarf came and hung his things up in your hall without a word of explanation?",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_99",
+            "text": "\u201cThis was made by Thror, your grandfather, Thorin,\u201d he said in answer to the dwarves\u2019 excited \nquestions. \u201cIt is a plan of the Mountain.\u201d",
+            "book": "01",
+            "relevance_score": 1.0
+          }
+        ],
+        "confidence": 0.6000000000000001,
+        "validated": false,
+        "validator_notes": "",
+        "related_entities": [],
+        "contradicts": [],
+        "supports": [],
+        "extraction_method": "keyword"
+      },
+      {
+        "id": "themes_friend_5fc94b",
+        "category": "themes",
+        "title": "References to friend",
+        "description": "Found 4 passages referencing 'friend' in the context of themes.",
+        "source_passages": [
+          {
+            "passage_id": "01_6",
+            "text": "By some curious chance one morning long ago in the quiet of the world, when there was less noise \nand more green, and the hobbits were still numerous and prosperous, and Bilbo Baggins was standing \nat his door after breakfast smoking an enormous long wooden pipe that reached nearly down to his \nwoolly toes (neatly brushed) \u2014 Gandalf came by. Gandalf ! If you had heard only a quarter of what I \nhave heard about him, and I have only heard very little of all there is to hear, you would be prepared ",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_38",
+            "text": "When he got back Balin and Dwalin were talking at the table like old friends (as a matter of fact \nthey were brothers). Bilbo plumped down the beer and the cake in front of them, when loud came a \nring at the bell again, and then another ring.",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_48",
+            "text": "\u201cCarefully! Carefully!\u201d he said. \u201cIt is not like you, Bilbo, to keep friends waiting on the mat, and \nthen open the door like a pop-gun! Let me introduce Bifur, Bofur, Bombur, and especially Thorin!\u201d",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_85",
+            "text": "\u201cGandalf, dwarves and Mr. Baggins! We are met together in the house of our friend and fellow \nconspirator, this most excellent and audacious hobbit \u2014 may the hair on his toes never fall out! all \npraise to his wine and ale! \u2014 \u201d He paused for breath and for a polite remark from the hobbit, but the \ncompliments were quite lost on poor Bilbo Baggins, who was wagging his mouth in protest at being \ncalled audacious and worst of all fellow conspirator, though no noise came out, he was so flummoxed. \nS",
+            "book": "01",
+            "relevance_score": 1.0
+          }
+        ],
+        "confidence": 0.7,
+        "validated": false,
+        "validator_notes": "",
+        "related_entities": [],
+        "contradicts": [],
+        "supports": [],
+        "extraction_method": "keyword"
+      },
+      {
+        "id": "themes_hope_96cca3",
+        "category": "themes",
+        "title": "References to hope",
+        "description": "Found 3 passages referencing 'hope' in the context of themes.",
+        "source_passages": [
+          {
+            "passage_id": "01_19",
+            "text": "\u201cWhere else should I be?\u201d said the wizard. \u201cAll the same I am pleased to find you remember \nsomething about me. You seem to remember my fireworks kindly, at any rate, and that is not without \nhope. Indeed for your old grandfather Took\u2019s sake, and for the sake of poor Belladonna, I will give \nyou what you asked for.\u201d",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_50",
+            "text": "\u201cNow we are all here!\u201d said Gandalf, looking at the row of thirteen hoods \u2014 the best detachable \nparty hoods \u2014 and his own hat hanging on the pegs. \u201cQuite a merry gathering! I hope there is \nsomething left for the late-comers to eat and drink! What\u2019s that? Tea! No thank you! A little red wine, \nI think for me.\u201d",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_110",
+            "text": "\u201cIndeed I will,\u201d said Thorin, and he fastened it upon a fine chain that hung about his neck and \nunder his jacket. \u201cNow things begin to look more hopeful. This news alters them much for the better. \nSo far we have had no clear idea what to do. We thought of going East, as quiet and careful as we \ncould, as far as the Long Lake. After that the trouble would begin \u2014 .\u201d",
+            "book": "01",
+            "relevance_score": 1.0
+          }
+        ],
+        "confidence": 0.6000000000000001,
+        "validated": false,
+        "validator_notes": "",
+        "related_entities": [],
+        "contradicts": [],
+        "supports": [],
+        "extraction_method": "keyword"
+      },
+      {
+        "id": "themes_hate_3d1d4a",
+        "category": "themes",
+        "title": "References to hate",
+        "description": "Found 2 passages referencing 'hate' in the context of themes.",
+        "source_passages": [
+          {
+            "passage_id": "01_59",
+            "text": "Blunt the knives and bend the forks! \nThat\u2019s what Bilbo Baggins hates- \nSmash the bottles and burn the corks!",
+            "book": "01",
+            "relevance_score": 1.0
+          },
+          {
+            "passage_id": "01_129",
+            "text": "\u201cWhatever were you doing there?\u201d asked Thorin with a shudder, and all the dwarves shivered.",
+            "book": "01",
+            "relevance_score": 1.0
+          }
+        ],
+        "confidence": 0.5,
+        "validated": false,
+        "validator_notes": "",
+        "related_entities": [],
+        "contradicts": [],
+        "supports": [],
+        "extraction_method": "keyword"
+      }
+    ]
+  },
+  "cultures": {
+    "hobbits": {
+      "id": "hobbits",
+      "name": "Hobbits",
+      "values": [],
+      "customs": [],
+      "taboos": [],
+      "homeland": null,
+      "appearance": null,
+      "lifespan": null,
+      "government": null,
+      "social_structure": null,
+      "relations": {},
+      "language": null,
+      "naming_conventions": null,
+      "source_passages": [
+        {
+          "passage_id": "01_0",
+          "text": "In a hole in the ground there lived a hobbit. Not a nasty, dirty, wet hole, filled with the ends of worms \nand an oozy smell, nor yet a dry, bare, sandy hole with nothing in it to sit down on or to eat: it was a \nhobbit-hole, and that means comfort.",
+          "book": "01",
+          "relevance_score": 1.0
+        },
+        {
+          "passage_id": "01_1",
+          "text": "It had a perfectly round door like a porthole, painted green, with a shiny yellow brass knob in the \nexact middle. The door opened on to a tube-shaped hall like a tunnel: a very comfortable tunnel \nwithout smoke, with panelled walls, and floors tiled and carpeted, provided with polished chairs, and ",
+          "book": "01",
+          "relevance_score": 1.0
+        },
+        {
+          "passage_id": "01_2",
+          "text": "This hobbit was a very well-to-do hobbit, and his name was Baggins. The Bagginses had lived in \nthe neighbourhood of The Hill for time out of mind, and people considered them very respectable, not \nonly because most of them were rich, but also because they never had any adventures or did anything \nu",
+          "book": "01",
+          "relevance_score": 1.0
+        },
+        {
+          "passage_id": "01_3",
+          "text": "The mother of our particular hobbit \u2014 what is a hobbit? I suppose hobbits need some description \nnowadays, since they have become rare and shy of the Big People, as they call us. They are (or were) a \nlittle people, about half our height, and smaller than the bearded Dwarves. Hobbits have no beards.",
+          "book": "01",
+          "relevance_score": 1.0
+        },
+        {
+          "passage_id": "01_3",
+          "text": "The mother of our particular hobbit \u2014 what is a hobbit? I suppose hobbits need some description \nnowadays, since they have become rare and shy of the Big People, as they call us. They are (or were) a \nlittle people, about half our height, and smaller than the bearded Dwarves. Hobbits have no beards.",
+          "book": "01",
+          "relevance_score": 1.0
+        },
+        {
+          "passage_id": "01_5",
+          "text": "Not that Belladonna Took ever had any adventures after she became Mrs. Bungo Baggins. Bungo, \nthat was Bilbo\u2019s father, built the most luxurious hobbit-hole for her (and partly with her money) that \nwas to be found either under The Hill or over The Hill or across The Water, and there they remained to",
+          "book": "01",
+          "relevance_score": 1.0
+        },
+        {
+          "passage_id": "01_6",
+          "text": "By some curious chance one morning long ago in the quiet of the world, when there was less noise \nand more green, and the hobbits were still numerous and prosperous, and Bilbo Baggins was standing \nat his door after breakfast smoking an enormous long wooden pipe that reached nearly down to his \nwool",
+          "book": "01",
+          "relevance_score": 1.0
+        },
+        {
+          "passage_id": "01_6",
+          "text": "By some curious chance one morning long ago in the quiet of the world, when there was less noise \nand more green, and the hobbits were still numerous and prosperous, and Bilbo Baggins was standing \nat his door after breakfast smoking an enormous long wooden pipe that reached nearly down to his \nwool",
+          "book": "01",
+          "relevance_score": 1.0
+        },
+        {
+          "passage_id": "01_12",
+          "text": "\u201cI should think so \u2014 in these parts! We are plain quiet folk and have no use for adventures. Nasty \ndisturbing uncomfortable things! Make you late for dinner! I can\u2019t think what anybody sees in them,\u201d \nsaid our Mr. Baggins, and stuck one thumb behind his braces, and blew out another even bigger \nsmo",
+          "book": "01",
+          "relevance_score": 1.0
+        },
+        {
+          "passage_id": "01_21",
+          "text": "\u201cSorry! I don\u2019t want any adventures, thank you. Not today. Good morning! But please come to tea \n\u2014 any time you like! Why not tomorrow? Come tomorrow! Good bye!\u201d With that the hobbit turned \nand scuttled inside his round green door, and shut it as quickly as he dared, not to seem rude. Wizards \nafte",
+          "book": "01",
+          "relevance_score": 1.0
+        }
+      ]
+    },
+    "elves": {
+      "id": "elves",
+      "name": "Elves",
+      "values": [],
+      "customs": [],
+      "taboos": [],
+      "homeland": null,
+      "appearance": null,
+      "lifespan": null,
+      "government": null,
+      "social_structure": null,
+      "relations": {},
+      "language": null,
+      "naming_conventions": null,
+      "source_passages": [
+        {
+          "passage_id": "01_2",
+          "text": "This hobbit was a very well-to-do hobbit, and his name was Baggins. The Bagginses had lived in \nthe neighbourhood of The Hill for time out of mind, and people considered them very respectable, not \nonly because most of them were rich, but also because they never had any adventures or did anything \nu",
+          "book": "01",
+          "relevance_score": 1.0
+        },
+        {
+          "passage_id": "01_18",
+          "text": "\u201cGandalf, Gandalf! Good gracious me! Not the wandering wizard that gave Old Took a pair of \nmagic diamond studs that fastened themselves and never came undone till ordered? Not the fellow \nwho used to tell such wonderful tales at parties, about dragons and goblins and giants and the rescue of \nprinc",
+          "book": "01",
+          "relevance_score": 1.0
+        },
+        {
+          "passage_id": "01_22",
+          "text": "\u201cWhat on earth did I ask him to tea for!\u201d he said to himself, as he went to the pantry. He had only \njust had breakfast, but he thought a cake or two and a drink of something would do him good after his \nfright.",
+          "book": "01",
+          "relevance_score": 1.0
+        },
+        {
+          "passage_id": "01_34",
+          "text": "\u201cThank you!\u201d said Bilbo with a gasp. It was not the correct thing to say, but they have begun to \narrive had flustered him badly. He liked visitors, but he liked to know them before they arrived, and \nhe preferred to ask them himself. He had a horrible thought that the cakes might run short, and the",
+          "book": "01",
+          "relevance_score": 1.0
+        },
+        {
+          "passage_id": "01_37",
+          "text": "\u201cLots!\u201d Bilbo found himself answering, to his own surprise; and he found himself scuttling off, \ntoo, to the cellar to fill a pint beer-mug, and then to a pantry to fetch two beautiful round seed-cakes \nwhich he had baked that afternoon for his after-supper morsel.",
+          "book": "01",
+          "relevance_score": 1.0
+        },
+        {
+          "passage_id": "01_49",
+          "text": "\u201cAt your service!\u201d said Bifur, Bofur, and Bombur standing in a row. Then they hung up two yellow \nhoods and a pale green one; and also a sky-blue one with a long silver tassel. This last belonged to \nThorin, an enormously important dwarf, in fact no other than the great Thorin Oakenshield himself, \n",
+          "book": "01",
+          "relevance_score": 1.0
+        },
+        {
+          "passage_id": "01_53",
+          "text": "\u201cSeems to know as much about the inside of my larders as I do myself!\u201d thought Mr. Baggins, who \nwas feeling positively flummoxed, and was beginning to wonder whether a most wretched adventure \nhad not come right into his house. By the time he had got all the bottles and dishes and knives and \nforks",
+          "book": "01",
+          "relevance_score": 1.0
+        },
+        {
+          "passage_id": "01_65",
+          "text": "Kili and Fili rushed for their bags and brought back little fiddles; Dori, Nori, and Ori brought out \nflutes from somewhere inside their coats; Bombur produced a drum from the hall; Bifur and Bofur \nwent out too, and came back with clarinets that they had left among the walking-sticks. Dwalin and \nB",
+          "book": "01",
+          "relevance_score": 1.0
+        },
+        {
+          "passage_id": "01_72",
+          "text": "Goblets they carved there for themselves \nAnd harps of gold; where no man delves \nThere lay they long, and many a song \nWas sung unheard by men or elves.",
+          "book": "01",
+          "relevance_score": 1.0
+        },
+        {
+          "passage_id": "01_93",
+          "text": "Then Mr. Baggins turned the handle and went in. The Took side had won. He suddenly felt he \nwould go without bed and breakfast to be thought fierce. As for little fellow bobbing on the mat it \nalmost made him really fierce. Many a time afterwards the Baggins part regretted what he did now, \nand he s",
+          "book": "01",
+          "relevance_score": 1.0
+        }
+      ]
+    },
+    "dwarves": {
+      "id": "dwarves",
+      "name": "Dwarves",
+      "values": [],
+      "customs": [],
+      "taboos": [],
+      "homeland": null,
+      "appearance": null,
+      "lifespan": null,
+      "government": null,
+      "social_structure": null,
+      "relations": {},
+      "language": null,
+      "naming_conventions": null,
+      "source_passages": [
+        {
+          "passage_id": "01_3",
+          "text": "The mother of our particular hobbit \u2014 what is a hobbit? I suppose hobbits need some description \nnowadays, since they have become rare and shy of the Big People, as they call us. They are (or were) a \nlittle people, about half our height, and smaller than the bearded Dwarves. Hobbits have no beards.",
+          "book": "01",
+          "relevance_score": 1.0
+        },
+        {
+          "passage_id": "01_26",
+          "text": "\u201cI am so sorry to keep you waiting!\u201d he was going to say, when he saw that it was not Gandalf at \nall. It was a dwarf with a blue beard tucked into a golden belt, and very bright eyes under his dark-",
+          "book": "01",
+          "relevance_score": 1.0
+        },
+        {
+          "passage_id": "01_29",
+          "text": "\u201cBilbo Baggins at yours!\u201d said the hobbit, too surprised to ask any questions for the moment. When \nthe silence that followed had become uncomfortable, he added: \u201cI am just about to take tea; pray come \nand have some with me.\u201d A little stiff perhaps, but he meant it kindly. And what would you do, if",
+          "book": "01",
+          "relevance_score": 1.0
+        },
+        {
+          "passage_id": "01_32",
+          "text": "\u201cSo you have got here at last!\u201d That was what he was going to say to Gandalf this time. But it was \nnot Gandalf. Instead there was a very old-looking dwarf on the step with a white beard and a scarlet \nhood; and he too hopped inside as soon as the door was open, just as if he had been invited.",
+          "book": "01",
+          "relevance_score": 1.0
+        },
+        {
+          "passage_id": "01_39",
+          "text": "\u201cGandalf for certain this time,\u201d he thought as he puffed along the passage. But it was not. It was \ntwo more dwarves, both with blue hoods, silver belts, and yellow beards; and each of them carried a \nbag of tools and a spade. In they hopped, as soon as the door began to open \u2014 Bilbo was hardly \nsur",
+          "book": "01",
+          "relevance_score": 1.0
+        },
+        {
+          "passage_id": "01_43",
+          "text": "\u201cThrong!\u201d thought Mr. Baggins. \u201cI don\u2019t like the sound of that. I really must sit down for a minute \nand collect my wits, and have a drink.\u201d He had only just had a sip \u2014 in the corner, while the four \ndwarves sat round the table, and talked about mines and gold and troubles with the goblins, and the",
+          "book": "01",
+          "relevance_score": 1.0
+        },
+        {
+          "passage_id": "01_45",
+          "text": "The poor little hobbit sat down in the hall and put his head in his hands, and wondered what had \nhappened, and what was going to happen, and whether they would all stay to supper. Then the bell \nrang again louder than ever, and he had to run to the door. It was not four after all, it was five. Anot",
+          "book": "01",
+          "relevance_score": 1.0
+        },
+        {
+          "passage_id": "01_46",
+          "text": "A big jug of coffee had just been set in the hearth, the seed-cakes were gone, and the dwarves were \nstarting on a round of buttered scones, when there came \u2014 a loud knock. Not a ring, but a hard rat-tat \non the hobbit\u2019s beautiful green door. Somebody was banging with a stick!",
+          "book": "01",
+          "relevance_score": 1.0
+        },
+        {
+          "passage_id": "01_47",
+          "text": "Bilbo rushed along the passage, very angry, and altogether bewildered and bewuthered \u2014 this was \nthe most awkward Wednesday he ever remembered. He pulled open the door with a jerk, and they all \nfell in, one on top of the other. More dwarves, four more! And there was Gandalf behind, leaning on \nhis ",
+          "book": "01",
+          "relevance_score": 1.0
+        },
+        {
+          "passage_id": "01_49",
+          "text": "\u201cAt your service!\u201d said Bifur, Bofur, and Bombur standing in a row. Then they hung up two yellow \nhoods and a pale green one; and also a sky-blue one with a long silver tassel. This last belonged to \nThorin, an enormously important dwarf, in fact no other than the great Thorin Oakenshield himself, \n",
+          "book": "01",
+          "relevance_score": 1.0
+        }
+      ]
+    },
+    "men": {
+      "id": "men",
+      "name": "Men",
+      "values": [],
+      "customs": [],
+      "taboos": [],
+      "homeland": null,
+      "appearance": null,
+      "lifespan": null,
+      "government": null,
+      "social_structure": null,
+      "relations": {},
+      "language": null,
+      "naming_conventions": null,
+      "source_passages": [
+        {
+          "passage_id": "01_7",
+          "text": "All that the unsuspecting Bilbo saw that morning was an old man with a staff. He had a tall pointed \nblue hat, a long grey cloak, a silver scarf over which his long white beard hung down below his waist, \nand immense black boots.",
+          "book": "01",
+          "relevance_score": 1.0
+        },
+        {
+          "passage_id": "01_24",
+          "text": "The next day he had almost forgotten about Gandalf. He did not remember things very well, unless \nhe put them down on his Engagement Tablet: like this: Gandalf Tea Wednesday. Yesterday he had \nbeen too flustered to do anything of the kind.",
+          "book": "01",
+          "relevance_score": 1.0
+        },
+        {
+          "passage_id": "01_25",
+          "text": "Just before tea-time there came a tremendous ring on the front-door bell, and then he remembered! \nHe rushed and put on the kettle, and put out another cup and saucer, and an extra cake or two, and ran \nto the door.",
+          "book": "01",
+          "relevance_score": 1.0
+        },
+        {
+          "passage_id": "01_29",
+          "text": "\u201cBilbo Baggins at yours!\u201d said the hobbit, too surprised to ask any questions for the moment. When \nthe silence that followed had become uncomfortable, he added: \u201cI am just about to take tea; pray come \nand have some with me.\u201d A little stiff perhaps, but he meant it kindly. And what would you do, if",
+          "book": "01",
+          "relevance_score": 1.0
+        },
+        {
+          "passage_id": "01_49",
+          "text": "\u201cAt your service!\u201d said Bifur, Bofur, and Bombur standing in a row. Then they hung up two yellow \nhoods and a pale green one; and also a sky-blue one with a long silver tassel. This last belonged to \nThorin, an enormously important dwarf, in fact no other than the great Thorin Oakenshield himself, \n",
+          "book": "01",
+          "relevance_score": 1.0
+        },
+        {
+          "passage_id": "01_64",
+          "text": "\u201cNow for some music!\u201d said Thorin. \u201cBring out the instruments!\u201d",
+          "book": "01",
+          "relevance_score": 1.0
+        },
+        {
+          "passage_id": "01_67",
+          "text": "The dark filled all the room, and the fire died down, and the shadows were lost, and still they \nplayed on. And suddenly first one and then another began to sing as they played, deep-throated singing \nof the dwarves in the deep places of their ancient homes; and this is like a fragment of their song",
+          "book": "01",
+          "relevance_score": 1.0
+        },
+        {
+          "passage_id": "01_72",
+          "text": "Goblets they carved there for themselves \nAnd harps of gold; where no man delves \nThere lay they long, and many a song \nWas sung unheard by men or elves.",
+          "book": "01",
+          "relevance_score": 1.0
+        },
+        {
+          "passage_id": "01_74",
+          "text": "The bells were ringing in the dale \nAnd men looked up with faces pale; \nThe dragon\u2019s ire more fierce than fire \nLaid low their towers and houses frail.",
+          "book": "01",
+          "relevance_score": 1.0
+        },
+        {
+          "passage_id": "01_85",
+          "text": "\u201cGandalf, dwarves and Mr. Baggins! We are met together in the house of our friend and fellow \nconspirator, this most excellent and audacious hobbit \u2014 may the hair on his toes never fall out! all \npraise to his wine and ale! \u2014 \u201d He paused for breath and for a polite remark from the hobbit, but the \nc",
+          "book": "01",
+          "relevance_score": 1.0
+        }
+      ]
+    },
+    "goblins": {
+      "id": "goblins",
+      "name": "Goblins",
+      "values": [],
+      "customs": [],
+      "taboos": [],
+      "homeland": null,
+      "appearance": null,
+      "lifespan": null,
+      "government": null,
+      "social_structure": null,
+      "relations": {},
+      "language": null,
+      "naming_conventions": null,
+      "source_passages": [
+        {
+          "passage_id": "01_18",
+          "text": "\u201cGandalf, Gandalf! Good gracious me! Not the wandering wizard that gave Old Took a pair of \nmagic diamond studs that fastened themselves and never came undone till ordered? Not the fellow \nwho used to tell such wonderful tales at parties, about dragons and goblins and giants and the rescue of \nprinc",
+          "book": "01",
+          "relevance_score": 1.0
+        },
+        {
+          "passage_id": "01_18",
+          "text": "\u201cGandalf, Gandalf! Good gracious me! Not the wandering wizard that gave Old Took a pair of \nmagic diamond studs that fastened themselves and never came undone till ordered? Not the fellow \nwho used to tell such wonderful tales at parties, about dragons and goblins and giants and the rescue of \nprinc",
+          "book": "01",
+          "relevance_score": 1.0
+        },
+        {
+          "passage_id": "01_43",
+          "text": "\u201cThrong!\u201d thought Mr. Baggins. \u201cI don\u2019t like the sound of that. I really must sit down for a minute \nand collect my wits, and have a drink.\u201d He had only just had a sip \u2014 in the corner, while the four \ndwarves sat round the table, and talked about mines and gold and troubles with the goblins, and the",
+          "book": "01",
+          "relevance_score": 1.0
+        },
+        {
+          "passage_id": "01_43",
+          "text": "\u201cThrong!\u201d thought Mr. Baggins. \u201cI don\u2019t like the sound of that. I really must sit down for a minute \nand collect my wits, and have a drink.\u201d He had only just had a sip \u2014 in the corner, while the four \ndwarves sat round the table, and talked about mines and gold and troubles with the goblins, and the",
+          "book": "01",
+          "relevance_score": 1.0
+        },
+        {
+          "passage_id": "01_90",
+          "text": "If you have ever seen a dragon in a pinch, you will realize that this was only poetical exaggeration \napplied to any hobbit, even to Old Took\u2019s great-grand-uncle Bullroarer, who was so huge (for a \nhobbit) that he could ride a horse. He charged the ranks of the goblins of Mount Gram in the Battle of",
+          "book": "01",
+          "relevance_score": 1.0
+        },
+        {
+          "passage_id": "01_90",
+          "text": "If you have ever seen a dragon in a pinch, you will realize that this was only poetical exaggeration \napplied to any hobbit, even to Old Took\u2019s great-grand-uncle Bullroarer, who was so huge (for a \nhobbit) that he could ride a horse. He charged the ranks of the goblins of Mount Gram in the Battle of",
+          "book": "01",
+          "relevance_score": 1.0
+        },
+        {
+          "passage_id": "01_124",
+          "text": "\u201cI did not \u2018get hold of it,\u2019 I was given it,\u201d said the wizard. \u201cYour grandfather Thror was killed, you \nremember, in the mines of Moria by Azog the Goblin .\u201d",
+          "book": "01",
+          "relevance_score": 1.0
+        },
+        {
+          "passage_id": "01_131",
+          "text": "\u201cWe have long ago paid the goblins of Moria,\u201d said Thorin; \u201cwe must give a thought to the \nNecromancer.\u201d",
+          "book": "01",
+          "relevance_score": 1.0
+        },
+        {
+          "passage_id": "01_131",
+          "text": "\u201cWe have long ago paid the goblins of Moria,\u201d said Thorin; \u201cwe must give a thought to the \nNecromancer.\u201d",
+          "book": "01",
+          "relevance_score": 1.0
+        }
+      ]
+    },
+    "wizards": {
+      "id": "wizards",
+      "name": "Wizards",
+      "values": [],
+      "customs": [],
+      "taboos": [],
+      "homeland": null,
+      "appearance": null,
+      "lifespan": null,
+      "government": null,
+      "social_structure": null,
+      "relations": {},
+      "language": null,
+      "naming_conventions": null,
+      "source_passages": [
+        {
+          "passage_id": "01_18",
+          "text": "\u201cGandalf, Gandalf! Good gracious me! Not the wandering wizard that gave Old Took a pair of \nmagic diamond studs that fastened themselves and never came undone till ordered? Not the fellow \nwho used to tell such wonderful tales at parties, about dragons and goblins and giants and the rescue of \nprinc",
+          "book": "01",
+          "relevance_score": 1.0
+        },
+        {
+          "passage_id": "01_19",
+          "text": "\u201cWhere else should I be?\u201d said the wizard. \u201cAll the same I am pleased to find you remember \nsomething about me. You seem to remember my fireworks kindly, at any rate, and that is not without \nhope. Indeed for your old grandfather Took\u2019s sake, and for the sake of poor Belladonna, I will give \nyou wha",
+          "book": "01",
+          "relevance_score": 1.0
+        },
+        {
+          "passage_id": "01_21",
+          "text": "\u201cSorry! I don\u2019t want any adventures, thank you. Not today. Good morning! But please come to tea \n\u2014 any time you like! Why not tomorrow? Come tomorrow! Good bye!\u201d With that the hobbit turned \nand scuttled inside his round green door, and shut it as quickly as he dared, not to seem rude. Wizards \nafte",
+          "book": "01",
+          "relevance_score": 1.0
+        },
+        {
+          "passage_id": "01_21",
+          "text": "\u201cSorry! I don\u2019t want any adventures, thank you. Not today. Good morning! But please come to tea \n\u2014 any time you like! Why not tomorrow? Come tomorrow! Good bye!\u201d With that the hobbit turned \nand scuttled inside his round green door, and shut it as quickly as he dared, not to seem rude. Wizards \nafte",
+          "book": "01",
+          "relevance_score": 1.0
+        },
+        {
+          "passage_id": "01_63",
+          "text": "smoke-ring from his short clay-pipe straight through each one of Thorin\u2019 s. Then Gandalf\u2019s smoke-ring \nwould go green and come back to hover over the wizard\u2019s head. He had a cloud of them about him \nalready, and in the dim light it made him look strange and sorcerous. Bilbo stood still and watched \u2014",
+          "book": "01",
+          "relevance_score": 1.0
+        },
+        {
+          "passage_id": "01_86",
+          "text": "\u201cWe are met to discuss our plans, our ways, means, policy and devices. We shall soon before the \nbreak of day start on our long journey, a journey from which some of us, or perhaps all of us (except \nour friend and counsellor, the ingenious wizard Gandalf) may never return. It is a solemn moment.",
+          "book": "01",
+          "relevance_score": 1.0
+        },
+        {
+          "passage_id": "01_102",
+          "text": "\u201cThere is one point that you haven\u2019t noticed,\u201d said the wizard, \u201cand that is the secret entrance. You \nsee that rune on the West side, and the hand pointing to it from the other runes? That marks a hidden \npassage to the Lower Halls.\u201d (Look at the map at the beginning of this book, and you will see ",
+          "book": "01",
+          "relevance_score": 1.0
+        },
+        {
+          "passage_id": "01_113",
+          "text": "\u201cThat would be no good,\u201d said the wizard, \u201cnot without a mighty Warrior, even a Hero. I tried to \nfind one; but warriors are busy fighting one another in distant lands, and in this neighbourhood heroes \nare scarce, or simply not to be found. Swords in these parts are mostly blunt, and axes are used ",
+          "book": "01",
+          "relevance_score": 1.0
+        },
+        {
+          "passage_id": "01_124",
+          "text": "\u201cI did not \u2018get hold of it,\u2019 I was given it,\u201d said the wizard. \u201cYour grandfather Thror was killed, you \nremember, in the mines of Moria by Azog the Goblin .\u201d",
+          "book": "01",
+          "relevance_score": 1.0
+        },
+        {
+          "passage_id": "01_128",
+          "text": "\u201cYour grandfather,\u201d said the wizard slowly and grimly, \u201cgave the map to his son for safety before \nhe went to the mines of Moria. Your father went away to try his luck with the map after your \ngrandfather was killed; and lots of adventures of a most unpleasant sort he had, but he never got near \nthe",
+          "book": "01",
+          "relevance_score": 1.0
+        }
+      ]
+    }
+  },
+  "magic_system_summary": "",
+  "geography_summary": "",
+  "history_summary": "",
+  "cosmology_summary": ""
+}
