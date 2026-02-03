@@ -310,6 +310,10 @@ class EventExtractor:
             if self.progress_callback:
                 self.progress_callback(i + 1, total_chunks, f"Processing chunk {i + 1}/{total_chunks}")
             
+            # Simple progress print every 10 chunks (visible even without Rich)
+            if (i + 1) % 10 == 0 or i == 0:
+                print(f"  [chunk {i + 1}/{total_chunks}]", flush=True)
+            
             events, relations = self._extract_llm(chunk, source_book, chunk_index=i)
             
             for event in events:

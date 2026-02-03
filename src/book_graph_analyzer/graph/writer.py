@@ -718,7 +718,9 @@ class GraphWriter:
         # Group by relation type
         by_type: dict[str, list] = defaultdict(list)
         for rel in relations:
-            rel_type = rel.relation.upper()
+            # Sanitize relation type for Neo4j (no spaces, only alphanumeric + underscore)
+            rel_type = rel.relation.upper().replace(" ", "_")
+            rel_type = "".join(c if c.isalnum() or c == "_" else "_" for c in rel_type)
             by_type[rel_type].append(rel)
 
         count = 0
