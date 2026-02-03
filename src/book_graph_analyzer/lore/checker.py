@@ -13,6 +13,8 @@ from pathlib import Path
 from typing import Optional
 import json
 
+from rapidfuzz import fuzz
+
 from ..llm import LLMClient
 from ..worldbible import WorldBible, WorldBibleCategory
 from ..corpus import CrossBookResolver
@@ -20,6 +22,38 @@ from ..graph.connection import get_driver
 from .parser import ClaimParser, ParsedClaim, ClaimType
 from .temporal import Timeline, TemporalExtractor, Era
 from .events import EventGraph, EventExtractor
+
+
+def _compute_confidence(
+    claim_text: str,
+    found_text: str,
+    evidence_type: str = "direct",
+) -> float:
+    """Compute confidence based on match quality and evidence type.
+    
+    Args:
+        claim_text: What the user claimed (e.g., "Bilbo found the ring")
+        found_text: What we found in the graph (e.g., "Bilbo found the Ring")
+        evidence_type: "direct" (explicit relation), "year" (inferred from years), "era" (inferred from era)
+    
+    Returns:
+        Confidence 0.0-1.0
+    """
+    # Base confidence by evidence type
+    base = {
+        "direct": 0.95,  # Explicit BEFORE/AFTER relation
+        "year": 0.88,    # Same era, inferred from year comparison
+        "era": 0.80,     # Different eras
+    }.get(evidence_type, 0.85)
+    
+    # Match quality: how well did the claim match what we found?
+    match_score = fuzz.token_set_ratio(claim_text.lower(), found_text.lower()) / 100.0
+    
+    # Combine: base * match_quality, with floor of 0.5 if we found anything
+    confidence = base * match_score
+    confidence = max(0.5, min(0.95, confidence))  # Clamp to [0.5, 0.95]
+    
+    return round(confidence, 2)
 
 
 class ValidationStatus(Enum):
@@ -561,9 +595,17 @@ class LoreChecker:
                     ordering_lower = ordering.lower()
                     claimed_order = claim.ordering.lower() if claim.ordering else "before"
                     
+                    # Compute confidence from match quality
+                    claim_event1 = f"{claim.event1_agent or ''} {claim.event1_action or ''} {claim.event1_patient or ''}".strip()
+                    claim_event2 = f"{claim.event2_agent or ''} {claim.event2_action or ''} {claim.event2_patient or ''}".strip()
+                    claim_text = f"{claim_event1} {claim_event2}"
+                    found_text = f"{record['e1_desc']} {record['e2_desc']}"
+                    evidence_type = "direct" if record["relation"] else ("year" if record["e1_year"] and record["e2_year"] else "era")
+                    confidence = _compute_confidence(claim_text, found_text, evidence_type)
+                    
                     if ordering_lower == claimed_order:
                         vr.status = ValidationStatus.VALID
-                        vr.confidence = 0.9
+                        vr.confidence = confidence
                         vr.explanation = f"Event '{record['e1_desc']}' is {ordering_lower} '{record['e2_desc']}'"
                         vr.supporting.append(Evidence(
                             text=f"{record['e1_desc']} {ordering_lower} {record['e2_desc']}",
@@ -572,7 +614,7 @@ class LoreChecker:
                         ))
                     else:
                         vr.status = ValidationStatus.INVALID
-                        vr.confidence = 0.9
+                        vr.confidence = confidence
                         vr.explanation = f"Event '{record['e1_desc']}' is actually {ordering_lower} '{record['e2_desc']}', not {claimed_order}"
                         vr.contradicting.append(Evidence(
                             text=f"{record['e1_desc']} is {ordering_lower} {record['e2_desc']}",
@@ -734,9 +776,17 @@ class LoreChecker:
         if ordering:
             claimed_order = claim.ordering  # "before" or "after"
             
+            # Compute confidence from match quality
+            claim_event1 = f"{claim.event1_agent or ''} {claim.event1_action or ''} {claim.event1_patient or ''}".strip()
+            claim_event2 = f"{claim.event2_agent or ''} {claim.event2_action or ''} {claim.event2_patient or ''}".strip()
+            claim_text = f"{claim_event1} {claim_event2}"
+            found_text = f"{e1.description} {e2.description}"
+            evidence_type = "year" if (e1.year and e2.year) else ("era" if (e1.era and e2.era) else "direct")
+            confidence = _compute_confidence(claim_text, found_text, evidence_type)
+            
             if ordering == claimed_order:
                 result.status = ValidationStatus.VALID
-                result.confidence = 0.9
+                result.confidence = confidence
                 result.explanation = f"Event '{e1.description}' is {ordering} '{e2.description}'"
                 result.supporting.append(Evidence(
                     text=f"{e1.description} ({e1.year_text or e1.era.value if e1.era else 'unknown'}) {ordering} {e2.description} ({e2.year_text or e2.era.value if e2.era else 'unknown'})",
@@ -745,7 +795,7 @@ class LoreChecker:
                 ))
             else:
                 result.status = ValidationStatus.INVALID
-                result.confidence = 0.9
+                result.confidence = confidence
                 result.explanation = f"Event '{e1.description}' is actually {ordering} '{e2.description}', not {claimed_order}"
                 result.contradicting.append(Evidence(
                     text=f"{e1.description} is {ordering} {e2.description}",
