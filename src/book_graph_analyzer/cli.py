@@ -2443,6 +2443,198 @@ def lore_interactive(bible: str | None, corpus: str | None) -> None:
     console.print("\n[dim]Goodbye![/dim]")
 
 
+# =============================================================================
+# Generate Commands
+# =============================================================================
+
+@main.group()
+def generate() -> None:
+    """Generate lore-consistent story content."""
+    pass
+
+
+@generate.command(name="scene")
+@click.option("--goal", "-g", required=True, help="What should happen in this scene")
+@click.option("--characters", "-c", multiple=True, required=True, help="Characters present (repeat for multiple)")
+@click.option("--place", "-p", required=True, help="Where the scene takes place")
+@click.option("--objects", "-obj", multiple=True, help="Objects of note in the scene")
+@click.option("--context", help="Previous events/context for continuity")
+@click.option("--world-bible", "-w", type=click.Path(exists=True), help="World bible JSON for rules")
+@click.option("--output", "-o", type=click.Path(), help="Save scene to JSON file")
+@click.option("--neo4j", is_flag=True, help="Write scene to Neo4j")
+@click.option("--chapter-id", help="Chapter ID to link scene to (for Neo4j)")
+def generate_scene(
+    goal: str,
+    characters: tuple[str],
+    place: str,
+    objects: tuple[str],
+    context: str,
+    world_bible: str,
+    output: str,
+    neo4j: bool,
+    chapter_id: str,
+) -> None:
+    """Generate a single scene grounded in the knowledge graph.
+    
+    Example:
+        bga generate scene -g "Bilbo meets Gandalf" -c Bilbo -c Gandalf -p "Bag End"
+    """
+    from book_graph_analyzer.generate import SceneGenerator, GenerationWriter
+    
+    console.print("[bold]Generating Scene[/bold]\n")
+    console.print(f"Goal: {goal}")
+    console.print(f"Characters: {', '.join(characters)}")
+    console.print(f"Place: {place}")
+    if objects:
+        console.print(f"Objects: {', '.join(objects)}")
+    console.print()
+    
+    generator = SceneGenerator()
+    
+    if world_bible:
+        generator.load_world_bible(world_bible)
+        console.print(f"[dim]Loaded world bible: {world_bible}[/dim]")
+    
+    with console.status("Generating scene..."):
+        scene = generator.generate_scene(
+            scene_goal=goal,
+            characters=list(characters),
+            place=place,
+            previous_context=context or "",
+            objects=list(objects) if objects else None,
+        )
+    
+    # Display results
+    console.print(f"\n[bold]Generated Scene[/bold] (ID: {scene.id})")
+    console.print(f"Status: {scene.status.value}")
+    console.print(f"Word count: {scene.word_count}")
+    console.print(f"Revisions: {scene.revision_count}")
+    
+    console.print(f"\n[bold]Scores:[/bold]")
+    console.print(f"  Overall: {scene.scores.overall:.0%}")
+    console.print(f"  Lore: {scene.scores.lore_score:.0%}")
+    console.print(f"  Style: {scene.scores.style_score:.0%}")
+    console.print(f"  Narrative: {scene.scores.narrative_score:.0%}")
+    console.print(f"    - Engagement: {scene.scores.engagement:.0%}")
+    console.print(f"    - Pacing: {scene.scores.pacing:.0%}")
+    console.print(f"    - Dialogue: {scene.scores.dialogue:.0%}")
+    console.print(f"    - Imagery: {scene.scores.imagery:.0%}")
+    
+    if scene.critique_notes:
+        console.print(f"\n[bold]Notes:[/bold]")
+        for note in scene.critique_notes[:5]:
+            console.print(f"  - {note[:100]}...")
+    
+    console.print(f"\n[bold]Text:[/bold]")
+    console.print("-" * 60)
+    console.print(scene.text)
+    console.print("-" * 60)
+    
+    # Save to file
+    if output:
+        with open(output, 'w', encoding='utf-8') as f:
+            json.dump(scene.to_dict(), f, indent=2)
+        console.print(f"\n[green]OK[/green] Saved to {output}")
+    
+    # Write to Neo4j
+    if neo4j:
+        writer = GenerationWriter()
+        writer.ensure_schema()
+        stats = writer.write_scene(scene, chapter_id or "standalone")
+        console.print(f"\n[green]OK[/green] Written to Neo4j: {stats}")
+
+
+@generate.command(name="init-schema")
+def generate_init_schema() -> None:
+    """Initialize Neo4j schema for generated content."""
+    from book_graph_analyzer.generate import GenerationWriter
+    
+    writer = GenerationWriter()
+    writer.ensure_schema()
+    console.print("[green]OK[/green] Generation schema initialized")
+
+
+@generate.command(name="flagged")
+@click.option("--limit", "-n", default=10, help="Number of scenes to show")
+def generate_flagged(limit: int) -> None:
+    """Show scenes flagged for human review."""
+    from book_graph_analyzer.generate import GenerationWriter
+    
+    writer = GenerationWriter()
+    scenes = writer.get_flagged_scenes(limit)
+    
+    if not scenes:
+        console.print("[dim]No flagged scenes found[/dim]")
+        return
+    
+    console.print(f"[bold]Flagged Scenes ({len(scenes)})[/bold]\n")
+    
+    for scene in scenes:
+        console.print(f"[bold]ID:[/bold] {scene['id']}")
+        console.print(f"[bold]Summary:[/bold] {scene['summary']}")
+        console.print(f"[bold]Score:[/bold] {scene['score']:.0%}")
+        console.print(f"[bold]Characters:[/bold] {', '.join(scene['characters'])}")
+        console.print(f"\n{scene['text'][:500]}...")
+        console.print("-" * 40)
+
+
+@generate.command(name="review")
+@click.argument("scene_id")
+@click.option("--approve", is_flag=True, help="Approve the scene")
+@click.option("--reject", is_flag=True, help="Reject the scene")
+@click.option("--notes", "-n", help="Review notes")
+def generate_review(scene_id: str, approve: bool, reject: bool, notes: str) -> None:
+    """Review a flagged scene."""
+    from book_graph_analyzer.generate import GenerationWriter
+    
+    if approve and reject:
+        console.print("[red]Cannot both approve and reject[/red]")
+        return
+    
+    if not approve and not reject:
+        console.print("[red]Specify --approve or --reject[/red]")
+        return
+    
+    status = "approved" if approve else "flagged"  # rejected stays flagged with notes
+    
+    writer = GenerationWriter()
+    if writer.update_scene_status(scene_id, status, notes or ""):
+        console.print(f"[green]OK[/green] Scene {scene_id} marked as {status}")
+    else:
+        console.print(f"[red]Failed to update scene {scene_id}[/red]")
+
+
+@generate.command(name="by-character")
+@click.argument("character")
+@click.option("--min-quality", "-q", default=0.0, help="Minimum quality score")
+def generate_by_character(character: str, min_quality: float) -> None:
+    """List generated scenes featuring a character."""
+    from book_graph_analyzer.generate import GenerationWriter
+    
+    writer = GenerationWriter()
+    scenes = writer.get_scenes_by_character(character, min_quality)
+    
+    if not scenes:
+        console.print(f"[dim]No scenes found for {character}[/dim]")
+        return
+    
+    console.print(f"[bold]Scenes featuring {character} ({len(scenes)})[/bold]\n")
+    
+    table = Table(show_header=True)
+    table.add_column("ID")
+    table.add_column("Summary")
+    table.add_column("Quality")
+    
+    for scene in scenes:
+        table.add_row(
+            scene["id"],
+            scene["summary"][:50] + "..." if len(scene.get("summary", "")) > 50 else scene.get("summary", ""),
+            f"{scene['score']:.0%}" if scene.get("score") else "N/A",
+        )
+    
+    console.print(table)
+
+
 if __name__ == "__main__":
     main()
 
