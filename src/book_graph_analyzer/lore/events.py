@@ -6,6 +6,7 @@ Extracts structured events from text:
 - Temporal ordering (before/after other events)
 """
 
+import json
 import re
 from dataclasses import dataclass, field
 from typing import Optional
@@ -77,6 +78,15 @@ class EventRelation:
     event2_id: str
     confidence: float = 1.0
     source_text: str = ""
+    
+    def to_dict(self) -> dict:
+        return {
+            "event1_id": self.event1_id,
+            "relation": self.relation,
+            "event2_id": self.event2_id,
+            "confidence": self.confidence,
+            "source_text": self.source_text,
+        }
 
 
 @dataclass
@@ -181,14 +191,18 @@ class EventGraph:
                     return "before"
                 elif e1.era > e2.era:
                     return "after"
-                # Same era, check years
+                # Same era, check years (handle str/int mismatch)
                 elif e1.year and e2.year:
-                    if e1.year < e2.year:
-                        return "before"
-                    elif e1.year > e2.year:
-                        return "after"
-                    else:
-                        return "same"
+                    try:
+                        y1, y2 = int(e1.year), int(e2.year)
+                        if y1 < y2:
+                            return "before"
+                        elif y1 > y2:
+                            return "after"
+                        else:
+                            return "same"
+                    except (ValueError, TypeError):
+                        pass  # Can't compare non-numeric years
         
         return None
     
@@ -272,6 +286,7 @@ class EventExtractor:
         source_book: str = "",
         chunk_size: int = 3000,
         overlap: int = 200,
+        checkpoint_file: Optional[str] = None,
     ) -> EventGraph:
         """Extract events from a full book using chunked processing.
         
@@ -280,6 +295,7 @@ class EventExtractor:
             source_book: Name of the source book
             chunk_size: Characters per chunk
             overlap: Overlap between chunks to avoid losing context at boundaries
+            checkpoint_file: Optional path to save/resume progress
             
         Returns:
             EventGraph with all events and relations
@@ -305,13 +321,28 @@ class EventExtractor:
         total_chunks = len(chunks)
         all_events: list[Event] = []
         all_relations: list[EventRelation] = []
+        start_chunk = 0
+        
+        # Load checkpoint if exists
+        if checkpoint_file:
+            checkpoint = self._load_checkpoint(checkpoint_file)
+            if checkpoint:
+                start_chunk = checkpoint.get("next_chunk", 0)
+                all_events = [Event(**e) for e in checkpoint.get("events", [])]
+                all_relations = [EventRelation(**r) for r in checkpoint.get("relations", [])]
+                self._seen_events = set(checkpoint.get("seen_keys", []))
+                print(f"  Resuming from checkpoint: chunk {start_chunk}/{total_chunks} ({len(all_events)} events)", flush=True)
         
         for i, chunk in enumerate(chunks):
+            # Skip already processed chunks
+            if i < start_chunk:
+                continue
+                
             if self.progress_callback:
                 self.progress_callback(i + 1, total_chunks, f"Processing chunk {i + 1}/{total_chunks}")
             
             # Simple progress print every 10 chunks (visible even without Rich)
-            if (i + 1) % 10 == 0 or i == 0:
+            if (i + 1) % 10 == 0 or i == start_chunk:
                 print(f"  [chunk {i + 1}/{total_chunks}]", flush=True)
             
             events, relations = self._extract_llm(chunk, source_book, chunk_index=i)
@@ -324,6 +355,14 @@ class EventExtractor:
                     all_events.append(event)
             
             all_relations.extend(relations)
+            
+            # Save checkpoint after each chunk
+            if checkpoint_file:
+                self._save_checkpoint(checkpoint_file, i + 1, total_chunks, all_events, all_relations)
+        
+        # Clear checkpoint on completion
+        if checkpoint_file:
+            self._clear_checkpoint(checkpoint_file)
         
         # Add all events to graph
         for event in all_events:
@@ -354,6 +393,42 @@ class EventExtractor:
             patient = patient.replace("the ", "").replace("a ", "")
             parts.append(patient)
         return "|".join(parts) if parts else event.description.lower()[:50]
+    
+    def _load_checkpoint(self, checkpoint_file: str) -> Optional[dict]:
+        """Load checkpoint from file if it exists."""
+        try:
+            with open(checkpoint_file, 'r', encoding='utf-8') as f:
+                return json.load(f)
+        except (FileNotFoundError, json.JSONDecodeError):
+            return None
+    
+    def _save_checkpoint(
+        self,
+        checkpoint_file: str,
+        next_chunk: int,
+        total_chunks: int,
+        events: list[Event],
+        relations: list[EventRelation],
+    ) -> None:
+        """Save current progress to checkpoint file."""
+        checkpoint = {
+            "next_chunk": next_chunk,
+            "total_chunks": total_chunks,
+            "events": [e.to_dict() for e in events],
+            "relations": [r.to_dict() for r in relations],
+            "seen_keys": list(self._seen_events),
+        }
+        with open(checkpoint_file, 'w', encoding='utf-8') as f:
+            json.dump(checkpoint, f)
+    
+    def _clear_checkpoint(self, checkpoint_file: str) -> None:
+        """Remove checkpoint file on successful completion."""
+        try:
+            import os
+            os.remove(checkpoint_file)
+            print(f"  Checkpoint cleared: {checkpoint_file}", flush=True)
+        except OSError:
+            pass
     
     def _infer_temporal_ordering(self, graph: EventGraph) -> None:
         """Infer ordering relationships from year/era data."""
@@ -404,19 +479,25 @@ class EventExtractor:
                             event2_id=e2.id,
                             confidence=0.95,
                         ))
-                elif e1.era == e2.era and e1.year and e2.year and e1.year < e2.year:
+                elif e1.era == e2.era and e1.year and e2.year:
+                    # Safely compare years (might be str or int)
+                    try:
+                        y1, y2 = int(e1.year), int(e2.year)
+                    except (ValueError, TypeError):
+                        continue
                     # Same era, different years
-                    existing = any(
-                        r.event1_id == e1.id and r.event2_id == e2.id
-                        for r in graph.relations
-                    )
-                    if not existing:
-                        graph.add_relation(EventRelation(
-                            event1_id=e1.id,
-                            relation="before",
-                            event2_id=e2.id,
-                            confidence=0.9,
-                        ))
+                    if y1 < y2:
+                        existing = any(
+                            r.event1_id == e1.id and r.event2_id == e2.id
+                            for r in graph.relations
+                        )
+                        if not existing:
+                            graph.add_relation(EventRelation(
+                                event1_id=e1.id,
+                                relation="before",
+                                event2_id=e2.id,
+                                confidence=0.9,
+                            ))
     
     def extract_from_text(self, text: str, source_book: str = "") -> EventGraph:
         """Extract events from text.

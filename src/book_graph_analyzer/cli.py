@@ -2109,16 +2109,19 @@ def lore_check(claim: str, bible: str | None, corpus: str | None, timeline: str 
 @click.option("--neo4j", is_flag=True, help="Also write events to Neo4j")
 @click.option("--chunk-size", default=3000, help="Characters per chunk (default: 3000)")
 @click.option("--no-llm", is_flag=True, help="Use pattern matching instead of LLM")
-def lore_events(path: str, output: str, neo4j: bool, chunk_size: int, no_llm: bool) -> None:
+@click.option("--checkpoint", "-c", type=click.Path(), help="Checkpoint file for resume support")
+def lore_events(path: str, output: str, neo4j: bool, chunk_size: int, no_llm: bool, checkpoint: str) -> None:
     """Extract events from a text file.
     
     Identifies key events with participants and temporal ordering.
     Uses chunked processing for full books.
     
+    Use --checkpoint to save progress and resume on failure.
+    
     Examples:
         bga lore events hobbit.txt -o hobbit_events.json
         bga lore events hobbit.txt -o events.json --neo4j
-        bga lore events silmarillion.txt -o events.json --chunk-size 4000
+        bga lore events hobbit.txt -o events.json -c hobbit.checkpoint
     """
     from book_graph_analyzer.lore import EventExtractor
     from book_graph_analyzer.ingest.loader import load_book
@@ -2150,7 +2153,12 @@ def lore_events(path: str, output: str, neo4j: bool, chunk_size: int, no_llm: bo
         
         # Use chunked extraction for full books
         if len(text) > chunk_size * 2:
-            graph = extractor.extract_from_book(text, source_book=book_name, chunk_size=chunk_size)
+            graph = extractor.extract_from_book(
+                text, 
+                source_book=book_name, 
+                chunk_size=chunk_size,
+                checkpoint_file=checkpoint,
+            )
         else:
             graph = extractor.extract_from_text(text, source_book=book_name)
     
