@@ -1658,6 +1658,203 @@ def corpus_compare(corpus_name: str) -> None:
     console.print(table)
 
 
+@corpus.command(name="events")
+@click.argument("corpus_name")
+@click.option("--output", "-o", type=click.Path(), help="Output file (JSON)")
+@click.option("--neo4j", is_flag=True, help="Also write to Neo4j")
+@click.option("--chunk-size", default=3000, help="Characters per chunk (default: 3000)")
+@click.option("--skip-processed", is_flag=True, help="Skip books already in events file")
+def corpus_events(corpus_name: str, output: str | None, neo4j: bool, chunk_size: int, skip_processed: bool) -> None:
+    """Extract events from all books in corpus with cross-book linking.
+    
+    Creates a unified event graph with temporal ordering across books.
+    Events are linked to entities from the corpus entity resolver.
+    
+    Examples:
+        bga corpus events tolkien_works -o tolkien_events.json
+        bga corpus events tolkien_works --neo4j
+    """
+    from book_graph_analyzer.corpus import CorpusManager
+    from book_graph_analyzer.lore import EventExtractor, EventGraph, Event, EventRelation
+    from book_graph_analyzer.ingest.loader import load_book
+    
+    manager = CorpusManager(corpus_name)
+    books = manager.get_processed_books()
+    
+    if not books:
+        all_books = manager.list_books()
+        if all_books:
+            books = all_books
+        else:
+            console.print("[yellow]No books in corpus. Add books with 'bga corpus add'[/yellow]")
+            return
+    
+    # Output path
+    output_path = Path(output) if output else Path(f"data/output/{corpus_name}_events.json")
+    
+    # Load existing events if skip_processed
+    existing_books = set()
+    unified_graph = EventGraph()
+    if skip_processed and output_path.exists():
+        with open(output_path, 'r', encoding='utf-8') as f:
+            data = json.load(f)
+            unified_graph = EventGraph.from_dict(data)
+            # Track which books we've already processed
+            for event in unified_graph.events.values():
+                if event.source_book:
+                    existing_books.add(event.source_book.lower())
+        console.print(f"[dim]Loaded {len(unified_graph.events)} existing events[/dim]")
+    
+    # Progress tracking
+    total_books = len([b for b in books if b.title.lower() not in existing_books])
+    processed_books = 0
+    
+    console.print(f"[bold]Extracting events from {corpus_name}[/bold]")
+    console.print(f"Books to process: {total_books}")
+    
+    for book in books:
+        if book.title.lower() in existing_books:
+            console.print(f"[dim]Skipping {book.title} (already processed)[/dim]")
+            continue
+        
+        processed_books += 1
+        console.print(f"\n[bold][{processed_books}/{total_books}] {book.title}[/bold]")
+        
+        # Load book text
+        try:
+            text = load_book(Path(book.file_path))
+        except Exception as e:
+            console.print(f"[red]Error loading {book.file_path}: {e}[/red]")
+            continue
+        
+        console.print(f"[dim]Loaded {len(text):,} characters[/dim]")
+        
+        # Progress for this book
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            BarColumn(),
+            TaskProgressColumn(),
+            console=console,
+        ) as progress:
+            task = progress.add_task("Extracting events...", total=100)
+            
+            def update_progress(current, total, message):
+                progress.update(task, completed=int(current / total * 100), description=message)
+            
+            extractor = EventExtractor(use_llm=True, progress_callback=update_progress)
+            
+            # Extract events
+            if len(text) > chunk_size * 2:
+                book_graph = extractor.extract_from_book(text, source_book=book.title, chunk_size=chunk_size)
+            else:
+                book_graph = extractor.extract_from_text(text, source_book=book.title)
+        
+        console.print(f"  Events: {len(book_graph.events)}")
+        console.print(f"  Relations: {len(book_graph.relations)}")
+        
+        # Merge into unified graph
+        for event in book_graph.events.values():
+            # Check for duplicates across books
+            event_key = f"{event.agent}|{event.action}|{event.patient}".lower()
+            duplicate = False
+            for existing in unified_graph.events.values():
+                existing_key = f"{existing.agent}|{existing.action}|{existing.patient}".lower()
+                if event_key == existing_key:
+                    duplicate = True
+                    break
+            
+            if not duplicate:
+                # Prefix ID with book name to avoid collisions
+                book_prefix = book.title.lower().replace(" ", "_")[:10]
+                event.id = f"{book_prefix}_{event.id}"
+                unified_graph.add_event(event)
+        
+        # Add relations (update IDs)
+        for rel in book_graph.relations:
+            book_prefix = book.title.lower().replace(" ", "_")[:10]
+            unified_graph.add_relation(EventRelation(
+                event1_id=f"{book_prefix}_{rel.event1_id}",
+                relation=rel.relation,
+                event2_id=f"{book_prefix}_{rel.event2_id}",
+                confidence=rel.confidence,
+            ))
+    
+    # Infer cross-book ordering from era/year
+    console.print("\n[bold]Inferring cross-book temporal ordering...[/bold]")
+    cross_book_relations = 0
+    events_with_era = [e for e in unified_graph.events.values() if e.era]
+    
+    for i, e1 in enumerate(events_with_era):
+        for e2 in events_with_era[i+1:]:
+            if e1.source_book != e2.source_book:  # Cross-book
+                if e1.era and e2.era and e1.era != e2.era:
+                    if e1.era.order < e2.era.order:
+                        unified_graph.add_relation(EventRelation(
+                            event1_id=e1.id,
+                            relation="before",
+                            event2_id=e2.id,
+                            confidence=0.95,
+                        ))
+                        cross_book_relations += 1
+                    elif e1.era.order > e2.era.order:
+                        unified_graph.add_relation(EventRelation(
+                            event1_id=e2.id,
+                            relation="before",
+                            event2_id=e1.id,
+                            confidence=0.95,
+                        ))
+                        cross_book_relations += 1
+    
+    console.print(f"  Cross-book relations added: {cross_book_relations}")
+    
+    # Summary
+    console.print(f"\n[bold]Unified Event Graph:[/bold]")
+    console.print(f"  Total events: {len(unified_graph.events)}")
+    console.print(f"  Total relations: {len(unified_graph.relations)}")
+    
+    # Events by book
+    by_book: dict[str, int] = {}
+    for event in unified_graph.events.values():
+        book = event.source_book or "Unknown"
+        by_book[book] = by_book.get(book, 0) + 1
+    
+    console.print(f"\n[bold]Events by book:[/bold]")
+    for book, count in sorted(by_book.items()):
+        console.print(f"  {book}: {count}")
+    
+    # Save
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(output_path, 'w', encoding='utf-8') as f:
+        json.dump(unified_graph.to_dict(), f, indent=2)
+    
+    console.print(f"\n[green]OK[/green] Events saved to {output_path}")
+    
+    # Write to Neo4j if requested
+    if neo4j:
+        from book_graph_analyzer.graph.writer import GraphWriter
+        from book_graph_analyzer.graph.connection import check_neo4j_connection
+        
+        if not check_neo4j_connection():
+            console.print("[red]Error:[/red] Cannot connect to Neo4j")
+            return
+        
+        console.print("\n[bold]Writing to Neo4j...[/bold]")
+        
+        writer = GraphWriter()
+        stats = writer.write_event_graph(
+            unified_graph,
+            book=corpus_name,
+            link_entities=True,
+        )
+        writer.close()
+        
+        console.print(f"  Events written: {stats['events_written']}")
+        console.print(f"  Relations written: {stats['relations_written']}")
+        console.print(f"  Entity links created: {stats['entity_links']}")
+        console.print(f"[green]OK[/green] Events written to Neo4j")
+
+
 # ============================================================================
 # World Bible Commands (Phase 7)
 # ============================================================================
