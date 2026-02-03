@@ -360,8 +360,23 @@ class EventExtractor:
         
         # Sort by era then year
         def sort_key(e: Event):
-            era_order = e.era.order if e.era else -1
-            year = e.year or 0
+            # Handle era - might be Era enum or string
+            if e.era:
+                if hasattr(e.era, 'order'):
+                    era_order = e.era.order
+                elif isinstance(e.era, str):
+                    era_order = Era.from_text(e.era).order
+                else:
+                    era_order = -1
+            else:
+                era_order = -1
+            # Handle year - ensure it's an int, ignore non-numeric strings
+            year = 0
+            if e.year:
+                try:
+                    year = int(e.year)
+                except (ValueError, TypeError):
+                    pass  # Non-numeric like "a hundred years ago last Thursday"
             return (era_order, year)
         
         sorted_events = sorted(events_with_time, key=sort_key)
