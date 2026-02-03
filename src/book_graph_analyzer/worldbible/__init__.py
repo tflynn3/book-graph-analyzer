@@ -1,20 +1,34 @@
 """
-World Bible Module
+World Bible Extraction Module
 
-Phase 7: Extract and synthesize the implicit rules and patterns
-of a fictional world from text passages.
+Phase 7: Capture implicit rules and patterns of fictional worlds.
+Synthesizes patterns across many passages to document:
+- Magic/power systems and constraints
+- Cultural profiles per race/people
+- Geography and travel rules
+- Cosmology and metaphysics
+- Thematic patterns
 """
 
-from .categories import WorldBibleCategory, CATEGORY_PROMPTS
+from .models import (
+    WorldBible,
+    WorldRule,
+    WorldBibleCategory,
+    CulturalProfile,
+    MagicSystem,
+    GeographyEntry,
+)
 from .extractor import WorldBibleExtractor, ExtractionConfig
-from .models import WorldRule, WorldBible, CulturalProfile
+from .patterns import PatternMatcher
 
 __all__ = [
+    "WorldBible",
+    "WorldRule", 
     "WorldBibleCategory",
-    "CATEGORY_PROMPTS",
+    "CulturalProfile",
+    "MagicSystem",
+    "GeographyEntry",
     "WorldBibleExtractor",
     "ExtractionConfig",
-    "WorldRule",
-    "WorldBible",
-    "CulturalProfile",
+    "PatternMatcher",
 ]

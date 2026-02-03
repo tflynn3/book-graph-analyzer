@@ -1,0 +1,172 @@
+{
+  "entities": {
+    "Baggins": {
+      "name": "Baggins",
+      "entity_type": "character",
+      "birth_era": "third_age",
+      "death_era": "third_age",
+      "birth_year": null,
+      "death_year": null,
+      "event_era": null,
+      "event_year": null,
+      "source_text": ""
+    },
+    "The Bagginses": {
+      "name": "The Bagginses",
+      "entity_type": "character",
+      "birth_era": "unknown",
+      "death_era": "third_age",
+      "birth_year": null,
+      "death_year": null,
+      "event_era": null,
+      "event_year": null,
+      "source_text": ""
+    }
+  },
+  "relations": [
+    {
+      "subject": "the day",
+      "relation": "before",
+      "object": "us",
+      "confidence": 1.0
+    },
+    {
+      "subject": "Just",
+      "relation": "before",
+      "object": "tea",
+      "confidence": 1.0
+    },
+    {
+      "subject": "know them",
+      "relation": "before",
+      "object": "they arrived",
+      "confidence": 1.0
+    },
+    {
+      "subject": "and",
+      "relation": "before",
+      "object": "he could",
+      "confidence": 1.0
+    },
+    {
+      "subject": "many hours",
+      "relation": "before",
+      "object": "dawn",
+      "confidence": 1.0
+    },
+    {
+      "subject": "shall soon",
+      "relation": "before",
+      "object": "the \nbreak",
+      "confidence": 1.0
+    },
+    {
+      "subject": "long time",
+      "relation": "before",
+      "object": "that",
+      "confidence": 1.0
+    },
+    {
+      "subject": "for safety",
+      "relation": "before",
+      "object": "he went",
+      "confidence": 1.0
+    },
+    {
+      "subject": "good \nbreakfast",
+      "relation": "before",
+      "object": "you go",
+      "confidence": 1.0
+    },
+    {
+      "subject": "especially",
+      "relation": "after",
+      "object": "dinner",
+      "confidence": 1.0
+    },
+    {
+      "subject": "any adventures",
+      "relation": "after",
+      "object": "she became",
+      "confidence": 1.0
+    },
+    {
+      "subject": "his door",
+      "relation": "after",
+      "object": "breakfast smoking",
+      "confidence": 1.0
+    },
+    {
+      "subject": "Wizards",
+      "relation": "after",
+      "object": "all are",
+      "confidence": 1.0
+    },
+    {
+      "subject": "him good",
+      "relation": "after",
+      "object": "his \nfright",
+      "confidence": 1.0
+    },
+    {
+      "subject": "to say",
+      "relation": "after",
+      "object": "taking a",
+      "confidence": 1.0
+    },
+    {
+      "subject": "not four",
+      "relation": "after",
+      "object": "all",
+      "confidence": 1.0
+    },
+    {
+      "subject": "one",
+      "relation": "after",
+      "object": "another",
+      "confidence": 1.0
+    },
+    {
+      "subject": "Gandalf called",
+      "relation": "after",
+      "object": "him",
+      "confidence": 1.0
+    },
+    {
+      "subject": "hobbit ran",
+      "relation": "after",
+      "object": "them almost",
+      "confidence": 1.0
+    },
+    {
+      "subject": "Thorin disappointedly",
+      "relation": "after",
+      "object": "a glance",
+      "confidence": 1.0
+    },
+    {
+      "subject": "certainly not",
+      "relation": "after",
+      "object": "devouring so",
+      "confidence": 1.0
+    },
+    {
+      "subject": "the map",
+      "relation": "after",
+      "object": "your \ngrandfather",
+      "confidence": 1.0
+    },
+    {
+      "subject": "was long",
+      "relation": "after",
+      "object": "the break",
+      "confidence": 1.0
+    },
+    {
+      "subject": "silence that",
+      "relation": "after",
+      "object": "had become",
+      "confidence": 1.0
+    }
+  ]
+}

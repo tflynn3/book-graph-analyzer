@@ -1,0 +1,3336 @@
+{
+  "entities": {
+    "the": {
+      "name": "the",
+      "entity_type": "character",
+      "birth_era": null,
+      "death_era": "first_age",
+      "birth_year": null,
+      "death_year": null,
+      "event_era": null,
+      "event_year": null,
+      "source_text": "end of the First Age"
+    },
+    "operatic \nhistory": {
+      "name": "operatic \nhistory",
+      "entity_type": "character",
+      "birth_era": "first_age",
+      "death_era": "first_age",
+      "birth_year": null,
+      "death_year": null,
+      "event_era": null,
+      "event_year": null,
+      "source_text": "operatic \nhistory of the First Age"
+    },
+    "the end": {
+      "name": "the end",
+      "entity_type": "character",
+      "birth_era": "third_age",
+      "death_era": "third_age",
+      "birth_year": null,
+      "death_year": null,
+      "event_era": null,
+      "event_year": null,
+      "source_text": "the end of the Third Age"
+    },
+    "the \nnarrative": {
+      "name": "the \nnarrative",
+      "entity_type": "character",
+      "birth_era": "first_age",
+      "death_era": "first_age",
+      "birth_year": null,
+      "death_year": null,
+      "event_era": null,
+      "event_year": null,
+      "source_text": "the \nnarrative of the First Age"
+    },
+    "and": {
+      "name": "and",
+      "entity_type": "character",
+      "birth_era": "unknown",
+      "death_era": "unknown",
+      "birth_year": null,
+      "death_year": null,
+      "event_era": null,
+      "event_year": null,
+      "source_text": "and in every age"
+    },
+    "had wrought": {
+      "name": "had wrought",
+      "entity_type": "character",
+      "birth_era": "unknown",
+      "death_era": "unknown",
+      "birth_year": null,
+      "death_year": null,
+      "event_era": null,
+      "event_year": null,
+      "source_text": "had wrought in the \n\n\n\nage"
+    },
+    "most renowned": {
+      "name": "most renowned",
+      "entity_type": "character",
+      "birth_era": "unknown",
+      "death_era": "unknown",
+      "birth_year": null,
+      "death_year": null,
+      "event_era": null,
+      "event_year": null,
+      "source_text": "most renowned in after \nage"
+    },
+    "Melkor had": {
+      "name": "Melkor had",
+      "entity_type": "character",
+      "birth_era": "unknown",
+      "death_era": "unknown",
+      "birth_year": null,
+      "death_year": null,
+      "event_era": null,
+      "event_year": null,
+      "source_text": "Melkor had in the age"
+    },
+    "as \none": {
+      "name": "as \none",
+      "entity_type": "character",
+      "birth_era": "unknown",
+      "death_era": "unknown",
+      "birth_year": null,
+      "death_year": null,
+      "event_era": null,
+      "event_year": null,
+      "source_text": "as \none of the age"
+    },
+    "the Men": {
+      "name": "the Men",
+      "entity_type": "character",
+      "birth_era": "unknown",
+      "death_era": "unknown",
+      "birth_year": null,
+      "death_year": null,
+      "event_era": null,
+      "event_year": null,
+      "source_text": "the Men of that age"
+    },
+    "of \nElendil": {
+      "name": "of \nElendil",
+      "entity_type": "character",
+      "birth_era": "unknown",
+      "death_era": "unknown",
+      "birth_year": null,
+      "death_year": null,
+      "event_era": null,
+      "event_year": null,
+      "source_text": "of \nElendil in the age"
+    },
+    "Ered Luin": {
+      "name": "Ered Luin",
+      "entity_type": "character",
+      "birth_era": "unknown",
+      "death_era": "unknown",
+      "birth_year": null,
+      "death_year": null,
+      "event_era": null,
+      "event_year": null,
+      "source_text": "Ered Luin in that age"
+    },
+    "the Wise": {
+      "name": "the Wise",
+      "entity_type": "character",
+      "birth_era": "unknown",
+      "death_era": "unknown",
+      "birth_year": null,
+      "death_year": null,
+      "event_era": null,
+      "event_year": null,
+      "source_text": "the Wise in that age"
+    },
+    "the days": {
+      "name": "the days",
+      "entity_type": "character",
+      "birth_era": "third_age",
+      "death_era": "third_age",
+      "birth_year": null,
+      "death_year": null,
+      "event_era": null,
+      "event_year": null,
+      "source_text": "the days of the Third Age"
+    },
+    "last deeds": {
+      "name": "last deeds",
+      "entity_type": "character",
+      "birth_era": "unknown",
+      "death_era": "unknown",
+      "birth_year": null,
+      "death_year": null,
+      "event_era": null,
+      "event_year": null,
+      "source_text": "last deeds of that Age"
+    },
+    "a third": {
+      "name": "a third",
+      "entity_type": "character",
+      "birth_era": "unknown",
+      "death_era": "unknown",
+      "birth_year": null,
+      "death_year": null,
+      "event_era": null,
+      "event_year": null,
+      "source_text": "a third of that age"
+    },
+    "by \nSauron": {
+      "name": "by \nSauron",
+      "entity_type": "character",
+      "birth_era": "second_age",
+      "death_era": "second_age",
+      "birth_year": null,
+      "death_year": null,
+      "event_era": null,
+      "event_year": null,
+      "source_text": "by \nSauron in the Second Age"
+    },
+    "southern Mirkwood": {
+      "name": "southern Mirkwood",
+      "entity_type": "character",
+      "birth_era": "unknown",
+      "death_era": "unknown",
+      "birth_year": null,
+      "death_year": null,
+      "event_era": null,
+      "event_year": null,
+      "source_text": "southern Mirkwood in the Third \nAge"
+    },
+    "the beginning": {
+      "name": "the beginning",
+      "entity_type": "character",
+      "birth_era": "second_age",
+      "death_era": "second_age",
+      "birth_year": null,
+      "death_year": null,
+      "event_era": null,
+      "event_year": null,
+      "source_text": "the beginning of the Second Age"
+    },
+    "Noldorin \nrealm": {
+      "name": "Noldorin \nrealm",
+      "entity_type": "character",
+      "birth_era": "second_age",
+      "death_era": "second_age",
+      "birth_year": null,
+      "death_year": null,
+      "event_era": null,
+      "event_year": null,
+      "source_text": "Noldorin \nrealm in the Second Age"
+    },
+    "was borne": {
+      "name": "was borne",
+      "entity_type": "character",
+      "birth_era": "third_age",
+      "death_era": "third_age",
+      "birth_year": null,
+      "death_year": null,
+      "event_era": null,
+      "event_year": null,
+      "source_text": "was borne in the Third Age"
+    },
+    "of Ossiriand": {
+      "name": "of Ossiriand",
+      "entity_type": "character",
+      "birth_era": "first_age",
+      "death_era": "first_age",
+      "birth_year": null,
+      "death_year": null,
+      "event_era": null,
+      "event_year": null,
+      "source_text": "of Ossiriand in the First Age"
+    },
+    "the ending": {
+      "name": "the ending",
+      "entity_type": "character",
+      "birth_era": "first_age",
+      "death_era": "first_age",
+      "birth_year": null,
+      "death_year": null,
+      "event_era": null,
+      "event_year": null,
+      "source_text": "the ending of \nthe First Age"
+    },
+    "F\u00ebanor": {
+      "name": "F\u00ebanor",
+      "entity_type": "character",
+      "birth_era": "first_age",
+      "death_era": "first_age",
+      "birth_year": null,
+      "death_year": null,
+      "event_era": null,
+      "event_year": null,
+      "source_text": ""
+    },
+    "Morgoth": {
+      "name": "Morgoth",
+      "entity_type": "character",
+      "birth_era": "first_age",
+      "death_era": "first_age",
+      "birth_year": null,
+      "death_year": null,
+      "event_era": null,
+      "event_year": null,
+      "source_text": ""
+    },
+    "The Silmarils": {
+      "name": "The Silmarils",
+      "entity_type": "event",
+      "birth_era": "first_age",
+      "death_era": "first_age",
+      "birth_year": null,
+      "death_year": null,
+      "event_era": null,
+      "event_year": null,
+      "source_text": ""
+    },
+    "The Darkening of Valinor": {
+      "name": "The Darkening of Valinor",
+      "entity_type": "event",
+      "birth_era": "first_age",
+      "death_era": "first_age",
+      "birth_year": null,
+      "death_year": null,
+      "event_era": null,
+      "event_year": null,
+      "source_text": ""
+    },
+    "The War of Wrath": {
+      "name": "The War of Wrath",
+      "entity_type": "event",
+      "birth_era": "first_age",
+      "death_era": "first_age",
+      "birth_year": null,
+      "death_year": null,
+      "event_era": null,
+      "event_year": null,
+      "source_text": ""
+    },
+    "Galadriel": {
+      "name": "Galadriel",
+      "entity_type": "character",
+      "birth_era": "first_age",
+      "death_era": "fourth_age",
+      "birth_year": null,
+      "death_year": null,
+      "event_era": null,
+      "event_year": null,
+      "source_text": ""
+    },
+    "Elrond": {
+      "name": "Elrond",
+      "entity_type": "character",
+      "birth_era": "first_age",
+      "death_era": "fourth_age",
+      "birth_year": null,
+      "death_year": null,
+      "event_era": null,
+      "event_year": null,
+      "source_text": ""
+    }
+  },
+  "relations": [
+    {
+      "subject": "history long",
+      "relation": "before",
+      "object": "Bilbo",
+      "confidence": 1.0
+    },
+    {
+      "subject": "with him",
+      "relation": "before",
+      "object": "aught else",
+      "confidence": 1.0
+    },
+    {
+      "subject": "they sang",
+      "relation": "before",
+      "object": "him",
+      "confidence": 1.0
+    },
+    {
+      "subject": "they bowed",
+      "relation": "before",
+      "object": "lluvatar and",
+      "confidence": 1.0
+    },
+    {
+      "subject": "be made",
+      "relation": "before",
+      "object": "lluvatar by",
+      "confidence": 1.0
+    },
+    {
+      "subject": "been heard",
+      "relation": "before",
+      "object": "foundered in",
+      "confidence": 1.0
+    },
+    {
+      "subject": "one time",
+      "relation": "before",
+      "object": "the seat",
+      "confidence": 1.0
+    },
+    {
+      "subject": "sight where",
+      "relation": "before",
+      "object": "was only",
+      "confidence": 1.0
+    },
+    {
+      "subject": "made visible",
+      "relation": "before",
+      "object": "them",
+      "confidence": 1.0
+    },
+    {
+      "subject": "I set",
+      "relation": "before",
+      "object": "you",
+      "confidence": 1.0
+    },
+    {
+      "subject": "was played",
+      "relation": "before",
+      "object": "them",
+      "confidence": 1.0
+    },
+    {
+      "subject": "not known",
+      "relation": "before",
+      "object": "except in",
+      "confidence": 1.0
+    },
+    {
+      "subject": "the wars",
+      "relation": "before",
+      "object": "the coming",
+      "confidence": 1.0
+    },
+    {
+      "subject": "great Music",
+      "relation": "before",
+      "object": "him",
+      "confidence": 1.0
+    },
+    {
+      "subject": "knew from",
+      "relation": "before",
+      "object": "the making",
+      "confidence": 1.0
+    },
+    {
+      "subject": "and",
+      "relation": "before",
+      "object": "Valinor was",
+      "confidence": 1.0
+    },
+    {
+      "subject": "lamentation long",
+      "relation": "before",
+      "object": "its end",
+      "confidence": 1.0
+    },
+    {
+      "subject": "the \nWorld",
+      "relation": "before",
+      "object": "it began",
+      "confidence": 1.0
+    },
+    {
+      "subject": "in battles",
+      "relation": "before",
+      "object": "the Elves",
+      "confidence": 1.0
+    },
+    {
+      "subject": "also \nbegan",
+      "relation": "before",
+      "object": "the World",
+      "confidence": 1.0
+    },
+    {
+      "subject": "brought him",
+      "relation": "before",
+      "object": "Ulmo",
+      "confidence": 1.0
+    },
+    {
+      "subject": "War began",
+      "relation": "before",
+      "object": "Arda was",
+      "confidence": 1.0
+    },
+    {
+      "subject": "and darkness",
+      "relation": "before",
+      "object": "it",
+      "confidence": 1.0
+    },
+    {
+      "subject": "Melkor fled",
+      "relation": "before",
+      "object": "his wrath",
+      "confidence": 1.0
+    },
+    {
+      "subject": "she danced",
+      "relation": "before",
+      "object": "the Valar",
+      "confidence": 1.0
+    },
+    {
+      "subject": "Kementari sang",
+      "relation": "before",
+      "object": "them and",
+      "confidence": 1.0
+    },
+    {
+      "subject": "an hour",
+      "relation": "before",
+      "object": "the other",
+      "confidence": 1.0
+    },
+    {
+      "subject": "should come",
+      "relation": "before",
+      "object": "the Firstborn",
+      "confidence": 1.0
+    },
+    {
+      "subject": "she went",
+      "relation": "before",
+      "object": "Manwe",
+      "confidence": 1.0
+    },
+    {
+      "subject": "and",
+      "relation": "before",
+      "object": "the Children",
+      "confidence": 1.0
+    },
+    {
+      "subject": "terror \nwent",
+      "relation": "before",
+      "object": "them",
+      "confidence": 1.0
+    },
+    {
+      "subject": "Yavanna spoke",
+      "relation": "before",
+      "object": "the Valar",
+      "confidence": 1.0
+    },
+    {
+      "subject": "had been",
+      "relation": "before",
+      "object": "Melkor overthrew",
+      "confidence": 1.0
+    },
+    {
+      "subject": "the \nAinulindale",
+      "relation": "before",
+      "object": "the Beginning",
+      "confidence": 1.0
+    },
+    {
+      "subject": "Melkor fled",
+      "relation": "before",
+      "object": "them to",
+      "confidence": 1.0
+    },
+    {
+      "subject": "were \nfought",
+      "relation": "before",
+      "object": "its gates",
+      "confidence": 1.0
+    },
+    {
+      "subject": "his face",
+      "relation": "before",
+      "object": "the feet",
+      "confidence": 1.0
+    },
+    {
+      "subject": "they spoke",
+      "relation": "before",
+      "object": "their people",
+      "confidence": 1.0
+    },
+    {
+      "subject": "that was",
+      "relation": "before",
+      "object": "the Sun",
+      "confidence": 1.0
+    },
+    {
+      "subject": "was akin",
+      "relation": "before",
+      "object": "the World",
+      "confidence": 1.0
+    },
+    {
+      "subject": "earth",
+      "relation": "before",
+      "object": "the dawn",
+      "confidence": 1.0
+    },
+    {
+      "subject": "and dark",
+      "relation": "before",
+      "object": "they spoke",
+      "confidence": 1.0
+    },
+    {
+      "subject": "with lluvatar",
+      "relation": "before",
+      "object": "Ea",
+      "confidence": 1.0
+    },
+    {
+      "subject": "doom was",
+      "relation": "before",
+      "object": "him",
+      "confidence": 1.0
+    },
+    {
+      "subject": "brought again",
+      "relation": "before",
+      "object": "the thrones",
+      "confidence": 1.0
+    },
+    {
+      "subject": "be long",
+      "relation": "before",
+      "object": "he drives",
+      "confidence": 1.0
+    },
+    {
+      "subject": "and stood",
+      "relation": "before",
+      "object": "him",
+      "confidence": 1.0
+    },
+    {
+      "subject": "ago spoke",
+      "relation": "before",
+      "object": "the Quendi",
+      "confidence": 1.0
+    },
+    {
+      "subject": "would be",
+      "relation": "before",
+      "object": "me with",
+      "confidence": 1.0
+    },
+    {
+      "subject": "Fingolfin bowed",
+      "relation": "before",
+      "object": "Finwe",
+      "confidence": 1.0
+    },
+    {
+      "subject": "to appear",
+      "relation": "before",
+      "object": "them at",
+      "confidence": 1.0
+    },
+    {
+      "subject": "Feanor standing",
+      "relation": "before",
+      "object": "Mandos in",
+      "confidence": 1.0
+    },
+    {
+      "subject": "standing silent",
+      "relation": "before",
+      "object": "the \nValar",
+      "confidence": 1.0
+    },
+    {
+      "subject": "with Feanor",
+      "relation": "before",
+      "object": "his \ndoors",
+      "confidence": 1.0
+    },
+    {
+      "subject": "his humiliation",
+      "relation": "before",
+      "object": "Mandos",
+      "confidence": 1.0
+    },
+    {
+      "subject": "in council",
+      "relation": "before",
+      "object": "their \ngates",
+      "confidence": 1.0
+    },
+    {
+      "subject": "ages long",
+      "relation": "before",
+      "object": "she descended",
+      "confidence": 1.0
+    },
+    {
+      "subject": "they \nsang",
+      "relation": "before",
+      "object": "Manwe and",
+      "confidence": 1.0
+    },
+    {
+      "subject": "met \nFingolfin",
+      "relation": "before",
+      "object": "the throne",
+      "confidence": 1.0
+    },
+    {
+      "subject": "Fingolfin stood",
+      "relation": "before",
+      "object": "Manwe there",
+      "confidence": 1.0
+    },
+    {
+      "subject": "and they",
+      "relation": "before",
+      "object": "the green",
+      "confidence": 1.0
+    },
+    {
+      "subject": "Yavanna spoke",
+      "relation": "before",
+      "object": "the Valar",
+      "confidence": 1.0
+    },
+    {
+      "subject": "the Noldor",
+      "relation": "before",
+      "object": "his doors",
+      "confidence": 1.0
+    },
+    {
+      "subject": "his hand",
+      "relation": "before",
+      "object": "Manwe he",
+      "confidence": 1.0
+    },
+    {
+      "subject": "and",
+      "relation": "before",
+      "object": "his face",
+      "confidence": 1.0
+    },
+    {
+      "subject": "a speech",
+      "relation": "before",
+      "object": "the Noldor",
+      "confidence": 1.0
+    },
+    {
+      "subject": "his words",
+      "relation": "before",
+      "object": "the \nthrone",
+      "confidence": 1.0
+    },
+    {
+      "subject": "Valar bowed",
+      "relation": "before",
+      "object": "him \nas",
+      "confidence": 1.0
+    },
+    {
+      "subject": "Feanor hastened",
+      "relation": "before",
+      "object": "them along",
+      "confidence": 1.0
+    },
+    {
+      "subject": "had spoken",
+      "relation": "before",
+      "object": "in Tirion",
+      "confidence": 1.0
+    },
+    {
+      "subject": "rushed in",
+      "relation": "before",
+      "object": "they knew",
+      "confidence": 1.0
+    },
+    {
+      "subject": "of regret",
+      "relation": "before",
+      "object": "the younger",
+      "confidence": 1.0
+    },
+    {
+      "subject": "as never",
+      "relation": "before",
+      "object": "to \ncome",
+      "confidence": 1.0
+    },
+    {
+      "subject": "had not",
+      "relation": "before",
+      "object": "seen their",
+      "confidence": 1.0
+    },
+    {
+      "subject": "which",
+      "relation": "before",
+      "object": "his people",
+      "confidence": 1.0
+    },
+    {
+      "subject": "as has",
+      "relation": "before",
+      "object": "been told",
+      "confidence": 1.0
+    },
+    {
+      "subject": "beauty not",
+      "relation": "before",
+      "object": "conceived be",
+      "confidence": 1.0
+    },
+    {
+      "subject": "and black",
+      "relation": "before",
+      "object": "them",
+      "confidence": 1.0
+    },
+    {
+      "subject": "the Trees",
+      "relation": "before",
+      "object": "they were",
+      "confidence": 1.0
+    },
+    {
+      "subject": "Eldest Days",
+      "relation": "before",
+      "object": "the waxing",
+      "confidence": 1.0
+    },
+    {
+      "subject": "those days",
+      "relation": "before",
+      "object": "they \nhad",
+      "confidence": 1.0
+    },
+    {
+      "subject": "long ages",
+      "relation": "before",
+      "object": "in the",
+      "confidence": 1.0
+    },
+    {
+      "subject": "the \nmorning",
+      "relation": "before",
+      "object": "the dew",
+      "confidence": 1.0
+    },
+    {
+      "subject": "cold stars",
+      "relation": "before",
+      "object": "the rising",
+      "confidence": 1.0
+    },
+    {
+      "subject": "Ores fled",
+      "relation": "before",
+      "object": "them",
+      "confidence": 1.0
+    },
+    {
+      "subject": "now \nwithdrew",
+      "relation": "before",
+      "object": "them",
+      "confidence": 1.0
+    },
+    {
+      "subject": "never heard",
+      "relation": "before",
+      "object": "aught save",
+      "confidence": 1.0
+    },
+    {
+      "subject": "Elves fled",
+      "relation": "before",
+      "object": "him to",
+      "confidence": 1.0
+    },
+    {
+      "subject": "broken rocks",
+      "relation": "before",
+      "object": "the doors",
+      "confidence": 1.0
+    },
+    {
+      "subject": "forty leagues",
+      "relation": "before",
+      "object": "he found",
+      "confidence": 1.0
+    },
+    {
+      "subject": "and",
+      "relation": "before",
+      "object": "he found",
+      "confidence": 1.0
+    },
+    {
+      "subject": "East Beleriand",
+      "relation": "before",
+      "object": "the Third",
+      "confidence": 1.0
+    },
+    {
+      "subject": "Thargelion was",
+      "relation": "before",
+      "object": "called by",
+      "confidence": 1.0
+    },
+    {
+      "subject": "of Laurelin",
+      "relation": "before",
+      "object": "the coming",
+      "confidence": 1.0
+    },
+    {
+      "subject": "not long",
+      "relation": "before",
+      "object": "whispered tales",
+      "confidence": 1.0
+    },
+    {
+      "subject": "to do",
+      "relation": "before",
+      "object": "Thingol",
+      "confidence": 1.0
+    },
+    {
+      "subject": "been silent",
+      "relation": "before",
+      "object": "you",
+      "confidence": 1.0
+    },
+    {
+      "subject": "and",
+      "relation": "before",
+      "object": "she was",
+      "confidence": 1.0
+    },
+    {
+      "subject": "And",
+      "relation": "before",
+      "object": "Eol \nhad",
+      "confidence": 1.0
+    },
+    {
+      "subject": "your wife",
+      "relation": "before",
+      "object": "me",
+      "confidence": 1.0
+    },
+    {
+      "subject": "be brought",
+      "relation": "before",
+      "object": "you",
+      "confidence": 1.0
+    },
+    {
+      "subject": "and stood",
+      "relation": "before",
+      "object": "his high",
+      "confidence": 1.0
+    },
+    {
+      "subject": "Aredhel sprang",
+      "relation": "before",
+      "object": "the dart",
+      "confidence": 1.0
+    },
+    {
+      "subject": "was brought",
+      "relation": "before",
+      "object": "Turgon he",
+      "confidence": 1.0
+    },
+    {
+      "subject": "nor ever",
+      "relation": "before",
+      "object": "had any",
+      "confidence": 1.0
+    },
+    {
+      "subject": "clear visions",
+      "relation": "before",
+      "object": "their eyes",
+      "confidence": 1.0
+    },
+    {
+      "subject": "long therefore",
+      "relation": "before",
+      "object": "Felagund could",
+      "confidence": 1.0
+    },
+    {
+      "subject": "awaiting tidings",
+      "relation": "before",
+      "object": "they venture",
+      "confidence": 1.0
+    },
+    {
+      "subject": "They were",
+      "relation": "before",
+      "object": "us on",
+      "confidence": 1.0
+    },
+    {
+      "subject": "his name",
+      "relation": "before",
+      "object": "had been",
+      "confidence": 1.0
+    },
+    {
+      "subject": "is here",
+      "relation": "before",
+      "object": "us",
+      "confidence": 1.0
+    },
+    {
+      "subject": "the woods",
+      "relation": "before",
+      "object": "the Ores",
+      "confidence": 1.0
+    },
+    {
+      "subject": "had never",
+      "relation": "before",
+      "object": "seen or",
+      "confidence": 1.0
+    },
+    {
+      "subject": "Ores fled",
+      "relation": "before",
+      "object": "his face",
+      "confidence": 1.0
+    },
+    {
+      "subject": "the challenge",
+      "relation": "before",
+      "object": "the face",
+      "confidence": 1.0
+    },
+    {
+      "subject": "he stood",
+      "relation": "before",
+      "object": "the \nKing",
+      "confidence": 1.0
+    },
+    {
+      "subject": "fell backward",
+      "relation": "before",
+      "object": "the feet",
+      "confidence": 1.0
+    },
+    {
+      "subject": "bird fled",
+      "relation": "before",
+      "object": "them",
+      "confidence": 1.0
+    },
+    {
+      "subject": "the days",
+      "relation": "before",
+      "object": "the Dagor",
+      "confidence": 1.0
+    },
+    {
+      "subject": "lomin",
+      "relation": "before",
+      "object": "the dawn",
+      "confidence": 1.0
+    },
+    {
+      "subject": "still hours",
+      "relation": "before",
+      "object": "dawn surprised",
+      "confidence": 1.0
+    },
+    {
+      "subject": "were laid",
+      "relation": "before",
+      "object": "the rising",
+      "confidence": 1.0
+    },
+    {
+      "subject": "long dark",
+      "relation": "before",
+      "object": "the Sun",
+      "confidence": 1.0
+    },
+    {
+      "subject": "Beren herself",
+      "relation": "before",
+      "object": "the throne",
+      "confidence": 1.0
+    },
+    {
+      "subject": "and \nbowing",
+      "relation": "before",
+      "object": "Thingol and",
+      "confidence": 1.0
+    },
+    {
+      "subject": "they bowed",
+      "relation": "before",
+      "object": "him",
+      "confidence": 1.0
+    },
+    {
+      "subject": "of Narog",
+      "relation": "before",
+      "object": "the gates",
+      "confidence": 1.0
+    },
+    {
+      "subject": "Thus Beren",
+      "relation": "before",
+      "object": "King Finrod",
+      "confidence": 1.0
+    },
+    {
+      "subject": "as long",
+      "relation": "before",
+      "object": "he had",
+      "confidence": 1.0
+    },
+    {
+      "subject": "Felagund spoke",
+      "relation": "before",
+      "object": "his people",
+      "confidence": 1.0
+    },
+    {
+      "subject": "were long",
+      "relation": "before",
+      "object": "in Tirion",
+      "confidence": 1.0
+    },
+    {
+      "subject": "bring them",
+      "relation": "before",
+      "object": "him",
+      "confidence": 1.0
+    },
+    {
+      "subject": "Finrod fell",
+      "relation": "before",
+      "object": "the throne",
+      "confidence": 1.0
+    },
+    {
+      "subject": "they \nstood",
+      "relation": "before",
+      "object": "him naked",
+      "confidence": 1.0
+    },
+    {
+      "subject": "he lay",
+      "relation": "before",
+      "object": "her door",
+      "confidence": 1.0
+    },
+    {
+      "subject": "he died",
+      "relation": "before",
+      "object": "Sauron",
+      "confidence": 1.0
+    },
+    {
+      "subject": "she \nswooned",
+      "relation": "before",
+      "object": "the menace",
+      "confidence": 1.0
+    },
+    {
+      "subject": "dark cloak",
+      "relation": "before",
+      "object": "his eyes",
+      "confidence": 1.0
+    },
+    {
+      "subject": "sprang from",
+      "relation": "before",
+      "object": "Celegorm full",
+      "confidence": 1.0
+    },
+    {
+      "subject": "Beren sprang",
+      "relation": "before",
+      "object": "Luthien",
+      "confidence": 1.0
+    },
+    {
+      "subject": "one morning",
+      "relation": "before",
+      "object": "the sun",
+      "confidence": 1.0
+    },
+    {
+      "subject": "things fled",
+      "relation": "before",
+      "object": "them",
+      "confidence": 1.0
+    },
+    {
+      "subject": "that lies",
+      "relation": "before",
+      "object": "you",
+      "confidence": 1.0
+    },
+    {
+      "subject": "may \nmeet",
+      "relation": "before",
+      "object": "the end",
+      "confidence": 1.0
+    },
+    {
+      "subject": "that lay",
+      "relation": "before",
+      "object": "the Gate",
+      "confidence": 1.0
+    },
+    {
+      "subject": "and hungry",
+      "relation": "before",
+      "object": "the feet",
+      "confidence": 1.0
+    },
+    {
+      "subject": "lie unsleeping",
+      "relation": "before",
+      "object": "the doors",
+      "confidence": 1.0
+    },
+    {
+      "subject": "small",
+      "relation": "before",
+      "object": "the might",
+      "confidence": 1.0
+    },
+    {
+      "subject": "to sing",
+      "relation": "before",
+      "object": "him",
+      "confidence": 1.0
+    },
+    {
+      "subject": "her cloak",
+      "relation": "before",
+      "object": "his eyes",
+      "confidence": 1.0
+    },
+    {
+      "subject": "strode forth",
+      "relation": "before",
+      "object": "her",
+      "confidence": 1.0
+    },
+    {
+      "subject": "the Silmaril",
+      "relation": "before",
+      "object": "the eyes",
+      "confidence": 1.0
+    },
+    {
+      "subject": "he led",
+      "relation": "before",
+      "object": "them",
+      "confidence": 1.0
+    },
+    {
+      "subject": "even as",
+      "relation": "before",
+      "object": "when she",
+      "confidence": 1.0
+    },
+    {
+      "subject": "named even",
+      "relation": "before",
+      "object": "Maglor son",
+      "confidence": 1.0
+    },
+    {
+      "subject": "coming went",
+      "relation": "before",
+      "object": "them like",
+      "confidence": 1.0
+    },
+    {
+      "subject": "led Luthien",
+      "relation": "before",
+      "object": "the throne",
+      "confidence": 1.0
+    },
+    {
+      "subject": "Beren knelt",
+      "relation": "before",
+      "object": "him",
+      "confidence": 1.0
+    },
+    {
+      "subject": "Beren sat",
+      "relation": "before",
+      "object": "his throne",
+      "confidence": 1.0
+    },
+    {
+      "subject": "of Luthien",
+      "relation": "before",
+      "object": "the throne",
+      "confidence": 1.0
+    },
+    {
+      "subject": "Beren strode",
+      "relation": "before",
+      "object": "him with",
+      "confidence": 1.0
+    },
+    {
+      "subject": "Beren farewell",
+      "relation": "before",
+      "object": "he died",
+      "confidence": 1.0
+    },
+    {
+      "subject": "she knelt",
+      "relation": "before",
+      "object": "Mandos and",
+      "confidence": 1.0
+    },
+    {
+      "subject": "of Luthien",
+      "relation": "before",
+      "object": "Mandos was",
+      "confidence": 1.0
+    },
+    {
+      "subject": "she knelt",
+      "relation": "before",
+      "object": "him her",
+      "confidence": 1.0
+    },
+    {
+      "subject": "who never",
+      "relation": "before",
+      "object": "was so",
+      "confidence": 1.0
+    },
+    {
+      "subject": "had",
+      "relation": "before",
+      "object": "sent \nto",
+      "confidence": 1.0
+    },
+    {
+      "subject": "of \nAnfauglith",
+      "relation": "before",
+      "object": "their approach",
+      "confidence": 1.0
+    },
+    {
+      "subject": "drawn up",
+      "relation": "before",
+      "object": "the stream",
+      "confidence": 1.0
+    },
+    {
+      "subject": "rode up",
+      "relation": "before",
+      "object": "the \noutworks",
+      "confidence": 1.0
+    },
+    {
+      "subject": "were \nraised",
+      "relation": "before",
+      "object": "the walls",
+      "confidence": 1.0
+    },
+    {
+      "subject": "Men withered",
+      "relation": "before",
+      "object": "him",
+      "confidence": 1.0
+    },
+    {
+      "subject": "of Rivil",
+      "relation": "before",
+      "object": "them",
+      "confidence": 1.0
+    },
+    {
+      "subject": "as leaves",
+      "relation": "before",
+      "object": "the wind",
+      "confidence": 1.0
+    },
+    {
+      "subject": "was brought",
+      "relation": "before",
+      "object": "Morgoth",
+      "confidence": 1.0
+    },
+    {
+      "subject": "two months",
+      "relation": "before",
+      "object": "he went",
+      "confidence": 1.0
+    },
+    {
+      "subject": "he went",
+      "relation": "before",
+      "object": "the King",
+      "confidence": 1.0
+    },
+    {
+      "subject": "in terror",
+      "relation": "before",
+      "object": "him \nfell",
+      "confidence": 1.0
+    },
+    {
+      "subject": "searched \nout",
+      "relation": "before",
+      "object": "Thingol",
+      "confidence": 1.0
+    },
+    {
+      "subject": "what lay",
+      "relation": "before",
+      "object": "him he",
+      "confidence": 1.0
+    },
+    {
+      "subject": "and \ncoming",
+      "relation": "before",
+      "object": "Thingol and",
+      "confidence": 1.0
+    },
+    {
+      "subject": "had never",
+      "relation": "before",
+      "object": "allowed \nMen",
+      "confidence": 1.0
+    },
+    {
+      "subject": "who fled",
+      "relation": "before",
+      "object": "them",
+      "confidence": 1.0
+    },
+    {
+      "subject": "his life",
+      "relation": "before",
+      "object": "Turin",
+      "confidence": 1.0
+    },
+    {
+      "subject": "the greensward",
+      "relation": "before",
+      "object": "the mouth",
+      "confidence": 1.0
+    },
+    {
+      "subject": "and \nlong",
+      "relation": "before",
+      "object": "the return",
+      "confidence": 1.0
+    },
+    {
+      "subject": "loved him",
+      "relation": "before",
+      "object": "the Nirnaeth",
+      "confidence": 1.0
+    },
+    {
+      "subject": "it \n\n\n\non",
+      "relation": "before",
+      "object": "battle",
+      "confidence": 1.0
+    },
+    {
+      "subject": "enemies fled",
+      "relation": "before",
+      "object": "his face",
+      "confidence": 1.0
+    },
+    {
+      "subject": "all \nfled",
+      "relation": "before",
+      "object": "him",
+      "confidence": 1.0
+    },
+    {
+      "subject": "were there",
+      "relation": "before",
+      "object": "him",
+      "confidence": 1.0
+    },
+    {
+      "subject": "the terraces",
+      "relation": "before",
+      "object": "the doors",
+      "confidence": 1.0
+    },
+    {
+      "subject": "down all",
+      "relation": "before",
+      "object": "him",
+      "confidence": 1.0
+    },
+    {
+      "subject": "silent",
+      "relation": "before",
+      "object": "the \ndoors",
+      "confidence": 1.0
+    },
+    {
+      "subject": "shall come",
+      "relation": "before",
+      "object": "thee",
+      "confidence": 1.0
+    },
+    {
+      "subject": "where",
+      "relation": "before",
+      "object": "he had",
+      "confidence": 1.0
+    },
+    {
+      "subject": "a league",
+      "relation": "before",
+      "object": "the \ndoors",
+      "confidence": 1.0
+    },
+    {
+      "subject": "the time",
+      "relation": "before",
+      "object": "she was",
+      "confidence": 1.0
+    },
+    {
+      "subject": "was shamed",
+      "relation": "before",
+      "object": "his \npeople",
+      "confidence": 1.0
+    },
+    {
+      "subject": "sped on",
+      "relation": "before",
+      "object": "him",
+      "confidence": 1.0
+    },
+    {
+      "subject": "Turin \nhimself",
+      "relation": "before",
+      "object": "them",
+      "confidence": 1.0
+    },
+    {
+      "subject": "in despair",
+      "relation": "before",
+      "object": "the silent",
+      "confidence": 1.0
+    },
+    {
+      "subject": "ventured it",
+      "relation": "before",
+      "object": "him",
+      "confidence": 1.0
+    },
+    {
+      "subject": "he stood",
+      "relation": "before",
+      "object": "the \nbroken",
+      "confidence": 1.0
+    },
+    {
+      "subject": "and",
+      "relation": "before",
+      "object": "the \nproud",
+      "confidence": 1.0
+    },
+    {
+      "subject": "him there",
+      "relation": "before",
+      "object": "the doors",
+      "confidence": 1.0
+    },
+    {
+      "subject": "and brought",
+      "relation": "before",
+      "object": "King Thingol",
+      "confidence": 1.0
+    },
+    {
+      "subject": "long years",
+      "relation": "before",
+      "object": "by the",
+      "confidence": 1.0
+    },
+    {
+      "subject": "it lay",
+      "relation": "before",
+      "object": "Thingol",
+      "confidence": 1.0
+    },
+    {
+      "subject": "fell back",
+      "relation": "before",
+      "object": "his \nface",
+      "confidence": 1.0
+    },
+    {
+      "subject": "Heavy Hand",
+      "relation": "before",
+      "object": "the doors",
+      "confidence": 1.0
+    },
+    {
+      "subject": "people fled",
+      "relation": "before",
+      "object": "them",
+      "confidence": 1.0
+    },
+    {
+      "subject": "and Easterlings",
+      "relation": "before",
+      "object": "they made",
+      "confidence": 1.0
+    },
+    {
+      "subject": "and \nbrought",
+      "relation": "before",
+      "object": "Ecthelion of",
+      "confidence": 1.0
+    },
+    {
+      "subject": "Tuor stood",
+      "relation": "before",
+      "object": "Turgon son",
+      "confidence": 1.0
+    },
+    {
+      "subject": "were spoken",
+      "relation": "before",
+      "object": "the departing",
+      "confidence": 1.0
+    },
+    {
+      "subject": "to him",
+      "relation": "before",
+      "object": "the host",
+      "confidence": 1.0
+    },
+    {
+      "subject": "winds that",
+      "relation": "before",
+      "object": "he had",
+      "confidence": 1.0
+    },
+    {
+      "subject": "of light",
+      "relation": "before",
+      "object": "the Sun",
+      "confidence": 1.0
+    },
+    {
+      "subject": "to \ncome",
+      "relation": "before",
+      "object": "the Powers",
+      "confidence": 1.0
+    },
+    {
+      "subject": "Earendil stood",
+      "relation": "before",
+      "object": "their faces",
+      "confidence": 1.0
+    },
+    {
+      "subject": "shrivelled leaves",
+      "relation": "before",
+      "object": "a burning",
+      "confidence": 1.0
+    },
+    {
+      "subject": "had not",
+      "relation": "before",
+      "object": "been seen",
+      "confidence": 1.0
+    },
+    {
+      "subject": "that \nwere",
+      "relation": "before",
+      "object": "Arda",
+      "confidence": 1.0
+    },
+    {
+      "subject": "to speak",
+      "relation": "before",
+      "object": "the Powers",
+      "confidence": 1.0
+    },
+    {
+      "subject": "waters glittered",
+      "relation": "before",
+      "object": "the eyes",
+      "confidence": 1.0
+    },
+    {
+      "subject": "like snow",
+      "relation": "before",
+      "object": "the \nstems",
+      "confidence": 1.0
+    },
+    {
+      "subject": "what lies",
+      "relation": "before",
+      "object": "us in",
+      "confidence": 1.0
+    },
+    {
+      "subject": "two years",
+      "relation": "before",
+      "object": "his two",
+      "confidence": 1.0
+    },
+    {
+      "subject": "to \ncome",
+      "relation": "before",
+      "object": "him and",
+      "confidence": 1.0
+    },
+    {
+      "subject": "humbled himself",
+      "relation": "before",
+      "object": "Ar",
+      "confidence": 1.0
+    },
+    {
+      "subject": "they fled",
+      "relation": "before",
+      "object": "the black",
+      "confidence": 1.0
+    },
+    {
+      "subject": "Long",
+      "relation": "before",
+      "object": "in the",
+      "confidence": 1.0
+    },
+    {
+      "subject": "Minas Ithil",
+      "relation": "before",
+      "object": "the house",
+      "confidence": 1.0
+    },
+    {
+      "subject": "which lies",
+      "relation": "before",
+      "object": "the gate",
+      "confidence": 1.0
+    },
+    {
+      "subject": "Tree grew",
+      "relation": "before",
+      "object": "the King",
+      "confidence": 1.0
+    },
+    {
+      "subject": "the seed",
+      "relation": "before",
+      "object": "that \ncame",
+      "confidence": 1.0
+    },
+    {
+      "subject": "and",
+      "relation": "before",
+      "object": "that from",
+      "confidence": 1.0
+    },
+    {
+      "subject": "the \nDay",
+      "relation": "before",
+      "object": "days when",
+      "confidence": 1.0
+    },
+    {
+      "subject": "a while",
+      "relation": "before",
+      "object": "the house",
+      "confidence": 1.0
+    },
+    {
+      "subject": "which",
+      "relation": "before",
+      "object": "was named",
+      "confidence": 1.0
+    },
+    {
+      "subject": "the Day",
+      "relation": "before",
+      "object": "days in",
+      "confidence": 1.0
+    },
+    {
+      "subject": "had gone",
+      "relation": "before",
+      "object": "him to",
+      "confidence": 1.0
+    },
+    {
+      "subject": "than any",
+      "relation": "before",
+      "object": "him",
+      "confidence": 1.0
+    },
+    {
+      "subject": "and",
+      "relation": "before",
+      "object": "the City",
+      "confidence": 1.0
+    },
+    {
+      "subject": "made",
+      "relation": "before",
+      "object": "Ea",
+      "confidence": 1.0
+    },
+    {
+      "subject": "the Old",
+      "relation": "before",
+      "object": "he took",
+      "confidence": 1.0
+    },
+    {
+      "subject": "Turgon dwelt",
+      "relation": "before",
+      "object": "his departure",
+      "confidence": 1.0
+    },
+    {
+      "subject": "by Isildur",
+      "relation": "before",
+      "object": "it was",
+      "confidence": 1.0
+    },
+    {
+      "subject": "by Feanor",
+      "relation": "before",
+      "object": "the \ndestruction",
+      "confidence": 1.0
+    },
+    {
+      "subject": "of Turgon",
+      "relation": "before",
+      "object": "he went",
+      "confidence": 1.0
+    },
+    {
+      "subject": "by those",
+      "relation": "before",
+      "object": "them on",
+      "confidence": 1.0
+    },
+    {
+      "subject": "long remained",
+      "relation": "before",
+      "object": "they \nwent",
+      "confidence": 1.0
+    },
+    {
+      "subject": "in Nevrast",
+      "relation": "before",
+      "object": "he departed",
+      "confidence": 1.0
+    },
+    {
+      "subject": "Gandalfs \nwords",
+      "relation": "before",
+      "object": "the gate",
+      "confidence": 1.0
+    },
+    {
+      "subject": "four years",
+      "relation": "after",
+      "object": "the \ndeath",
+      "confidence": 1.0
+    },
+    {
+      "subject": "the \nElves",
+      "relation": "after",
+      "object": "the return",
+      "confidence": 1.0
+    },
+    {
+      "subject": "of lluvatar",
+      "relation": "after",
+      "object": "the end",
+      "confidence": 1.0
+    },
+    {
+      "subject": "took shape",
+      "relation": "after",
+      "object": "that manner",
+      "confidence": 1.0
+    },
+    {
+      "subject": "a body",
+      "relation": "after",
+      "object": "the manner",
+      "confidence": 1.0
+    },
+    {
+      "subject": "it ever",
+      "relation": "after",
+      "object": "in their",
+      "confidence": 1.0
+    },
+    {
+      "subject": "But in",
+      "relation": "after",
+      "object": "years he",
+      "confidence": 1.0
+    },
+    {
+      "subject": "were never",
+      "relation": "after",
+      "object": "restored",
+      "confidence": 1.0
+    },
+    {
+      "subject": "much in",
+      "relation": "after",
+      "object": "days",
+      "confidence": 1.0
+    },
+    {
+      "subject": "said that",
+      "relation": "after",
+      "object": "the departure",
+      "confidence": 1.0
+    },
+    {
+      "subject": "the Elves",
+      "relation": "after",
+      "object": "the World",
+      "confidence": 1.0
+    },
+    {
+      "subject": "of Arda",
+      "relation": "after",
+      "object": "the Last",
+      "confidence": 1.0
+    },
+    {
+      "subject": "renowned in",
+      "relation": "after",
+      "object": "ages",
+      "confidence": 1.0
+    },
+    {
+      "subject": "was called",
+      "relation": "after",
+      "object": "by the",
+      "confidence": 1.0
+    },
+    {
+      "subject": "name was",
+      "relation": "after",
+      "object": "borne only",
+      "confidence": 1.0
+    },
+    {
+      "subject": "and \n\n\nmultiplied",
+      "relation": "after",
+      "object": "the manner",
+      "confidence": 1.0
+    },
+    {
+      "subject": "known ever",
+      "relation": "after",
+      "object": "as the",
+      "confidence": 1.0
+    },
+    {
+      "subject": "to pass",
+      "relation": "after",
+      "object": "many years",
+      "confidence": 1.0
+    },
+    {
+      "subject": "which was",
+      "relation": "after",
+      "object": "called Anduin",
+      "confidence": 1.0
+    },
+    {
+      "subject": "In",
+      "relation": "after",
+      "object": "years Denethor",
+      "confidence": 1.0
+    },
+    {
+      "subject": "the Elves",
+      "relation": "after",
+      "object": "named Beleriand",
+      "confidence": 1.0
+    },
+    {
+      "subject": "Thus",
+      "relation": "after",
+      "object": "many years",
+      "confidence": 1.0
+    },
+    {
+      "subject": "In",
+      "relation": "after",
+      "object": "days he",
+      "confidence": 1.0
+    },
+    {
+      "subject": "ancient days",
+      "relation": "after",
+      "object": "the Battle",
+      "confidence": 1.0
+    },
+    {
+      "subject": "were",
+      "relation": "after",
+      "object": "enamoured of",
+      "confidence": 1.0
+    },
+    {
+      "subject": "who in",
+      "relation": "after",
+      "object": "days had",
+      "confidence": 1.0
+    },
+    {
+      "subject": "Osse followed",
+      "relation": "after",
+      "object": "the host",
+      "confidence": 1.0
+    },
+    {
+      "subject": "the hills",
+      "relation": "after",
+      "object": "stone",
+      "confidence": 1.0
+    },
+    {
+      "subject": "and",
+      "relation": "after",
+      "object": "his birth",
+      "confidence": 1.0
+    },
+    {
+      "subject": "But",
+      "relation": "after",
+      "object": "that time",
+      "confidence": 1.0
+    },
+    {
+      "subject": "the Noldor",
+      "relation": "after",
+      "object": "a time",
+      "confidence": 1.0
+    },
+    {
+      "subject": "that his",
+      "relation": "after",
+      "object": "deeds would",
+      "confidence": 1.0
+    },
+    {
+      "subject": "that was",
+      "relation": "after",
+      "object": "called Nan",
+      "confidence": 1.0
+    },
+    {
+      "subject": "and even",
+      "relation": "after",
+      "object": "Ungoliant \nherself",
+      "confidence": 1.0
+    },
+    {
+      "subject": "At length",
+      "relation": "after",
+      "object": "long debate",
+      "confidence": 1.0
+    },
+    {
+      "subject": "of Fingolfin",
+      "relation": "after",
+      "object": "them",
+      "confidence": 1.0
+    },
+    {
+      "subject": "woes \nindeed",
+      "relation": "after",
+      "object": "befell them",
+      "confidence": 1.0
+    },
+    {
+      "subject": "where \nbattle",
+      "relation": "after",
+      "object": "befell",
+      "confidence": 1.0
+    },
+    {
+      "subject": "Noldor in",
+      "relation": "after",
+      "object": "days than",
+      "confidence": 1.0
+    },
+    {
+      "subject": "him mansions",
+      "relation": "after",
+      "object": "the fashion",
+      "confidence": 1.0
+    },
+    {
+      "subject": "that followed",
+      "relation": "after",
+      "object": "the \ncoming",
+      "confidence": 1.0
+    },
+    {
+      "subject": "him ever",
+      "relation": "after",
+      "object": "and took",
+      "confidence": 1.0
+    },
+    {
+      "subject": "was",
+      "relation": "after",
+      "object": "called \nDoriath",
+      "confidence": 1.0
+    },
+    {
+      "subject": "told that",
+      "relation": "after",
+      "object": "the flight",
+      "confidence": 1.0
+    },
+    {
+      "subject": "were reckoned",
+      "relation": "after",
+      "object": "the \nmanner",
+      "confidence": 1.0
+    },
+    {
+      "subject": "a while",
+      "relation": "after",
+      "object": "the \npassing",
+      "confidence": 1.0
+    },
+    {
+      "subject": "but only",
+      "relation": "after",
+      "object": "the Sun",
+      "confidence": 1.0
+    },
+    {
+      "subject": "that in",
+      "relation": "after",
+      "object": "days sailed",
+      "confidence": 1.0
+    },
+    {
+      "subject": "their spirits",
+      "relation": "after",
+      "object": "death the",
+      "confidence": 1.0
+    },
+    {
+      "subject": "they go",
+      "relation": "after",
+      "object": "the time",
+      "confidence": 1.0
+    },
+    {
+      "subject": "of Men",
+      "relation": "after",
+      "object": "death",
+      "confidence": 1.0
+    },
+    {
+      "subject": "In",
+      "relation": "after",
+      "object": "days",
+      "confidence": 1.0
+    },
+    {
+      "subject": "whom Ecthelion",
+      "relation": "after",
+      "object": "slew in",
+      "confidence": 1.0
+    },
+    {
+      "subject": "who",
+      "relation": "after",
+      "object": "the onslaught",
+      "confidence": 1.0
+    },
+    {
+      "subject": "there followed",
+      "relation": "after",
+      "object": "long years",
+      "confidence": 1.0
+    },
+    {
+      "subject": "dreams remained",
+      "relation": "after",
+      "object": "they awoke",
+      "confidence": 1.0
+    },
+    {
+      "subject": "and \narmouries",
+      "relation": "after",
+      "object": "the fashion",
+      "confidence": 1.0
+    },
+    {
+      "subject": "a city",
+      "relation": "after",
+      "object": "the \nmanner",
+      "confidence": 1.0
+    },
+    {
+      "subject": "long time",
+      "relation": "after",
+      "object": "Dagor Aglareb",
+      "confidence": 1.0
+    },
+    {
+      "subject": "Again",
+      "relation": "after",
+      "object": "a hundred",
+      "confidence": 1.0
+    },
+    {
+      "subject": "and",
+      "relation": "after",
+      "object": "his defeat",
+      "confidence": 1.0
+    },
+    {
+      "subject": "upon Morgoth",
+      "relation": "after",
+      "object": "the Dagor",
+      "confidence": 1.0
+    },
+    {
+      "subject": "but",
+      "relation": "after",
+      "object": "the coming",
+      "confidence": 1.0
+    },
+    {
+      "subject": "but",
+      "relation": "after",
+      "object": "Nargothrond was",
+      "confidence": 1.0
+    },
+    {
+      "subject": "and Fingon",
+      "relation": "after",
+      "object": "him",
+      "confidence": 1.0
+    },
+    {
+      "subject": "Maedhros dwelt",
+      "relation": "after",
+      "object": "the \ngreat",
+      "confidence": 1.0
+    },
+    {
+      "subject": "that was",
+      "relation": "after",
+      "object": "named Rathloriel",
+      "confidence": 1.0
+    },
+    {
+      "subject": "Luthien dwelt",
+      "relation": "after",
+      "object": "their \nreturn",
+      "confidence": 1.0
+    },
+    {
+      "subject": "for",
+      "relation": "after",
+      "object": "Sirion Ulmo",
+      "confidence": 1.0
+    },
+    {
+      "subject": "as was",
+      "relation": "after",
+      "object": "known",
+      "confidence": 1.0
+    },
+    {
+      "subject": "Now",
+      "relation": "after",
+      "object": "the Dagor",
+      "confidence": 1.0
+    },
+    {
+      "subject": "of Lamentation",
+      "relation": "after",
+      "object": "three hundred",
+      "confidence": 1.0
+    },
+    {
+      "subject": "that \nfollowed",
+      "relation": "after",
+      "object": "Feanor could",
+      "confidence": 1.0
+    },
+    {
+      "subject": "he followed",
+      "relation": "after",
+      "object": "them even",
+      "confidence": 1.0
+    },
+    {
+      "subject": "following",
+      "relation": "after",
+      "object": "Aredhel",
+      "confidence": 1.0
+    },
+    {
+      "subject": "seen in",
+      "relation": "after",
+      "object": "days",
+      "confidence": 1.0
+    },
+    {
+      "subject": "and",
+      "relation": "after",
+      "object": "him they",
+      "confidence": 1.0
+    },
+    {
+      "subject": "were ever",
+      "relation": "after",
+      "object": "loyal to",
+      "confidence": 1.0
+    },
+    {
+      "subject": "But when",
+      "relation": "after",
+      "object": "a year",
+      "confidence": 1.0
+    },
+    {
+      "subject": "Soon",
+      "relation": "after",
+      "object": "the departure",
+      "confidence": 1.0
+    },
+    {
+      "subject": "until",
+      "relation": "after",
+      "object": "some fifty",
+      "confidence": 1.0
+    },
+    {
+      "subject": "were ever",
+      "relation": "after",
+      "object": "known to",
+      "confidence": 1.0
+    },
+    {
+      "subject": "as it",
+      "relation": "after",
+      "object": "became",
+      "confidence": 1.0
+    },
+    {
+      "subject": "But",
+      "relation": "after",
+      "object": "a time",
+      "confidence": 1.0
+    },
+    {
+      "subject": "of Men",
+      "relation": "after",
+      "object": "Beor and",
+      "confidence": 1.0
+    },
+    {
+      "subject": "as was",
+      "relation": "after",
+      "object": "seen",
+      "confidence": 1.0
+    },
+    {
+      "subject": "dared ever",
+      "relation": "after",
+      "object": "to pass",
+      "confidence": 1.0
+    },
+    {
+      "subject": "one foot",
+      "relation": "after",
+      "object": "that day",
+      "confidence": 1.0
+    },
+    {
+      "subject": "who was",
+      "relation": "after",
+      "object": "named \nGil",
+      "confidence": 1.0
+    },
+    {
+      "subject": "grew there",
+      "relation": "after",
+      "object": "the burning",
+      "confidence": 1.0
+    },
+    {
+      "subject": "two years",
+      "relation": "after",
+      "object": "the Dagor",
+      "confidence": 1.0
+    },
+    {
+      "subject": "for",
+      "relation": "after",
+      "object": "the taking",
+      "confidence": 1.0
+    },
+    {
+      "subject": "his son",
+      "relation": "after",
+      "object": "him",
+      "confidence": 1.0
+    },
+    {
+      "subject": "and swift",
+      "relation": "after",
+      "object": "the \nmanner",
+      "confidence": 1.0
+    },
+    {
+      "subject": "And",
+      "relation": "after",
+      "object": "Celegorm Curufin",
+      "confidence": 1.0
+    },
+    {
+      "subject": "that never",
+      "relation": "after",
+      "object": "until \nthe",
+      "confidence": 1.0
+    },
+    {
+      "subject": "but",
+      "relation": "after",
+      "object": "a space",
+      "confidence": 1.0
+    },
+    {
+      "subject": "Therefore",
+      "relation": "after",
+      "object": "a while",
+      "confidence": 1.0
+    },
+    {
+      "subject": "who was",
+      "relation": "after",
+      "object": "known as",
+      "confidence": 1.0
+    },
+    {
+      "subject": "dismay \nfollowed",
+      "relation": "after",
+      "object": "him",
+      "confidence": 1.0
+    },
+    {
+      "subject": "a manner",
+      "relation": "after",
+      "object": "his own",
+      "confidence": 1.0
+    },
+    {
+      "subject": "the Havens",
+      "relation": "after",
+      "object": "the Dagor",
+      "confidence": 1.0
+    },
+    {
+      "subject": "Now",
+      "relation": "after",
+      "object": "the Nimaeth",
+      "confidence": 1.0
+    },
+    {
+      "subject": "Beleg cried",
+      "relation": "after",
+      "object": "him",
+      "confidence": 1.0
+    },
+    {
+      "subject": "sent Mablung",
+      "relation": "after",
+      "object": "her",
+      "confidence": 1.0
+    },
+    {
+      "subject": "And",
+      "relation": "after",
+      "object": "three days",
+      "confidence": 1.0
+    },
+    {
+      "subject": "she spoke",
+      "relation": "after",
+      "object": "her darkness",
+      "confidence": 1.0
+    },
+    {
+      "subject": "the year",
+      "relation": "after",
+      "object": "Niniel conceived",
+      "confidence": 1.0
+    },
+    {
+      "subject": "set forth",
+      "relation": "after",
+      "object": "him",
+      "confidence": 1.0
+    },
+    {
+      "subject": "and went",
+      "relation": "after",
+      "object": "her",
+      "confidence": 1.0
+    },
+    {
+      "subject": "But",
+      "relation": "after",
+      "object": "a while",
+      "confidence": 1.0
+    },
+    {
+      "subject": "they followed",
+      "relation": "after",
+      "object": "him",
+      "confidence": 1.0
+    },
+    {
+      "subject": "as",
+      "relation": "after",
+      "object": "indeed \nbefell",
+      "confidence": 1.0
+    },
+    {
+      "subject": "told that",
+      "relation": "after",
+      "object": "the departure",
+      "confidence": 1.0
+    },
+    {
+      "subject": "and",
+      "relation": "after",
+      "object": "the Nirnaeth",
+      "confidence": 1.0
+    },
+    {
+      "subject": "and",
+      "relation": "after",
+      "object": "of the",
+      "confidence": 1.0
+    },
+    {
+      "subject": "the year",
+      "relation": "after",
+      "object": "was born",
+      "confidence": 1.0
+    },
+    {
+      "subject": "and \nquarrying",
+      "relation": "after",
+      "object": "metals above",
+      "confidence": 1.0
+    },
+    {
+      "subject": "seeking",
+      "relation": "after",
+      "object": "metals for",
+      "confidence": 1.0
+    },
+    {
+      "subject": "until long",
+      "relation": "after",
+      "object": "to Morgoth",
+      "confidence": 1.0
+    },
+    {
+      "subject": "But in",
+      "relation": "after",
+      "object": "days it",
+      "confidence": 1.0
+    },
+    {
+      "subject": "seeking",
+      "relation": "after",
+      "object": "Tuor and",
+      "confidence": 1.0
+    },
+    {
+      "subject": "love grew",
+      "relation": "after",
+      "object": "between them",
+      "confidence": 1.0
+    },
+    {
+      "subject": "Elves that",
+      "relation": "after",
+      "object": "Earendil had",
+      "confidence": 1.0
+    },
+    {
+      "subject": "named only",
+      "relation": "after",
+      "object": "Daeron of",
+      "confidence": 1.0
+    },
+    {
+      "subject": "his quest",
+      "relation": "after",
+      "object": "long labours",
+      "confidence": 1.0
+    },
+    {
+      "subject": "And",
+      "relation": "after",
+      "object": "the victory",
+      "confidence": 1.0
+    },
+    {
+      "subject": "and",
+      "relation": "after",
+      "object": "the \ndays",
+      "confidence": 1.0
+    },
+    {
+      "subject": "in honour",
+      "relation": "after",
+      "object": "the house",
+      "confidence": 1.0
+    },
+    {
+      "subject": "for",
+      "relation": "after",
+      "object": "the assault",
+      "confidence": 1.0
+    },
+    {
+      "subject": "and",
+      "relation": "after",
+      "object": "many days",
+      "confidence": 1.0
+    },
+    {
+      "subject": "his sons",
+      "relation": "after",
+      "object": "founded kingdoms",
+      "confidence": 1.0
+    },
+    {
+      "subject": "For even",
+      "relation": "after",
+      "object": "the ruin",
+      "confidence": 1.0
+    },
+    {
+      "subject": "Thus in",
+      "relation": "after",
+      "object": "days",
+      "confidence": 1.0
+    },
+    {
+      "subject": "evil enough",
+      "relation": "after",
+      "object": "came to",
+      "confidence": 1.0
+    },
+    {
+      "subject": "that were",
+      "relation": "after",
+      "object": "called Gondor",
+      "confidence": 1.0
+    },
+    {
+      "subject": "for",
+      "relation": "after",
+      "object": "Elendil",
+      "confidence": 1.0
+    },
+    {
+      "subject": "and",
+      "relation": "after",
+      "object": "he had",
+      "confidence": 1.0
+    },
+    {
+      "subject": "the mountains",
+      "relation": "after",
+      "object": "long wandering",
+      "confidence": 1.0
+    },
+    {
+      "subject": "to pass",
+      "relation": "after",
+      "object": "the days",
+      "confidence": 1.0
+    },
+    {
+      "subject": "Tirith endured",
+      "relation": "after",
+      "object": "the days",
+      "confidence": 1.0
+    },
+    {
+      "subject": "never again",
+      "relation": "after",
+      "object": "the days",
+      "confidence": 1.0
+    },
+    {
+      "subject": "Yet",
+      "relation": "after",
+      "object": "the fall",
+      "confidence": 1.0
+    },
+    {
+      "subject": "But",
+      "relation": "after",
+      "object": "many years",
+      "confidence": 1.0
+    },
+    {
+      "subject": "and",
+      "relation": "after",
+      "object": "him came",
+      "confidence": 1.0
+    },
+    {
+      "subject": "aided Morwen",
+      "relation": "after",
+      "object": "the \nNirnaeth",
+      "confidence": 1.0
+    },
+    {
+      "subject": "Valar dwelt",
+      "relation": "after",
+      "object": "they had",
+      "confidence": 1.0
+    },
+    {
+      "subject": "awoke again",
+      "relation": "after",
+      "object": "Sauron",
+      "confidence": 1.0
+    },
+    {
+      "subject": "galen",
+      "relation": "after",
+      "object": "its \ndesolation",
+      "confidence": 1.0
+    },
+    {
+      "subject": "and Gondor",
+      "relation": "after",
+      "object": "the \nWar",
+      "confidence": 1.0
+    },
+    {
+      "subject": "called",
+      "relation": "after",
+      "object": "its desolation",
+      "confidence": 1.0
+    },
+    {
+      "subject": "by Elendil",
+      "relation": "after",
+      "object": "his escape",
+      "confidence": 1.0
+    },
+    {
+      "subject": "galad \ndwelt",
+      "relation": "after",
+      "object": "the Nirnaeth",
+      "confidence": 1.0
+    },
+    {
+      "subject": "of Haleth",
+      "relation": "after",
+      "object": "the death",
+      "confidence": 1.0
+    },
+    {
+      "subject": "in Hithlum",
+      "relation": "after",
+      "object": "the Nirnaeth",
+      "confidence": 1.0
+    },
+    {
+      "subject": "Aras",
+      "relation": "after",
+      "object": "Nienor leapt",
+      "confidence": 1.0
+    },
+    {
+      "subject": "by Beren",
+      "relation": "after",
+      "object": "his return",
+      "confidence": 1.0
+    },
+    {
+      "subject": "earth",
+      "relation": "after",
+      "object": "the end",
+      "confidence": 1.0
+    },
+    {
+      "subject": "the Havens",
+      "relation": "after",
+      "object": "the Nimaeth",
+      "confidence": 1.0
+    },
+    {
+      "subject": "in Mithrim",
+      "relation": "after",
+      "object": "the coming",
+      "confidence": 1.0
+    },
+    {
+      "subject": "from Ossiriand",
+      "relation": "after",
+      "object": "the death",
+      "confidence": 1.0
+    },
+    {
+      "subject": "the Silmaril",
+      "relation": "after",
+      "object": "the death",
+      "confidence": 1.0
+    },
+    {
+      "subject": "Luthien dwelt",
+      "relation": "after",
+      "object": "their return",
+      "confidence": 1.0
+    },
+    {
+      "subject": "the time",
+      "relation": "after",
+      "object": "the Dagor",
+      "confidence": 1.0
+    },
+    {
+      "subject": "from Dorthonion",
+      "relation": "after",
+      "object": "the Dagor",
+      "confidence": 1.0
+    },
+    {
+      "subject": "of Beren",
+      "relation": "after",
+      "object": "his \nescape",
+      "confidence": 1.0
+    },
+    {
+      "subject": "Marach dwelt",
+      "relation": "after",
+      "object": "they \ncrossed",
+      "confidence": 1.0
+    },
+    {
+      "subject": "was known",
+      "relation": "after",
+      "object": "the establishment",
+      "confidence": 1.0
+    },
+    {
+      "subject": "in Aman",
+      "relation": "after",
+      "object": "the Exile",
+      "confidence": 1.0
+    },
+    {
+      "subject": "the \nNoldor",
+      "relation": "after",
+      "object": "the death",
+      "confidence": 1.0
+    },
+    {
+      "subject": "built",
+      "relation": "after",
+      "object": "the \nbanishment",
+      "confidence": 1.0
+    },
+    {
+      "subject": "earth",
+      "relation": "after",
+      "object": "the end",
+      "confidence": 1.0
+    },
+    {
+      "subject": "lomin",
+      "relation": "after",
+      "object": "him",
+      "confidence": 1.0
+    },
+    {
+      "subject": "in Lindon",
+      "relation": "after",
+      "object": "the end",
+      "confidence": 1.0
+    },
+    {
+      "subject": "a Balrog",
+      "relation": "after",
+      "object": "the escape",
+      "confidence": 1.0
+    },
+    {
+      "subject": "was \nnamed",
+      "relation": "after",
+      "object": "it",
+      "confidence": 1.0
+    },
+    {
+      "subject": "sword \n\n\n\nAnglachel",
+      "relation": "after",
+      "object": "it was",
+      "confidence": 1.0
+    },
+    {
+      "subject": "the Haladin",
+      "relation": "after",
+      "object": "the \ndeath",
+      "confidence": 1.0
+    },
+    {
+      "subject": "of Sirion",
+      "relation": "after",
+      "object": "the Dagor",
+      "confidence": 1.0
+    },
+    {
+      "subject": "the Haladin",
+      "relation": "after",
+      "object": "Haldir",
+      "confidence": 1.0
+    },
+    {
+      "subject": "and",
+      "relation": "after",
+      "object": "the \noverthrow",
+      "confidence": 1.0
+    },
+    {
+      "subject": "and",
+      "relation": "after",
+      "object": "which his",
+      "confidence": 1.0
+    },
+    {
+      "subject": "in Hithlum",
+      "relation": "after",
+      "object": "the \nNirnaeth",
+      "confidence": 1.0
+    },
+    {
+      "subject": "who",
+      "relation": "after",
+      "object": "the fulfilment",
+      "confidence": 1.0
+    },
+    {
+      "subject": "of \nNumenor",
+      "relation": "after",
+      "object": "the Downfall",
+      "confidence": 1.0
+    },
+    {
+      "subject": "Minas Ithil",
+      "relation": "after",
+      "object": "its capture",
+      "confidence": 1.0
+    },
+    {
+      "subject": "died",
+      "relation": "after",
+      "object": "Feanor",
+      "confidence": 1.0
+    },
+    {
+      "subject": "by Feanor",
+      "relation": "after",
+      "object": "the rape",
+      "confidence": 1.0
+    },
+    {
+      "subject": "the Edain",
+      "relation": "after",
+      "object": "the ending",
+      "confidence": 1.0
+    },
+    {
+      "subject": "and",
+      "relation": "after",
+      "object": "its downfall",
+      "confidence": 1.0
+    },
+    {
+      "subject": "of Nargothrond",
+      "relation": "after",
+      "object": "the death",
+      "confidence": 1.0
+    },
+    {
+      "subject": "the Valar",
+      "relation": "after",
+      "object": "the destruction",
+      "confidence": 1.0
+    },
+    {
+      "subject": "especially",
+      "relation": "after",
+      "object": "the edict",
+      "confidence": 1.0
+    },
+    {
+      "subject": "especially",
+      "relation": "after",
+      "object": "the death",
+      "confidence": 1.0
+    },
+    {
+      "subject": "still sail",
+      "relation": "after",
+      "object": "the Downfall",
+      "confidence": 1.0
+    },
+    {
+      "subject": "the Sindar",
+      "relation": "after",
+      "object": "the ending",
+      "confidence": 1.0
+    },
+    {
+      "subject": "Luthien dwelt",
+      "relation": "after",
+      "object": "their return",
+      "confidence": 1.0
+    },
+    {
+      "subject": "Tol \nSirion",
+      "relation": "after",
+      "object": "its capture",
+      "confidence": 1.0
+    },
+    {
+      "subject": "the sea",
+      "relation": "after",
+      "object": "the drowning",
+      "confidence": 1.0
+    },
+    {
+      "subject": "the West",
+      "relation": "after",
+      "object": "the Nirnaeth",
+      "confidence": 1.0
+    },
+    {
+      "subject": "the Ainur",
+      "relation": "after",
+      "object": "him",
+      "confidence": 1.0
+    },
+    {
+      "subject": "those who",
+      "relation": "after",
+      "object": "him upon",
+      "confidence": 1.0
+    },
+    {
+      "subject": "Now Osse",
+      "relation": "after",
+      "object": "after the",
+      "confidence": 1.0
+    },
+    {
+      "subject": "and often",
+      "relation": "after",
+      "object": "the Vala",
+      "confidence": 1.0
+    },
+    {
+      "subject": "days that",
+      "relation": "after",
+      "object": "after",
+      "confidence": 1.0
+    },
+    {
+      "subject": "But Feanor",
+      "relation": "after",
+      "object": "him",
+      "confidence": 1.0
+    },
+    {
+      "subject": "Darkness that",
+      "relation": "after",
+      "object": "was more",
+      "confidence": 1.0
+    },
+    {
+      "subject": "those that",
+      "relation": "after",
+      "object": "Fingolfin",
+      "confidence": 1.0
+    },
+    {
+      "subject": "Dolmed and",
+      "relation": "after",
+      "object": "the course",
+      "confidence": 1.0
+    },
+    {
+      "subject": "peace that",
+      "relation": "after",
+      "object": "after the",
+      "confidence": 1.0
+    },
+    {
+      "subject": "those that",
+      "relation": "after",
+      "object": "him",
+      "confidence": 1.0
+    },
+    {
+      "subject": "those that",
+      "relation": "after",
+      "object": "Fingolfin for",
+      "confidence": 1.0
+    },
+    {
+      "subject": "his people",
+      "relation": "after",
+      "object": "their lord",
+      "confidence": 1.0
+    },
+    {
+      "subject": "indeed there",
+      "relation": "after",
+      "object": "after long",
+      "confidence": 1.0
+    },
+    {
+      "subject": "that Fingolfin",
+      "relation": "after",
+      "object": "from \nthe",
+      "confidence": 1.0
+    },
+    {
+      "subject": "Noldor that",
+      "relation": "after",
+      "object": "after Feanor",
+      "confidence": 1.0
+    },
+    {
+      "subject": "Blue \nMountains",
+      "relation": "after",
+      "object": "two roads",
+      "confidence": 1.0
+    },
+    {
+      "subject": "that he",
+      "relation": "after",
+      "object": "after \nthem",
+      "confidence": 1.0
+    },
+    {
+      "subject": "that he",
+      "relation": "after",
+      "object": "them",
+      "confidence": 1.0
+    },
+    {
+      "subject": "Eol has",
+      "relation": "after",
+      "object": "us",
+      "confidence": 1.0
+    },
+    {
+      "subject": "You have",
+      "relation": "after",
+      "object": "a fool",
+      "confidence": 1.0
+    },
+    {
+      "subject": "days that",
+      "relation": "after",
+      "object": "many of",
+      "confidence": 1.0
+    },
+    {
+      "subject": "and they",
+      "relation": "after",
+      "object": "Maedhros and",
+      "confidence": 1.0
+    },
+    {
+      "subject": "and they",
+      "relation": "after",
+      "object": "Caranthir and",
+      "confidence": 1.0
+    },
+    {
+      "subject": "hounds that",
+      "relation": "after",
+      "object": "Celegorm was",
+      "confidence": 1.0
+    },
+    {
+      "subject": "he had",
+      "relation": "after",
+      "object": "the horn",
+      "confidence": 1.0
+    },
+    {
+      "subject": "Huan",
+      "relation": "after",
+      "object": "Celegorm into",
+      "confidence": 1.0
+    },
+    {
+      "subject": "that evil",
+      "relation": "after",
+      "object": "them",
+      "confidence": 1.0
+    },
+    {
+      "subject": "yet Huan",
+      "relation": "after",
+      "object": "still the",
+      "confidence": 1.0
+    },
+    {
+      "subject": "great host",
+      "relation": "after",
+      "object": "them",
+      "confidence": 1.0
+    },
+    {
+      "subject": "in dismay",
+      "relation": "after",
+      "object": "after him",
+      "confidence": 1.0
+    },
+    {
+      "subject": "but Turin",
+      "relation": "after",
+      "object": "after",
+      "confidence": 1.0
+    },
+    {
+      "subject": "time that",
+      "relation": "after",
+      "object": "Turin spoke",
+      "confidence": 1.0
+    },
+    {
+      "subject": "time that",
+      "relation": "after",
+      "object": "Turin grew",
+      "confidence": 1.0
+    },
+    {
+      "subject": "few that",
+      "relation": "after",
+      "object": "him \nhad",
+      "confidence": 1.0
+    },
+    {
+      "subject": "black \nblood",
+      "relation": "after",
+      "object": "it",
+      "confidence": 1.0
+    },
+    {
+      "subject": "and",
+      "relation": "after",
+      "object": "him",
+      "confidence": 1.0
+    },
+    {
+      "subject": "and \nthey",
+      "relation": "after",
+      "object": "after him",
+      "confidence": 1.0
+    },
+    {
+      "subject": "Shadow still",
+      "relation": "after",
+      "object": "him",
+      "confidence": 1.0
+    },
+    {
+      "subject": "and he",
+      "relation": "after",
+      "object": "their \nflight",
+      "confidence": 1.0
+    },
+    {
+      "subject": "his people",
+      "relation": "after",
+      "object": "him",
+      "confidence": 1.0
+    },
+    {
+      "subject": "most part",
+      "relation": "after",
+      "object": "him",
+      "confidence": 1.0
+    },
+    {
+      "subject": "undivided and",
+      "relation": "after",
+      "object": "Gil",
+      "confidence": 1.0
+    },
+    {
+      "subject": "king that",
+      "relation": "after",
+      "object": "Valandil",
+      "confidence": 1.0
+    },
+    {
+      "subject": "three sons",
+      "relation": "after",
+      "object": "Caranthir",
+      "confidence": 1.0
+    }
+  ]
+}

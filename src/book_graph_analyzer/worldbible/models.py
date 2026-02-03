@@ -1,223 +1,380 @@
-"""
-World Bible Data Models
+"""Data models for World Bible extraction.
 
-Data structures for world rules, cultural profiles, and the complete world bible.
+Defines the structure for storing world-building rules,
+cultural profiles, magic systems, and other lore.
 """
 
-from dataclasses import dataclass, field, asdict
+from dataclasses import dataclass, field
+from enum import Enum
 from typing import Optional
 import json
+from pathlib import Path
 
-from .categories import WorldBibleCategory
+
+class WorldBibleCategory(Enum):
+    """Categories of world-building information."""
+    MAGIC = "magic"
+    CULTURE = "culture"
+    GEOGRAPHY = "geography"
+    TECHNOLOGY = "technology"
+    COSMOLOGY = "cosmology"
+    HISTORY = "history"
+    LANGUAGE = "language"
+    CREATURES = "creatures"
+    OBJECTS = "objects"
+    THEMES = "themes"
 
 
 @dataclass
 class SourcePassage:
-    """A passage that supports a world rule."""
-    passage_id: str
+    """A passage that supports a world bible entry."""
     text: str
     book: str
-    relevance_score: float = 1.0  # How relevant this passage is to the rule
+    location: str  # e.g., "Chapter 3, paragraph 12"
+    relevance: float = 1.0  # How relevant is this passage to the rule?
 
 
 @dataclass
 class WorldRule:
-    """
-    A rule or fact about the fictional world.
+    """A rule or pattern extracted from the world.
     
-    Rules are extracted from text and linked to their sources.
+    Examples:
+    - "Elves do not age and are immortal unless slain"
+    - "The One Ring corrupts all who possess it"
+    - "Only those with Elvish or Numenorean blood can wield certain swords"
     """
     id: str
+    title: str
+    description: str
     category: WorldBibleCategory
-    title: str                      # Short description
-    description: str                # Full explanation
     
-    # Source tracking
+    # Evidence
     source_passages: list[SourcePassage] = field(default_factory=list)
-    
-    # Confidence and validation
-    confidence: float = 0.5         # 0-1, how confident we are
-    validated: bool = False         # Human-validated?
-    validator_notes: str = ""       # Notes from validation
-    
-    # Relationships
-    related_entities: list[str] = field(default_factory=list)  # Entity IDs
-    contradicts: list[str] = field(default_factory=list)       # Other rule IDs that conflict
-    supports: list[str] = field(default_factory=list)          # Other rule IDs this supports
+    confidence: float = 1.0
     
     # Metadata
-    extraction_method: str = "llm"  # llm, pattern, manual
+    keywords: list[str] = field(default_factory=list)
+    related_entities: list[str] = field(default_factory=list)
     
-    def add_source(self, passage_id: str, text: str, book: str, relevance: float = 1.0):
-        """Add a source passage for this rule."""
-        self.source_passages.append(SourcePassage(
-            passage_id=passage_id,
-            text=text[:500],  # Truncate for storage
-            book=book,
-            relevance_score=relevance,
-        ))
+    # Constraints and exceptions
+    constraints: list[str] = field(default_factory=list)
+    exceptions: list[str] = field(default_factory=list)
     
     def to_dict(self) -> dict:
-        d = asdict(self)
-        d['category'] = self.category.value
-        d['source_passages'] = [asdict(sp) for sp in self.source_passages]
-        return d
+        return {
+            "id": self.id,
+            "title": self.title,
+            "description": self.description,
+            "category": self.category.value,
+            "source_passages": [
+                {"text": p.text, "book": p.book, "location": p.location, "relevance": p.relevance}
+                for p in self.source_passages
+            ],
+            "confidence": self.confidence,
+            "keywords": self.keywords,
+            "related_entities": self.related_entities,
+            "constraints": self.constraints,
+            "exceptions": self.exceptions,
+        }
     
     @classmethod
     def from_dict(cls, d: dict) -> "WorldRule":
-        d['category'] = WorldBibleCategory(d['category'])
-        d['source_passages'] = [SourcePassage(**sp) for sp in d.get('source_passages', [])]
-        return cls(**d)
+        return cls(
+            id=d["id"],
+            title=d["title"],
+            description=d["description"],
+            category=WorldBibleCategory(d["category"]),
+            source_passages=[
+                SourcePassage(**p) for p in d.get("source_passages", [])
+            ],
+            confidence=d.get("confidence", 1.0),
+            keywords=d.get("keywords", []),
+            related_entities=d.get("related_entities", []),
+            constraints=d.get("constraints", []),
+            exceptions=d.get("exceptions", []),
+        )
 
 
 @dataclass
 class CulturalProfile:
-    """
-    Profile of a culture, race, or people in the world.
-    """
+    """Profile of a culture, race, or people in the world."""
     id: str
-    name: str                       # e.g., "Elves", "Dwarves", "Hobbits"
+    name: str  # e.g., "Hobbits", "Elves of Rivendell", "Dwarves of Erebor"
     
-    # Core traits
-    values: list[str] = field(default_factory=list)         # What they value
-    customs: list[str] = field(default_factory=list)        # Traditions, rituals
-    taboos: list[str] = field(default_factory=list)         # What's forbidden
+    # Cultural attributes
+    values: list[str] = field(default_factory=list)  # What they value
+    customs: list[str] = field(default_factory=list)  # Traditions and practices
+    taboos: list[str] = field(default_factory=list)  # Things they avoid/forbid
     
-    # Physical/material
+    # Physical/practical
     homeland: Optional[str] = None
-    appearance: Optional[str] = None
+    government: Optional[str] = None
+    language: Optional[str] = None
     lifespan: Optional[str] = None
     
-    # Social
-    government: Optional[str] = None
-    social_structure: Optional[str] = None
-    relations: dict[str, str] = field(default_factory=dict)  # other_culture -> relationship
+    # Relationships
+    allies: list[str] = field(default_factory=list)
+    enemies: list[str] = field(default_factory=list)
     
-    # Language
-    language: Optional[str] = None
-    naming_conventions: Optional[str] = None
-    
-    # Source tracking
+    # Evidence
     source_passages: list[SourcePassage] = field(default_factory=list)
     
     def to_dict(self) -> dict:
-        d = asdict(self)
-        d['source_passages'] = [asdict(sp) for sp in self.source_passages]
-        return d
+        return {
+            "id": self.id,
+            "name": self.name,
+            "values": self.values,
+            "customs": self.customs,
+            "taboos": self.taboos,
+            "homeland": self.homeland,
+            "government": self.government,
+            "language": self.language,
+            "lifespan": self.lifespan,
+            "allies": self.allies,
+            "enemies": self.enemies,
+            "source_passages": [
+                {"text": p.text, "book": p.book, "location": p.location}
+                for p in self.source_passages
+            ],
+        }
     
     @classmethod
     def from_dict(cls, d: dict) -> "CulturalProfile":
-        d['source_passages'] = [SourcePassage(**sp) for sp in d.get('source_passages', [])]
-        return cls(**d)
+        return cls(
+            id=d["id"],
+            name=d["name"],
+            values=d.get("values", []),
+            customs=d.get("customs", []),
+            taboos=d.get("taboos", []),
+            homeland=d.get("homeland"),
+            government=d.get("government"),
+            language=d.get("language"),
+            lifespan=d.get("lifespan"),
+            allies=d.get("allies", []),
+            enemies=d.get("enemies", []),
+            source_passages=[
+                SourcePassage(**p) for p in d.get("source_passages", [])
+            ],
+        )
+
+
+@dataclass
+class MagicSystem:
+    """Description of a magic or power system in the world."""
+    id: str
+    name: str  # e.g., "Ring Magic", "Elven Magic", "Wizardry"
+    
+    # How it works
+    source: Optional[str] = None  # Where does the power come from?
+    practitioners: list[str] = field(default_factory=list)  # Who can use it?
+    abilities: list[str] = field(default_factory=list)  # What can it do?
+    
+    # Constraints
+    costs: list[str] = field(default_factory=list)  # What does it cost to use?
+    limitations: list[str] = field(default_factory=list)  # What can't it do?
+    dangers: list[str] = field(default_factory=list)  # What are the risks?
+    
+    # Evidence
+    source_passages: list[SourcePassage] = field(default_factory=list)
+    
+    def to_dict(self) -> dict:
+        return {
+            "id": self.id,
+            "name": self.name,
+            "source": self.source,
+            "practitioners": self.practitioners,
+            "abilities": self.abilities,
+            "costs": self.costs,
+            "limitations": self.limitations,
+            "dangers": self.dangers,
+            "source_passages": [
+                {"text": p.text, "book": p.book, "location": p.location}
+                for p in self.source_passages
+            ],
+        }
+    
+    @classmethod
+    def from_dict(cls, d: dict) -> "MagicSystem":
+        return cls(
+            id=d["id"],
+            name=d["name"],
+            source=d.get("source"),
+            practitioners=d.get("practitioners", []),
+            abilities=d.get("abilities", []),
+            costs=d.get("costs", []),
+            limitations=d.get("limitations", []),
+            dangers=d.get("dangers", []),
+            source_passages=[
+                SourcePassage(**p) for p in d.get("source_passages", [])
+            ],
+        )
+
+
+@dataclass
+class GeographyEntry:
+    """A location or geographical feature in the world."""
+    id: str
+    name: str
+    
+    # Description
+    type: str = "location"  # location, region, building, landmark
+    description: Optional[str] = None
+    
+    # Relationships
+    parent_region: Optional[str] = None  # What larger area contains this?
+    notable_features: list[str] = field(default_factory=list)
+    inhabitants: list[str] = field(default_factory=list)
+    
+    # Travel
+    travel_notes: list[str] = field(default_factory=list)  # How to get there, dangers, etc.
+    distances: dict[str, str] = field(default_factory=dict)  # name -> distance description
+    
+    # Evidence
+    source_passages: list[SourcePassage] = field(default_factory=list)
+    
+    def to_dict(self) -> dict:
+        return {
+            "id": self.id,
+            "name": self.name,
+            "type": self.type,
+            "description": self.description,
+            "parent_region": self.parent_region,
+            "notable_features": self.notable_features,
+            "inhabitants": self.inhabitants,
+            "travel_notes": self.travel_notes,
+            "distances": self.distances,
+            "source_passages": [
+                {"text": p.text, "book": p.book, "location": p.location}
+                for p in self.source_passages
+            ],
+        }
+    
+    @classmethod
+    def from_dict(cls, d: dict) -> "GeographyEntry":
+        return cls(
+            id=d["id"],
+            name=d["name"],
+            type=d.get("type", "location"),
+            description=d.get("description"),
+            parent_region=d.get("parent_region"),
+            notable_features=d.get("notable_features", []),
+            inhabitants=d.get("inhabitants", []),
+            travel_notes=d.get("travel_notes", []),
+            distances=d.get("distances", {}),
+            source_passages=[
+                SourcePassage(**p) for p in d.get("source_passages", [])
+            ],
+        )
 
 
 @dataclass
 class WorldBible:
-    """
-    Complete world bible for a fictional world.
+    """Complete world bible for a fictional world."""
+    name: str  # e.g., "Middle-earth"
     
-    Contains all extracted rules, cultures, and world-building information.
-    """
-    name: str                       # e.g., "Middle-earth", "Westeros"
-    source_books: list[str] = field(default_factory=list)
-    
-    # Rules by category
-    rules: dict[str, list[WorldRule]] = field(default_factory=dict)
-    
-    # Cultural profiles
+    # Core content
+    rules: dict[WorldBibleCategory, list[WorldRule]] = field(default_factory=dict)
     cultures: dict[str, CulturalProfile] = field(default_factory=dict)
+    magic_systems: dict[str, MagicSystem] = field(default_factory=dict)
+    geography: dict[str, GeographyEntry] = field(default_factory=dict)
     
-    # Summary information
-    magic_system_summary: str = ""
-    geography_summary: str = ""
-    history_summary: str = ""
-    cosmology_summary: str = ""
+    # Metadata
+    sources: list[str] = field(default_factory=list)  # Books processed
+    last_updated: Optional[str] = None
     
     def add_rule(self, rule: WorldRule) -> None:
-        """Add a rule to the world bible."""
-        category = rule.category.value
-        if category not in self.rules:
-            self.rules[category] = []
-        self.rules[category].append(rule)
+        """Add a rule to the appropriate category."""
+        if rule.category not in self.rules:
+            self.rules[rule.category] = []
+        self.rules[rule.category].append(rule)
     
     def get_rules(self, category: WorldBibleCategory) -> list[WorldRule]:
-        """Get all rules for a category."""
-        return self.rules.get(category.value, [])
+        """Get all rules in a category."""
+        return self.rules.get(category, [])
     
-    def add_culture(self, culture: CulturalProfile) -> None:
-        """Add a cultural profile."""
-        self.cultures[culture.id] = culture
-    
-    def get_culture(self, culture_id: str) -> Optional[CulturalProfile]:
-        """Get a cultural profile by ID."""
-        return self.cultures.get(culture_id)
-    
-    def total_rules(self) -> int:
-        """Get total rule count."""
-        return sum(len(rules) for rules in self.rules.values())
+    def search_rules(self, query: str) -> list[WorldRule]:
+        """Search rules by keyword."""
+        query_lower = query.lower()
+        results = []
+        for rules in self.rules.values():
+            for rule in rules:
+                if (query_lower in rule.title.lower() or 
+                    query_lower in rule.description.lower() or
+                    any(query_lower in kw.lower() for kw in rule.keywords)):
+                    results.append(rule)
+        return results
     
     def to_dict(self) -> dict:
         return {
             "name": self.name,
-            "source_books": self.source_books,
             "rules": {
-                cat: [r.to_dict() for r in rules]
+                cat.value: [r.to_dict() for r in rules]
                 for cat, rules in self.rules.items()
             },
-            "cultures": {
-                cid: c.to_dict() for cid, c in self.cultures.items()
-            },
-            "magic_system_summary": self.magic_system_summary,
-            "geography_summary": self.geography_summary,
-            "history_summary": self.history_summary,
-            "cosmology_summary": self.cosmology_summary,
+            "cultures": {k: v.to_dict() for k, v in self.cultures.items()},
+            "magic_systems": {k: v.to_dict() for k, v in self.magic_systems.items()},
+            "geography": {k: v.to_dict() for k, v in self.geography.items()},
+            "sources": self.sources,
+            "last_updated": self.last_updated,
         }
-    
-    def to_json(self, indent: int = 2) -> str:
-        return json.dumps(self.to_dict(), indent=indent)
     
     @classmethod
     def from_dict(cls, d: dict) -> "WorldBible":
-        wb = cls(name=d["name"], source_books=d.get("source_books", []))
+        bible = cls(
+            name=d["name"],
+            sources=d.get("sources", []),
+            last_updated=d.get("last_updated"),
+        )
         
-        for cat, rules in d.get("rules", {}).items():
-            wb.rules[cat] = [WorldRule.from_dict(r) for r in rules]
+        # Load rules
+        for cat_str, rules_data in d.get("rules", {}).items():
+            cat = WorldBibleCategory(cat_str)
+            bible.rules[cat] = [WorldRule.from_dict(r) for r in rules_data]
         
-        for cid, cdata in d.get("cultures", {}).items():
-            wb.cultures[cid] = CulturalProfile.from_dict(cdata)
+        # Load cultures
+        for k, v in d.get("cultures", {}).items():
+            bible.cultures[k] = CulturalProfile.from_dict(v)
         
-        wb.magic_system_summary = d.get("magic_system_summary", "")
-        wb.geography_summary = d.get("geography_summary", "")
-        wb.history_summary = d.get("history_summary", "")
-        wb.cosmology_summary = d.get("cosmology_summary", "")
+        # Load magic systems
+        for k, v in d.get("magic_systems", {}).items():
+            bible.magic_systems[k] = MagicSystem.from_dict(v)
         
-        return wb
-    
-    @classmethod
-    def from_json(cls, json_str: str) -> "WorldBible":
-        return cls.from_dict(json.loads(json_str))
+        # Load geography
+        for k, v in d.get("geography", {}).items():
+            bible.geography[k] = GeographyEntry.from_dict(v)
+        
+        return bible
     
     def summary(self) -> str:
-        """Generate human-readable summary."""
+        """Generate a summary of the world bible contents."""
+        total_rules = sum(len(rules) for rules in self.rules.values())
+        
         lines = [
             f"=== World Bible: {self.name} ===",
+            f"Sources: {', '.join(self.sources) if self.sources else 'None'}",
             f"",
-            f"Source books: {', '.join(self.source_books)}",
-            f"Total rules: {self.total_rules()}",
-            f"Cultures documented: {len(self.cultures)}",
+            f"[Content Summary]",
+            f"  Total rules: {total_rules}",
+            f"  Cultures: {len(self.cultures)}",
+            f"  Magic systems: {len(self.magic_systems)}",
+            f"  Geography entries: {len(self.geography)}",
             f"",
-            f"[Rules by Category]",
         ]
         
-        for cat in WorldBibleCategory:
-            rules = self.get_rules(cat)
-            if rules:
-                lines.append(f"  {cat.value}: {len(rules)} rules")
-        
-        if self.cultures:
-            lines.append(f"")
-            lines.append(f"[Cultures]")
-            for culture in self.cultures.values():
-                lines.append(f"  - {culture.name}")
+        if self.rules:
+            lines.append("[Rules by Category]")
+            for cat, rules in sorted(self.rules.items(), key=lambda x: -len(x[1])):
+                lines.append(f"  {cat.value}: {len(rules)}")
         
         return "\n".join(lines)
+    
+    def save(self, path: Path) -> None:
+        """Save world bible to JSON file."""
+        with open(path, 'w', encoding='utf-8') as f:
+            json.dump(self.to_dict(), f, indent=2)
+    
+    @classmethod
+    def load(cls, path: Path) -> "WorldBible":
+        """Load world bible from JSON file."""
+        with open(path, 'r', encoding='utf-8') as f:
+            return cls.from_dict(json.load(f))

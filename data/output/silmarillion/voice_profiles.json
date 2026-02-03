@@ -1,0 +1,766 @@
+{
+  "source_file": "silmarillion.txt",
+  "stats": {
+    "total_dialogue_lines": 614,
+    "total_characters": 11,
+    "unattributed_lines": 422,
+    "attribution_rate": 0.3127035830618892
+  },
+  "top_speakers": [
+    [
+      "Det",
+      20
+    ],
+    [
+      "Software",
+      12
+    ],
+    [
+      "Community",
+      8
+    ],
+    [
+      "Search",
+      6
+    ],
+    [
+      "News",
+      5
+    ],
+    [
+      "Occupy",
+      4
+    ],
+    [
+      "Computers",
+      4
+    ],
+    [
+      "Spirituality",
+      4
+    ],
+    [
+      "Audio",
+      4
+    ],
+    [
+      "Books",
+      3
+    ],
+    [
+      "Images",
+      3
+    ],
+    [
+      "Internet",
+      2
+    ],
+    [
+      "Texts",
+      2
+    ],
+    [
+      "Smithsonian",
+      2
+    ],
+    [
+      "Genealogy",
+      2
+    ],
+    [
+      "Lincoln",
+      2
+    ],
+    [
+      "Additional",
+      2
+    ],
+    [
+      "American",
+      2
+    ],
+    [
+      "Canadian",
+      2
+    ],
+    [
+      "Universal",
+      2
+    ]
+  ],
+  "profiles": {
+    "Search": {
+      "character_name": "Search",
+      "character_id": null,
+      "total_lines": 6,
+      "total_words": 6,
+      "total_chars": 52,
+      "avg_utterance_length": 1,
+      "utterance_length_std": 0.0,
+      "min_utterance_length": 1,
+      "max_utterance_length": 1,
+      "question_ratio": 0.0,
+      "exclamation_ratio": 0.0,
+      "statement_ratio": 1.0,
+      "unique_words": 6,
+      "type_token_ratio": 1.0,
+      "avg_word_length": 8.666666666666666,
+      "contraction_ratio": 0.0,
+      "first_person_ratio": 0.0,
+      "second_person_ratio": 0.0,
+      "top_words": [
+        [
+          "nav-wb-url",
+          1
+        ],
+        [
+          "sr-only",
+          1
+        ],
+        [
+          "js-search-bar",
+          1
+        ],
+        [
+          "aria-label=",
+          1
+        ],
+        [
+          "false",
+          1
+        ],
+        [
+          "submit",
+          1
+        ]
+      ],
+      "distinctive_words": [],
+      "signature_phrases": [],
+      "archaism_count": 0,
+      "archaisms_used": [],
+      "sample_quotes": [
+        "nav-wb-url",
+        "sr-only",
+        "js-search-bar",
+        "aria-label=",
+        "false"
+      ]
+    },
+    "Det": {
+      "character_name": "Det",
+      "character_id": null,
+      "total_lines": 20,
+      "total_words": 30,
+      "total_chars": 220,
+      "avg_utterance_length": 1.5,
+      "utterance_length_std": 0.5129891760425771,
+      "min_utterance_length": 1,
+      "max_utterance_length": 2,
+      "question_ratio": 0.0,
+      "exclamation_ratio": 0.0,
+      "statement_ratio": 1.0,
+      "unique_words": 3,
+      "type_token_ratio": 0.1,
+      "avg_word_length": 7,
+      "contraction_ratio": 0.0,
+      "first_person_ratio": 0.0,
+      "second_person_ratio": 0.0,
+      "top_words": [
+        [
+          "true",
+          10
+        ],
+        [
+          "stealth",
+          10
+        ],
+        [
+          "boxy-label",
+          10
+        ]
+      ],
+      "distinctive_words": [
+        "true",
+        "stealth",
+        "boxy-label"
+      ],
+      "signature_phrases": [
+        "stealth boxy-label"
+      ],
+      "archaism_count": 0,
+      "archaisms_used": [],
+      "sample_quotes": [
+        "true",
+        "stealth boxy-label"
+      ]
+    },
+    "Books": {
+      "character_name": "Books",
+      "character_id": null,
+      "total_lines": 3,
+      "total_words": 5,
+      "total_chars": 114,
+      "avg_utterance_length": 1.6666666666666667,
+      "utterance_length_std": 1.1547005383792515,
+      "min_utterance_length": 1,
+      "max_utterance_length": 3,
+      "question_ratio": 0.0,
+      "exclamation_ratio": 0.0,
+      "statement_ratio": 1.0,
+      "unique_words": 5,
+      "type_token_ratio": 1.0,
+      "avg_word_length": 22.4,
+      "contraction_ratio": 0.0,
+      "first_person_ratio": 0.0,
+      "second_person_ratio": 0.0,
+      "top_words": [
+        [
+          "https://archive.org/details/inlibrary?sort=-publicdate",
+          1
+        ],
+        [
+          "https://archive.org/details/booksbylanguage",
+          1
+        ],
+        [
+          "books",
+          1
+        ],
+        [
+          "language",
+          1
+        ]
+      ],
+      "distinctive_words": [],
+      "signature_phrases": [],
+      "archaism_count": 0,
+      "archaisms_used": [],
+      "sample_quotes": [
+        "Books by Language",
+        "https://archive.org/details/inlibrary?sort=-publicdate",
+        "https://archive.org/details/booksbylanguage"
+      ]
+    },
+    "Community": {
+      "character_name": "Community",
+      "character_id": null,
+      "total_lines": 8,
+      "total_words": 12,
+      "total_chars": 238,
+      "avg_utterance_length": 1.5,
+      "utterance_length_std": 0.5345224838248488,
+      "min_utterance_length": 1,
+      "max_utterance_length": 2,
+      "question_ratio": 0.0,
+      "exclamation_ratio": 0.0,
+      "statement_ratio": 1.0,
+      "unique_words": 9,
+      "type_token_ratio": 0.75,
+      "avg_word_length": 19.5,
+      "contraction_ratio": 0.0,
+      "first_person_ratio": 0.0,
+      "second_person_ratio": 0.0,
+      "top_words": [
+        [
+          "community",
+          4
+        ],
+        [
+          "https://archive.org/details/opensource",
+          1
+        ],
+        [
+          "texts",
+          1
+        ],
+        [
+          "https://archive.org/details/opensource_movies",
+          1
+        ],
+        [
+          "video",
+          1
+        ],
+        [
+          "https://archive.org/details/opensource_audio",
+          1
+        ],
+        [
+          "audio",
+          1
+        ],
+        [
+          "https://archive.org/details/open_source_software",
+          1
+        ],
+        [
+          "software",
+          1
+        ]
+      ],
+      "distinctive_words": [
+        "community"
+      ],
+      "signature_phrases": [],
+      "archaism_count": 0,
+      "archaisms_used": [],
+      "sample_quotes": [
+        "https://archive.org/details/opensource",
+        "Community Texts",
+        "https://archive.org/details/opensource_movies",
+        "Community Video",
+        "https://archive.org/details/opensource_audio"
+      ]
+    },
+    "Occupy": {
+      "character_name": "Occupy",
+      "character_id": null,
+      "total_lines": 4,
+      "total_words": 9,
+      "total_chars": 125,
+      "avg_utterance_length": 2.25,
+      "utterance_length_std": 1.5,
+      "min_utterance_length": 1,
+      "max_utterance_length": 4,
+      "question_ratio": 0.0,
+      "exclamation_ratio": 0.0,
+      "statement_ratio": 1.0,
+      "unique_words": 6,
+      "type_token_ratio": 0.6666666666666666,
+      "avg_word_length": 13.333333333333334,
+      "contraction_ratio": 0.0,
+      "first_person_ratio": 0.0,
+      "second_person_ratio": 0.0,
+      "top_words": [
+        [
+          "occupy",
+          2
+        ],
+        [
+          "wall",
+          2
+        ],
+        [
+          "street",
+          2
+        ],
+        [
+          "https://archive.org/details/occupywallstreet",
+          1
+        ],
+        [
+          "https://archive.org/details/flickr-ows",
+          1
+        ],
+        [
+          "flickr",
+          1
+        ]
+      ],
+      "distinctive_words": [
+        "occupy",
+        "wall",
+        "street"
+      ],
+      "signature_phrases": [
+        "occupy wall",
+        "wall street",
+        "occupy wall street"
+      ],
+      "archaism_count": 0,
+      "archaisms_used": [],
+      "sample_quotes": [
+        "Occupy Wall Street",
+        "Occupy Wall Street Flickr",
+        "https://archive.org/details/occupywallstreet",
+        "https://archive.org/details/flickr-ows"
+      ]
+    },
+    "News": {
+      "character_name": "News",
+      "character_id": null,
+      "total_lines": 5,
+      "total_words": 11,
+      "total_chars": 166,
+      "avg_utterance_length": 2.2,
+      "utterance_length_std": 1.6431676725154984,
+      "min_utterance_length": 1,
+      "max_utterance_length": 4,
+      "question_ratio": 0.0,
+      "exclamation_ratio": 0.0,
+      "statement_ratio": 1.0,
+      "unique_words": 7,
+      "type_token_ratio": 0.6363636363636364,
+      "avg_word_length": 14.545454545454545,
+      "contraction_ratio": 0.0,
+      "first_person_ratio": 0.0,
+      "second_person_ratio": 0.0,
+      "top_words": [
+        [
+          "news",
+          2
+        ],
+        [
+          "&amp;",
+          2
+        ],
+        [
+          "public",
+          2
+        ],
+        [
+          "affairs",
+          2
+        ],
+        [
+          "https://archive.org/details/tv",
+          1
+        ],
+        [
+          "https://archive.org/details/newsandpublicaffairs",
+          1
+        ],
+        [
+          "https://archive.org/details/audio_news",
+          1
+        ]
+      ],
+      "distinctive_words": [
+        "news",
+        "public",
+        "affairs",
+        "&amp;"
+      ],
+      "signature_phrases": [
+        "news &amp;",
+        "&amp; public",
+        "public affairs",
+        "news &amp; public",
+        "&amp; public affairs"
+      ],
+      "archaism_count": 0,
+      "archaisms_used": [],
+      "sample_quotes": [
+        "News &amp; Public Affairs",
+        "https://archive.org/details/tv",
+        "https://archive.org/details/newsandpublicaffairs",
+        "https://archive.org/details/audio_news"
+      ]
+    },
+    "Computers": {
+      "character_name": "Computers",
+      "character_id": null,
+      "total_lines": 4,
+      "total_words": 8,
+      "total_chars": 140,
+      "avg_utterance_length": 2,
+      "utterance_length_std": 1.1547005383792515,
+      "min_utterance_length": 1,
+      "max_utterance_length": 3,
+      "question_ratio": 0.0,
+      "exclamation_ratio": 0.0,
+      "statement_ratio": 1.0,
+      "unique_words": 5,
+      "type_token_ratio": 0.625,
+      "avg_word_length": 17,
+      "contraction_ratio": 0.0,
+      "first_person_ratio": 0.0,
+      "second_person_ratio": 0.0,
+      "top_words": [
+        [
+          "computers",
+          2
+        ],
+        [
+          "&amp;",
+          2
+        ],
+        [
+          "technology",
+          2
+        ],
+        [
+          "https://archive.org/details/computersandtechvideos",
+          1
+        ],
+        [
+          "https://archive.org/details/audio_tech",
+          1
+        ]
+      ],
+      "distinctive_words": [
+        "computers",
+        "technology",
+        "&amp;"
+      ],
+      "signature_phrases": [
+        "computers &amp;",
+        "&amp; technology",
+        "computers &amp; technology"
+      ],
+      "archaism_count": 0,
+      "archaisms_used": [],
+      "sample_quotes": [
+        "Computers &amp; Technology",
+        "https://archive.org/details/computersandtechvideos",
+        "https://archive.org/details/audio_tech"
+      ]
+    },
+    "Spirituality": {
+      "character_name": "Spirituality",
+      "character_id": null,
+      "total_lines": 4,
+      "total_words": 8,
+      "total_chars": 147,
+      "avg_utterance_length": 2,
+      "utterance_length_std": 1.1547005383792515,
+      "min_utterance_length": 1,
+      "max_utterance_length": 3,
+      "question_ratio": 0.0,
+      "exclamation_ratio": 0.0,
+      "statement_ratio": 1.0,
+      "unique_words": 5,
+      "type_token_ratio": 0.625,
+      "avg_word_length": 17.875,
+      "contraction_ratio": 0.0,
+      "first_person_ratio": 0.0,
+      "second_person_ratio": 0.0,
+      "top_words": [
+        [
+          "spirituality",
+          2
+        ],
+        [
+          "&amp;",
+          2
+        ],
+        [
+          "religion",
+          2
+        ],
+        [
+          "https://archive.org/details/spiritualityandreligion",
+          1
+        ],
+        [
+          "https://archive.org/details/audio_religion",
+          1
+        ]
+      ],
+      "distinctive_words": [
+        "spirituality",
+        "religion",
+        "&amp;"
+      ],
+      "signature_phrases": [
+        "spirituality &amp;",
+        "&amp; religion",
+        "spirituality &amp; religion"
+      ],
+      "archaism_count": 0,
+      "archaisms_used": [],
+      "sample_quotes": [
+        "Spirituality &amp; Religion",
+        "https://archive.org/details/spiritualityandreligion",
+        "https://archive.org/details/audio_religion"
+      ]
+    },
+    "Audio": {
+      "character_name": "Audio",
+      "character_id": null,
+      "total_lines": 4,
+      "total_words": 8,
+      "total_chars": 92,
+      "avg_utterance_length": 2,
+      "utterance_length_std": 1.4142135623730951,
+      "min_utterance_length": 1,
+      "max_utterance_length": 4,
+      "question_ratio": 0.0,
+      "exclamation_ratio": 0.0,
+      "statement_ratio": 1.0,
+      "unique_words": 7,
+      "type_token_ratio": 0.875,
+      "avg_word_length": 11,
+      "contraction_ratio": 0.0,
+      "first_person_ratio": 0.0,
+      "second_person_ratio": 0.0,
+      "top_words": [
+        [
+          "audio",
+          2
+        ],
+        [
+          "sr-only",
+          1
+        ],
+        [
+          "https://archive.org/details/audio_bookspoetry",
+          1
+        ],
+        [
+          "books",
+          1
+        ],
+        [
+          "&amp;",
+          1
+        ],
+        [
+          "poetry",
+          1
+        ],
+        [
+          "navia-link",
+          1
+        ]
+      ],
+      "distinctive_words": [
+        "audio"
+      ],
+      "signature_phrases": [],
+      "archaism_count": 0,
+      "archaisms_used": [],
+      "sample_quotes": [
+        "Audio Books &amp; Poetry",
+        "sr-only",
+        "https://archive.org/details/audio_bookspoetry",
+        "navia-link audio"
+      ]
+    },
+    "Software": {
+      "character_name": "Software",
+      "character_id": null,
+      "total_lines": 12,
+      "total_words": 19,
+      "total_chars": 304,
+      "avg_utterance_length": 1.5833333333333333,
+      "utterance_length_std": 0.6685579234215214,
+      "min_utterance_length": 1,
+      "max_utterance_length": 3,
+      "question_ratio": 0.0,
+      "exclamation_ratio": 0.0,
+      "statement_ratio": 1.0,
+      "unique_words": 12,
+      "type_token_ratio": 0.631578947368421,
+      "avg_word_length": 15.631578947368421,
+      "contraction_ratio": 0.0,
+      "first_person_ratio": 0.0,
+      "second_person_ratio": 0.0,
+      "top_words": [
+        [
+          "software",
+          6
+        ],
+        [
+          "library",
+          2
+        ],
+        [
+          "cd-rom",
+          2
+        ],
+        [
+          "sr-only",
+          1
+        ],
+        [
+          "https://archive.org/details/softwarelibrary",
+          1
+        ],
+        [
+          "https://archive.org/details/ipaarchive",
+          1
+        ],
+        [
+          "ipa",
+          1
+        ],
+        [
+          "https://archive.org/details/cd-roms",
+          1
+        ],
+        [
+          "https://archive.org/details/softwaresites",
+          1
+        ],
+        [
+          "sites",
+          1
+        ],
+        [
+          "https://archive.org/details/cdromsoftware",
+          1
+        ],
+        [
+          "navia-link",
+          1
+        ]
+      ],
+      "distinctive_words": [
+        "software",
+        "cd-rom",
+        "library"
+      ],
+      "signature_phrases": [
+        "software library",
+        "cd-rom software"
+      ],
+      "archaism_count": 0,
+      "archaisms_used": [],
+      "sample_quotes": [
+        "CD-ROM Software Library",
+        "sr-only",
+        "https://archive.org/details/softwarelibrary",
+        "Software Library",
+        "https://archive.org/details/ipaarchive"
+      ]
+    },
+    "Images": {
+      "character_name": "Images",
+      "character_id": null,
+      "total_lines": 3,
+      "total_words": 4,
+      "total_chars": 84,
+      "avg_utterance_length": 1.3333333333333333,
+      "utterance_length_std": 0.5773502691896257,
+      "min_utterance_length": 1,
+      "max_utterance_length": 2,
+      "question_ratio": 0.0,
+      "exclamation_ratio": 0.0,
+      "statement_ratio": 1.0,
+      "unique_words": 4,
+      "type_token_ratio": 1.0,
+      "avg_word_length": 20.75,
+      "contraction_ratio": 0.0,
+      "first_person_ratio": 0.0,
+      "second_person_ratio": 0.0,
+      "top_words": [
+        [
+          "https://archive.org/details/cdromimages",
+          1
+        ],
+        [
+          "cd-rom",
+          1
+        ],
+        [
+          "images",
+          1
+        ],
+        [
+          "https://archive.org/details/nasa",
+          1
+        ]
+      ],
+      "distinctive_words": [],
+      "signature_phrases": [],
+      "archaism_count": 0,
+      "archaisms_used": [],
+      "sample_quotes": [
+        "https://archive.org/details/cdromimages",
+        "CD-ROM Images",
+        "https://archive.org/details/nasa"
+      ]
+    }
+  }
+}

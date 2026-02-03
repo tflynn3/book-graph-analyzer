@@ -609,3 +609,382 @@ class GraphWriter:
         """
         with self.driver.session() as session:
             session.run(query, id=char_id, name=name)
+
+    # =========================================================================
+    # Event Graph Integration (Phase 6+)
+    # =========================================================================
+
+    def write_event(
+        self,
+        event,  # Event from lore.events
+        book: str,
+    ) -> None:
+        """Write a single event to the graph.
+
+        Args:
+            event: Event object from lore.events module
+            book: The book this event was found in
+        """
+        query = """
+        MERGE (e:Event {id: $id})
+        SET e.description = $description,
+            e.agent = $agent,
+            e.action = $action,
+            e.patient = $patient,
+            e.era = $era,
+            e.year = $year,
+            e.source_book = $book,
+            e.confidence = $confidence
+        """
+
+        with self.driver.session() as session:
+            session.run(
+                query,
+                id=event.id,
+                description=event.description,
+                agent=event.agent,
+                action=event.action,
+                patient=event.patient,
+                era=event.era.value if event.era else None,
+                year=event.year,
+                book=book,
+                confidence=event.confidence,
+            )
+
+    def write_events_batch(
+        self,
+        events: list,  # List of Event objects
+        book: str,
+    ) -> int:
+        """Write multiple events in a batch.
+
+        Args:
+            events: List of Event objects
+            book: The book these events were found in
+
+        Returns:
+            Number of events written
+        """
+        if not events:
+            return 0
+
+        batch_data = [
+            {
+                "id": e.id,
+                "description": e.description,
+                "agent": e.agent,
+                "action": e.action,
+                "patient": e.patient,
+                "era": e.era.value if e.era else None,
+                "year": e.year,
+                "confidence": e.confidence,
+            }
+            for e in events
+        ]
+
+        query = """
+        UNWIND $batch AS item
+        MERGE (e:Event {id: item.id})
+        SET e.description = item.description,
+            e.agent = item.agent,
+            e.action = item.action,
+            e.patient = item.patient,
+            e.era = item.era,
+            e.year = item.year,
+            e.source_book = $book,
+            e.confidence = item.confidence
+        """
+
+        with self.driver.session() as session:
+            session.run(query, batch=batch_data, book=book)
+
+        return len(batch_data)
+
+    def write_event_relations_batch(
+        self,
+        relations: list,  # List of EventRelation objects
+    ) -> int:
+        """Write event temporal relations.
+
+        Args:
+            relations: List of EventRelation objects
+
+        Returns:
+            Number of relations written
+        """
+        if not relations:
+            return 0
+
+        # Group by relation type
+        by_type: dict[str, list] = defaultdict(list)
+        for rel in relations:
+            rel_type = rel.relation.upper()
+            by_type[rel_type].append(rel)
+
+        count = 0
+
+        for rel_type, type_rels in by_type.items():
+            batch_data = [
+                {
+                    "event1_id": r.event1_id,
+                    "event2_id": r.event2_id,
+                    "confidence": r.confidence,
+                }
+                for r in type_rels
+            ]
+
+            query = f"""
+            UNWIND $batch AS item
+            MATCH (e1:Event {{id: item.event1_id}})
+            MATCH (e2:Event {{id: item.event2_id}})
+            MERGE (e1)-[r:{rel_type}]->(e2)
+            SET r.confidence = item.confidence
+            """
+
+            with self.driver.session() as session:
+                session.run(query, batch=batch_data)
+                count += len(batch_data)
+
+        return count
+
+    def link_event_to_entities(
+        self,
+        event,  # Event object
+    ) -> int:
+        """Link an event to its participant entities.
+
+        Creates PARTICIPATED_IN relationships between characters and events.
+
+        Args:
+            event: Event object with agent/patient
+
+        Returns:
+            Number of links created
+        """
+        links = 0
+
+        if event.agent:
+            # Try to find matching character
+            query = """
+            MATCH (c:Character)
+            WHERE toLower(c.canonical_name) CONTAINS toLower($name)
+               OR toLower(c.name) CONTAINS toLower($name)
+            WITH c LIMIT 1
+            MATCH (e:Event {id: $event_id})
+            MERGE (c)-[r:PARTICIPATED_IN]->(e)
+            SET r.role = 'agent'
+            RETURN count(r) as cnt
+            """
+            with self.driver.session() as session:
+                result = session.run(query, name=event.agent, event_id=event.id)
+                record = result.single()
+                if record:
+                    links += record["cnt"]
+
+        if event.patient:
+            # Try to find matching entity (could be character, place, or object)
+            for label in ["Character", "Place", "Object"]:
+                query = f"""
+                MATCH (n:{label})
+                WHERE toLower(n.canonical_name) CONTAINS toLower($name)
+                   OR toLower(n.name) CONTAINS toLower($name)
+                WITH n LIMIT 1
+                MATCH (e:Event {{id: $event_id}})
+                MERGE (n)-[r:INVOLVED_IN]->(e)
+                SET r.role = 'patient'
+                RETURN count(r) as cnt
+                """
+                with self.driver.session() as session:
+                    result = session.run(query, name=event.patient, event_id=event.id)
+                    record = result.single()
+                    if record and record["cnt"] > 0:
+                        links += record["cnt"]
+                        break  # Found a match, stop looking
+
+        return links
+
+    def write_event_graph(
+        self,
+        event_graph,  # EventGraph object
+        book: str,
+        link_entities: bool = True,
+        progress_callback=None,
+    ) -> dict:
+        """Write a complete event graph to Neo4j.
+
+        Args:
+            event_graph: EventGraph from lore.events
+            book: Book title
+            link_entities: Whether to link events to existing entities
+            progress_callback: Optional callback(step, total, message)
+
+        Returns:
+            Stats dict
+        """
+        self.initialize()
+
+        stats = {
+            "events_written": 0,
+            "relations_written": 0,
+            "entity_links": 0,
+        }
+
+        total_steps = 3 if link_entities else 2
+        current_step = 0
+
+        # Step 1: Write events
+        current_step += 1
+        if progress_callback:
+            progress_callback(current_step, total_steps, "Writing events...")
+
+        events = list(event_graph.events.values())
+        stats["events_written"] = self.write_events_batch(events, book)
+
+        # Step 2: Write relations
+        current_step += 1
+        if progress_callback:
+            progress_callback(current_step, total_steps, "Writing temporal relations...")
+
+        stats["relations_written"] = self.write_event_relations_batch(event_graph.relations)
+
+        # Step 3: Link to entities
+        if link_entities:
+            current_step += 1
+            if progress_callback:
+                progress_callback(current_step, total_steps, "Linking to entities...")
+
+            for event in events:
+                stats["entity_links"] += self.link_event_to_entities(event)
+
+        return stats
+
+    def query_events(
+        self,
+        agent: str | None = None,
+        action: str | None = None,
+        patient: str | None = None,
+        era: str | None = None,
+        limit: int = 50,
+    ) -> list[dict]:
+        """Query events from Neo4j.
+
+        Args:
+            agent: Filter by agent name (fuzzy match)
+            action: Filter by action verb (fuzzy match)
+            patient: Filter by patient/object (fuzzy match)
+            era: Filter by era (exact match)
+            limit: Maximum results
+
+        Returns:
+            List of event dicts
+        """
+        conditions = []
+        params = {"limit": limit}
+
+        if agent:
+            conditions.append("toLower(e.agent) CONTAINS toLower($agent)")
+            params["agent"] = agent
+
+        if action:
+            conditions.append("toLower(e.action) CONTAINS toLower($action)")
+            params["action"] = action
+
+        if patient:
+            conditions.append("toLower(e.patient) CONTAINS toLower($patient)")
+            params["patient"] = patient
+
+        if era:
+            conditions.append("e.era = $era")
+            params["era"] = era
+
+        where_clause = " AND ".join(conditions) if conditions else "true"
+
+        query = f"""
+        MATCH (e:Event)
+        WHERE {where_clause}
+        RETURN e.id as id, e.description as description, e.agent as agent,
+               e.action as action, e.patient as patient, e.era as era,
+               e.year as year, e.source_book as source_book,
+               e.confidence as confidence
+        ORDER BY e.era, e.year
+        LIMIT $limit
+        """
+
+        with self.driver.session() as session:
+            result = session.run(query, **params)
+            return [dict(record) for record in result]
+
+    def query_event_ordering(
+        self,
+        event1_desc: str,
+        event2_desc: str,
+    ) -> dict | None:
+        """Query the ordering relationship between two events.
+
+        Args:
+            event1_desc: Description or agent+action of first event
+            event2_desc: Description or agent+action of second event
+
+        Returns:
+            Dict with ordering info, or None if not found
+        """
+        query = """
+        MATCH (e1:Event), (e2:Event)
+        WHERE toLower(e1.description) CONTAINS toLower($desc1)
+           OR (toLower(e1.agent) CONTAINS toLower($desc1) AND e1.agent IS NOT NULL)
+        WITH e1
+        MATCH (e2:Event)
+        WHERE toLower(e2.description) CONTAINS toLower($desc2)
+           OR (toLower(e2.agent) CONTAINS toLower($desc2) AND e2.agent IS NOT NULL)
+        OPTIONAL MATCH (e1)-[r]->(e2)
+        WHERE type(r) IN ['BEFORE', 'AFTER', 'DURING', 'CAUSES']
+        RETURN e1.id as event1_id, e1.description as event1,
+               e2.id as event2_id, e2.description as event2,
+               type(r) as relation,
+               e1.era as era1, e1.year as year1,
+               e2.era as era2, e2.year as year2
+        LIMIT 1
+        """
+
+        with self.driver.session() as session:
+            result = session.run(query, desc1=event1_desc, desc2=event2_desc)
+            record = result.single()
+
+            if not record:
+                return None
+
+            ordering = record["relation"]
+
+            # If no direct relation, try to infer from era/year
+            if not ordering:
+                era1 = record["era1"]
+                era2 = record["era2"]
+                year1 = record["year1"]
+                year2 = record["year2"]
+
+                if era1 and era2:
+                    era_order = {
+                        "first_age": 1,
+                        "second_age": 2,
+                        "third_age": 3,
+                        "fourth_age": 4,
+                    }
+                    if era_order.get(era1, 0) < era_order.get(era2, 0):
+                        ordering = "BEFORE"
+                    elif era_order.get(era1, 0) > era_order.get(era2, 0):
+                        ordering = "AFTER"
+                    elif year1 and year2:
+                        if year1 < year2:
+                            ordering = "BEFORE"
+                        elif year1 > year2:
+                            ordering = "AFTER"
+
+            return {
+                "event1": record["event1"],
+                "event2": record["event2"],
+                "relation": ordering,
+                "era1": record["era1"],
+                "year1": record["year1"],
+                "era2": record["era2"],
+                "year2": record["year2"],
+            }

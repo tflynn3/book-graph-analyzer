@@ -24,6 +24,11 @@ class Settings(BaseSettings):
     # Ollama (local LLM)
     ollama_base_url: str = Field(default="http://localhost:11434")
     ollama_model: str = Field(default="llama3.1:8b")
+    
+    # Hugging Face Inference API
+    hf_api_key: str = Field(default="")
+    hf_model: str = Field(default="meta-llama/Llama-3.1-70B-Instruct")
+    llm_provider: str = Field(default="ollama", description="ollama or huggingface")
 
     # Paths
     data_dir: Path = Field(default=Path("data"))

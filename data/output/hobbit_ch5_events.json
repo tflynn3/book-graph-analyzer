@@ -1,0 +1,138 @@
+{
+  "events": {
+    "event1": {
+      "id": "event1",
+      "description": "Bilbo woke up in the dark tunnel",
+      "agent": "Bilbo",
+      "action": "woke up",
+      "patient": null,
+      "era": null,
+      "year": null,
+      "year_text": null,
+      "source_text": "",
+      "confidence": 0.8
+    },
+    "event2": {
+      "id": "event2",
+      "description": "Bilbo found the ring",
+      "agent": "Bilbo",
+      "action": "found",
+      "patient": "the ring",
+      "era": null,
+      "year": null,
+      "year_text": null,
+      "source_text": "",
+      "confidence": 0.8
+    },
+    "event3": {
+      "id": "event3",
+      "description": "Bilbo put the ring in his pocket",
+      "agent": "Bilbo",
+      "action": "put",
+      "patient": "the ring",
+      "era": null,
+      "year": null,
+      "year_text": null,
+      "source_text": "",
+      "confidence": 0.8
+    },
+    "event4": {
+      "id": "event4",
+      "description": "Bilbo discovered his pipe was not broken",
+      "agent": "Bilbo",
+      "action": "discovered",
+      "patient": "his pipe",
+      "era": null,
+      "year": null,
+      "year_text": null,
+      "source_text": "",
+      "confidence": 0.8
+    },
+    "event5": {
+      "id": "event5",
+      "description": "Bilbo found his little sword",
+      "agent": "Bilbo",
+      "action": "found",
+      "patient": "his little sword",
+      "era": null,
+      "year": null,
+      "year_text": null,
+      "source_text": "",
+      "confidence": 0.8
+    },
+    "event6": {
+      "id": "event6",
+      "description": "Bilbo decided to move forward",
+      "agent": "Bilbo",
+      "action": "decided",
+      "patient": null,
+      "era": null,
+      "year": null,
+      "year_text": null,
+      "source_text": "",
+      "confidence": 0.8
+    },
+    "event7": {
+      "id": "event7",
+      "description": "Bilbo started moving forward with his sword",
+      "agent": "Bilbo",
+      "action": "started moving",
+      "patient": null,
+      "era": null,
+      "year": null,
+      "year_text": null,
+      "source_text": "",
+      "confidence": 0.8
+    }
+  },
+  "relations": [
+    {
+      "event1_id": "event1",
+      "relation": "before",
+      "event2_id": "event2",
+      "confidence": 0.7
+    },
+    {
+      "event1_id": "event2",
+      "relation": "before",
+      "event2_id": "event3",
+      "confidence": 0.7
+    },
+    {
+      "event1_id": "event3",
+      "relation": "before",
+      "event2_id": "event4",
+      "confidence": 0.7
+    },
+    {
+      "event1_id": "event4",
+      "relation": "before",
+      "event2_id": "event5",
+      "confidence": 0.7
+    },
+    {
+      "event1_id": "event5",
+      "relation": "before",
+      "event2_id": "event6",
+      "confidence": 0.7
+    },
+    {
+      "event1_id": "event6",
+      "relation": "before",
+      "event2_id": "event7",
+      "confidence": 0.7
+    },
+    {
+      "event1_id": "event2",
+      "relation": "caused",
+      "event2_id": "event3",
+      "confidence": 0.7
+    },
+    {
+      "event1_id": "event5",
+      "relation": "caused",
+      "event2_id": "event6",
+      "confidence": 0.7
+    }
+  ]
+}

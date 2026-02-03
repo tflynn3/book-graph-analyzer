@@ -1,0 +1,4808 @@
+{
+  "name": "Middle-earth",
+  "rules": {
+    "cosmology": [
+      {
+        "id": "cosmology_pattern_0",
+        "title": "you will see whether he gained anything in the end",
+        "description": "you will see whether he gained anything in the end",
+        "category": "cosmology",
+        "source_passages": [
+          {
+            "text": "He may have lost the neighbours\u2019 respect, but he gained \u2014 well, you will see whether he gained anything in the end.",
+            "book": "01.txt",
+            "location": "Ch.1, P4",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "cosmology_pattern_1",
+        "title": "that was to be found either under The Hill or over...",
+        "description": "that was to be found either under The Hill or over The Hill or across The Water",
+        "category": "cosmology",
+        "source_passages": [
+          {
+            "text": "Bungo, that was Bilbo\u2019s father, built the most luxurious hobbit-hole for her (and partly with her money) that was to be found either under The Hill or over The Hill or across The Water, and there they",
+            "book": "01.txt",
+            "location": "Ch.1, P7",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "cosmology_pattern_2",
+        "title": "when there was less noise and more green",
+        "description": "when there was less noise and more green",
+        "category": "cosmology",
+        "source_passages": [
+          {
+            "text": "By some curious chance one morning long ago in the quiet of the world, when there was less noise and more green, and the hobbits were still numerous and prosperous, and Bilbo Baggins was standing at h",
+            "book": "01.txt",
+            "location": "Ch.1, P8",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "cosmology_pattern_3",
+        "title": "and the hobbits were still numerous and prosperous",
+        "description": "and the hobbits were still numerous and prosperous",
+        "category": "cosmology",
+        "source_passages": [
+          {
+            "text": "By some curious chance one morning long ago in the quiet of the world, when there was less noise and more green, and the hobbits were still numerous and prosperous, and Bilbo Baggins was standing at h",
+            "book": "01.txt",
+            "location": "Ch.1, P8",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "cosmology_pattern_4",
+        "title": "The sun was shining",
+        "description": "The sun was shining",
+        "category": "cosmology",
+        "source_passages": [
+          {
+            "text": "The sun was shining, and the grass was very green.",
+            "book": "01.txt",
+            "location": "Ch.1, P10",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "cosmology_pattern_5",
+        "title": "and the grass was very green",
+        "description": "and the grass was very green",
+        "category": "cosmology",
+        "source_passages": [
+          {
+            "text": "The sun was shining, and the grass was very green.",
+            "book": "01.txt",
+            "location": "Ch.1, P10",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "cosmology_pattern_6",
+        "title": "By this he meant that the conversation was at an e...",
+        "description": "By this he meant that the conversation was at an end",
+        "category": "cosmology",
+        "source_passages": [
+          {
+            "text": "You might try over The Hill or across The Water.\u201d By this he meant that the conversation was at an end.",
+            "book": "01.txt",
+            "location": "Ch.1, P15",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "cosmology_pattern_7",
+        "title": "just about the time when Bilbo was finishing his s...",
+        "description": "just about the time when Bilbo was finishing his second cake and beginning to think that he had escaped adventures very well",
+        "category": "cosmology",
+        "source_passages": [
+          {
+            "text": "Then he strode away, just about the time when Bilbo was finishing his second cake and beginning to think that he had escaped adventures very well.",
+            "book": "01.txt",
+            "location": "Ch.1, P26",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "cosmology_pattern_8",
+        "title": "cakes were gone",
+        "description": "cakes were gone",
+        "category": "cosmology",
+        "source_passages": [
+          {
+            "text": "A big jug of coffee had just been set in the hearth, the seed-cakes were gone, and the dwarves were starting on a round of buttered scones, when there came \u2014 a loud knock.",
+            "book": "01.txt",
+            "location": "Ch.1, P51",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "cosmology_pattern_9",
+        "title": "and the dwarves were starting on a round of butter...",
+        "description": "and the dwarves were starting on a round of buttered scones",
+        "category": "cosmology",
+        "source_passages": [
+          {
+            "text": "A big jug of coffee had just been set in the hearth, the seed-cakes were gone, and the dwarves were starting on a round of buttered scones, when there came \u2014 a loud knock.",
+            "book": "01.txt",
+            "location": "Ch.1, P51",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "cosmology_pattern_10",
+        "title": "who was feeling positively flummoxed",
+        "description": "who was feeling positively flummoxed",
+        "category": "cosmology",
+        "source_passages": [
+          {
+            "text": "\u201cSeems to know as much about the inside of my larders as I do myself!\u201d thought Mr. Baggins, who was feeling positively flummoxed, and was beginning to wonder whether a most wretched adventure had not ",
+            "book": "01.txt",
+            "location": "Ch.1, P62",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "cosmology_pattern_11",
+        "title": "and was beginning to wonder whether a most wretche...",
+        "description": "and was beginning to wonder whether a most wretched adventure had not come right into his house",
+        "category": "cosmology",
+        "source_passages": [
+          {
+            "text": "\u201cSeems to know as much about the inside of my larders as I do myself!\u201d thought Mr. Baggins, who was feeling positively flummoxed, and was beginning to wonder whether a most wretched adventure had not ",
+            "book": "01.txt",
+            "location": "Ch.1, P62",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "cosmology_pattern_12",
+        "title": "I can manage",
+        "description": "I can manage",
+        "category": "cosmology",
+        "source_passages": [
+          {
+            "text": "I can manage.\u201d But the dwarves only started to sing:",
+            "book": "01.txt",
+            "location": "Ch.1, P67",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "cosmology_pattern_13",
+        "title": "and everything was cleaned and put away safe as qu...",
+        "description": "and everything was cleaned and put away safe as quick as lightning",
+        "category": "cosmology",
+        "source_passages": [
+          {
+            "text": "And of course they did none of these dreadful things, and everything was cleaned and put away safe as quick as lightning, while the hobbit was turning round and round in the middle of the kitchen tryi",
+            "book": "01.txt",
+            "location": "Ch.1, P76",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "cosmology_pattern_14",
+        "title": "while the hobbit was turning round and round in th...",
+        "description": "while the hobbit was turning round and round in the middle of the kitchen trying to see what they were doing",
+        "category": "cosmology",
+        "source_passages": [
+          {
+            "text": "And of course they did none of these dreadful things, and everything was cleaned and put away safe as quick as lightning, while the hobbit was turning round and round in the middle of the kitchen tryi",
+            "book": "01.txt",
+            "location": "Ch.1, P76",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "cosmology_pattern_15",
+        "title": "and was swept away into dark lands under strange m...",
+        "description": "and was swept away into dark lands under strange moons",
+        "category": "cosmology",
+        "source_passages": [
+          {
+            "text": "It was a beautiful golden harp, and when Thorin struck it the music began all at once, so sudden and sweet that Bilbo forgot everything else, and was swept away into dark lands under strange moons, fa",
+            "book": "01.txt",
+            "location": "Ch.1, P79",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "cosmology_pattern_16",
+        "title": "it was April ",
+        "description": "it was April ",
+        "category": "cosmology",
+        "source_passages": [
+          {
+            "text": "The dark came into the room from the little window that opened in the side of The Hill; the firelight flickered \u2014 it was April \u2014 and still they played on, while the shadow of Gandalf\u2019s beard wagged ag",
+            "book": "01.txt",
+            "location": "Ch.1, P80",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "cosmology_pattern_17",
+        "title": "and the shadows were lost",
+        "description": "and the shadows were lost",
+        "category": "cosmology",
+        "source_passages": [
+          {
+            "text": "The dark filled all the room, and the fire died down, and the shadows were lost, and still they played on.",
+            "book": "01.txt",
+            "location": "Ch.1, P81",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "cosmology_pattern_18",
+        "title": "The stars were out in a dark sky above the trees",
+        "description": "The stars were out in a dark sky above the trees",
+        "category": "cosmology",
+        "source_passages": [
+          {
+            "text": "The stars were out in a dark sky above the trees.",
+            "book": "01.txt",
+            "location": "Ch.1, P97",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "cosmology_pattern_19",
+        "title": "and very quickly he was plain Mr",
+        "description": "and very quickly he was plain Mr",
+        "category": "cosmology",
+        "source_passages": [
+          {
+            "text": "He shuddered; and very quickly he was plain Mr. Baggins of Bag- End, Under-Hill, again.",
+            "book": "01.txt",
+            "location": "Ch.1, P97",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "cosmology_pattern_20",
+        "title": "and they were all looking at him with eyes shining...",
+        "description": "and they were all looking at him with eyes shining in the dark",
+        "category": "cosmology",
+        "source_passages": [
+          {
+            "text": "Suddenly he found that the music and the singing had stopped, and they were all looking at him with eyes shining in the dark.",
+            "book": "01.txt",
+            "location": "Ch.1, P99",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "cosmology_pattern_21",
+        "title": "We shall soon before the break of day start on our...",
+        "description": "We shall soon before the break of day start on our long journey",
+        "category": "cosmology",
+        "source_passages": [
+          {
+            "text": "We shall soon before the break of day start on our long journey, a journey from which some of us, or perhaps all of us (except our friend and counsellor, the ingenious wizard Gandalf) may never return",
+            "book": "01.txt",
+            "location": "Ch.1, P106",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "cosmology_pattern_22",
+        "title": "and that was all they could get out of him for a l...",
+        "description": "and that was all they could get out of him for a long time",
+        "category": "cosmology",
+        "source_passages": [
+          {
+            "text": "Then he fell flat on the floor, and kept on calling out \u201cstruck by lightning, struck by lightning!\u201d over and over again; and that was all they could get out of him for a long time.",
+            "book": "01.txt",
+            "location": "Ch.1, P108",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "cosmology_pattern_23",
+        "title": "and you will see there the runes",
+        "description": "and you will see there the runes",
+        "category": "cosmology",
+        "source_passages": [
+          {
+            "text": "That marks a hidden passage to the Lower Halls.\u201d (Look at the map at the beginning of this book, and you will see there the runes.)",
+            "book": "01.txt",
+            "location": "Ch.1, P122",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      }
+    ],
+    "themes": [
+      {
+        "id": "themes_pattern_0",
+        "title": "it was a hobbit",
+        "description": "it was a hobbit",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "Not a nasty, dirty, wet hole, filled with the ends of worms and an oozy smell, nor yet a dry, bare, sandy hole with nothing in it to sit down on or to eat: it was a hobbit-hole, and that means comfort",
+            "book": "01.txt",
+            "location": "Ch.1, P2",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_1",
+        "title": "the hobbit was fond of visitors",
+        "description": "the hobbit was fond of visitors",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "The door opened on to a tube-shaped hall like a tunnel: a very comfortable tunnel without smoke, with panelled walls, and floors tiled and carpeted, provided with polished chairs, and lots and lots of",
+            "book": "01.txt",
+            "location": "Ch.1, P3",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_2",
+        "title": "The best rooms were all on the left",
+        "description": "The best rooms were all on the left",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "The best rooms were all on the left-hand side (going in), for these were the only ones to have windows, deep-set round windows looking over his garden, and meadows beyond, sloping down to the river.",
+            "book": "01.txt",
+            "location": "Ch.1, P3",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_3",
+        "title": "for these were the only ones to have windows",
+        "description": "for these were the only ones to have windows",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "The best rooms were all on the left-hand side (going in), for these were the only ones to have windows, deep-set round windows looking over his garden, and meadows beyond, sloping down to the river.",
+            "book": "01.txt",
+            "location": "Ch.1, P3",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_4",
+        "title": "not only because most of them were rich",
+        "description": "not only because most of them were rich",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "The Bagginses had lived in the neighbourhood of The Hill for time out of mind, and people considered them very respectable, not only because most of them were rich, but also because they never had any",
+            "book": "01.txt",
+            "location": "Ch.1, P4",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_5",
+        "title": "but also because they never had any adventures or ...",
+        "description": "but also because they never had any adventures or did anything unexpected",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "The Bagginses had lived in the neighbourhood of The Hill for time out of mind, and people considered them very respectable, not only because most of them were rich, but also because they never had any",
+            "book": "01.txt",
+            "location": "Ch.1, P4",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_6",
+        "title": "This is a story of how a Baggins had an adventure",
+        "description": "This is a story of how a Baggins had an adventure",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "This is a story of how a Baggins had an adventure, and found himself doing and saying things altogether unexpected.",
+            "book": "01.txt",
+            "location": "Ch.1, P4",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_7",
+        "title": "He may have lost the neighbours",
+        "description": "He may have lost the neighbours",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "He may have lost the neighbours\u2019 respect, but he gained \u2014 well, you will see whether he gained anything in the end.",
+            "book": "01.txt",
+            "location": "Ch.1, P4",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_8",
+        "title": "what is a hobbit",
+        "description": "what is a hobbit",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "The mother of our particular hobbit \u2014 what is a hobbit?",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_9",
+        "title": "They are inclined to be fat in the stomach",
+        "description": "They are inclined to be fat in the stomach",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "They are inclined to be fat in the stomach; they dress in bright colours (chiefly green and yellow); wear no shoes, because their feet grow natural leathery soles and thick warm brown hair like the st",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_10",
+        "title": "which they have twice a day when they can get it",
+        "description": "which they have twice a day when they can get it",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "They are inclined to be fat in the stomach; they dress in bright colours (chiefly green and yellow); wear no shoes, because their feet grow natural leathery soles and thick warm brown hair like the st",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_11",
+        "title": "As I was saying",
+        "description": "As I was saying",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "As I was saying, the mother of this hobbit \u2014 of Bilbo Baggins, that is \u2014 was the famous Belladonna Took, one of the three remarkable daughters of the Old Took, head of the hobbits who lived across The",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_12",
+        "title": "that the Tooks were not as respectable as the Bagg...",
+        "description": "that the Tooks were not as respectable as the Bagginses",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "that the Tooks were not as respectable as the Bagginses, though they were undoubtedly richer.",
+            "book": "01.txt",
+            "location": "Ch.1, P6",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_13",
+        "title": "though they were undoubtedly richer",
+        "description": "though they were undoubtedly richer",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "that the Tooks were not as respectable as the Bagginses, though they were undoubtedly richer.",
+            "book": "01.txt",
+            "location": "Ch.1, P6",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_14",
+        "title": "that was Bilbo",
+        "description": "that was Bilbo",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "Bungo, that was Bilbo\u2019s father, built the most luxurious hobbit-hole for her (and partly with her money) that was to be found either under The Hill or over The Hill or across The Water, and there they",
+            "book": "01.txt",
+            "location": "Ch.1, P7",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_15",
+        "title": "Still it is probable that Bilbo",
+        "description": "Still it is probable that Bilbo",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "Still it is probable that Bilbo, her only son, although he looked and behaved exactly like a second edition of his solid and comfortable father, got something a bit queer in his make-up from the Took ",
+            "book": "01.txt",
+            "location": "Ch.1, P7",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_16",
+        "title": "The chance never arrived",
+        "description": "The chance never arrived",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "The chance never arrived, until Bilbo Baggins was grown up, being about fifty years old or so, and living in the beautiful hobbit-hole built by his father, which I have just described for you, until h",
+            "book": "01.txt",
+            "location": "Ch.1, P7",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_17",
+        "title": "and Bilbo Baggins was standing at his door after b...",
+        "description": "and Bilbo Baggins was standing at his door after breakfast smoking an enormous long wooden pipe that reached nearly down to his woolly toes ",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "By some curious chance one morning long ago in the quiet of the world, when there was less noise and more green, and the hobbits were still numerous and prosperous, and Bilbo Baggins was standing at h",
+            "book": "01.txt",
+            "location": "Ch.1, P8",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_18",
+        "title": "and I have only heard very little of all there is ...",
+        "description": "and I have only heard very little of all there is to hear",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "If you had heard only a quarter of what I have heard about him, and I have only heard very little of all there is to hear, you would be prepared for any sort of remarkable tale.",
+            "book": "01.txt",
+            "location": "Ch.1, P8",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_19",
+        "title": "He had been away over The Hill and across The Wate...",
+        "description": "He had been away over The Hill and across The Water on businesses of his own since they were all small hobbit",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "He had been away over The Hill and across The Water on businesses of his own since they were all small hobbit-boys and hobbit-girls.",
+            "book": "01.txt",
+            "location": "Ch.1, P8",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_20",
+        "title": "or mean that it is a good morning whether I want i...",
+        "description": "or mean that it is a good morning whether I want it or not",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "\u201cWhat do you mean?\u201d he said. \u201cDo you wish me a good morning, or mean that it is a good morning whether I want it or not; or that you feel good this morning; or that it is a morning to be good on?\u201d",
+            "book": "01.txt",
+            "location": "Ch.1, P11",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_21",
+        "title": "or that it is a morning to be good on",
+        "description": "or that it is a morning to be good on",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "\u201cWhat do you mean?\u201d he said. \u201cDo you wish me a good morning, or mean that it is a good morning whether I want it or not; or that you feel good this morning; or that it is a morning to be good on?\u201d",
+            "book": "01.txt",
+            "location": "Ch.1, P11",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_22",
+        "title": "We are plain quiet folk and have no use for advent...",
+        "description": "We are plain quiet folk and have no use for adventures",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "We are plain quiet folk and have no use for adventures.",
+            "book": "01.txt",
+            "location": "Ch.1, P14",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_23",
+        "title": "He had decided that he was not quite his sort",
+        "description": "He had decided that he was not quite his sort",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "He had decided that he was not quite his sort, and wanted him to go away.",
+            "book": "01.txt",
+            "location": "Ch.1, P14",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_24",
+        "title": "as if I was selling buttons at the door",
+        "description": "as if I was selling buttons at the door",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "To think that I should have lived to be good-morninged by Belladonna Took\u2019s son, as if I was selling buttons at the door!\u201d",
+            "book": "01.txt",
+            "location": "Ch.1, P19",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_25",
+        "title": "You will notice already that Mr",
+        "description": "You will notice already that Mr",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "They used to go up like great lilies and snapdragons and laburnums of fire and hang in the twilight all evening!\u201d You will notice already that Mr. Baggins was not quite so prosy as he liked to believe",
+            "book": "01.txt",
+            "location": "Ch.1, P20",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_26",
+        "title": "Baggins was not quite so prosy as he liked to beli...",
+        "description": "Baggins was not quite so prosy as he liked to believe",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "They used to go up like great lilies and snapdragons and laburnums of fire and hang in the twilight all evening!\u201d You will notice already that Mr. Baggins was not quite so prosy as he liked to believe",
+            "book": "01.txt",
+            "location": "Ch.1, P20",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_27",
+        "title": "also that he was very fond of flowers",
+        "description": "also that he was very fond of flowers",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "They used to go up like great lilies and snapdragons and laburnums of fire and hang in the twilight all evening!\u201d You will notice already that Mr. Baggins was not quite so prosy as he liked to believe",
+            "book": "01.txt",
+            "location": "Ch.1, P20",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_28",
+        "title": "Not the Gandalf who was responsible for so many qu...",
+        "description": "Not the Gandalf who was responsible for so many quiet lads and lasses going off into the Blue for mad adventures",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "They used to go up like great lilies and snapdragons and laburnums of fire and hang in the twilight all evening!\u201d You will notice already that Mr. Baggins was not quite so prosy as he liked to believe",
+            "book": "01.txt",
+            "location": "Ch.1, P20",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_29",
+        "title": "but I had no idea you were still in business",
+        "description": "but I had no idea you were still in business",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "I beg your pardon, but I had no idea you were still in business.\u201d",
+            "book": "01.txt",
+            "location": "Ch.1, P20",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_30",
+        "title": "and that is not without hope",
+        "description": "and that is not without hope",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "You seem to remember my fireworks kindly, at any rate, and that is not without hope.",
+            "book": "01.txt",
+            "location": "Ch.1, P21",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_31",
+        "title": "I will give you what you asked for",
+        "description": "I will give you what you asked for",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "Indeed for your old grandfather Took\u2019s sake, and for the sake of poor Belladonna, I will give you what you asked for.\u201d",
+            "book": "01.txt",
+            "location": "Ch.1, P21",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_32",
+        "title": "In fact I will go so far as to send you on this ad...",
+        "description": "In fact I will go so far as to send you on this adventure",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "In fact I will go so far as to send you on this adventure.",
+            "book": "01.txt",
+            "location": "Ch.1, P23",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_33",
+        "title": "Gandalf in the meantime was still standing outside...",
+        "description": "Gandalf in the meantime was still standing outside the door",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "Gandalf in the meantime was still standing outside the door, and laughing long but quietly.",
+            "book": "01.txt",
+            "location": "Ch.1, P26",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_34",
+        "title": "he was going to say",
+        "description": "he was going to say",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "\u201cI am so sorry to keep you waiting!\u201d he was going to say, when he saw that it was not Gandalf at all.",
+            "book": "01.txt",
+            "location": "Ch.1, P29",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_35",
+        "title": "when he saw that it was not Gandalf at all",
+        "description": "when he saw that it was not Gandalf at all",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "\u201cI am so sorry to keep you waiting!\u201d he was going to say, when he saw that it was not Gandalf at all.",
+            "book": "01.txt",
+            "location": "Ch.1, P29",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_36",
+        "title": "As soon as the door was opened",
+        "description": "As soon as the door was opened",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "As soon as the door was opened, he pushed inside, just as if he had been expected.",
+            "book": "01.txt",
+            "location": "Ch.1, P30",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_37",
+        "title": "But it was not Gandalf",
+        "description": "But it was not Gandalf",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "But it was not Gandalf.",
+            "book": "01.txt",
+            "location": "Ch.1, P35",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_38",
+        "title": "It was not the correct thing to say",
+        "description": "It was not the correct thing to say",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "It was not the correct thing to say, but they have begun to arrive had flustered him badly.",
+            "book": "01.txt",
+            "location": "Ch.1, P37",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_39",
+        "title": "When he got back Balin and Dwalin were talking at ...",
+        "description": "When he got back Balin and Dwalin were talking at the table like old friends ",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "When he got back Balin and Dwalin were talking at the table like old friends (as a matter of fact they were brothers).",
+            "book": "01.txt",
+            "location": "Ch.1, P41",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_40",
+        "title": "as a matter of fact they were brothers",
+        "description": "as a matter of fact they were brothers",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "When he got back Balin and Dwalin were talking at the table like old friends (as a matter of fact they were brothers).",
+            "book": "01.txt",
+            "location": "Ch.1, P41",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_41",
+        "title": "But it was not",
+        "description": "But it was not",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "But it was not.",
+            "book": "01.txt",
+            "location": "Ch.1, P42",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_42",
+        "title": "Bilbo was hardly surprised at all",
+        "description": "Bilbo was hardly surprised at all",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "In they hopped, as soon as the door began to open \u2014 Bilbo was hardly surprised at all.",
+            "book": "01.txt",
+            "location": "Ch.1, P42",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_43",
+        "title": "What can I do for you",
+        "description": "What can I do for you",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "\u201cWhat can I do for you, my dwarves?\u201d he said.",
+            "book": "01.txt",
+            "location": "Ch.1, P43",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_44",
+        "title": "I really must sit down for a minute and collect my...",
+        "description": "I really must sit down for a minute and collect my wits",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "I really must sit down for a minute and collect my wits, and have a drink.\u201d He had only just had a sip \u2014 in the corner, while the four dwarves sat round the table, and talked about mines and gold and ",
+            "book": "01.txt",
+            "location": "Ch.1, P47",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_45",
+        "title": "boy was trying to pull the handle off",
+        "description": "boy was trying to pull the handle off",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "I really must sit down for a minute and collect my wits, and have a drink.\u201d He had only just had a sip \u2014 in the corner, while the four dwarves sat round the table, and talked about mines and gold and ",
+            "book": "01.txt",
+            "location": "Ch.1, P47",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_46",
+        "title": "and what was going to happen",
+        "description": "and what was going to happen",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "The poor little hobbit sat down in the hall and put his head in his hands, and wondered what had happened, and what was going to happen, and whether they would all stay to supper.",
+            "book": "01.txt",
+            "location": "Ch.1, P50",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_47",
+        "title": "It was not four after all",
+        "description": "It was not four after all",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "It was not four after all, it was five.",
+            "book": "01.txt",
+            "location": "Ch.1, P50",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_48",
+        "title": "it was five",
+        "description": "it was five",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "It was not four after all, it was five.",
+            "book": "01.txt",
+            "location": "Ch.1, P50",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_49",
+        "title": "Another dwarf had come along while he was wonderin...",
+        "description": "Another dwarf had come along while he was wondering in the hall",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "Another dwarf had come along while he was wondering in the hall.",
+            "book": "01.txt",
+            "location": "Ch.1, P50",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_50",
+        "title": "and a white hood were hanging on the pegs",
+        "description": "and a white hood were hanging on the pegs",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "Dori, Nori, Ori, Oin, and Gloin were their names; and very soon two purple hoods, a grey hood, a brown hood, and a white hood were hanging on the pegs, and off they marched with their broad hands stuc",
+            "book": "01.txt",
+            "location": "Ch.1, P50",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_51",
+        "title": "so the hobbit was kept very busy for a while",
+        "description": "so the hobbit was kept very busy for a while",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "Some called for ale, and some for porter, and one for coffee, and all of them for cakes; so the hobbit was kept very busy for a while.",
+            "book": "01.txt",
+            "location": "Ch.1, P50",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_52",
+        "title": "Somebody was banging with a stick",
+        "description": "Somebody was banging with a stick",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "Somebody was banging with a stick!",
+            "book": "01.txt",
+            "location": "Ch.1, P51",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_53",
+        "title": "this was the most awkward Wednesday he ever rememb...",
+        "description": "this was the most awkward Wednesday he ever remembered",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "Bilbo rushed along the passage, very angry, and altogether bewildered and bewuthered \u2014 this was the most awkward Wednesday he ever remembered.",
+            "book": "01.txt",
+            "location": "Ch.1, P52",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_54",
+        "title": "It is not like you",
+        "description": "It is not like you",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "Carefully!\u201d he said. \u201cIt is not like you, Bilbo, to keep friends waiting on the mat, and then open the door like a pop-gun!",
+            "book": "01.txt",
+            "location": "Ch.1, P53",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_55",
+        "title": "who was not at all pleased at falling flat on Bilb...",
+        "description": "who was not at all pleased at falling flat on Bilbo",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "This last belonged to Thorin, an enormously important dwarf, in fact no other than the great Thorin Oakenshield himself, who was not at all pleased at falling flat on Bilbo\u2019s mat with Bifur, Bofur, an",
+            "book": "01.txt",
+            "location": "Ch.1, P54",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_56",
+        "title": "For one thing Bombur was immensely fat and heavy",
+        "description": "For one thing Bombur was immensely fat and heavy",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "For one thing Bombur was immensely fat and heavy.",
+            "book": "01.txt",
+            "location": "Ch.1, P54",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_57",
+        "title": "Thorin indeed was very haughty",
+        "description": "Thorin indeed was very haughty",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "Thorin indeed was very haughty, and said nothing about service; but poor Mr. Baggins said he was sorry so many times, that at last he grunted \u201cpray don\u2019t mention it,\u201d and stopped frowning.",
+            "book": "01.txt",
+            "location": "Ch.1, P54",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_58",
+        "title": "Now we are all here",
+        "description": "Now we are all here",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "\u201cNow we are all here!\u201d said Gandalf, looking at the row of thirteen hoods \u2014 the best detachable party hoods \u2014 and his own hat hanging on the pegs. \u201cQuite a merry gathering!",
+            "book": "01.txt",
+            "location": "Ch.1, P55",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_59",
+        "title": "I hope there is something left for the late",
+        "description": "I hope there is something left for the late",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "I hope there is something left for the late-comers to eat and drink!",
+            "book": "01.txt",
+            "location": "Ch.1, P55",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_60",
+        "title": "he was getting very hot",
+        "description": "he was getting very hot",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "By the time he had got all the bottles and dishes and knives and forks and glasses and plates and spoons and things piled up on big trays, he was getting very hot, and red in the face, and annoyed.",
+            "book": "01.txt",
+            "location": "Ch.1, P62",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_61",
+        "title": "his appetite was quite taken away",
+        "description": "his appetite was quite taken away",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "Gandalf sat at the head of the party with the thirteen dwarves all round: and Bilbo sat on a stool at the fireside, nibbling at a biscuit (his appetite was quite taken away), and trying to look as if ",
+            "book": "01.txt",
+            "location": "Ch.1, P64",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_62",
+        "title": "and trying to look as if this was all perfectly or...",
+        "description": "and trying to look as if this was all perfectly ordinary and not in the least an adventure",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "Gandalf sat at the head of the party with the thirteen dwarves all round: and Bilbo sat on a stool at the fireside, nibbling at a biscuit (his appetite was quite taken away), and trying to look as if ",
+            "book": "01.txt",
+            "location": "Ch.1, P64",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_63",
+        "title": "I suppose you will all stay to supper",
+        "description": "I suppose you will all stay to supper",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "\u201cI suppose you will all stay to supper?\u201d he said in his politest unpressing tones.",
+            "book": "01.txt",
+            "location": "Ch.1, P65",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_64",
+        "title": "and we must have some music first",
+        "description": "and we must have some music first",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "We shan\u2019t get through the business till late, and we must have some music first.",
+            "book": "01.txt",
+            "location": "Ch.1, P66",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_65",
+        "title": "he was too important",
+        "description": "he was too important",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "Thereupon the twelve dwarves \u2014 not Thorin, he was too important, and stayed talking to Gandalf \u2014 jumped to their feet, and made tall piles of all the things.",
+            "book": "01.txt",
+            "location": "Ch.1, P67",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_66",
+        "title": "if any are whole",
+        "description": "if any are whole",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "Pound them up with a thumping pole; And when you\u2019ve finished, if any are whole, Send them down the hall to roll!",
+            "book": "01.txt",
+            "location": "Ch.1, P73",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_67",
+        "title": "He was blowing the most enormous smoke",
+        "description": "He was blowing the most enormous smoke",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "He was blowing the most enormous smoke-rings, and wherever he told one to go, it went \u2014 up the chimney, or behind the clock on the mantelpiece, or under the table, or round and round the ceiling; but ",
+            "book": "01.txt",
+            "location": "Ch.1, P76",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_68",
+        "title": "but wherever it went it was not quick enough to es...",
+        "description": "but wherever it went it was not quick enough to escape Gandalf",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "He was blowing the most enormous smoke-rings, and wherever he told one to go, it went \u2014 up the chimney, or behind the clock on the mantelpiece, or under the table, or round and round the ceiling; but ",
+            "book": "01.txt",
+            "location": "Ch.1, P76",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_69",
+        "title": "if it can be like their song without their music",
+        "description": "if it can be like their song without their music",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "And suddenly first one and then another began to sing as they played, deep-throated singing of the dwarves in the deep places of their ancient homes; and this is like a fragment of their song, if it c",
+            "book": "01.txt",
+            "location": "Ch.1, P81",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_70",
+        "title": "The pines were roaring on the height",
+        "description": "The pines were roaring on the height",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "The pines were roaring on the height, The winds were moaning in the night.",
+            "book": "01.txt",
+            "location": "Ch.1, P91",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_71",
+        "title": "The winds were moaning in the night",
+        "description": "The winds were moaning in the night",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "The pines were roaring on the height, The winds were moaning in the night.",
+            "book": "01.txt",
+            "location": "Ch.1, P91",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_72",
+        "title": "The fire was red",
+        "description": "The fire was red",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "The fire was red, it flaming spread;",
+            "book": "01.txt",
+            "location": "Ch.1, P91",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_73",
+        "title": "Where are you going",
+        "description": "Where are you going",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "\u201cWhere are you going?\u201d said Thorin, in a tone that seemed to show that he guessed both halves of the hobbit\u2019s mind.",
+            "book": "01.txt",
+            "location": "Ch.1, P100",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_74",
+        "title": "There are many hours before dawn",
+        "description": "There are many hours before dawn",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "There are many hours before dawn.\u201d",
+            "book": "01.txt",
+            "location": "Ch.1, P102",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_75",
+        "title": "And this is how Thorin began",
+        "description": "And this is how Thorin began",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "\u201cHush!\u201d said Gandalf. \u201cLet Thorin speak!\u201d And this is how Thorin began.",
+            "book": "01.txt",
+            "location": "Ch.1, P104",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_76",
+        "title": "We are met together in the house of our friend and...",
+        "description": "We are met together in the house of our friend and fellow conspirator",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "We are met together in the house of our friend and fellow conspirator, this most excellent and audacious hobbit \u2014 may the hair on his toes never fall out! all praise to his wine and ale! \u2014 \u201d He paused",
+            "book": "01.txt",
+            "location": "Ch.1, P105",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_77",
+        "title": "may the hair on his toes never fall out",
+        "description": "may the hair on his toes never fall out",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "We are met together in the house of our friend and fellow conspirator, this most excellent and audacious hobbit \u2014 may the hair on his toes never fall out! all praise to his wine and ale! \u2014 \u201d He paused",
+            "book": "01.txt",
+            "location": "Ch.1, P105",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_78",
+        "title": "but the compliments were quite lost on poor Bilbo ...",
+        "description": "but the compliments were quite lost on poor Bilbo Baggins",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "We are met together in the house of our friend and fellow conspirator, this most excellent and audacious hobbit \u2014 may the hair on his toes never fall out! all praise to his wine and ale! \u2014 \u201d He paused",
+            "book": "01.txt",
+            "location": "Ch.1, P105",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_79",
+        "title": "he was so flummoxed",
+        "description": "he was so flummoxed",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "We are met together in the house of our friend and fellow conspirator, this most excellent and audacious hobbit \u2014 may the hair on his toes never fall out! all praise to his wine and ale! \u2014 \u201d He paused",
+            "book": "01.txt",
+            "location": "Ch.1, P105",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_80",
+        "title": "We are met to discuss our plans",
+        "description": "We are met to discuss our plans",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "\u201cWe are met to discuss our plans, our ways, means, policy and devices.",
+            "book": "01.txt",
+            "location": "Ch.1, P106",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_81",
+        "title": "It is a solemn moment",
+        "description": "It is a solemn moment",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "It is a solemn moment.",
+            "book": "01.txt",
+            "location": "Ch.1, P106",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_82",
+        "title": "the exact situation at the moment may require a li...",
+        "description": "the exact situation at the moment may require a little brief explanation ",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "To the estimable Mr. Baggins, and perhaps to one or two of the younger dwarves (I think I should be right in naming Kili and Fili, for instance), the exact situation at the moment may require a little",
+            "book": "01.txt",
+            "location": "Ch.1, P107",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_83",
+        "title": "This was Thorin",
+        "description": "This was Thorin",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "This was Thorin\u2019 s style.",
+            "book": "01.txt",
+            "location": "Ch.1, P108",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_84",
+        "title": "He was an important dwarf",
+        "description": "He was an important dwarf",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "He was an important dwarf.",
+            "book": "01.txt",
+            "location": "Ch.1, P108",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_85",
+        "title": "he would probably have gone on like this until he ...",
+        "description": "he would probably have gone on like this until he was out of breath",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "If he had been allowed, he would probably have gone on like this until he was out of breath, without telling any one there anything that was not known already.",
+            "book": "01.txt",
+            "location": "Ch.1, P108",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_86",
+        "title": "without telling any one there anything that was no...",
+        "description": "without telling any one there anything that was not known already",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "If he had been allowed, he would probably have gone on like this until he was out of breath, without telling any one there anything that was not known already.",
+            "book": "01.txt",
+            "location": "Ch.1, P108",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_87",
+        "title": "But he was rudely interrupted",
+        "description": "But he was rudely interrupted",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "But he was rudely interrupted.",
+            "book": "01.txt",
+            "location": "Ch.1, P108",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_88",
+        "title": "At may never return he began to feel a shriek comi...",
+        "description": "At may never return he began to feel a shriek coming up inside",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "At may never return he began to feel a shriek coming up inside, and very soon it burst out like the whistle of an engine coming out of a tunnel.",
+            "book": "01.txt",
+            "location": "Ch.1, P108",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_89",
+        "title": "shaking like a jelly that was melting",
+        "description": "shaking like a jelly that was melting",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "Gandalf struck a blue light on the end of his magic staff, and in its firework glare the poor little hobbit could be seen kneeling on the hearth-rug, shaking like a jelly that was melting.",
+            "book": "01.txt",
+            "location": "Ch.1, P108",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_90",
+        "title": "who was so huge ",
+        "description": "who was so huge ",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "If you have ever seen a dragon in a pinch, you will realize that this was only poetical exaggeration applied to any hobbit, even to Old Took\u2019s great-grand-uncle Bullroarer, who was so huge (for a hobb",
+            "book": "01.txt",
+            "location": "Ch.1, P110",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_91",
+        "title": "s gentler descendant was reviving in the drawing",
+        "description": "s gentler descendant was reviving in the drawing",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "In the meanwhile, however, Bullroarer\u2019 s gentler descendant was reviving in the drawing-room.",
+            "book": "01.txt",
+            "location": "Ch.1, P111",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_92",
+        "title": "This is what he heard",
+        "description": "This is what he heard",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "This is what he heard, Gloin speaking: \u201cHumph!\u201d (or some snort more or less like that). \u201cWill he do, do you think?",
+            "book": "01.txt",
+            "location": "Ch.1, P111",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_93",
+        "title": "It is all very well for Gandalf to talk about this...",
+        "description": "It is all very well for Gandalf to talk about this hobbit being fierce",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "It is all very well for Gandalf to talk about this hobbit being fierce, but one shriek like that in a moment of excitement would be enough to wake the dragon and all his relatives, and kill the lot of",
+            "book": "01.txt",
+            "location": "Ch.1, P111",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_94",
+        "title": "you were a fool",
+        "description": "you were a fool",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "Many a time afterwards the Baggins part regretted what he did now, and he said to himself: \u201cBilbo, you were a fool; you walked right in and put your foot in it.\u201d",
+            "book": "01.txt",
+            "location": "Ch.1, P113",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_95",
+        "title": "t pretend to understand what you are talking about",
+        "description": "t pretend to understand what you are talking about",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "I don\u2019t pretend to understand what you are talking about, or your reference to burglars, but I think I am right in believing\u201d (this is what he called being on his dignity) \u201cthat you think I am no good",
+            "book": "01.txt",
+            "location": "Ch.1, P114",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_96",
+        "title": "I will show you",
+        "description": "I will show you",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "I will show you.",
+            "book": "01.txt",
+            "location": "Ch.1, P114",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_97",
+        "title": "it was painted a week ago ",
+        "description": "it was painted a week ago ",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "I have no signs on my door \u2014 it was painted a week ago \u2014 , and I am quite sure you have come to the wrong house.",
+            "book": "01.txt",
+            "location": "Ch.1, P114",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_98",
+        "title": "And I assure you there is a mark on this door ",
+        "description": "And I assure you there is a mark on this door ",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "And I assure you there is a mark on this door \u2014 the usual one in the trade, or used to be.",
+            "book": "01.txt",
+            "location": "Ch.1, P115",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_99",
+        "title": "s how it is usually read",
+        "description": "s how it is usually read",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "Burglar wants a good job, plenty of Excitement and reasonable Reward, that\u2019s how it is usually read.",
+            "book": "01.txt",
+            "location": "Ch.1, P115",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_100",
+        "title": "You can say Expert Treasure",
+        "description": "You can say Expert Treasure",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "You can say Expert Treasure-hunter instead of Burglar if you like.",
+            "book": "01.txt",
+            "location": "Ch.1, P115",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_101",
+        "title": "Gandalf told us that there was a man of the sort i...",
+        "description": "Gandalf told us that there was a man of the sort in these parts looking for a Job at once",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "Gandalf told us that there was a man of the sort in these parts looking for a Job at once, and that he had arranged for a meeting here this Wednesday tea-time.\u201d",
+            "book": "01.txt",
+            "location": "Ch.1, P115",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_102",
+        "title": "Of course there is a mark",
+        "description": "Of course there is a mark",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "\u201cOf course there is a mark,\u201d said Gandalf. \u201cI put it there myself.",
+            "book": "01.txt",
+            "location": "Ch.1, P116",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_103",
+        "title": "and you can stop at thirteen and have all the bad ...",
+        "description": "and you can stop at thirteen and have all the bad luck you like",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "Just let any one say I chose the wrong man or the wrong house, and you can stop at thirteen and have all the bad luck you like, or go back to digging coal.\u201d",
+            "book": "01.txt",
+            "location": "Ch.1, P116",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_104",
+        "title": "There is a lot more in him than you guess",
+        "description": "There is a lot more in him than you guess",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "There is a lot more in him than you guess, and a deal more than he has any idea of himself.",
+            "book": "01.txt",
+            "location": "Ch.1, P117",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_105",
+        "title": "This was made by Thror",
+        "description": "This was made by Thror",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "\u201cThis was made by Thror, your grandfather, Thorin,\u201d he said in answer to the dwarves\u2019 excited questions. \u201cIt is a plan of the Mountain.\u201d",
+            "book": "01.txt",
+            "location": "Ch.1, P119",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_106",
+        "title": "t see that this will help us much",
+        "description": "t see that this will help us much",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "\u201cI don\u2019t see that this will help us much,\u201d said Thorin disappointedly after a glance. \u201cI remember the Mountain well enough and the lands about it.",
+            "book": "01.txt",
+            "location": "Ch.1, P120",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_107",
+        "title": "It may have been secret once",
+        "description": "It may have been secret once",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "\u201cIt may have been secret once,\u201d said Thorin, \u201cbut how do we know that it is secret any longer?",
+            "book": "01.txt",
+            "location": "Ch.1, P123",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_108",
+        "title": "but how do we know that it is secret any longer",
+        "description": "but how do we know that it is secret any longer",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "\u201cIt may have been secret once,\u201d said Thorin, \u201cbut how do we know that it is secret any longer?",
+            "book": "01.txt",
+            "location": "Ch.1, P123",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_109",
+        "title": "Old Smaug has lived there long enough now to find ...",
+        "description": "Old Smaug has lived there long enough now to find out anything there is to know about those caves",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "Old Smaug has lived there long enough now to find out anything there is to know about those caves.\u201d",
+            "book": "01.txt",
+            "location": "Ch.1, P123",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_110",
+        "title": "Because it is too small",
+        "description": "Because it is too small",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "\u201cBecause it is too small. \u2018 Five feet high the door and three may walk abreast \u2019 say the runes, but Smaug could not creep into a hole that size, not even when he was a young dragon, certainly not afte",
+            "book": "01.txt",
+            "location": "Ch.1, P126",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_111",
+        "title": "He was getting excited and interested again",
+        "description": "He was getting excited and interested again",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "He was getting excited and interested again, so that he forgot to keep his mouth shut.",
+            "book": "01.txt",
+            "location": "Ch.1, P127",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_112",
+        "title": "He was only a little hobbit you must remember",
+        "description": "He was only a little hobbit you must remember",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "He was only a little hobbit you must remember.",
+            "book": "01.txt",
+            "location": "Ch.1, P128",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_113",
+        "title": "That is the usual dwarves",
+        "description": "That is the usual dwarves",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "That is the usual dwarves\u2019 method \u2014 I think that is right, isn\u2019t it?\u201d",
+            "book": "01.txt",
+            "location": "Ch.1, P129",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_114",
+        "title": "I think that is right",
+        "description": "I think that is right",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "That is the usual dwarves\u2019 method \u2014 I think that is right, isn\u2019t it?\u201d",
+            "book": "01.txt",
+            "location": "Ch.1, P129",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_115",
+        "title": "That is why I settled on burglary ",
+        "description": "That is why I settled on burglary ",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "That is why I settled on burglary \u2014 especially when I remembered the existence of a Side- door.",
+            "book": "01.txt",
+            "location": "Ch.1, P135",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_116",
+        "title": "And here is our little Bilbo Baggins",
+        "description": "And here is our little Bilbo Baggins",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "And here is our little Bilbo Baggins, the burglar, the chosen and selected burglar.",
+            "book": "01.txt",
+            "location": "Ch.1, P135",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_117",
+        "title": "which we never bothered to grow or find for oursel...",
+        "description": "which we never bothered to grow or find for ourselves",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "Fathers would beg us to take their sons as apprentices, and pay us handsomely, especially in food-supplies, which we never bothered to grow or find for ourselves.",
+            "book": "01.txt",
+            "location": "Ch.1, P141",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_118",
+        "title": "Altogether those were good days for us",
+        "description": "Altogether those were good days for us",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "Altogether those were good days for us, and the poorest of us had money to spend and to lend, and leisure to make beautiful things just for the fun of it, not to speak of the most marvellous and magic",
+            "book": "01.txt",
+            "location": "Ch.1, P141",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_119",
+        "title": "and the toy market of Dale was the wonder of the N...",
+        "description": "and the toy market of Dale was the wonder of the North",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "So my grandfather\u2019s halls became full of armour and jewels and carvings and cups, and the toy market of Dale was the wonder of the North.",
+            "book": "01.txt",
+            "location": "Ch.1, P141",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_120",
+        "title": "wherever they can find them",
+        "description": "wherever they can find them",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "Dragons steal gold and jewels, you know, from men and elves and dwarves, wherever they can find them; and they guard their plunder as long as they live (which is practically for ever, unless they are ",
+            "book": "01.txt",
+            "location": "Ch.1, P142",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_121",
+        "title": "which is practically for ever",
+        "description": "which is practically for ever",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "Dragons steal gold and jewels, you know, from men and elves and dwarves, wherever they can find them; and they guard their plunder as long as they live (which is practically for ever, unless they are ",
+            "book": "01.txt",
+            "location": "Ch.1, P142",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_122",
+        "title": "unless they are killed",
+        "description": "unless they are killed",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "Dragons steal gold and jewels, you know, from men and elves and dwarves, wherever they can find them; and they guard their plunder as long as they live (which is practically for ever, unless they are ",
+            "book": "01.txt",
+            "location": "Ch.1, P142",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_123",
+        "title": "and never enjoy a brass ring of it",
+        "description": "and never enjoy a brass ring of it",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "Dragons steal gold and jewels, you know, from men and elves and dwarves, wherever they can find them; and they guard their plunder as long as they live (which is practically for ever, unless they are ",
+            "book": "01.txt",
+            "location": "Ch.1, P142",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_124",
+        "title": "I was one luckily ",
+        "description": "I was one luckily ",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "Some of the dwarves who happened to be outside (I was one luckily \u2014 a fine adventurous lad in those days, always wandering about, and it saved my life that day) \u2014 well, from a good way off we saw the ",
+            "book": "01.txt",
+            "location": "Ch.1, P142",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_125",
+        "title": "After that there were no dwarves left alive inside",
+        "description": "After that there were no dwarves left alive inside",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "After that there were no dwarves left alive inside, and he took all their wealth for himself.",
+            "book": "01.txt",
+            "location": "Ch.1, P142",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_126",
+        "title": "until Dale was ruined",
+        "description": "until Dale was ruined",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "Later he used to crawl out of the great gate and come by night to Dale, and carry away people, especially maidens, to eat, until Dale was ruined, and all the people dead or gone.",
+            "book": "01.txt",
+            "location": "Ch.1, P142",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_127",
+        "title": "But we have never forgotten our stolen treasure",
+        "description": "But we have never forgotten our stolen treasure",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "But we have never forgotten our stolen treasure.",
+            "book": "01.txt",
+            "location": "Ch.1, P144",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_128",
+        "title": "I see now they must have had a private Side",
+        "description": "I see now they must have had a private Side",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "I see now they must have had a private Side-door which only they knew about.",
+            "book": "01.txt",
+            "location": "Ch.1, P145",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_129",
+        "title": "Your father went away to try his luck with the map...",
+        "description": "Your father went away to try his luck with the map after your grandfather was killed",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "Your father went away to try his luck with the map after your grandfather was killed; and lots of adventures of a most unpleasant sort he had, but he never got near the Mountain.",
+            "book": "01.txt",
+            "location": "Ch.1, P152",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_130",
+        "title": "Whatever were you doing there",
+        "description": "Whatever were you doing there",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "\u201cWhatever were you doing there?\u201d asked Thorin with a shudder, and all the dwarves shivered.",
+            "book": "01.txt",
+            "location": "Ch.1, P153",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_131",
+        "title": "I was finding things out",
+        "description": "I was finding things out",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "I was finding things out, as usual; and a nasty dangerous business it was.",
+            "book": "01.txt",
+            "location": "Ch.1, P154",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_132",
+        "title": "but it was too late",
+        "description": "but it was too late",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "I tried to save your father, but it was too late.",
+            "book": "01.txt",
+            "location": "Ch.1, P154",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_133",
+        "title": "The one thing your father wished was for his son t...",
+        "description": "The one thing your father wished was for his son to read the map and use the key",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "The one thing your father wished was for his son to read the map and use the key.",
+            "book": "01.txt",
+            "location": "Ch.1, P156",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_134",
+        "title": "and he was so flustered that he answered ",
+        "description": "and he was so flustered that he answered ",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "\u201cHear what?\u201d they all said turning suddenly towards him, and he was so flustered that he answered \u201cHear what I have got to say!\u201d",
+            "book": "01.txt",
+            "location": "Ch.1, P158",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_135",
+        "title": "I daresay you will think of something",
+        "description": "I daresay you will think of something",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "If you sit on the door-step long enough, I daresay you will think of something.",
+            "book": "01.txt",
+            "location": "Ch.1, P160",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_136",
+        "title": "I will give you a good breakfast before you go",
+        "description": "I will give you a good breakfast before you go",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "I will give you a good breakfast before you go.\u201d",
+            "book": "01.txt",
+            "location": "Ch.1, P160",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_137",
+        "title": "The Tookishness was wearing off",
+        "description": "The Tookishness was wearing off",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "The Tookishness was wearing off, and he was not now quite so sure that he was going on any journey in the morning.",
+            "book": "01.txt",
+            "location": "Ch.1, P163",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_138",
+        "title": "and he was not now quite so sure that he was going...",
+        "description": "and he was not now quite so sure that he was going on any journey in the morning",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "The Tookishness was wearing off, and he was not now quite so sure that he was going on any journey in the morning.",
+            "book": "01.txt",
+            "location": "Ch.1, P163",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_pattern_139",
+        "title": "It was long after the break of day",
+        "description": "It was long after the break of day",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "It was long after the break of day, when he woke up.",
+            "book": "01.txt",
+            "location": "Ch.1, P167",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      }
+    ],
+    "geography": [
+      {
+        "id": "geography_pattern_0",
+        "title": "all were on the same floor",
+        "description": "all were on the same floor",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "No going upstairs for the hobbit: bedrooms, bathrooms, cellars, pantries (lots of these), wardrobes (he had whole rooms devoted to clothes), kitchens, dining-rooms, all were on the same floor, and ind",
+            "book": "01.txt",
+            "location": "Ch.1, P3",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "geography_pattern_1",
+        "title": "making a noise like elephants which they can hear ...",
+        "description": "making a noise like elephants which they can hear a mile off",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "There is little or no magic about them, except the ordinary everyday sort which helps them to disappear quietly and quickly when large stupid folk like you and me come blundering along, making a noise",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "geography_pattern_2",
+        "title": "Far over the misty mountains cold To dungeons deep...",
+        "description": "Far over the misty mountains cold To dungeons deep and caverns old We must away",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "Far over the misty mountains cold To dungeons deep and caverns old We must away, ere break of day, To claim our long-forgotten gold.",
+            "book": "01.txt",
+            "location": "Ch.1, P89",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "geography_pattern_3",
+        "title": "Far over the misty mountains grim To dungeons deep...",
+        "description": "Far over the misty mountains grim To dungeons deep and caverns dim We must away",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "Far over the misty mountains grim To dungeons deep and caverns dim We must away, ere break of day,",
+            "book": "01.txt",
+            "location": "Ch.1, P95",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "geography_pattern_4",
+        "title": "and I will try it",
+        "description": "and I will try it",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "Tell me what you want done, and I will try it, if I have to walk from here to the East of East and fight the wild Were-worms in the Last Desert.",
+            "book": "01.txt",
+            "location": "Ch.1, P114",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "geography_pattern_5",
+        "title": "It is a plan of the Mountain",
+        "description": "It is a plan of the Mountain",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "\u201cThis was made by Thror, your grandfather, Thorin,\u201d he said in answer to the dwarves\u2019 excited questions. \u201cIt is a plan of the Mountain.\u201d",
+            "book": "01.txt",
+            "location": "Ch.1, P119",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "geography_pattern_6",
+        "title": "There is a dragon marked in red on the Mountain",
+        "description": "There is a dragon marked in red on the Mountain",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "\u201cThere is a dragon marked in red on the Mountain,\u201d said Balin, \u201cbut it will be easy enough to find him without that, if ever we arrive there.\u201d",
+            "book": "01.txt",
+            "location": "Ch.1, P121",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "geography_pattern_7",
+        "title": "but it will be easy enough to find him without tha...",
+        "description": "but it will be easy enough to find him without that",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "\u201cThere is a dragon marked in red on the Mountain,\u201d said Balin, \u201cbut it will be easy enough to find him without that, if ever we arrive there.\u201d",
+            "book": "01.txt",
+            "location": "Ch.1, P121",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "geography_pattern_8",
+        "title": "From what it says on the map I should guess there ...",
+        "description": "From what it says on the map I should guess there is a closed door which has been made to look exactly like the side of the Mountain",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "From what it says on the map I should guess there is a closed door which has been made to look exactly like the side of the Mountain.",
+            "book": "01.txt",
+            "location": "Ch.1, P129",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "geography_pattern_9",
+        "title": "but warriors are busy fighting one another in dist...",
+        "description": "but warriors are busy fighting one another in distant lands",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "I tried to find one; but warriors are busy fighting one another in distant lands, and in this neighbourhood heroes are scarce, or simply not to be found.",
+            "book": "01.txt",
+            "location": "Ch.1, P135",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "geography_pattern_10",
+        "title": "and in this neighbourhood heroes are scarce",
+        "description": "and in this neighbourhood heroes are scarce",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "I tried to find one; but warriors are busy fighting one another in distant lands, and in this neighbourhood heroes are scarce, or simply not to be found.",
+            "book": "01.txt",
+            "location": "Ch.1, P135",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "geography_pattern_11",
+        "title": "and my grandfather was King under the Mountain aga...",
+        "description": "and my grandfather was King under the Mountain again",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "Anyway they grew immensely rich and famous, and my grandfather was King under the Mountain again, and treated with great reverence by the mortal men, who lived to the South, and were gradually spreadi",
+            "book": "01.txt",
+            "location": "Ch.1, P141",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "geography_pattern_12",
+        "title": "and were gradually spreading up the Running River ...",
+        "description": "and were gradually spreading up the Running River as far as the valley overshadowed by the Mountain",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "Anyway they grew immensely rich and famous, and my grandfather was King under the Mountain again, and treated with great reverence by the mortal men, who lived to the South, and were gradually spreadi",
+            "book": "01.txt",
+            "location": "Ch.1, P141",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "geography_pattern_13",
+        "title": "The first we heard of it was a noise like a hurric...",
+        "description": "The first we heard of it was a noise like a hurricane coming from the North",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "The first we heard of it was a noise like a hurricane coming from the North, and the pine-trees on the Mountain creaking and cracking in the wind.",
+            "book": "01.txt",
+            "location": "Ch.1, P142",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "geography_pattern_14",
+        "title": "but he never got near the Mountain",
+        "description": "but he never got near the Mountain",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "Your father went away to try his luck with the map after your grandfather was killed; and lots of adventures of a most unpleasant sort he had, but he never got near the Mountain.",
+            "book": "01.txt",
+            "location": "Ch.1, P152",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "geography_pattern_15",
+        "title": "The dragon and the Mountain are more than big enou...",
+        "description": "The dragon and the Mountain are more than big enough tasks for you",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "The dragon and the Mountain are more than big enough tasks for you!\u201d",
+            "book": "01.txt",
+            "location": "Ch.1, P156",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      }
+    ],
+    "language": [
+      {
+        "id": "language_pattern_0",
+        "title": "This hobbit was a very well",
+        "description": "This hobbit was a very well",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "This hobbit was a very well-to-do hobbit, and his name was Baggins.",
+            "book": "01.txt",
+            "location": "Ch.1, P4",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "language_pattern_1",
+        "title": "and his name was Baggins",
+        "description": "and his name was Baggins",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "This hobbit was a very well-to-do hobbit, and his name was Baggins.",
+            "book": "01.txt",
+            "location": "Ch.1, P4",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "language_pattern_2",
+        "title": "and Gloin were their names",
+        "description": "and Gloin were their names",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "Dori, Nori, Ori, Oin, and Gloin were their names; and very soon two purple hoods, a grey hood, a brown hood, and a white hood were hanging on the pegs, and off they marched with their broad hands stuc",
+            "book": "01.txt",
+            "location": "Ch.1, P50",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "language_pattern_3",
+        "title": "who was wagging his mouth in protest at being call...",
+        "description": "who was wagging his mouth in protest at being called audacious and worst of all fellow conspirator",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "We are met together in the house of our friend and fellow conspirator, this most excellent and audacious hobbit \u2014 may the hair on his toes never fall out! all praise to his wine and ale! \u2014 \u201d He paused",
+            "book": "01.txt",
+            "location": "Ch.1, P105",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "language_pattern_4",
+        "title": "if I have overheard words that you were saying",
+        "description": "if I have overheard words that you were saying",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "\u201cPardon me,\u201d he said, \u201cif I have overheard words that you were saying.",
+            "book": "01.txt",
+            "location": "Ch.1, P114",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "language_pattern_5",
+        "title": "this is what he called being on his dignity",
+        "description": "this is what he called being on his dignity",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "I don\u2019t pretend to understand what you are talking about, or your reference to burglars, but I think I am right in believing\u201d (this is what he called being on his dignity) \u201cthat you think I am no good",
+            "book": "01.txt",
+            "location": "Ch.1, P114",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "language_pattern_6",
+        "title": "Five feet high the door and three may walk abreast...",
+        "description": "Five feet high the door and three may walk abreast ",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "\u201cBecause it is too small. \u2018 Five feet high the door and three may walk abreast \u2019 say the runes, but Smaug could not creep into a hole that size, not even when he was a young dragon, certainly not afte",
+            "book": "01.txt",
+            "location": "Ch.1, P126",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "language_pattern_7",
+        "title": "There was a most specially greedy",
+        "description": "There was a most specially greedy",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "There was a most specially greedy, strong and wicked worm called Smaug.",
+            "book": "01.txt",
+            "location": "Ch.1, P142",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "language_pattern_8",
+        "title": "and he never told me yours",
+        "description": "and he never told me yours",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "Your father could not remember his own name when he gave me the paper, and he never told me yours; so on the whole I think I ought to be praised and thanked!",
+            "book": "01.txt",
+            "location": "Ch.1, P150",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      }
+    ],
+    "history": [
+      {
+        "id": "history_pattern_0",
+        "title": "which is curly",
+        "description": "which is curly",
+        "category": "history",
+        "source_passages": [
+          {
+            "text": "They are inclined to be fat in the stomach; they dress in bright colours (chiefly green and yellow); wear no shoes, because their feet grow natural leathery soles and thick warm brown hair like the st",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "history_pattern_1",
+        "title": "It was often said ",
+        "description": "It was often said ",
+        "category": "history",
+        "source_passages": [
+          {
+            "text": "It was often said (in other families) that long ago one of the Took ancestors must have taken a fairy wife.",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "history_pattern_2",
+        "title": "that long ago one of the Took ancestors must have ...",
+        "description": "that long ago one of the Took ancestors must have taken a fairy wife",
+        "category": "history",
+        "source_passages": [
+          {
+            "text": "It was often said (in other families) that long ago one of the Took ancestors must have taken a fairy wife.",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "history_pattern_3",
+        "title": "until Bilbo Baggins was grown up",
+        "description": "until Bilbo Baggins was grown up",
+        "category": "history",
+        "source_passages": [
+          {
+            "text": "The chance never arrived, until Bilbo Baggins was grown up, being about fifty years old or so, and living in the beautiful hobbit-hole built by his father, which I have just described for you, until h",
+            "book": "01.txt",
+            "location": "Ch.1, P7",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "history_pattern_4",
+        "title": "That was what he was going to say to Gandalf this ...",
+        "description": "That was what he was going to say to Gandalf this time",
+        "category": "history",
+        "source_passages": [
+          {
+            "text": "\u201cSo you have got here at last!\u201d That was what he was going to say to Gandalf this time.",
+            "book": "01.txt",
+            "location": "Ch.1, P35",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "history_pattern_5",
+        "title": "Baggins said he was sorry so many times",
+        "description": "Baggins said he was sorry so many times",
+        "category": "history",
+        "source_passages": [
+          {
+            "text": "Thorin indeed was very haughty, and said nothing about service; but poor Mr. Baggins said he was sorry so many times, that at last he grunted \u201cpray don\u2019t mention it,\u201d and stopped frowning.",
+            "book": "01.txt",
+            "location": "Ch.1, P54",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "history_pattern_6",
+        "title": "and this is like a fragment of their song",
+        "description": "and this is like a fragment of their song",
+        "category": "history",
+        "source_passages": [
+          {
+            "text": "And suddenly first one and then another began to sing as they played, deep-throated singing of the dwarves in the deep places of their ancient homes; and this is like a fragment of their song, if it c",
+            "book": "01.txt",
+            "location": "Ch.1, P81",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "history_pattern_7",
+        "title": "and in this way the battle was won and the game of...",
+        "description": "and in this way the battle was won and the game of Golf invented at the same moment",
+        "category": "history",
+        "source_passages": [
+          {
+            "text": "It sailed a hundred yards through the air and went down a rabbit-hole, and in this way the battle was won and the game of Golf invented at the same moment.",
+            "book": "01.txt",
+            "location": "Ch.1, P110",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "history_pattern_8",
+        "title": "but that was long ago",
+        "description": "but that was long ago",
+        "category": "history",
+        "source_passages": [
+          {
+            "text": "\u201cYes, yes, but that was long ago,\u201d said Gloin. \u201cI was talking about you.",
+            "book": "01.txt",
+            "location": "Ch.1, P115",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "history_pattern_9",
+        "title": "I was talking about you",
+        "description": "I was talking about you",
+        "category": "history",
+        "source_passages": [
+          {
+            "text": "\u201cYes, yes, but that was long ago,\u201d said Gloin. \u201cI was talking about you.",
+            "book": "01.txt",
+            "location": "Ch.1, P115",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "history_pattern_10",
+        "title": "If I say he is a Burglar",
+        "description": "If I say he is a Burglar",
+        "category": "history",
+        "source_passages": [
+          {
+            "text": "If I say he is a Burglar, a Burglar he is, or will be when the time comes.",
+            "book": "01.txt",
+            "location": "Ch.1, P117",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "history_pattern_11",
+        "title": "or will be when the time comes",
+        "description": "or will be when the time comes",
+        "category": "history",
+        "source_passages": [
+          {
+            "text": "If I say he is a Burglar, a Burglar he is, or will be when the time comes.",
+            "book": "01.txt",
+            "location": "Ch.1, P117",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "history_pattern_12",
+        "title": "s time our family was driven out of the far North",
+        "description": "s time our family was driven out of the far North",
+        "category": "history",
+        "source_passages": [
+          {
+            "text": "\u201cO very well,\u201d said Thorin. \u201cLong ago in my grandfather Thror\u2019s time our family was driven out of the far North, and came back with all their wealth and their tools to this Mountain on the map.",
+            "book": "01.txt",
+            "location": "Ch.1, P141",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "history_pattern_13",
+        "title": "By that time all the bells were ringing in Dale an...",
+        "description": "By that time all the bells were ringing in Dale and the warriors were arming",
+        "category": "history",
+        "source_passages": [
+          {
+            "text": "By that time all the bells were ringing in Dale and the warriors were arming.",
+            "book": "01.txt",
+            "location": "Ch.1, P142",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "history_pattern_14",
+        "title": "it was only too common in those days",
+        "description": "it was only too common in those days",
+        "category": "history",
+        "source_passages": [
+          {
+            "text": "The river rushed up in steam and a fog fell on Dale, and in the fog the dragon came on them and destroyed most of the warriors \u2014 the usual unhappy story, it was only too common in those days.",
+            "book": "01.txt",
+            "location": "Ch.1, P142",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "history_pattern_15",
+        "title": "and has never been seen by you since",
+        "description": "and has never been seen by you since",
+        "category": "history",
+        "source_passages": [
+          {
+            "text": "\u201cAnd Thrain your father went away on the twenty-first of April, a hundred years ago last Thursday, and has never been seen by you since-\u201d",
+            "book": "01.txt",
+            "location": "Ch.1, P148",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "history_pattern_16",
+        "title": "you can hardly blame me",
+        "description": "you can hardly blame me",
+        "category": "history",
+        "source_passages": [
+          {
+            "text": "\u201cWell, your father gave me this to give to you; and if I have chosen my own time and way for handing it over, you can hardly blame me, considering the trouble I had to find you.",
+            "book": "01.txt",
+            "location": "Ch.1, P150",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      }
+    ],
+    "creatures": [
+      {
+        "id": "creatures_pattern_0",
+        "title": "but certainly there was still something not entire...",
+        "description": "but certainly there was still something not entirely hobbitlike about them",
+        "category": "creatures",
+        "source_passages": [
+          {
+            "text": "That was, of course, absurd, but certainly there was still something not entirely hobbitlike about them, and once in a while members of the Took-clan would go and have adventures.",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "creatures_pattern_1",
+        "title": "Instead there was a very old",
+        "description": "Instead there was a very old",
+        "category": "creatures",
+        "source_passages": [
+          {
+            "text": "Instead there was a very old-looking dwarf on the step with a white beard and a scarlet hood; and he too hopped inside as soon as the door was open, just as if he had been invited.",
+            "book": "01.txt",
+            "location": "Ch.1, P35",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "creatures_pattern_2",
+        "title": "and he too hopped inside as soon as the door was o...",
+        "description": "and he too hopped inside as soon as the door was open",
+        "category": "creatures",
+        "source_passages": [
+          {
+            "text": "Instead there was a very old-looking dwarf on the step with a white beard and a scarlet hood; and he too hopped inside as soon as the door was open, just as if he had been invited.",
+            "book": "01.txt",
+            "location": "Ch.1, P35",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "creatures_pattern_3",
+        "title": "if it is all the same to you",
+        "description": "if it is all the same to you",
+        "category": "creatures",
+        "source_passages": [
+          {
+            "text": "\u201cA little beer would suit me better, if it is all the same to you, my good sir,\u201d said Balin with the white beard. \u201cBut I don\u2019t mind some cake \u2014 seed-cake, if you have any.\u201d",
+            "book": "01.txt",
+            "location": "Ch.1, P39",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "creatures_pattern_4",
+        "title": "The bells were ringing in the dale And men looked ...",
+        "description": "The bells were ringing in the dale And men looked up with faces pale",
+        "category": "creatures",
+        "source_passages": [
+          {
+            "text": "The bells were ringing in the dale And men looked up with faces pale; The dragon\u2019s ire more fierce than fire Laid low their towers and houses frail.",
+            "book": "01.txt",
+            "location": "Ch.1, P93",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "creatures_pattern_5",
+        "title": "but he is one of the best",
+        "description": "but he is one of the best",
+        "category": "creatures",
+        "source_passages": [
+          {
+            "text": "\u201cExcitable little fellow,\u201d said Gandalf, as they sat down again. \u201cGets funny queer fits, but he is one of the best, one of the best \u2014 as fierce as a dragon in a pinch.\u201d",
+            "book": "01.txt",
+            "location": "Ch.1, P109",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "creatures_pattern_6",
+        "title": "you will realize that this was only poetical exagg...",
+        "description": "you will realize that this was only poetical exaggeration applied to any hobbit",
+        "category": "creatures",
+        "source_passages": [
+          {
+            "text": "If you have ever seen a dragon in a pinch, you will realize that this was only poetical exaggeration applied to any hobbit, even to Old Took\u2019s great-grand-uncle Bullroarer, who was so huge (for a hobb",
+            "book": "01.txt",
+            "location": "Ch.1, P110",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "creatures_pattern_7",
+        "title": "not even when he was a young dragon",
+        "description": "not even when he was a young dragon",
+        "category": "creatures",
+        "source_passages": [
+          {
+            "text": "\u201cBecause it is too small. \u2018 Five feet high the door and three may walk abreast \u2019 say the runes, but Smaug could not creep into a hole that size, not even when he was a young dragon, certainly not afte",
+            "book": "01.txt",
+            "location": "Ch.1, P126",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "creatures_pattern_8",
+        "title": "Undoubtedly that was what brought the dragon",
+        "description": "Undoubtedly that was what brought the dragon",
+        "category": "creatures",
+        "source_passages": [
+          {
+            "text": "\u201cUndoubtedly that was what brought the dragon.",
+            "book": "01.txt",
+            "location": "Ch.1, P142",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "creatures_pattern_9",
+        "title": "but there was the dragon waiting for them",
+        "description": "but there was the dragon waiting for them",
+        "category": "creatures",
+        "source_passages": [
+          {
+            "text": "The dwarves rushed out of their great gate; but there was the dragon waiting for them.",
+            "book": "01.txt",
+            "location": "Ch.1, P142",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "creatures_pattern_10",
+        "title": "for that is the dragons",
+        "description": "for that is the dragons",
+        "category": "creatures",
+        "source_passages": [
+          {
+            "text": "Probably, for that is the dragons\u2019 way, he has piled it all up in a great heap far inside, and sleeps on it for a bed.",
+            "book": "01.txt",
+            "location": "Ch.1, P142",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "creatures_pattern_11",
+        "title": "we must give a thought to the Necromancer",
+        "description": "we must give a thought to the Necromancer",
+        "category": "creatures",
+        "source_passages": [
+          {
+            "text": "\u201cWe have long ago paid the goblins of Moria,\u201d said Thorin; \u201cwe must give a thought to the Necromancer.\u201d",
+            "book": "01.txt",
+            "location": "Ch.1, P155",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "creatures_pattern_12",
+        "title": "After all there is the Side",
+        "description": "After all there is the Side",
+        "category": "creatures",
+        "source_passages": [
+          {
+            "text": "After all there is the Side- door, and dragons must sleep sometimes, I suppose.",
+            "book": "01.txt",
+            "location": "Ch.1, P160",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "creatures_pattern_13",
+        "title": "and dragons must sleep sometimes",
+        "description": "and dragons must sleep sometimes",
+        "category": "creatures",
+        "source_passages": [
+          {
+            "text": "After all there is the Side- door, and dragons must sleep sometimes, I suppose.",
+            "book": "01.txt",
+            "location": "Ch.1, P160",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      }
+    ],
+    "magic": [
+      {
+        "id": "magic_pattern_0",
+        "title": "There is little or no magic about them",
+        "description": "There is little or no magic about them",
+        "category": "magic",
+        "source_passages": [
+          {
+            "text": "There is little or no magic about them, except the ordinary everyday sort which helps them to disappear quietly and quickly when large stupid folk like you and me come blundering along, making a noise",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "magic_pattern_1",
+        "title": "All that the unsuspecting Bilbo saw that morning w...",
+        "description": "All that the unsuspecting Bilbo saw that morning was an old man with a staff",
+        "category": "magic",
+        "source_passages": [
+          {
+            "text": "All that the unsuspecting Bilbo saw that morning was an old man with a staff.",
+            "book": "01.txt",
+            "location": "Ch.1, P9",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "magic_pattern_2",
+        "title": "Not the wandering wizard that gave Old Took a pair...",
+        "description": "Not the wandering wizard that gave Old Took a pair of magic diamond studs that fastened themselves and never came undone till ordered",
+        "category": "magic",
+        "source_passages": [
+          {
+            "text": "Not the wandering wizard that gave Old Took a pair of magic diamond studs that fastened themselves and never came undone till ordered?",
+            "book": "01.txt",
+            "location": "Ch.1, P20",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "magic_pattern_3",
+        "title": "Wizards after all are wizards",
+        "description": "Wizards after all are wizards",
+        "category": "magic",
+        "source_passages": [
+          {
+            "text": "Wizards after all are wizards.",
+            "book": "01.txt",
+            "location": "Ch.1, P24",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "magic_pattern_4",
+        "title": "And there was Gandalf behind",
+        "description": "And there was Gandalf behind",
+        "category": "magic",
+        "source_passages": [
+          {
+            "text": "And there was Gandalf behind, leaning on his staff and laughing.",
+            "book": "01.txt",
+            "location": "Ch.1, P52",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "magic_pattern_5",
+        "title": "Far over the misty mountains cold To dungeons deep...",
+        "description": "Far over the misty mountains cold To dungeons deep and caverns old We must away ere break of day To seek the pale enchanted gold",
+        "category": "magic",
+        "source_passages": [
+          {
+            "text": "Far over the misty mountains cold To dungeons deep and caverns old We must away ere break of day To seek the pale enchanted gold.",
+            "book": "01.txt",
+            "location": "Ch.1, P82",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "magic_pattern_6",
+        "title": "may never return",
+        "description": "may never return",
+        "category": "magic",
+        "source_passages": [
+          {
+            "text": "We shall soon before the break of day start on our long journey, a journey from which some of us, or perhaps all of us (except our friend and counsellor, the ingenious wizard Gandalf) may never return",
+            "book": "01.txt",
+            "location": "Ch.1, P106",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "magic_pattern_7",
+        "title": "There is one point that you haven",
+        "description": "There is one point that you haven",
+        "category": "magic",
+        "source_passages": [
+          {
+            "text": "\u201cThere is one point that you haven\u2019t noticed,\u201d said the wizard, \u201cand that is the secret entrance.",
+            "book": "01.txt",
+            "location": "Ch.1, P122",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "magic_pattern_8",
+        "title": "and that is the secret entrance",
+        "description": "and that is the secret entrance",
+        "category": "magic",
+        "source_passages": [
+          {
+            "text": "\u201cThere is one point that you haven\u2019t noticed,\u201d said the wizard, \u201cand that is the secret entrance.",
+            "book": "01.txt",
+            "location": "Ch.1, P122",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "magic_pattern_9",
+        "title": "the like of which is not to be found in the world ...",
+        "description": "the like of which is not to be found in the world now",
+        "category": "magic",
+        "source_passages": [
+          {
+            "text": "Altogether those were good days for us, and the poorest of us had money to spend and to lend, and leisure to make beautiful things just for the fun of it, not to speak of the most marvellous and magic",
+            "book": "01.txt",
+            "location": "Ch.1, P141",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "magic_pattern_10",
+        "title": "The few of us that were well outside sat and wept ...",
+        "description": "The few of us that were well outside sat and wept in hiding",
+        "category": "magic",
+        "source_passages": [
+          {
+            "text": "\u201cThe few of us that were well outside sat and wept in hiding, and cursed Smaug; and there we were unexpectedly joined by my father and my grandfather with singed beards.",
+            "book": "01.txt",
+            "location": "Ch.1, P143",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "magic_pattern_11",
+        "title": "and there we were unexpectedly joined by my father...",
+        "description": "and there we were unexpectedly joined by my father and my grandfather with singed beards",
+        "category": "magic",
+        "source_passages": [
+          {
+            "text": "\u201cThe few of us that were well outside sat and wept in hiding, and cursed Smaug; and there we were unexpectedly joined by my father and my grandfather with singed beards.",
+            "book": "01.txt",
+            "location": "Ch.1, P143",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "magic_pattern_12",
+        "title": "I was given it",
+        "description": "I was given it",
+        "category": "magic",
+        "source_passages": [
+          {
+            "text": "\u201cI did not \u2018get hold of it,\u2019 I was given it,\u201d said the wizard. \u201cYour grandfather Thror was killed, you remember, in the mines of Moria by Azog the Goblin .\u201d",
+            "book": "01.txt",
+            "location": "Ch.1, P146",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "magic_pattern_13",
+        "title": "Your grandfather Thror was killed",
+        "description": "Your grandfather Thror was killed",
+        "category": "magic",
+        "source_passages": [
+          {
+            "text": "\u201cI did not \u2018get hold of it,\u2019 I was given it,\u201d said the wizard. \u201cYour grandfather Thror was killed, you remember, in the mines of Moria by Azog the Goblin .\u201d",
+            "book": "01.txt",
+            "location": "Ch.1, P146",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "magic_pattern_14",
+        "title": "He was witless and wandering",
+        "description": "He was witless and wandering",
+        "category": "magic",
+        "source_passages": [
+          {
+            "text": "He was witless and wandering, and had forgotten almost everything except the map and the key.\u201d",
+            "book": "01.txt",
+            "location": "Ch.1, P154",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "magic_pattern_15",
+        "title": "He is an enemy far beyond the powers of all the dw...",
+        "description": "He is an enemy far beyond the powers of all the dwarves put together",
+        "category": "magic",
+        "source_passages": [
+          {
+            "text": "He is an enemy far beyond the powers of all the dwarves put together, if they could all be collected again from the four corners of the world.",
+            "book": "01.txt",
+            "location": "Ch.1, P156",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      }
+    ],
+    "technology": [
+      {
+        "id": "technology_pattern_0",
+        "title": "It was a dwarf with a blue beard tucked into a gol...",
+        "description": "It was a dwarf with a blue beard tucked into a golden belt",
+        "category": "technology",
+        "source_passages": [
+          {
+            "text": "It was a dwarf with a blue beard tucked into a golden belt, and very bright eyes under his dark-",
+            "book": "01.txt",
+            "location": "Ch.1, P29",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "technology_pattern_1",
+        "title": "It was two more dwarves",
+        "description": "It was two more dwarves",
+        "category": "technology",
+        "source_passages": [
+          {
+            "text": "It was two more dwarves, both with blue hoods, silver belts, and yellow beards; and each of them carried a bag of tools and a spade.",
+            "book": "01.txt",
+            "location": "Ch.1, P42",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "technology_pattern_2",
+        "title": "before they were all inside",
+        "description": "before they were all inside",
+        "category": "technology",
+        "source_passages": [
+          {
+            "text": "He had hardly turned the knob, before they were all inside, bowing and saying \u201cat your service\u201d one after another.",
+            "book": "01.txt",
+            "location": "Ch.1, P50",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "technology_pattern_3",
+        "title": "It was a beautiful golden harp",
+        "description": "It was a beautiful golden harp",
+        "category": "technology",
+        "source_passages": [
+          {
+            "text": "It was a beautiful golden harp, and when Thorin struck it the music began all at once, so sudden and sweet that Bilbo forgot everything else, and was swept away into dark lands under strange moons, fa",
+            "book": "01.txt",
+            "location": "Ch.1, P79",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "technology_pattern_4",
+        "title": "and many a song Was sung unheard by men or elves",
+        "description": "and many a song Was sung unheard by men or elves",
+        "category": "technology",
+        "source_passages": [
+          {
+            "text": "Goblets they carved there for themselves And harps of gold; where no man delves There lay they long, and many a song Was sung unheard by men or elves.",
+            "book": "01.txt",
+            "location": "Ch.1, P90",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "technology_pattern_5",
+        "title": "Swords in these parts are mostly blunt",
+        "description": "Swords in these parts are mostly blunt",
+        "category": "technology",
+        "source_passages": [
+          {
+            "text": "Swords in these parts are mostly blunt, and axes are used for trees, and shields as cradles or dish-covers; and dragons are comfortably far-off (and therefore legendary).",
+            "book": "01.txt",
+            "location": "Ch.1, P135",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "technology_pattern_6",
+        "title": "and axes are used for trees",
+        "description": "and axes are used for trees",
+        "category": "technology",
+        "source_passages": [
+          {
+            "text": "Swords in these parts are mostly blunt, and axes are used for trees, and shields as cradles or dish-covers; and dragons are comfortably far-off (and therefore legendary).",
+            "book": "01.txt",
+            "location": "Ch.1, P135",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "technology_pattern_7",
+        "title": "and dragons are comfortably far",
+        "description": "and dragons are comfortably far",
+        "category": "technology",
+        "source_passages": [
+          {
+            "text": "Swords in these parts are mostly blunt, and axes are used for trees, and shields as cradles or dish-covers; and dragons are comfortably far-off (and therefore legendary).",
+            "book": "01.txt",
+            "location": "Ch.1, P135",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "technology_pattern_8",
+        "title": "There were lots of dragons in the North in those d...",
+        "description": "There were lots of dragons in the North in those days",
+        "category": "technology",
+        "source_passages": [
+          {
+            "text": "There were lots of dragons in the North in those days, and gold was probably getting scarce up there, with the dwarves flying south or getting killed, and all the general waste and destruction that dr",
+            "book": "01.txt",
+            "location": "Ch.1, P142",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "technology_pattern_9",
+        "title": "and gold was probably getting scarce up there",
+        "description": "and gold was probably getting scarce up there",
+        "category": "technology",
+        "source_passages": [
+          {
+            "text": "There were lots of dragons in the North in those days, and gold was probably getting scarce up there, with the dwarves flying south or getting killed, and all the general waste and destruction that dr",
+            "book": "01.txt",
+            "location": "Ch.1, P142",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "technology_pattern_10",
+        "title": "when I will allow we have a good bit laid by and a...",
+        "description": "when I will allow we have a good bit laid by and are not so badly off",
+        "category": "technology",
+        "source_passages": [
+          {
+            "text": "And even now, when I will allow we have a good bit laid by and are not so badly off\u201d \u2014 here Thorin stroked the gold chain round his neck \u2014 \u201cwe still mean to get it back, and to bring our curses home t",
+            "book": "01.txt",
+            "location": "Ch.1, P144",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "technology_pattern_11",
+        "title": "One thing he did make his mind up about was not to...",
+        "description": "One thing he did make his mind up about was not to bother to get up very early and cook everybody else",
+        "category": "technology",
+        "source_passages": [
+          {
+            "text": "One thing he did make his mind up about was not to bother to get up very early and cook everybody else\u2019s wretched breakfast.",
+            "book": "01.txt",
+            "location": "Ch.1, P163",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      }
+    ]
+  },
+  "cultures": {},
+  "magic_systems": {
+    "general_magic": {
+      "id": "general_magic",
+      "name": "Magic",
+      "source": null,
+      "practitioners": [],
+      "abilities": [
+        "There is little or no magic about them, except the ordinary everyday sort which helps them to disapp",
+        "And even now, when I will allow we have a good bit laid by and are not so badly off\u201d \u2014 here Thorin s",
+        "He is an enemy far beyond the powers of all the dwarves put together, if they could all be collected",
+        "Bilbo went to sleep with that in his ears, and it gave him very uncomfortable dreams."
+      ],
+      "costs": [],
+      "limitations": [],
+      "dangers": [],
+      "source_passages": [
+        {
+          "text": "There is little or no magic about them, except the ordinary everyday sort which helps them to disappear quietly and quickly when large stupid folk like you and me come blundering along, making a noise",
+          "book": "01.txt",
+          "location": "Ch.1, P5"
+        },
+        {
+          "text": "All that the unsuspecting Bilbo saw that morning was an old man with a staff.",
+          "book": "01.txt",
+          "location": "Ch.1, P9"
+        },
+        {
+          "text": "Not the wandering wizard that gave Old Took a pair of magic diamond studs that fastened themselves and never came undone till ordered?",
+          "book": "01.txt",
+          "location": "Ch.1, P20"
+        },
+        {
+          "text": "\u201cWhere else should I be?\u201d said the wizard. \u201cAll the same I am pleased to find you remember something about me.",
+          "book": "01.txt",
+          "location": "Ch.1, P21"
+        },
+        {
+          "text": "Wizards after all are wizards.",
+          "book": "01.txt",
+          "location": "Ch.1, P24"
+        },
+        {
+          "text": "After a while he stepped up, and with the spike on his staff scratched a queer sign on the hobbit\u2019s beautiful green front-door.",
+          "book": "01.txt",
+          "location": "Ch.1, P26"
+        },
+        {
+          "text": "And there was Gandalf behind, leaning on his staff and laughing.",
+          "book": "01.txt",
+          "location": "Ch.1, P52"
+        },
+        {
+          "text": "Then Gandalf\u2019s smoke-ring would go green and come back to hover over the wizard\u2019s head.",
+          "book": "01.txt",
+          "location": "Ch.1, P77"
+        },
+        {
+          "text": "Far over the misty mountains cold To dungeons deep and caverns old We must away ere break of day To seek the pale enchanted gold.",
+          "book": "01.txt",
+          "location": "Ch.1, P82"
+        },
+        {
+          "text": "The dwarves of yore made mighty spells, While hammers fell like ringing bells In places deep, where dark things sleep, In hollow halls beneath the fells.",
+          "book": "01.txt",
+          "location": "Ch.1, P83"
+        }
+      ]
+    }
+  },
+  "geography": {},
+  "sources": [
+    "01.txt"
+  ],
+  "last_updated": "2026-02-02T12:33:33.666642"
+}

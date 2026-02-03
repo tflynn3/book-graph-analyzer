@@ -1456,7 +1456,8 @@ def corpus_list(corpus_name: str) -> None:
 @click.argument("corpus_name")
 @click.option("--book", "-b", help="Process specific book ID only")
 @click.option("--skip-processed", is_flag=True, help="Skip already processed books")
-def corpus_process(corpus_name: str, book: str | None, skip_processed: bool) -> None:
+@click.option("--no-llm", is_flag=True, help="Disable LLM-based extraction")
+def corpus_process(corpus_name: str, book: str | None, skip_processed: bool, no_llm: bool) -> None:
     """Process all books in a corpus with cross-book entity resolution.
     
     Example:
@@ -1464,16 +1465,17 @@ def corpus_process(corpus_name: str, book: str | None, skip_processed: bool) -> 
         bga corpus process tolkien_works -b the_hobbit
     """
     from book_graph_analyzer.corpus import CorpusManager, CrossBookResolver
+    from book_graph_analyzer.extract.dynamic_resolver import DynamicEntityResolver
+    from book_graph_analyzer.extract.ner import NERPipeline
     from book_graph_analyzer.ingest.loader import load_book
     from book_graph_analyzer.ingest.splitter import split_into_passages
-    from book_graph_analyzer.extract import EntityExtractor, RelationshipExtractor
     from book_graph_analyzer.style import StyleAnalyzer
     from book_graph_analyzer.voice import VoiceAnalyzer
     from book_graph_analyzer.graph.writer import GraphWriter
     from book_graph_analyzer.graph.connection import check_neo4j_connection
     
     manager = CorpusManager(corpus_name)
-    resolver = CrossBookResolver(corpus_name)
+    cross_resolver = CrossBookResolver(corpus_name, use_llm=not no_llm)
     
     # Determine which books to process
     if book:
@@ -1496,6 +1498,9 @@ def corpus_process(corpus_name: str, book: str | None, skip_processed: bool) -> 
     if neo4j_ok:
         writer = GraphWriter()
     
+    # Initialize NER pipeline once
+    ner_pipeline = NERPipeline(use_llm=not no_llm)
+    
     for book_info in books_to_process:
         console.print(f"\n[bold cyan]>>> {book_info.title}[/bold cyan]")
         
@@ -1504,41 +1509,28 @@ def corpus_process(corpus_name: str, book: str | None, skip_processed: bool) -> 
         passages = split_into_passages(text, book_info.title)
         console.print(f"  Loaded {len(text):,} chars, {len(passages):,} passages")
         
-        # Entity extraction with cross-book resolution
-        extractor = EntityExtractor(use_llm=False)
-        rel_extractor = RelationshipExtractor(resolver=extractor.resolver, use_llm=False)
+        # Entity extraction using DynamicEntityResolver (per-book)
+        dynamic_resolver = DynamicEntityResolver(use_llm=not no_llm)
         
-        entity_results = []
-        relationship_results = []
         entity_ids = set()
         
         with console.status("Extracting entities..."):
             for passage in passages:
-                results = extractor.extract_from_passage(passage)
-                if results:
-                    entity_results.append(results)
-                    
-                    # Resolve to corpus-wide canonical IDs
-                    for entity in results.entities:
-                        if entity.canonical_name:
-                            canonical_id = resolver.resolve(
-                                entity.canonical_name,
-                                entity.entity_type,
-                                book_info.id,
-                            )
-                            entity.canonical_id = canonical_id
-                            entity_ids.add(canonical_id)
-                    
-                    rel_result = rel_extractor.extract_relationships(
-                        text=passage.text,
+                ner_entities = ner_pipeline.extract_entities(passage.text)
+                for entity in ner_entities:
+                    cluster = dynamic_resolver.process_mention(
+                        entity=entity,
                         passage_id=passage.id,
-                        entities=results.entities,
+                        passage_text=passage.text,
                     )
-                    if rel_result.relationships:
-                        relationship_results.append(rel_result)
+                    entity_ids.add(cluster.id)
         
-        total_rels = sum(len(r.relationships) for r in relationship_results)
-        console.print(f"  Entities: {len(entity_ids)}, Relationships: {total_rels}")
+        # Consolidate within-book aliases
+        merge_count = dynamic_resolver.consolidate_clusters()
+        console.print(f"  Extracted {len(dynamic_resolver.clusters)} unique entities ({merge_count} alias merges)")
+        
+        # Register book's entities with cross-book resolver
+        cross_resolver.register_book_entities(book_info.id, dynamic_resolver.clusters)
         
         # Style analysis
         style_analyzer = StyleAnalyzer()
@@ -1555,8 +1547,8 @@ def corpus_process(corpus_name: str, book: str | None, skip_processed: bool) -> 
             book_id=book_info.id,
             total_words=fingerprint.total_word_count,
             total_passages=len(passages),
-            entity_count=len(entity_ids),
-            relationship_count=total_rels,
+            entity_count=len(dynamic_resolver.clusters),
+            relationship_count=0,  # TODO: Add relationship extraction
             dialogue_lines=voice_result.total_dialogue_lines,
             character_profiles=voice_result.total_characters,
             avg_sentence_length=fingerprint.sentence_length_dist.mean if fingerprint.sentence_length_dist else 0,
@@ -1566,18 +1558,20 @@ def corpus_process(corpus_name: str, book: str | None, skip_processed: bool) -> 
         # Write to Neo4j
         if neo4j_ok:
             writer.write_book_style(book_info.id, book_info.title, manager.corpus.author, fingerprint)
-            writer.write_extraction_results(entity_results, relationship_results, book_info.title)
         
         console.print(f"  [green]OK[/green] Processed")
     
-    # Save cross-book resolver state
-    resolver.save()
+    # Resolve cross-book entities
+    console.print("\n[bold]Resolving cross-book entities...[/bold]")
+    resolution_stats = cross_resolver.resolve_all()
+    console.print(f"  New entities: {resolution_stats['new_entities']}")
+    console.print(f"  Merged across books: {resolution_stats['merged_entities']}")
     
     if neo4j_ok:
         writer.close()
     
     console.print(f"\n[bold green]Corpus processing complete![/bold green]")
-    console.print(resolver.summary())
+    console.print(cross_resolver.summary())
 
 
 @corpus.command(name="entities")
@@ -1596,7 +1590,7 @@ def corpus_entities(corpus_name: str, cross_book: bool, entity_type: str | None)
     resolver = CrossBookResolver(corpus_name)
     
     if cross_book:
-        entities = resolver.get_cross_book_entities()
+        entities = resolver.get_multi_book_entities()
         console.print(f"[bold]Cross-Book Entities ({len(entities)})[/bold]\n")
     elif entity_type:
         entities = resolver.get_entities_by_type(entity_type)
@@ -1605,8 +1599,8 @@ def corpus_entities(corpus_name: str, cross_book: bool, entity_type: str | None)
         entities = list(resolver.entities.values())
         console.print(f"[bold]All Entities ({len(entities)})[/bold]\n")
     
-    # Sort by total appearances
-    entities.sort(key=lambda e: -sum(e.appearances.values()))
+    # Sort by total mentions
+    entities.sort(key=lambda e: -e.total_mentions)
     
     table = Table()
     table.add_column("Name", style="cyan")
@@ -1615,9 +1609,8 @@ def corpus_entities(corpus_name: str, cross_book: bool, entity_type: str | None)
     table.add_column("Mentions", justify="right")
     
     for entity in entities[:30]:
-        books = ", ".join(entity.appearances.keys())
-        mentions = sum(entity.appearances.values())
-        table.add_row(entity.canonical_name, entity.entity_type, books, str(mentions))
+        books = ", ".join(entity.book_clusters.keys())
+        table.add_row(entity.canonical_name, entity.entity_type, books, str(entity.total_mentions))
     
     console.print(table)
     
@@ -1849,6 +1842,400 @@ def worldbible_query(bible_path: str, query: str) -> None:
         else:
             console.print(f"[cyan][Culture][/cyan] {item.name}")
         console.print()
+
+
+# ============================================================================
+# Lore Checking Commands
+# ============================================================================
+
+@main.group()
+def lore() -> None:
+    """Lore consistency checking - validate facts against extracted knowledge."""
+    pass
+
+
+@lore.command(name="check")
+@click.argument("claim")
+@click.option("--bible", "-b", type=click.Path(exists=True), help="World bible file")
+@click.option("--corpus", "-c", help="Corpus name for entity lookup")
+@click.option("--timeline", "-t", type=click.Path(exists=True), help="Timeline file")
+@click.option("--events", "-e", type=click.Path(exists=True), help="Events file for temporal ordering")
+@click.option("--neo4j", is_flag=True, help="Query Neo4j for relationships")
+def lore_check(claim: str, bible: str | None, corpus: str | None, timeline: str | None, events: str | None, neo4j: bool) -> None:
+    """Check a single claim against world knowledge.
+    
+    Examples:
+        bga lore check "Gandalf is a wizard" -b hobbit_bible.json
+        bga lore check "Hobbits have beards" -b hobbit_bible.json
+        bga lore check "Turin lived in the Second Age" -t timeline.json
+        bga lore check "Bilbo found the ring before Gollum" -e events.json
+        bga lore check "Bilbo met Gandalf" --neo4j
+    """
+    from book_graph_analyzer.lore import LoreChecker
+    
+    checker = LoreChecker()
+    
+    if bible:
+        checker.load_world_bible(bible)
+        console.print(f"[dim]Loaded world bible: {bible}[/dim]")
+    
+    if corpus:
+        checker.load_corpus_entities(corpus)
+        console.print(f"[dim]Loaded corpus entities: {corpus}[/dim]")
+    
+    if timeline:
+        checker.load_timeline(timeline)
+        console.print(f"[dim]Loaded timeline: {timeline}[/dim]")
+    
+    if events:
+        checker.load_events(events)
+        console.print(f"[dim]Loaded events: {events}[/dim]")
+    
+    if neo4j:
+        if checker.connect_neo4j():
+            console.print(f"[dim]Connected to Neo4j[/dim]")
+        else:
+            console.print(f"[yellow]Could not connect to Neo4j[/yellow]")
+    
+    if not bible and not corpus and not timeline and not events and not neo4j:
+        console.print("[yellow]Warning: No knowledge base loaded. Results will be limited.[/yellow]")
+    
+    console.print()
+    
+    result = checker.check(claim)
+    console.print(result.summary())
+
+
+@lore.command(name="events")
+@click.argument("path", type=click.Path(exists=True))
+@click.option("--output", "-o", type=click.Path(), required=True, help="Output file (JSON)")
+@click.option("--neo4j", is_flag=True, help="Also write events to Neo4j")
+@click.option("--chunk-size", default=3000, help="Characters per chunk (default: 3000)")
+@click.option("--no-llm", is_flag=True, help="Use pattern matching instead of LLM")
+def lore_events(path: str, output: str, neo4j: bool, chunk_size: int, no_llm: bool) -> None:
+    """Extract events from a text file.
+    
+    Identifies key events with participants and temporal ordering.
+    Uses chunked processing for full books.
+    
+    Examples:
+        bga lore events hobbit.txt -o hobbit_events.json
+        bga lore events hobbit.txt -o events.json --neo4j
+        bga lore events silmarillion.txt -o events.json --chunk-size 4000
+    """
+    from book_graph_analyzer.lore import EventExtractor
+    from book_graph_analyzer.ingest.loader import load_book
+    
+    file_path = Path(path)
+    book_name = file_path.stem.replace("_", " ").replace("-", " ").title()
+    
+    console.print(f"[bold]Extracting events from:[/bold] {file_path.name}")
+    
+    with console.status("Loading text..."):
+        text = load_book(file_path)
+    
+    console.print(f"[dim]Loaded {len(text):,} characters[/dim]")
+    
+    # Progress tracking
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        BarColumn(),
+        TaskProgressColumn(),
+        console=console,
+    ) as progress:
+        task = progress.add_task("Extracting events...", total=100)
+        
+        def update_progress(current, total, message):
+            progress.update(task, completed=int(current / total * 100), description=message)
+        
+        extractor = EventExtractor(use_llm=not no_llm, progress_callback=update_progress)
+        
+        # Use chunked extraction for full books
+        if len(text) > chunk_size * 2:
+            graph = extractor.extract_from_book(text, source_book=book_name, chunk_size=chunk_size)
+        else:
+            graph = extractor.extract_from_text(text, source_book=book_name)
+    
+    # Summary
+    console.print(f"\n[bold]Events extracted:[/bold]")
+    console.print(f"  Events: {len(graph.events)}")
+    console.print(f"  Temporal relations: {len(graph.relations)}")
+    
+    if graph.events:
+        console.print(f"\n[bold]Sample events:[/bold]")
+        for event in list(graph.events.values())[:10]:
+            time_info = ""
+            if event.year:
+                time_info = f" (Year {event.year})"
+            elif event.era:
+                time_info = f" ({event.era.value.replace('_', ' ').title()})"
+            console.print(f"  - {event.description}{time_info}")
+    
+    if graph.relations:
+        console.print(f"\n[bold]Sample temporal relations:[/bold]")
+        for rel in graph.relations[:5]:
+            e1 = graph.events.get(rel.event1_id, None)
+            e2 = graph.events.get(rel.event2_id, None)
+            e1_name = e1.description if e1 else rel.event1_id
+            e2_name = e2.description if e2 else rel.event2_id
+            console.print(f"  - {e1_name} --{rel.relation}--> {e2_name}")
+    
+    # Save to JSON
+    output_path = Path(output)
+    with open(output_path, 'w', encoding='utf-8') as f:
+        json.dump(graph.to_dict(), f, indent=2)
+    
+    console.print(f"\n[green]OK[/green] Events saved to {output_path}")
+    
+    # Write to Neo4j if requested
+    if neo4j:
+        from book_graph_analyzer.graph.writer import GraphWriter
+        from book_graph_analyzer.graph.connection import check_neo4j_connection
+        
+        if not check_neo4j_connection():
+            console.print("[red]Error:[/red] Cannot connect to Neo4j")
+            return
+        
+        console.print("\n[bold]Writing to Neo4j...[/bold]")
+        
+        writer = GraphWriter()
+        stats = writer.write_event_graph(
+            graph,
+            book=book_name,
+            link_entities=True,
+        )
+        writer.close()
+        
+        console.print(f"  Events written: {stats['events_written']}")
+        console.print(f"  Relations written: {stats['relations_written']}")
+        console.print(f"  Entity links created: {stats['entity_links']}")
+        console.print(f"[green]OK[/green] Events written to Neo4j")
+
+
+@lore.command(name="query-events")
+@click.option("--agent", "-a", help="Filter by agent (who did it)")
+@click.option("--action", help="Filter by action verb")
+@click.option("--patient", "-p", help="Filter by patient (what was acted upon)")
+@click.option("--era", "-e", help="Filter by era (first_age, second_age, etc.)")
+@click.option("--limit", "-n", default=20, help="Maximum results (default: 20)")
+def lore_query_events(agent: str | None, action: str | None, patient: str | None, era: str | None, limit: int) -> None:
+    """Query events from Neo4j.
+    
+    Examples:
+        bga lore query-events --agent Bilbo
+        bga lore query-events --action found --patient Ring
+        bga lore query-events --era third_age --limit 50
+    """
+    from book_graph_analyzer.graph.writer import GraphWriter
+    from book_graph_analyzer.graph.connection import check_neo4j_connection
+    
+    if not check_neo4j_connection():
+        console.print("[red]Error:[/red] Cannot connect to Neo4j")
+        return
+    
+    writer = GraphWriter()
+    events = writer.query_events(
+        agent=agent,
+        action=action,
+        patient=patient,
+        era=era,
+        limit=limit,
+    )
+    writer.close()
+    
+    if not events:
+        console.print("[yellow]No events found matching criteria[/yellow]")
+        return
+    
+    console.print(f"[bold]Found {len(events)} events:[/bold]\n")
+    
+    table = Table(show_header=True)
+    table.add_column("Description", style="cyan")
+    table.add_column("Agent")
+    table.add_column("Action")
+    table.add_column("Patient")
+    table.add_column("Era")
+    table.add_column("Year")
+    
+    for e in events:
+        era_str = (e.get("era") or "").replace("_", " ").title() if e.get("era") else "-"
+        year_str = str(e.get("year")) if e.get("year") else "-"
+        table.add_row(
+            e.get("description", "-")[:50],
+            e.get("agent") or "-",
+            e.get("action") or "-",
+            e.get("patient") or "-",
+            era_str,
+            year_str,
+        )
+    
+    console.print(table)
+
+
+@lore.command(name="timeline")
+@click.argument("path", type=click.Path(exists=True))
+@click.option("--output", "-o", type=click.Path(), required=True, help="Output file (JSON)")
+def lore_timeline(path: str, output: str) -> None:
+    """Extract timeline from a text file.
+    
+    Identifies characters, events, and their temporal relationships.
+    
+    Example:
+        bga lore timeline silmarillion.txt -o silmarillion_timeline.json
+    """
+    from book_graph_analyzer.lore import TemporalExtractor
+    from book_graph_analyzer.ingest.loader import load_book
+    
+    file_path = Path(path)
+    
+    console.print(f"[bold]Extracting timeline from:[/bold] {file_path.name}")
+    
+    with console.status("Loading text..."):
+        text = load_book(file_path)
+    
+    extractor = TemporalExtractor(use_llm=True)
+    
+    with console.status("Extracting temporal information..."):
+        timeline = extractor.extract_from_text(text)
+    
+    # Summary
+    console.print(f"\n[bold]Timeline extracted:[/bold]")
+    console.print(f"  Entities: {len(timeline.entities)}")
+    console.print(f"  Relations: {len(timeline.relations)}")
+    
+    if timeline.entities:
+        console.print(f"\n[bold]Sample entities:[/bold]")
+        for name, entity in list(timeline.entities.items())[:10]:
+            era_info = ""
+            if entity.birth_era:
+                era_info = f" (born: {entity.birth_era.value})"
+            if entity.death_era:
+                era_info += f" (died: {entity.death_era.value})"
+            console.print(f"  - {name}{era_info}")
+    
+    # Save
+    output_path = Path(output)
+    with open(output_path, 'w', encoding='utf-8') as f:
+        json.dump(timeline.to_dict(), f, indent=2)
+    
+    console.print(f"\n[green]OK[/green] Timeline saved to {output_path}")
+
+
+@lore.command(name="validate")
+@click.argument("text_file", type=click.Path(exists=True))
+@click.option("--bible", "-b", type=click.Path(exists=True), required=True, help="World bible file")
+@click.option("--corpus", "-c", help="Corpus name for entity lookup")
+@click.option("--output", "-o", type=click.Path(), help="Output file for results (JSON)")
+def lore_validate(text_file: str, bible: str, corpus: str | None, output: str | None) -> None:
+    """Validate all claims in a text file.
+    
+    Useful for checking draft chapters or generated content.
+    
+    Example:
+        bga lore validate my_chapter.txt -b hobbit_bible.json -o validation_results.json
+    """
+    from book_graph_analyzer.lore import LoreChecker
+    
+    checker = LoreChecker()
+    checker.load_world_bible(bible)
+    
+    if corpus:
+        checker.load_corpus_entities(corpus)
+    
+    # Load text
+    with open(text_file, 'r', encoding='utf-8') as f:
+        text = f.read()
+    
+    console.print(f"[bold]Validating: {text_file}[/bold]")
+    console.print(f"[dim]Using: {bible}[/dim]\n")
+    
+    with console.status("Checking claims..."):
+        results = checker.check_text(text)
+    
+    # Summary
+    valid = sum(1 for r in results if r.status.value == "valid")
+    invalid = sum(1 for r in results if r.status.value == "invalid")
+    unknown = sum(1 for r in results if r.status.value == "unknown")
+    plausible = sum(1 for r in results if r.status.value == "plausible")
+    
+    console.print(f"[bold]Results: {len(results)} claims checked[/bold]")
+    console.print(f"  [green]Valid:[/green] {valid}")
+    console.print(f"  [red]Invalid:[/red] {invalid}")
+    console.print(f"  [yellow]Unknown:[/yellow] {unknown}")
+    console.print(f"  [cyan]Plausible:[/cyan] {plausible}")
+    
+    # Show issues
+    if invalid > 0:
+        console.print(f"\n[bold red]Issues Found:[/bold red]")
+        for r in results:
+            if r.status.value == "invalid":
+                console.print(r.summary())
+                console.print()
+    
+    # Save output
+    if output:
+        output_data = {
+            "file": text_file,
+            "bible": bible,
+            "summary": {
+                "total": len(results),
+                "valid": valid,
+                "invalid": invalid,
+                "unknown": unknown,
+                "plausible": plausible,
+            },
+            "results": [r.to_dict() for r in results],
+        }
+        
+        with open(output, 'w', encoding='utf-8') as f:
+            json.dump(output_data, f, indent=2)
+        
+        console.print(f"\n[green]OK[/green] Results saved to {output}")
+
+
+@lore.command(name="interactive")
+@click.option("--bible", "-b", type=click.Path(exists=True), help="World bible file")
+@click.option("--corpus", "-c", help="Corpus name for entity lookup")
+def lore_interactive(bible: str | None, corpus: str | None) -> None:
+    """Interactive lore checking session.
+    
+    Enter claims one at a time and get immediate feedback.
+    
+    Example:
+        bga lore interactive -b hobbit_bible.json
+    """
+    from book_graph_analyzer.lore import LoreChecker
+    
+    checker = LoreChecker()
+    
+    if bible:
+        checker.load_world_bible(bible)
+        console.print(f"[green]OK[/green] Loaded world bible: {bible}")
+    
+    if corpus:
+        checker.load_corpus_entities(corpus)
+        console.print(f"[green]OK[/green] Loaded corpus: {corpus}")
+    
+    console.print("\n[bold]Lore Checker Interactive Mode[/bold]")
+    console.print("Enter claims to check. Type 'quit' to exit.\n")
+    
+    while True:
+        try:
+            claim = console.input("[cyan]Claim>[/cyan] ")
+            if claim.lower() in ('quit', 'exit', 'q'):
+                break
+            if not claim.strip():
+                continue
+            
+            result = checker.check(claim)
+            console.print(result.summary())
+            console.print()
+            
+        except (KeyboardInterrupt, EOFError):
+            break
+    
+    console.print("\n[dim]Goodbye![/dim]")
 
 
 if __name__ == "__main__":

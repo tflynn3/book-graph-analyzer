@@ -161,11 +161,36 @@ A phased approach to building the Book Graph Analyzer. Each phase delivers usabl
 
 **Goal**: Process LOTR, Silmarillion, Unfinished Tales.
 
+**Status**: ✅ Core implementation complete
+
 ### Deliverables
 - Complete knowledge graph spanning all processed texts
 - Entity resolution across books (characters who appear in multiple works)
 - Timeline spanning Ages (First Age through Fourth Age)
 - Cross-reference capabilities ("Show me everything about Galadriel across all texts")
+
+### Implementation (Completed)
+
+#### Corpus Management (`src/book_graph_analyzer/corpus/`)
+- `manager.py`: `CorpusManager` class for managing multiple books
+  - `BookInfo` dataclass: tracks book metadata, processing status, stats
+  - `CorpusInfo` dataclass: corpus-level aggregates
+  - JSON persistence in `data/corpus/{corpus_name}.json`
+  
+- `resolver.py`: `CrossBookResolver` for cross-book entity resolution
+  - `CrossBookEntity` dataclass: tracks entities across books
+  - Fuzzy name matching (85% threshold with rapidfuzz)
+  - Optional LLM verification for ambiguous matches
+  - Per-book cluster tracking (`book_clusters` dict)
+  - Automatic alias merging
+
+#### CLI Commands (`bga corpus ...`)
+- `bga corpus create <name> -a <author>` - Create new corpus
+- `bga corpus add <corpus> <title> <file>` - Add book to corpus
+- `bga corpus list <corpus>` - List books and stats
+- `bga corpus process <corpus>` - Process all books with cross-book resolution
+- `bga corpus entities <corpus> [-x]` - Show entities (--cross-book for multi-book only)
+- `bga corpus compare <corpus>` - Compare style metrics across books
 
 ### Challenges to Solve
 - Scale: Silmarillion has hundreds of characters in dense prose
@@ -181,6 +206,71 @@ A phased approach to building the Book Graph Analyzer. Each phase delivers usabl
 - Major characters fully connected across appearances
 - Timeline is navigable by Age
 - No duplicate entities (same character as two nodes)
+
+### Future Enhancements
+- [ ] Merge "Bilbo" and "Bilbo Baggins" as same entity
+- [x] Event extraction and temporal ordering (implemented in lore/events.py)
+- [ ] Genealogy relationship types
+- [ ] Conflict tracking for contradictory information
+
+---
+
+## Event Extraction Enhancement (Phase 6+)
+
+**Goal**: Extract structured events with temporal ordering for queries like "Did X happen before Y?"
+
+### Deliverables (Completed)
+- Event dataclass with agent/action/patient/era/year fields
+- EventGraph for storing events and temporal relations
+- EventExtractor with chunked processing for full books
+- Neo4j integration for event storage and queries
+- Lore checker integration for event ordering validation
+
+### Key Components
+
+#### lore/events.py
+- `Event`: Structured event (who did what to whom, when)
+- `EventRelation`: Temporal relationship between events
+- `EventGraph`: Graph of events with ordering queries
+- `EventExtractor`: LLM-based extraction with chunked processing
+
+#### graph/writer.py (Event Methods)
+- `write_event()`: Write single event to Neo4j
+- `write_events_batch()`: Batch write events
+- `write_event_relations_batch()`: Write temporal relations
+- `link_event_to_entities()`: Link events to Character/Place/Object nodes
+- `write_event_graph()`: Full event graph write with entity linking
+- `query_events()`: Query events with filters
+- `query_event_ordering()`: Query temporal ordering between events
+
+#### CLI Commands
+- `bga lore events <file> -o <output>`: Extract events from text
+  - `--neo4j`: Also write to Neo4j
+  - `--chunk-size`: Characters per chunk (default 3000)
+  - `--no-llm`: Pattern-based extraction fallback
+- `bga lore query-events`: Query events from Neo4j
+  - `--agent`, `--action`, `--patient`, `--era` filters
+- `bga lore check "X before Y" -e events.json`: Validate event ordering
+
+### Validation Examples
+```bash
+# Extract events
+bga lore events hobbit.txt -o hobbit_events.json --neo4j
+
+# Check event ordering
+bga lore check "Gollum lost the ring before Bilbo found it" -e hobbit_events.json
+# -> VALID
+
+bga lore check "Bilbo found the ring before Gollum lost it" -e hobbit_events.json
+# -> INVALID (actually happened after)
+```
+
+### Technical Notes
+- Chunked extraction: 3000 chars/chunk with 200 char overlap
+- Deduplication via normalized event keys
+- Pronoun handling ("it", "them") in patient matching
+- Temporal ordering inferred from era/year when available
+- LLM-based parsing for complex event claims
 
 ---
 

@@ -1,0 +1,2205 @@
+{
+  "name": "Middle-earth",
+  "rules": {
+    "cosmology": [
+      {
+        "id": "cosmology_0",
+        "title": "Hobbit-hole Comfort",
+        "description": "A hobbit-hole is a comfortable dwelling designed for hobbits.",
+        "category": "cosmology",
+        "source_passages": [
+          {
+            "text": "Not a nasty, dirty, wet hole, filled with the ends of worms and an oozy smell, nor yet a dry, bare, sandy hole with nothing in it to sit down on or to eat: it was a hobbit-hole, and that means comfort",
+            "book": "01.txt",
+            "location": "Ch.1, P2",
+            "relevance": 1.0
+          },
+          {
+            "text": "He may have lost the neighbours\u2019 respect, but he gained \u2014 well, you will see whether he gained anything in the end.",
+            "book": "01.txt",
+            "location": "Ch.1, P4",
+            "relevance": 1.0
+          },
+          {
+            "text": "Bungo, that was Bilbo\u2019s father, built the most luxurious hobbit-hole for her (and partly with her money) that was to be found either under The Hill or over The Hill or across The Water, and there they",
+            "book": "01.txt",
+            "location": "Ch.1, P7",
+            "relevance": 1.0
+          },
+          {
+            "text": "By some curious chance one morning long ago in the quiet of the world, when there was less noise and more green, and the hobbits were still numerous and prosperous, and Bilbo Baggins was standing at h",
+            "book": "01.txt",
+            "location": "Ch.1, P8",
+            "relevance": 1.0
+          },
+          {
+            "text": "The sun was shining, and the grass was very green.",
+            "book": "01.txt",
+            "location": "Ch.1, P10",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "cosmology_1",
+        "title": "Hobbit Wealth and Prosperity",
+        "description": "At one point in history, hobbits were numerous and prosperous.",
+        "category": "cosmology",
+        "source_passages": [
+          {
+            "text": "Not a nasty, dirty, wet hole, filled with the ends of worms and an oozy smell, nor yet a dry, bare, sandy hole with nothing in it to sit down on or to eat: it was a hobbit-hole, and that means comfort",
+            "book": "01.txt",
+            "location": "Ch.1, P2",
+            "relevance": 1.0
+          },
+          {
+            "text": "He may have lost the neighbours\u2019 respect, but he gained \u2014 well, you will see whether he gained anything in the end.",
+            "book": "01.txt",
+            "location": "Ch.1, P4",
+            "relevance": 1.0
+          },
+          {
+            "text": "Bungo, that was Bilbo\u2019s father, built the most luxurious hobbit-hole for her (and partly with her money) that was to be found either under The Hill or over The Hill or across The Water, and there they",
+            "book": "01.txt",
+            "location": "Ch.1, P7",
+            "relevance": 1.0
+          },
+          {
+            "text": "By some curious chance one morning long ago in the quiet of the world, when there was less noise and more green, and the hobbits were still numerous and prosperous, and Bilbo Baggins was standing at h",
+            "book": "01.txt",
+            "location": "Ch.1, P8",
+            "relevance": 1.0
+          },
+          {
+            "text": "The sun was shining, and the grass was very green.",
+            "book": "01.txt",
+            "location": "Ch.1, P10",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "cosmology_2",
+        "title": "Location of Hobbit-holes",
+        "description": "Hobbit-holes can be found under hills, over hills, or across water.",
+        "category": "cosmology",
+        "source_passages": [
+          {
+            "text": "Not a nasty, dirty, wet hole, filled with the ends of worms and an oozy smell, nor yet a dry, bare, sandy hole with nothing in it to sit down on or to eat: it was a hobbit-hole, and that means comfort",
+            "book": "01.txt",
+            "location": "Ch.1, P2",
+            "relevance": 1.0
+          },
+          {
+            "text": "He may have lost the neighbours\u2019 respect, but he gained \u2014 well, you will see whether he gained anything in the end.",
+            "book": "01.txt",
+            "location": "Ch.1, P4",
+            "relevance": 1.0
+          },
+          {
+            "text": "Bungo, that was Bilbo\u2019s father, built the most luxurious hobbit-hole for her (and partly with her money) that was to be found either under The Hill or over The Hill or across The Water, and there they",
+            "book": "01.txt",
+            "location": "Ch.1, P7",
+            "relevance": 1.0
+          },
+          {
+            "text": "By some curious chance one morning long ago in the quiet of the world, when there was less noise and more green, and the hobbits were still numerous and prosperous, and Bilbo Baggins was standing at h",
+            "book": "01.txt",
+            "location": "Ch.1, P8",
+            "relevance": 1.0
+          },
+          {
+            "text": "The sun was shining, and the grass was very green.",
+            "book": "01.txt",
+            "location": "Ch.1, P10",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "cosmology_3",
+        "title": "Dwarven Music and Magic",
+        "description": "The music played by dwarves has the power to transport listeners to distant lands.",
+        "category": "cosmology",
+        "source_passages": [
+          {
+            "text": "Not a nasty, dirty, wet hole, filled with the ends of worms and an oozy smell, nor yet a dry, bare, sandy hole with nothing in it to sit down on or to eat: it was a hobbit-hole, and that means comfort",
+            "book": "01.txt",
+            "location": "Ch.1, P2",
+            "relevance": 1.0
+          },
+          {
+            "text": "He may have lost the neighbours\u2019 respect, but he gained \u2014 well, you will see whether he gained anything in the end.",
+            "book": "01.txt",
+            "location": "Ch.1, P4",
+            "relevance": 1.0
+          },
+          {
+            "text": "Bungo, that was Bilbo\u2019s father, built the most luxurious hobbit-hole for her (and partly with her money) that was to be found either under The Hill or over The Hill or across The Water, and there they",
+            "book": "01.txt",
+            "location": "Ch.1, P7",
+            "relevance": 1.0
+          },
+          {
+            "text": "By some curious chance one morning long ago in the quiet of the world, when there was less noise and more green, and the hobbits were still numerous and prosperous, and Bilbo Baggins was standing at h",
+            "book": "01.txt",
+            "location": "Ch.1, P8",
+            "relevance": 1.0
+          },
+          {
+            "text": "The sun was shining, and the grass was very green.",
+            "book": "01.txt",
+            "location": "Ch.1, P10",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [
+          "The music must be played by a dwarf."
+        ],
+        "exceptions": []
+      },
+      {
+        "id": "cosmology_4",
+        "title": "Dwarven Craftsmanship",
+        "description": "Dwarves are skilled in creating spells, hammers, swords, and golden hoards.",
+        "category": "cosmology",
+        "source_passages": [
+          {
+            "text": "Not a nasty, dirty, wet hole, filled with the ends of worms and an oozy smell, nor yet a dry, bare, sandy hole with nothing in it to sit down on or to eat: it was a hobbit-hole, and that means comfort",
+            "book": "01.txt",
+            "location": "Ch.1, P2",
+            "relevance": 1.0
+          },
+          {
+            "text": "He may have lost the neighbours\u2019 respect, but he gained \u2014 well, you will see whether he gained anything in the end.",
+            "book": "01.txt",
+            "location": "Ch.1, P4",
+            "relevance": 1.0
+          },
+          {
+            "text": "Bungo, that was Bilbo\u2019s father, built the most luxurious hobbit-hole for her (and partly with her money) that was to be found either under The Hill or over The Hill or across The Water, and there they",
+            "book": "01.txt",
+            "location": "Ch.1, P7",
+            "relevance": 1.0
+          },
+          {
+            "text": "By some curious chance one morning long ago in the quiet of the world, when there was less noise and more green, and the hobbits were still numerous and prosperous, and Bilbo Baggins was standing at h",
+            "book": "01.txt",
+            "location": "Ch.1, P8",
+            "relevance": 1.0
+          },
+          {
+            "text": "The sun was shining, and the grass was very green.",
+            "book": "01.txt",
+            "location": "Ch.1, P10",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      }
+    ],
+    "themes": [
+      {
+        "id": "themes_0",
+        "title": "Hobbit-holes as Comfortable Spaces",
+        "description": "Hobbit-holes are designed for comfort and are equipped with amenities such as comfortable seating, storage for hats and coats, and windows overlooking gardens or meadows.",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "Not a nasty, dirty, wet hole, filled with the ends of worms and an oozy smell, nor yet a dry, bare, sandy hole with nothing in it to sit down on or to eat: it was a hobbit-hole, and that means comfort",
+            "book": "01.txt",
+            "location": "Ch.1, P2",
+            "relevance": 1.0
+          },
+          {
+            "text": "The door opened on to a tube-shaped hall like a tunnel: a very comfortable tunnel without smoke, with panelled walls, and floors tiled and carpeted, provided with polished chairs, and lots and lots of",
+            "book": "01.txt",
+            "location": "Ch.1, P3",
+            "relevance": 1.0
+          },
+          {
+            "text": "The best rooms were all on the left-hand side (going in), for these were the only ones to have windows, deep-set round windows looking over his garden, and meadows beyond, sloping down to the river.",
+            "book": "01.txt",
+            "location": "Ch.1, P3",
+            "relevance": 1.0
+          },
+          {
+            "text": "The Bagginses had lived in the neighbourhood of The Hill for time out of mind, and people considered them very respectable, not only because most of them were rich, but also because they never had any",
+            "book": "01.txt",
+            "location": "Ch.1, P4",
+            "relevance": 1.0
+          },
+          {
+            "text": "This is a story of how a Baggins had an adventure, and found himself doing and saying things altogether unexpected.",
+            "book": "01.txt",
+            "location": "Ch.1, P4",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_1",
+        "title": "Left-Hand Side Rooms Have Windows",
+        "description": "In a hobbit-hole, the rooms on the left-hand side (going in) are the only ones to have windows.",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "Not a nasty, dirty, wet hole, filled with the ends of worms and an oozy smell, nor yet a dry, bare, sandy hole with nothing in it to sit down on or to eat: it was a hobbit-hole, and that means comfort",
+            "book": "01.txt",
+            "location": "Ch.1, P2",
+            "relevance": 1.0
+          },
+          {
+            "text": "The door opened on to a tube-shaped hall like a tunnel: a very comfortable tunnel without smoke, with panelled walls, and floors tiled and carpeted, provided with polished chairs, and lots and lots of",
+            "book": "01.txt",
+            "location": "Ch.1, P3",
+            "relevance": 1.0
+          },
+          {
+            "text": "The best rooms were all on the left-hand side (going in), for these were the only ones to have windows, deep-set round windows looking over his garden, and meadows beyond, sloping down to the river.",
+            "book": "01.txt",
+            "location": "Ch.1, P3",
+            "relevance": 1.0
+          },
+          {
+            "text": "The Bagginses had lived in the neighbourhood of The Hill for time out of mind, and people considered them very respectable, not only because most of them were rich, but also because they never had any",
+            "book": "01.txt",
+            "location": "Ch.1, P4",
+            "relevance": 1.0
+          },
+          {
+            "text": "This is a story of how a Baggins had an adventure, and found himself doing and saying things altogether unexpected.",
+            "book": "01.txt",
+            "location": "Ch.1, P4",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_2",
+        "title": "Respectability of Bagginses and Tooks",
+        "description": "The Bagginses are considered very respectable due to their wealth and lack of adventures, while the Tooks are considered less respectable but richer.",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "Not a nasty, dirty, wet hole, filled with the ends of worms and an oozy smell, nor yet a dry, bare, sandy hole with nothing in it to sit down on or to eat: it was a hobbit-hole, and that means comfort",
+            "book": "01.txt",
+            "location": "Ch.1, P2",
+            "relevance": 1.0
+          },
+          {
+            "text": "The door opened on to a tube-shaped hall like a tunnel: a very comfortable tunnel without smoke, with panelled walls, and floors tiled and carpeted, provided with polished chairs, and lots and lots of",
+            "book": "01.txt",
+            "location": "Ch.1, P3",
+            "relevance": 1.0
+          },
+          {
+            "text": "The best rooms were all on the left-hand side (going in), for these were the only ones to have windows, deep-set round windows looking over his garden, and meadows beyond, sloping down to the river.",
+            "book": "01.txt",
+            "location": "Ch.1, P3",
+            "relevance": 1.0
+          },
+          {
+            "text": "The Bagginses had lived in the neighbourhood of The Hill for time out of mind, and people considered them very respectable, not only because most of them were rich, but also because they never had any",
+            "book": "01.txt",
+            "location": "Ch.1, P4",
+            "relevance": 1.0
+          },
+          {
+            "text": "This is a story of how a Baggins had an adventure, and found himself doing and saying things altogether unexpected.",
+            "book": "01.txt",
+            "location": "Ch.1, P4",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_3",
+        "title": "Hobbits' Physical Characteristics",
+        "description": "Hobbits have curly hair on their heads and feet, long clever brown fingers, good-natured faces, and laugh deeply.",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "Not a nasty, dirty, wet hole, filled with the ends of worms and an oozy smell, nor yet a dry, bare, sandy hole with nothing in it to sit down on or to eat: it was a hobbit-hole, and that means comfort",
+            "book": "01.txt",
+            "location": "Ch.1, P2",
+            "relevance": 1.0
+          },
+          {
+            "text": "The door opened on to a tube-shaped hall like a tunnel: a very comfortable tunnel without smoke, with panelled walls, and floors tiled and carpeted, provided with polished chairs, and lots and lots of",
+            "book": "01.txt",
+            "location": "Ch.1, P3",
+            "relevance": 1.0
+          },
+          {
+            "text": "The best rooms were all on the left-hand side (going in), for these were the only ones to have windows, deep-set round windows looking over his garden, and meadows beyond, sloping down to the river.",
+            "book": "01.txt",
+            "location": "Ch.1, P3",
+            "relevance": 1.0
+          },
+          {
+            "text": "The Bagginses had lived in the neighbourhood of The Hill for time out of mind, and people considered them very respectable, not only because most of them were rich, but also because they never had any",
+            "book": "01.txt",
+            "location": "Ch.1, P4",
+            "relevance": 1.0
+          },
+          {
+            "text": "This is a story of how a Baggins had an adventure, and found himself doing and saying things altogether unexpected.",
+            "book": "01.txt",
+            "location": "Ch.1, P4",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_4",
+        "title": "Bilbo Baggins' Unusual Nature",
+        "description": "Bilbo Baggins, despite his outward appearance, has a 'queer' quality in his make-up that came from the Took side.",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "Not a nasty, dirty, wet hole, filled with the ends of worms and an oozy smell, nor yet a dry, bare, sandy hole with nothing in it to sit down on or to eat: it was a hobbit-hole, and that means comfort",
+            "book": "01.txt",
+            "location": "Ch.1, P2",
+            "relevance": 1.0
+          },
+          {
+            "text": "The door opened on to a tube-shaped hall like a tunnel: a very comfortable tunnel without smoke, with panelled walls, and floors tiled and carpeted, provided with polished chairs, and lots and lots of",
+            "book": "01.txt",
+            "location": "Ch.1, P3",
+            "relevance": 1.0
+          },
+          {
+            "text": "The best rooms were all on the left-hand side (going in), for these were the only ones to have windows, deep-set round windows looking over his garden, and meadows beyond, sloping down to the river.",
+            "book": "01.txt",
+            "location": "Ch.1, P3",
+            "relevance": 1.0
+          },
+          {
+            "text": "The Bagginses had lived in the neighbourhood of The Hill for time out of mind, and people considered them very respectable, not only because most of them were rich, but also because they never had any",
+            "book": "01.txt",
+            "location": "Ch.1, P4",
+            "relevance": 1.0
+          },
+          {
+            "text": "This is a story of how a Baggins had an adventure, and found himself doing and saying things altogether unexpected.",
+            "book": "01.txt",
+            "location": "Ch.1, P4",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_5",
+        "title": "Hobbits' Aversion to Adventures",
+        "description": "Hobbits are plain quiet folk who have no use for adventures.",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "Not a nasty, dirty, wet hole, filled with the ends of worms and an oozy smell, nor yet a dry, bare, sandy hole with nothing in it to sit down on or to eat: it was a hobbit-hole, and that means comfort",
+            "book": "01.txt",
+            "location": "Ch.1, P2",
+            "relevance": 1.0
+          },
+          {
+            "text": "The door opened on to a tube-shaped hall like a tunnel: a very comfortable tunnel without smoke, with panelled walls, and floors tiled and carpeted, provided with polished chairs, and lots and lots of",
+            "book": "01.txt",
+            "location": "Ch.1, P3",
+            "relevance": 1.0
+          },
+          {
+            "text": "The best rooms were all on the left-hand side (going in), for these were the only ones to have windows, deep-set round windows looking over his garden, and meadows beyond, sloping down to the river.",
+            "book": "01.txt",
+            "location": "Ch.1, P3",
+            "relevance": 1.0
+          },
+          {
+            "text": "The Bagginses had lived in the neighbourhood of The Hill for time out of mind, and people considered them very respectable, not only because most of them were rich, but also because they never had any",
+            "book": "01.txt",
+            "location": "Ch.1, P4",
+            "relevance": 1.0
+          },
+          {
+            "text": "This is a story of how a Baggins had an adventure, and found himself doing and saying things altogether unexpected.",
+            "book": "01.txt",
+            "location": "Ch.1, P4",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": [
+          "Bilbo Baggins"
+        ]
+      }
+    ],
+    "geography": [
+      {
+        "id": "geography_0",
+        "title": "Hill Geography",
+        "description": "The Hill is a geographical feature with tunnels and rooms built into its side, accessible through multiple doors.",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "The tunnel wound on and on, going fairly but not quite straight into the side of the hill \u2014 The Hill, as all the people for many miles round called it \u2014 and many little round doors opened out of it, f",
+            "book": "01.txt",
+            "location": "Ch.1, P3",
+            "relevance": 1.0
+          },
+          {
+            "text": "No going upstairs for the hobbit: bedrooms, bathrooms, cellars, pantries (lots of these), wardrobes (he had whole rooms devoted to clothes), kitchens, dining-rooms, all were on the same floor, and ind",
+            "book": "01.txt",
+            "location": "Ch.1, P3",
+            "relevance": 1.0
+          },
+          {
+            "text": "The best rooms were all on the left-hand side (going in), for these were the only ones to have windows, deep-set round windows looking over his garden, and meadows beyond, sloping down to the river.",
+            "book": "01.txt",
+            "location": "Ch.1, P3",
+            "relevance": 1.0
+          },
+          {
+            "text": "There is little or no magic about them, except the ordinary everyday sort which helps them to disappear quietly and quickly when large stupid folk like you and me come blundering along, making a noise",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          },
+          {
+            "text": "As I was saying, the mother of this hobbit \u2014 of Bilbo Baggins, that is \u2014 was the famous Belladonna Took, one of the three remarkable daughters of the Old Took, head of the hobbits who lived across The",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "geography_1",
+        "title": "Hobbit Home Layout",
+        "description": "In hobbit homes, all rooms are on the same floor, with the best rooms having windows overlooking gardens and meadows.",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "The tunnel wound on and on, going fairly but not quite straight into the side of the hill \u2014 The Hill, as all the people for many miles round called it \u2014 and many little round doors opened out of it, f",
+            "book": "01.txt",
+            "location": "Ch.1, P3",
+            "relevance": 1.0
+          },
+          {
+            "text": "No going upstairs for the hobbit: bedrooms, bathrooms, cellars, pantries (lots of these), wardrobes (he had whole rooms devoted to clothes), kitchens, dining-rooms, all were on the same floor, and ind",
+            "book": "01.txt",
+            "location": "Ch.1, P3",
+            "relevance": 1.0
+          },
+          {
+            "text": "The best rooms were all on the left-hand side (going in), for these were the only ones to have windows, deep-set round windows looking over his garden, and meadows beyond, sloping down to the river.",
+            "book": "01.txt",
+            "location": "Ch.1, P3",
+            "relevance": 1.0
+          },
+          {
+            "text": "There is little or no magic about them, except the ordinary everyday sort which helps them to disappear quietly and quickly when large stupid folk like you and me come blundering along, making a noise",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          },
+          {
+            "text": "As I was saying, the mother of this hobbit \u2014 of Bilbo Baggins, that is \u2014 was the famous Belladonna Took, one of the three remarkable daughters of the Old Took, head of the hobbits who lived across The",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "geography_2",
+        "title": "Hobbit Homes Disappearance",
+        "description": "Hobbit homes have a magical property that allows them to disappear when large, noisy people approach.",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "The tunnel wound on and on, going fairly but not quite straight into the side of the hill \u2014 The Hill, as all the people for many miles round called it \u2014 and many little round doors opened out of it, f",
+            "book": "01.txt",
+            "location": "Ch.1, P3",
+            "relevance": 1.0
+          },
+          {
+            "text": "No going upstairs for the hobbit: bedrooms, bathrooms, cellars, pantries (lots of these), wardrobes (he had whole rooms devoted to clothes), kitchens, dining-rooms, all were on the same floor, and ind",
+            "book": "01.txt",
+            "location": "Ch.1, P3",
+            "relevance": 1.0
+          },
+          {
+            "text": "The best rooms were all on the left-hand side (going in), for these were the only ones to have windows, deep-set round windows looking over his garden, and meadows beyond, sloping down to the river.",
+            "book": "01.txt",
+            "location": "Ch.1, P3",
+            "relevance": 1.0
+          },
+          {
+            "text": "There is little or no magic about them, except the ordinary everyday sort which helps them to disappear quietly and quickly when large stupid folk like you and me come blundering along, making a noise",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          },
+          {
+            "text": "As I was saying, the mother of this hobbit \u2014 of Bilbo Baggins, that is \u2014 was the famous Belladonna Took, one of the three remarkable daughters of the Old Took, head of the hobbits who lived across The",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [
+          "Large, noisy people"
+        ],
+        "exceptions": []
+      },
+      {
+        "id": "geography_3",
+        "title": "Took Family Lineage",
+        "description": "The Took family is a notable hobbit family, with Belladonna Took being the mother of Bilbo Baggins.",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "The tunnel wound on and on, going fairly but not quite straight into the side of the hill \u2014 The Hill, as all the people for many miles round called it \u2014 and many little round doors opened out of it, f",
+            "book": "01.txt",
+            "location": "Ch.1, P3",
+            "relevance": 1.0
+          },
+          {
+            "text": "No going upstairs for the hobbit: bedrooms, bathrooms, cellars, pantries (lots of these), wardrobes (he had whole rooms devoted to clothes), kitchens, dining-rooms, all were on the same floor, and ind",
+            "book": "01.txt",
+            "location": "Ch.1, P3",
+            "relevance": 1.0
+          },
+          {
+            "text": "The best rooms were all on the left-hand side (going in), for these were the only ones to have windows, deep-set round windows looking over his garden, and meadows beyond, sloping down to the river.",
+            "book": "01.txt",
+            "location": "Ch.1, P3",
+            "relevance": 1.0
+          },
+          {
+            "text": "There is little or no magic about them, except the ordinary everyday sort which helps them to disappear quietly and quickly when large stupid folk like you and me come blundering along, making a noise",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          },
+          {
+            "text": "As I was saying, the mother of this hobbit \u2014 of Bilbo Baggins, that is \u2014 was the famous Belladonna Took, one of the three remarkable daughters of the Old Took, head of the hobbits who lived across The",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "geography_4",
+        "title": "Hill and Water Geography",
+        "description": "The Hill is located near a small river called The Water, which separates it from the hobbits who live on the other side.",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "The tunnel wound on and on, going fairly but not quite straight into the side of the hill \u2014 The Hill, as all the people for many miles round called it \u2014 and many little round doors opened out of it, f",
+            "book": "01.txt",
+            "location": "Ch.1, P3",
+            "relevance": 1.0
+          },
+          {
+            "text": "No going upstairs for the hobbit: bedrooms, bathrooms, cellars, pantries (lots of these), wardrobes (he had whole rooms devoted to clothes), kitchens, dining-rooms, all were on the same floor, and ind",
+            "book": "01.txt",
+            "location": "Ch.1, P3",
+            "relevance": 1.0
+          },
+          {
+            "text": "The best rooms were all on the left-hand side (going in), for these were the only ones to have windows, deep-set round windows looking over his garden, and meadows beyond, sloping down to the river.",
+            "book": "01.txt",
+            "location": "Ch.1, P3",
+            "relevance": 1.0
+          },
+          {
+            "text": "There is little or no magic about them, except the ordinary everyday sort which helps them to disappear quietly and quickly when large stupid folk like you and me come blundering along, making a noise",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          },
+          {
+            "text": "As I was saying, the mother of this hobbit \u2014 of Bilbo Baggins, that is \u2014 was the famous Belladonna Took, one of the three remarkable daughters of the Old Took, head of the hobbits who lived across The",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "geography_5",
+        "title": "Mountain Geography",
+        "description": "The Mountain is a geographical feature with hidden passages, a dragon marked in red, and a closed door that looks like the side of the mountain.",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "The tunnel wound on and on, going fairly but not quite straight into the side of the hill \u2014 The Hill, as all the people for many miles round called it \u2014 and many little round doors opened out of it, f",
+            "book": "01.txt",
+            "location": "Ch.1, P3",
+            "relevance": 1.0
+          },
+          {
+            "text": "No going upstairs for the hobbit: bedrooms, bathrooms, cellars, pantries (lots of these), wardrobes (he had whole rooms devoted to clothes), kitchens, dining-rooms, all were on the same floor, and ind",
+            "book": "01.txt",
+            "location": "Ch.1, P3",
+            "relevance": 1.0
+          },
+          {
+            "text": "The best rooms were all on the left-hand side (going in), for these were the only ones to have windows, deep-set round windows looking over his garden, and meadows beyond, sloping down to the river.",
+            "book": "01.txt",
+            "location": "Ch.1, P3",
+            "relevance": 1.0
+          },
+          {
+            "text": "There is little or no magic about them, except the ordinary everyday sort which helps them to disappear quietly and quickly when large stupid folk like you and me come blundering along, making a noise",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          },
+          {
+            "text": "As I was saying, the mother of this hobbit \u2014 of Bilbo Baggins, that is \u2014 was the famous Belladonna Took, one of the three remarkable daughters of the Old Took, head of the hobbits who lived across The",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      }
+    ],
+    "language": [
+      {
+        "id": "language_0",
+        "title": "Hobbit Names",
+        "description": "Names of hobbits consist of a single word and end with 's', such as Baggins.",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "The tunnel wound on and on, going fairly but not quite straight into the side of the hill \u2014 The Hill, as all the people for many miles round called it \u2014 and many little round doors opened out of it, f",
+            "book": "01.txt",
+            "location": "Ch.1, P3",
+            "relevance": 1.0
+          },
+          {
+            "text": "This hobbit was a very well-to-do hobbit, and his name was Baggins.",
+            "book": "01.txt",
+            "location": "Ch.1, P4",
+            "relevance": 1.0
+          },
+          {
+            "text": "I suppose hobbits need some description nowadays, since they have become rare and shy of the Big People, as they call us.",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          },
+          {
+            "text": "Let me see, I don\u2019t think I know your name?\u201d",
+            "book": "01.txt",
+            "location": "Ch.1, P18",
+            "relevance": 1.0
+          },
+          {
+            "text": "\u201cYes, yes, my dear sir \u2014 and I do know your name, Mr. Bilbo Baggins.",
+            "book": "01.txt",
+            "location": "Ch.1, P19",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "language_1",
+        "title": "Dwarf Names",
+        "description": "Dwarf names are composed of multiple words, ending with 'n' (e.g., Dori, Nori, Ori, Oin, and Gloin).",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "The tunnel wound on and on, going fairly but not quite straight into the side of the hill \u2014 The Hill, as all the people for many miles round called it \u2014 and many little round doors opened out of it, f",
+            "book": "01.txt",
+            "location": "Ch.1, P3",
+            "relevance": 1.0
+          },
+          {
+            "text": "This hobbit was a very well-to-do hobbit, and his name was Baggins.",
+            "book": "01.txt",
+            "location": "Ch.1, P4",
+            "relevance": 1.0
+          },
+          {
+            "text": "I suppose hobbits need some description nowadays, since they have become rare and shy of the Big People, as they call us.",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          },
+          {
+            "text": "Let me see, I don\u2019t think I know your name?\u201d",
+            "book": "01.txt",
+            "location": "Ch.1, P18",
+            "relevance": 1.0
+          },
+          {
+            "text": "\u201cYes, yes, my dear sir \u2014 and I do know your name, Mr. Bilbo Baggins.",
+            "book": "01.txt",
+            "location": "Ch.1, P19",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "language_2",
+        "title": "Runic Language",
+        "description": "Runes are used for inscriptions on doors and walls to indicate hidden passages or size restrictions.",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "The tunnel wound on and on, going fairly but not quite straight into the side of the hill \u2014 The Hill, as all the people for many miles round called it \u2014 and many little round doors opened out of it, f",
+            "book": "01.txt",
+            "location": "Ch.1, P3",
+            "relevance": 1.0
+          },
+          {
+            "text": "This hobbit was a very well-to-do hobbit, and his name was Baggins.",
+            "book": "01.txt",
+            "location": "Ch.1, P4",
+            "relevance": 1.0
+          },
+          {
+            "text": "I suppose hobbits need some description nowadays, since they have become rare and shy of the Big People, as they call us.",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          },
+          {
+            "text": "Let me see, I don\u2019t think I know your name?\u201d",
+            "book": "01.txt",
+            "location": "Ch.1, P18",
+            "relevance": 1.0
+          },
+          {
+            "text": "\u201cYes, yes, my dear sir \u2014 and I do know your name, Mr. Bilbo Baggins.",
+            "book": "01.txt",
+            "location": "Ch.1, P19",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [
+          "The runes may contain directions or warnings."
+        ],
+        "exceptions": []
+      },
+      {
+        "id": "language_3",
+        "title": "Hobbit Language",
+        "description": "Hobbits have a language that includes terms like 'Big People' for non-hobbits.",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "The tunnel wound on and on, going fairly but not quite straight into the side of the hill \u2014 The Hill, as all the people for many miles round called it \u2014 and many little round doors opened out of it, f",
+            "book": "01.txt",
+            "location": "Ch.1, P3",
+            "relevance": 1.0
+          },
+          {
+            "text": "This hobbit was a very well-to-do hobbit, and his name was Baggins.",
+            "book": "01.txt",
+            "location": "Ch.1, P4",
+            "relevance": 1.0
+          },
+          {
+            "text": "I suppose hobbits need some description nowadays, since they have become rare and shy of the Big People, as they call us.",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          },
+          {
+            "text": "Let me see, I don\u2019t think I know your name?\u201d",
+            "book": "01.txt",
+            "location": "Ch.1, P18",
+            "relevance": 1.0
+          },
+          {
+            "text": "\u201cYes, yes, my dear sir \u2014 and I do know your name, Mr. Bilbo Baggins.",
+            "book": "01.txt",
+            "location": "Ch.1, P19",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "language_4",
+        "title": "Dwarven Toasts",
+        "description": "Dwarves often make toasts using phrases such as 'all praise to his wine and ale!'",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "The tunnel wound on and on, going fairly but not quite straight into the side of the hill \u2014 The Hill, as all the people for many miles round called it \u2014 and many little round doors opened out of it, f",
+            "book": "01.txt",
+            "location": "Ch.1, P3",
+            "relevance": 1.0
+          },
+          {
+            "text": "This hobbit was a very well-to-do hobbit, and his name was Baggins.",
+            "book": "01.txt",
+            "location": "Ch.1, P4",
+            "relevance": 1.0
+          },
+          {
+            "text": "I suppose hobbits need some description nowadays, since they have become rare and shy of the Big People, as they call us.",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          },
+          {
+            "text": "Let me see, I don\u2019t think I know your name?\u201d",
+            "book": "01.txt",
+            "location": "Ch.1, P18",
+            "relevance": 1.0
+          },
+          {
+            "text": "\u201cYes, yes, my dear sir \u2014 and I do know your name, Mr. Bilbo Baggins.",
+            "book": "01.txt",
+            "location": "Ch.1, P19",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "language_5",
+        "title": "Dragon Language",
+        "description": "The language of dragons, if any, is not explicitly mentioned but is inferred from the name 'Smaug' being a dragon.",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "The tunnel wound on and on, going fairly but not quite straight into the side of the hill \u2014 The Hill, as all the people for many miles round called it \u2014 and many little round doors opened out of it, f",
+            "book": "01.txt",
+            "location": "Ch.1, P3",
+            "relevance": 1.0
+          },
+          {
+            "text": "This hobbit was a very well-to-do hobbit, and his name was Baggins.",
+            "book": "01.txt",
+            "location": "Ch.1, P4",
+            "relevance": 1.0
+          },
+          {
+            "text": "I suppose hobbits need some description nowadays, since they have become rare and shy of the Big People, as they call us.",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          },
+          {
+            "text": "Let me see, I don\u2019t think I know your name?\u201d",
+            "book": "01.txt",
+            "location": "Ch.1, P18",
+            "relevance": 1.0
+          },
+          {
+            "text": "\u201cYes, yes, my dear sir \u2014 and I do know your name, Mr. Bilbo Baggins.",
+            "book": "01.txt",
+            "location": "Ch.1, P19",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      }
+    ],
+    "history": [
+      {
+        "id": "history_0",
+        "title": "Single-Floor Dwellings for Hobbits",
+        "description": "Hobbit homes have all rooms on the same floor and passage.",
+        "category": "history",
+        "source_passages": [
+          {
+            "text": "No going upstairs for the hobbit: bedrooms, bathrooms, cellars, pantries (lots of these), wardrobes (he had whole rooms devoted to clothes), kitchens, dining-rooms, all were on the same floor, and ind",
+            "book": "01.txt",
+            "location": "Ch.1, P3",
+            "relevance": 1.0
+          },
+          {
+            "text": "The Bagginses had lived in the neighbourhood of The Hill for time out of mind, and people considered them very respectable, not only because most of them were rich, but also because they never had any",
+            "book": "01.txt",
+            "location": "Ch.1, P4",
+            "relevance": 1.0
+          },
+          {
+            "text": "They are inclined to be fat in the stomach; they dress in bright colours (chiefly green and yellow); wear no shoes, because their feet grow natural leathery soles and thick warm brown hair like the st",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          },
+          {
+            "text": "It was often said (in other families) that long ago one of the Took ancestors must have taken a fairy wife.",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          },
+          {
+            "text": "The chance never arrived, until Bilbo Baggins was grown up, being about fifty years old or so, and living in the beautiful hobbit-hole built by his father, which I have just described for you, until h",
+            "book": "01.txt",
+            "location": "Ch.1, P7",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "history_1",
+        "title": "Respectable Baggins Family History",
+        "description": "The Baggins family has lived in the same neighborhood for a long time, are wealthy, and avoid adventures or unexpected actions.",
+        "category": "history",
+        "source_passages": [
+          {
+            "text": "No going upstairs for the hobbit: bedrooms, bathrooms, cellars, pantries (lots of these), wardrobes (he had whole rooms devoted to clothes), kitchens, dining-rooms, all were on the same floor, and ind",
+            "book": "01.txt",
+            "location": "Ch.1, P3",
+            "relevance": 1.0
+          },
+          {
+            "text": "The Bagginses had lived in the neighbourhood of The Hill for time out of mind, and people considered them very respectable, not only because most of them were rich, but also because they never had any",
+            "book": "01.txt",
+            "location": "Ch.1, P4",
+            "relevance": 1.0
+          },
+          {
+            "text": "They are inclined to be fat in the stomach; they dress in bright colours (chiefly green and yellow); wear no shoes, because their feet grow natural leathery soles and thick warm brown hair like the st",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          },
+          {
+            "text": "It was often said (in other families) that long ago one of the Took ancestors must have taken a fairy wife.",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          },
+          {
+            "text": "The chance never arrived, until Bilbo Baggins was grown up, being about fifty years old or so, and living in the beautiful hobbit-hole built by his father, which I have just described for you, until h",
+            "book": "01.txt",
+            "location": "Ch.1, P7",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "history_2",
+        "title": "Physical Characteristics of Hobbits",
+        "description": "Hobbits are inclined to be fat in the stomach, dress in bright colors (chiefly green and yellow), have no shoes due to natural leathery soles, wear hair on their heads that is curly, have long clever brown fingers, good-natured faces, and laugh easily.",
+        "category": "history",
+        "source_passages": [
+          {
+            "text": "No going upstairs for the hobbit: bedrooms, bathrooms, cellars, pantries (lots of these), wardrobes (he had whole rooms devoted to clothes), kitchens, dining-rooms, all were on the same floor, and ind",
+            "book": "01.txt",
+            "location": "Ch.1, P3",
+            "relevance": 1.0
+          },
+          {
+            "text": "The Bagginses had lived in the neighbourhood of The Hill for time out of mind, and people considered them very respectable, not only because most of them were rich, but also because they never had any",
+            "book": "01.txt",
+            "location": "Ch.1, P4",
+            "relevance": 1.0
+          },
+          {
+            "text": "They are inclined to be fat in the stomach; they dress in bright colours (chiefly green and yellow); wear no shoes, because their feet grow natural leathery soles and thick warm brown hair like the st",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          },
+          {
+            "text": "It was often said (in other families) that long ago one of the Took ancestors must have taken a fairy wife.",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          },
+          {
+            "text": "The chance never arrived, until Bilbo Baggins was grown up, being about fifty years old or so, and living in the beautiful hobbit-hole built by his father, which I have just described for you, until h",
+            "book": "01.txt",
+            "location": "Ch.1, P7",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "history_3",
+        "title": "Took Ancestry with Fairy Wives",
+        "description": "One of the Took ancestors is said to have taken a fairy wife.",
+        "category": "history",
+        "source_passages": [
+          {
+            "text": "No going upstairs for the hobbit: bedrooms, bathrooms, cellars, pantries (lots of these), wardrobes (he had whole rooms devoted to clothes), kitchens, dining-rooms, all were on the same floor, and ind",
+            "book": "01.txt",
+            "location": "Ch.1, P3",
+            "relevance": 1.0
+          },
+          {
+            "text": "The Bagginses had lived in the neighbourhood of The Hill for time out of mind, and people considered them very respectable, not only because most of them were rich, but also because they never had any",
+            "book": "01.txt",
+            "location": "Ch.1, P4",
+            "relevance": 1.0
+          },
+          {
+            "text": "They are inclined to be fat in the stomach; they dress in bright colours (chiefly green and yellow); wear no shoes, because their feet grow natural leathery soles and thick warm brown hair like the st",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          },
+          {
+            "text": "It was often said (in other families) that long ago one of the Took ancestors must have taken a fairy wife.",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          },
+          {
+            "text": "The chance never arrived, until Bilbo Baggins was grown up, being about fifty years old or so, and living in the beautiful hobbit-hole built by his father, which I have just described for you, until h",
+            "book": "01.txt",
+            "location": "Ch.1, P7",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "history_4",
+        "title": "Bilbo's Unadventurous Life Before Gandalf",
+        "description": "Bilbo Baggins had lived an uneventful life until he was about fifty years old.",
+        "category": "history",
+        "source_passages": [
+          {
+            "text": "No going upstairs for the hobbit: bedrooms, bathrooms, cellars, pantries (lots of these), wardrobes (he had whole rooms devoted to clothes), kitchens, dining-rooms, all were on the same floor, and ind",
+            "book": "01.txt",
+            "location": "Ch.1, P3",
+            "relevance": 1.0
+          },
+          {
+            "text": "The Bagginses had lived in the neighbourhood of The Hill for time out of mind, and people considered them very respectable, not only because most of them were rich, but also because they never had any",
+            "book": "01.txt",
+            "location": "Ch.1, P4",
+            "relevance": 1.0
+          },
+          {
+            "text": "They are inclined to be fat in the stomach; they dress in bright colours (chiefly green and yellow); wear no shoes, because their feet grow natural leathery soles and thick warm brown hair like the st",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          },
+          {
+            "text": "It was often said (in other families) that long ago one of the Took ancestors must have taken a fairy wife.",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          },
+          {
+            "text": "The chance never arrived, until Bilbo Baggins was grown up, being about fifty years old or so, and living in the beautiful hobbit-hole built by his father, which I have just described for you, until h",
+            "book": "01.txt",
+            "location": "Ch.1, P7",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "history_5",
+        "title": "Infrequent Visits Under The Hill",
+        "description": "Hobbits rarely venture under The Hill, especially after the death of an Old Took.",
+        "category": "history",
+        "source_passages": [
+          {
+            "text": "No going upstairs for the hobbit: bedrooms, bathrooms, cellars, pantries (lots of these), wardrobes (he had whole rooms devoted to clothes), kitchens, dining-rooms, all were on the same floor, and ind",
+            "book": "01.txt",
+            "location": "Ch.1, P3",
+            "relevance": 1.0
+          },
+          {
+            "text": "The Bagginses had lived in the neighbourhood of The Hill for time out of mind, and people considered them very respectable, not only because most of them were rich, but also because they never had any",
+            "book": "01.txt",
+            "location": "Ch.1, P4",
+            "relevance": 1.0
+          },
+          {
+            "text": "They are inclined to be fat in the stomach; they dress in bright colours (chiefly green and yellow); wear no shoes, because their feet grow natural leathery soles and thick warm brown hair like the st",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          },
+          {
+            "text": "It was often said (in other families) that long ago one of the Took ancestors must have taken a fairy wife.",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          },
+          {
+            "text": "The chance never arrived, until Bilbo Baggins was grown up, being about fifty years old or so, and living in the beautiful hobbit-hole built by his father, which I have just described for you, until h",
+            "book": "01.txt",
+            "location": "Ch.1, P7",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      }
+    ],
+    "creatures": [
+      {
+        "id": "creatures_0",
+        "title": "Size and Height of Creatures",
+        "description": "Creatures such as Hobbits, Dwarves, and possibly others are smaller than humans and shorter than bearded Dwarves.",
+        "category": "creatures",
+        "source_passages": [
+          {
+            "text": "They are (or were) a little people, about half our height, and smaller than the bearded Dwarves.",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          },
+          {
+            "text": "Hobbits have no beards.",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          },
+          {
+            "text": "That was, of course, absurd, but certainly there was still something not entirely hobbitlike about them, and once in a while members of the Took-clan would go and have adventures.",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          },
+          {
+            "text": "He had a tall pointed blue hat, a long grey cloak, a silver scarf over which his long white beard hung down below his waist, and immense black boots.",
+            "book": "01.txt",
+            "location": "Ch.1, P9",
+            "relevance": 1.0
+          },
+          {
+            "text": "Not the fellow who used to tell such wonderful tales at parties, about dragons and goblins and giants and the rescue of princesses and the unexpected luck of widows\u2019 sons?",
+            "book": "01.txt",
+            "location": "Ch.1, P20",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [
+          "The size and height of creatures like Hobbits and Dwarves is smaller compared to humans."
+        ],
+        "exceptions": []
+      },
+      {
+        "id": "creatures_1",
+        "title": "Appearance of Hobbits",
+        "description": "Hobbits do not have beards.",
+        "category": "creatures",
+        "source_passages": [
+          {
+            "text": "They are (or were) a little people, about half our height, and smaller than the bearded Dwarves.",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          },
+          {
+            "text": "Hobbits have no beards.",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          },
+          {
+            "text": "That was, of course, absurd, but certainly there was still something not entirely hobbitlike about them, and once in a while members of the Took-clan would go and have adventures.",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          },
+          {
+            "text": "He had a tall pointed blue hat, a long grey cloak, a silver scarf over which his long white beard hung down below his waist, and immense black boots.",
+            "book": "01.txt",
+            "location": "Ch.1, P9",
+            "relevance": 1.0
+          },
+          {
+            "text": "Not the fellow who used to tell such wonderful tales at parties, about dragons and goblins and giants and the rescue of princesses and the unexpected luck of widows\u2019 sons?",
+            "book": "01.txt",
+            "location": "Ch.1, P20",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [
+          "Hobbits are identified by their lack of beards."
+        ],
+        "exceptions": []
+      },
+      {
+        "id": "creatures_2",
+        "title": "Adventurous Nature of Some Hobbits",
+        "description": "Members of the Took-clan, a subset of Hobbits, occasionally go on adventures.",
+        "category": "creatures",
+        "source_passages": [
+          {
+            "text": "They are (or were) a little people, about half our height, and smaller than the bearded Dwarves.",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          },
+          {
+            "text": "Hobbits have no beards.",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          },
+          {
+            "text": "That was, of course, absurd, but certainly there was still something not entirely hobbitlike about them, and once in a while members of the Took-clan would go and have adventures.",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          },
+          {
+            "text": "He had a tall pointed blue hat, a long grey cloak, a silver scarf over which his long white beard hung down below his waist, and immense black boots.",
+            "book": "01.txt",
+            "location": "Ch.1, P9",
+            "relevance": 1.0
+          },
+          {
+            "text": "Not the fellow who used to tell such wonderful tales at parties, about dragons and goblins and giants and the rescue of princesses and the unexpected luck of widows\u2019 sons?",
+            "book": "01.txt",
+            "location": "Ch.1, P20",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [
+          "The adventurous nature is specific to members of the Took-clan."
+        ],
+        "exceptions": []
+      },
+      {
+        "id": "creatures_3",
+        "title": "Dwarf Physical Characteristics",
+        "description": "Dwarves are characterized by their height (taller than Hobbits), beards, hats, cloaks, scarfs, and boots.",
+        "category": "creatures",
+        "source_passages": [
+          {
+            "text": "They are (or were) a little people, about half our height, and smaller than the bearded Dwarves.",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          },
+          {
+            "text": "Hobbits have no beards.",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          },
+          {
+            "text": "That was, of course, absurd, but certainly there was still something not entirely hobbitlike about them, and once in a while members of the Took-clan would go and have adventures.",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          },
+          {
+            "text": "He had a tall pointed blue hat, a long grey cloak, a silver scarf over which his long white beard hung down below his waist, and immense black boots.",
+            "book": "01.txt",
+            "location": "Ch.1, P9",
+            "relevance": 1.0
+          },
+          {
+            "text": "Not the fellow who used to tell such wonderful tales at parties, about dragons and goblins and giants and the rescue of princesses and the unexpected luck of widows\u2019 sons?",
+            "book": "01.txt",
+            "location": "Ch.1, P20",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [
+          "Dwarves have beards, hats, cloaks, scarfs, and boots."
+        ],
+        "exceptions": []
+      },
+      {
+        "id": "creatures_4",
+        "title": "Dwarf Beard Colors",
+        "description": "Some Dwarves have blue beards.",
+        "category": "creatures",
+        "source_passages": [
+          {
+            "text": "They are (or were) a little people, about half our height, and smaller than the bearded Dwarves.",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          },
+          {
+            "text": "Hobbits have no beards.",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          },
+          {
+            "text": "That was, of course, absurd, but certainly there was still something not entirely hobbitlike about them, and once in a while members of the Took-clan would go and have adventures.",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          },
+          {
+            "text": "He had a tall pointed blue hat, a long grey cloak, a silver scarf over which his long white beard hung down below his waist, and immense black boots.",
+            "book": "01.txt",
+            "location": "Ch.1, P9",
+            "relevance": 1.0
+          },
+          {
+            "text": "Not the fellow who used to tell such wonderful tales at parties, about dragons and goblins and giants and the rescue of princesses and the unexpected luck of widows\u2019 sons?",
+            "book": "01.txt",
+            "location": "Ch.1, P20",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [
+          "Blue is one of the possible colors for a Dwarf's beard."
+        ],
+        "exceptions": []
+      },
+      {
+        "id": "creatures_5",
+        "title": "Dwarf Tool-Carrying Habit",
+        "description": "Dwarves carry bags of tools and spades.",
+        "category": "creatures",
+        "source_passages": [
+          {
+            "text": "They are (or were) a little people, about half our height, and smaller than the bearded Dwarves.",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          },
+          {
+            "text": "Hobbits have no beards.",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          },
+          {
+            "text": "That was, of course, absurd, but certainly there was still something not entirely hobbitlike about them, and once in a while members of the Took-clan would go and have adventures.",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          },
+          {
+            "text": "He had a tall pointed blue hat, a long grey cloak, a silver scarf over which his long white beard hung down below his waist, and immense black boots.",
+            "book": "01.txt",
+            "location": "Ch.1, P9",
+            "relevance": 1.0
+          },
+          {
+            "text": "Not the fellow who used to tell such wonderful tales at parties, about dragons and goblins and giants and the rescue of princesses and the unexpected luck of widows\u2019 sons?",
+            "book": "01.txt",
+            "location": "Ch.1, P20",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [
+          "Dwarves are often seen carrying bags of tools and spades."
+        ],
+        "exceptions": []
+      },
+      {
+        "id": "creatures_6",
+        "title": "Hobbit Fear of Dragons",
+        "description": "Hobbits fear dragons, as their presence could potentially set their homes on fire.",
+        "category": "creatures",
+        "source_passages": [
+          {
+            "text": "They are (or were) a little people, about half our height, and smaller than the bearded Dwarves.",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          },
+          {
+            "text": "Hobbits have no beards.",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          },
+          {
+            "text": "That was, of course, absurd, but certainly there was still something not entirely hobbitlike about them, and once in a while members of the Took-clan would go and have adventures.",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          },
+          {
+            "text": "He had a tall pointed blue hat, a long grey cloak, a silver scarf over which his long white beard hung down below his waist, and immense black boots.",
+            "book": "01.txt",
+            "location": "Ch.1, P9",
+            "relevance": 1.0
+          },
+          {
+            "text": "Not the fellow who used to tell such wonderful tales at parties, about dragons and goblins and giants and the rescue of princesses and the unexpected luck of widows\u2019 sons?",
+            "book": "01.txt",
+            "location": "Ch.1, P20",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [
+          "Hobbits have a natural fear of dragons due to the potential destruction they can cause."
+        ],
+        "exceptions": []
+      },
+      {
+        "id": "creatures_7",
+        "title": "Gandalf's Fierceness Exaggeration",
+        "description": "Gandalf often exaggerates the fierceness of hobbits, comparing them to dragons in a pinch.",
+        "category": "creatures",
+        "source_passages": [
+          {
+            "text": "They are (or were) a little people, about half our height, and smaller than the bearded Dwarves.",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          },
+          {
+            "text": "Hobbits have no beards.",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          },
+          {
+            "text": "That was, of course, absurd, but certainly there was still something not entirely hobbitlike about them, and once in a while members of the Took-clan would go and have adventures.",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          },
+          {
+            "text": "He had a tall pointed blue hat, a long grey cloak, a silver scarf over which his long white beard hung down below his waist, and immense black boots.",
+            "book": "01.txt",
+            "location": "Ch.1, P9",
+            "relevance": 1.0
+          },
+          {
+            "text": "Not the fellow who used to tell such wonderful tales at parties, about dragons and goblins and giants and the rescue of princesses and the unexpected luck of widows\u2019 sons?",
+            "book": "01.txt",
+            "location": "Ch.1, P20",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [
+          "Gandalf frequently compares hobbits to dragons in terms of fierceness."
+        ],
+        "exceptions": []
+      },
+      {
+        "id": "creatures_8",
+        "title": "Hobbit Heroism",
+        "description": "Some hobbits, like Old Took's great-grand-uncle Bullroarer, are capable of heroic feats such as charging into battle with a wooden club.",
+        "category": "creatures",
+        "source_passages": [
+          {
+            "text": "They are (or were) a little people, about half our height, and smaller than the bearded Dwarves.",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          },
+          {
+            "text": "Hobbits have no beards.",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          },
+          {
+            "text": "That was, of course, absurd, but certainly there was still something not entirely hobbitlike about them, and once in a while members of the Took-clan would go and have adventures.",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          },
+          {
+            "text": "He had a tall pointed blue hat, a long grey cloak, a silver scarf over which his long white beard hung down below his waist, and immense black boots.",
+            "book": "01.txt",
+            "location": "Ch.1, P9",
+            "relevance": 1.0
+          },
+          {
+            "text": "Not the fellow who used to tell such wonderful tales at parties, about dragons and goblins and giants and the rescue of princesses and the unexpected luck of widows\u2019 sons?",
+            "book": "01.txt",
+            "location": "Ch.1, P20",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [
+          "Exceptional hobbits can exhibit heroic behavior."
+        ],
+        "exceptions": []
+      }
+    ],
+    "magic": [
+      {
+        "id": "magic_0",
+        "title": "Magic Can Hide from Unsuspecting Individuals",
+        "description": "Magic in this world has the ability to conceal itself from those who are not looking for it or are unaware of its presence.",
+        "category": "magic",
+        "source_passages": [
+          {
+            "text": "There is little or no magic about them, except the ordinary everyday sort which helps them to disappear quietly and quickly when large stupid folk like you and me come blundering along, making a noise",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          },
+          {
+            "text": "All that the unsuspecting Bilbo saw that morning was an old man with a staff.",
+            "book": "01.txt",
+            "location": "Ch.1, P9",
+            "relevance": 1.0
+          },
+          {
+            "text": "Not the wandering wizard that gave Old Took a pair of magic diamond studs that fastened themselves and never came undone till ordered?",
+            "book": "01.txt",
+            "location": "Ch.1, P20",
+            "relevance": 1.0
+          },
+          {
+            "text": "\u201cWhere else should I be?\u201d said the wizard. \u201cAll the same I am pleased to find you remember something about me.",
+            "book": "01.txt",
+            "location": "Ch.1, P21",
+            "relevance": 1.0
+          },
+          {
+            "text": "Wizards after all are wizards.",
+            "book": "01.txt",
+            "location": "Ch.1, P24",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [
+          "The magic is only hidden from 'large stupid folk like you and me'."
+        ],
+        "exceptions": []
+      },
+      {
+        "id": "magic_1",
+        "title": "Wizards Possess Magic",
+        "description": "Wizards have the ability to perform magical feats, such as disappearing quietly, leaving signs on doors, and creating smoke-rings that change color.",
+        "category": "magic",
+        "source_passages": [
+          {
+            "text": "There is little or no magic about them, except the ordinary everyday sort which helps them to disappear quietly and quickly when large stupid folk like you and me come blundering along, making a noise",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          },
+          {
+            "text": "All that the unsuspecting Bilbo saw that morning was an old man with a staff.",
+            "book": "01.txt",
+            "location": "Ch.1, P9",
+            "relevance": 1.0
+          },
+          {
+            "text": "Not the wandering wizard that gave Old Took a pair of magic diamond studs that fastened themselves and never came undone till ordered?",
+            "book": "01.txt",
+            "location": "Ch.1, P20",
+            "relevance": 1.0
+          },
+          {
+            "text": "\u201cWhere else should I be?\u201d said the wizard. \u201cAll the same I am pleased to find you remember something about me.",
+            "book": "01.txt",
+            "location": "Ch.1, P21",
+            "relevance": 1.0
+          },
+          {
+            "text": "Wizards after all are wizards.",
+            "book": "01.txt",
+            "location": "Ch.1, P24",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "magic_2",
+        "title": "Magic Can Be Used for Entrance to Secret Places",
+        "description": "Wizards can use magic to open secret entrances, as mentioned by Gandalf.",
+        "category": "magic",
+        "source_passages": [
+          {
+            "text": "There is little or no magic about them, except the ordinary everyday sort which helps them to disappear quietly and quickly when large stupid folk like you and me come blundering along, making a noise",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          },
+          {
+            "text": "All that the unsuspecting Bilbo saw that morning was an old man with a staff.",
+            "book": "01.txt",
+            "location": "Ch.1, P9",
+            "relevance": 1.0
+          },
+          {
+            "text": "Not the wandering wizard that gave Old Took a pair of magic diamond studs that fastened themselves and never came undone till ordered?",
+            "book": "01.txt",
+            "location": "Ch.1, P20",
+            "relevance": 1.0
+          },
+          {
+            "text": "\u201cWhere else should I be?\u201d said the wizard. \u201cAll the same I am pleased to find you remember something about me.",
+            "book": "01.txt",
+            "location": "Ch.1, P21",
+            "relevance": 1.0
+          },
+          {
+            "text": "Wizards after all are wizards.",
+            "book": "01.txt",
+            "location": "Ch.1, P24",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [
+          "The wizard must be present."
+        ],
+        "exceptions": []
+      },
+      {
+        "id": "magic_3",
+        "title": "Magic Is Needed for Certain Actions Against Dragons",
+        "description": "A mighty warrior or hero is needed, along with magic, to defeat a dragon, as mentioned by the wizard.",
+        "category": "magic",
+        "source_passages": [
+          {
+            "text": "There is little or no magic about them, except the ordinary everyday sort which helps them to disappear quietly and quickly when large stupid folk like you and me come blundering along, making a noise",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          },
+          {
+            "text": "All that the unsuspecting Bilbo saw that morning was an old man with a staff.",
+            "book": "01.txt",
+            "location": "Ch.1, P9",
+            "relevance": 1.0
+          },
+          {
+            "text": "Not the wandering wizard that gave Old Took a pair of magic diamond studs that fastened themselves and never came undone till ordered?",
+            "book": "01.txt",
+            "location": "Ch.1, P20",
+            "relevance": 1.0
+          },
+          {
+            "text": "\u201cWhere else should I be?\u201d said the wizard. \u201cAll the same I am pleased to find you remember something about me.",
+            "book": "01.txt",
+            "location": "Ch.1, P21",
+            "relevance": 1.0
+          },
+          {
+            "text": "Wizards after all are wizards.",
+            "book": "01.txt",
+            "location": "Ch.1, P24",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [
+          "The presence of a mighty warrior or hero is necessary."
+        ],
+        "exceptions": []
+      },
+      {
+        "id": "magic_4",
+        "title": "Magic Can Influence Emotions",
+        "description": "Gandalf's magic can make the hobbit feel strong emotions, such as love and fear.",
+        "category": "magic",
+        "source_passages": [
+          {
+            "text": "There is little or no magic about them, except the ordinary everyday sort which helps them to disappear quietly and quickly when large stupid folk like you and me come blundering along, making a noise",
+            "book": "01.txt",
+            "location": "Ch.1, P5",
+            "relevance": 1.0
+          },
+          {
+            "text": "All that the unsuspecting Bilbo saw that morning was an old man with a staff.",
+            "book": "01.txt",
+            "location": "Ch.1, P9",
+            "relevance": 1.0
+          },
+          {
+            "text": "Not the wandering wizard that gave Old Took a pair of magic diamond studs that fastened themselves and never came undone till ordered?",
+            "book": "01.txt",
+            "location": "Ch.1, P20",
+            "relevance": 1.0
+          },
+          {
+            "text": "\u201cWhere else should I be?\u201d said the wizard. \u201cAll the same I am pleased to find you remember something about me.",
+            "book": "01.txt",
+            "location": "Ch.1, P21",
+            "relevance": 1.0
+          },
+          {
+            "text": "Wizards after all are wizards.",
+            "book": "01.txt",
+            "location": "Ch.1, P24",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      }
+    ],
+    "technology": [
+      {
+        "id": "technology_0",
+        "title": "Dwarven Attire",
+        "description": "Dwarves wear tall pointed hats, long grey cloaks, silver scarves, and immense black boots. They also have a golden belt to hold their tools.",
+        "category": "technology",
+        "source_passages": [
+          {
+            "text": "Still it is probable that Bilbo, her only son, although he looked and behaved exactly like a second edition of his solid and comfortable father, got something a bit queer in his make-up from the Took ",
+            "book": "01.txt",
+            "location": "Ch.1, P7",
+            "relevance": 1.0
+          },
+          {
+            "text": "He had a tall pointed blue hat, a long grey cloak, a silver scarf over which his long white beard hung down below his waist, and immense black boots.",
+            "book": "01.txt",
+            "location": "Ch.1, P9",
+            "relevance": 1.0
+          },
+          {
+            "text": "Make you late for dinner!",
+            "book": "01.txt",
+            "location": "Ch.1, P14",
+            "relevance": 1.0
+          },
+          {
+            "text": "Not the man that used to make such particularly excellent fireworks!",
+            "book": "01.txt",
+            "location": "Ch.1, P20",
+            "relevance": 1.0
+          },
+          {
+            "text": "Anything from climbing trees to visiting elves \u2014 or sailing in ships, sailing to other shores!",
+            "book": "01.txt",
+            "location": "Ch.1, P20",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [
+          "Dwarves always wear a tall pointed hat",
+          "Dwarves always wear a long grey cloak",
+          "Dwarves always wear a silver scarf",
+          "Dwarves always wear a golden belt"
+        ],
+        "exceptions": []
+      },
+      {
+        "id": "technology_1",
+        "title": "Dwarven Names",
+        "description": "Dwarven names often follow a pattern of ending with the suffix '-in', such as Dwalin, Kili, Fili, Dori, Nori, Ori, Oin, and Gloin.",
+        "category": "technology",
+        "source_passages": [
+          {
+            "text": "Still it is probable that Bilbo, her only son, although he looked and behaved exactly like a second edition of his solid and comfortable father, got something a bit queer in his make-up from the Took ",
+            "book": "01.txt",
+            "location": "Ch.1, P7",
+            "relevance": 1.0
+          },
+          {
+            "text": "He had a tall pointed blue hat, a long grey cloak, a silver scarf over which his long white beard hung down below his waist, and immense black boots.",
+            "book": "01.txt",
+            "location": "Ch.1, P9",
+            "relevance": 1.0
+          },
+          {
+            "text": "Make you late for dinner!",
+            "book": "01.txt",
+            "location": "Ch.1, P14",
+            "relevance": 1.0
+          },
+          {
+            "text": "Not the man that used to make such particularly excellent fireworks!",
+            "book": "01.txt",
+            "location": "Ch.1, P20",
+            "relevance": 1.0
+          },
+          {
+            "text": "Anything from climbing trees to visiting elves \u2014 or sailing in ships, sailing to other shores!",
+            "book": "01.txt",
+            "location": "Ch.1, P20",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [
+          "Most dwarven names end with '-in'"
+        ],
+        "exceptions": []
+      },
+      {
+        "id": "technology_2",
+        "title": "Dwarven Hood Colors",
+        "description": "Dwarves have hooded cloaks of various colors, including blue, purple, grey, brown, white, yellow, sky-blue, and pale green.",
+        "category": "technology",
+        "source_passages": [
+          {
+            "text": "Still it is probable that Bilbo, her only son, although he looked and behaved exactly like a second edition of his solid and comfortable father, got something a bit queer in his make-up from the Took ",
+            "book": "01.txt",
+            "location": "Ch.1, P7",
+            "relevance": 1.0
+          },
+          {
+            "text": "He had a tall pointed blue hat, a long grey cloak, a silver scarf over which his long white beard hung down below his waist, and immense black boots.",
+            "book": "01.txt",
+            "location": "Ch.1, P9",
+            "relevance": 1.0
+          },
+          {
+            "text": "Make you late for dinner!",
+            "book": "01.txt",
+            "location": "Ch.1, P14",
+            "relevance": 1.0
+          },
+          {
+            "text": "Not the man that used to make such particularly excellent fireworks!",
+            "book": "01.txt",
+            "location": "Ch.1, P20",
+            "relevance": 1.0
+          },
+          {
+            "text": "Anything from climbing trees to visiting elves \u2014 or sailing in ships, sailing to other shores!",
+            "book": "01.txt",
+            "location": "Ch.1, P20",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [
+          "Dwarves wear hooded cloaks of multiple colors"
+        ],
+        "exceptions": []
+      },
+      {
+        "id": "technology_3",
+        "title": "Dwarven Music",
+        "description": "Dwarves can play beautiful music on golden harps, and their songs are often about mines, gold, troubles with goblins, and the depredations of dragons.",
+        "category": "technology",
+        "source_passages": [
+          {
+            "text": "Still it is probable that Bilbo, her only son, although he looked and behaved exactly like a second edition of his solid and comfortable father, got something a bit queer in his make-up from the Took ",
+            "book": "01.txt",
+            "location": "Ch.1, P7",
+            "relevance": 1.0
+          },
+          {
+            "text": "He had a tall pointed blue hat, a long grey cloak, a silver scarf over which his long white beard hung down below his waist, and immense black boots.",
+            "book": "01.txt",
+            "location": "Ch.1, P9",
+            "relevance": 1.0
+          },
+          {
+            "text": "Make you late for dinner!",
+            "book": "01.txt",
+            "location": "Ch.1, P14",
+            "relevance": 1.0
+          },
+          {
+            "text": "Not the man that used to make such particularly excellent fireworks!",
+            "book": "01.txt",
+            "location": "Ch.1, P20",
+            "relevance": 1.0
+          },
+          {
+            "text": "Anything from climbing trees to visiting elves \u2014 or sailing in ships, sailing to other shores!",
+            "book": "01.txt",
+            "location": "Ch.1, P20",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [
+          "Dwarven music is often about dwarven themes"
+        ],
+        "exceptions": []
+      },
+      {
+        "id": "technology_4",
+        "title": "Dwarven Treasure",
+        "description": "Dwarves have a long-forgotten treasure of gold that they shaped and wrought, hidden in gems on the hilt of swords.",
+        "category": "technology",
+        "source_passages": [
+          {
+            "text": "Still it is probable that Bilbo, her only son, although he looked and behaved exactly like a second edition of his solid and comfortable father, got something a bit queer in his make-up from the Took ",
+            "book": "01.txt",
+            "location": "Ch.1, P7",
+            "relevance": 1.0
+          },
+          {
+            "text": "He had a tall pointed blue hat, a long grey cloak, a silver scarf over which his long white beard hung down below his waist, and immense black boots.",
+            "book": "01.txt",
+            "location": "Ch.1, P9",
+            "relevance": 1.0
+          },
+          {
+            "text": "Make you late for dinner!",
+            "book": "01.txt",
+            "location": "Ch.1, P14",
+            "relevance": 1.0
+          },
+          {
+            "text": "Not the man that used to make such particularly excellent fireworks!",
+            "book": "01.txt",
+            "location": "Ch.1, P20",
+            "relevance": 1.0
+          },
+          {
+            "text": "Anything from climbing trees to visiting elves \u2014 or sailing in ships, sailing to other shores!",
+            "book": "01.txt",
+            "location": "Ch.1, P20",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [
+          "Dwarven treasure is primarily golden hoards"
+        ],
+        "exceptions": []
+      }
+    ]
+  },
+  "cultures": {},
+  "magic_systems": {
+    "general_magic": {
+      "id": "general_magic",
+      "name": "Magic",
+      "source": null,
+      "practitioners": [],
+      "abilities": [
+        "There is little or no magic about them, except the ordinary everyday sort which helps them to disapp",
+        "And even now, when I will allow we have a good bit laid by and are not so badly off\u201d \u2014 here Thorin s",
+        "He is an enemy far beyond the powers of all the dwarves put together, if they could all be collected",
+        "Bilbo went to sleep with that in his ears, and it gave him very uncomfortable dreams."
+      ],
+      "costs": [],
+      "limitations": [],
+      "dangers": [],
+      "source_passages": [
+        {
+          "text": "There is little or no magic about them, except the ordinary everyday sort which helps them to disappear quietly and quickly when large stupid folk like you and me come blundering along, making a noise",
+          "book": "01.txt",
+          "location": "Ch.1, P5"
+        },
+        {
+          "text": "All that the unsuspecting Bilbo saw that morning was an old man with a staff.",
+          "book": "01.txt",
+          "location": "Ch.1, P9"
+        },
+        {
+          "text": "Not the wandering wizard that gave Old Took a pair of magic diamond studs that fastened themselves and never came undone till ordered?",
+          "book": "01.txt",
+          "location": "Ch.1, P20"
+        },
+        {
+          "text": "\u201cWhere else should I be?\u201d said the wizard. \u201cAll the same I am pleased to find you remember something about me.",
+          "book": "01.txt",
+          "location": "Ch.1, P21"
+        },
+        {
+          "text": "Wizards after all are wizards.",
+          "book": "01.txt",
+          "location": "Ch.1, P24"
+        },
+        {
+          "text": "After a while he stepped up, and with the spike on his staff scratched a queer sign on the hobbit\u2019s beautiful green front-door.",
+          "book": "01.txt",
+          "location": "Ch.1, P26"
+        },
+        {
+          "text": "And there was Gandalf behind, leaning on his staff and laughing.",
+          "book": "01.txt",
+          "location": "Ch.1, P52"
+        },
+        {
+          "text": "Then Gandalf\u2019s smoke-ring would go green and come back to hover over the wizard\u2019s head.",
+          "book": "01.txt",
+          "location": "Ch.1, P77"
+        },
+        {
+          "text": "Far over the misty mountains cold To dungeons deep and caverns old We must away ere break of day To seek the pale enchanted gold.",
+          "book": "01.txt",
+          "location": "Ch.1, P82"
+        },
+        {
+          "text": "The dwarves of yore made mighty spells, While hammers fell like ringing bells In places deep, where dark things sleep, In hollow halls beneath the fells.",
+          "book": "01.txt",
+          "location": "Ch.1, P83"
+        }
+      ]
+    }
+  },
+  "geography": {},
+  "sources": [
+    "01.txt"
+  ],
+  "last_updated": "2026-02-02T12:34:05.519661"
+}

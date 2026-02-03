@@ -1,0 +1,3995 @@
+{
+  "name": "Middle-earth",
+  "rules": {
+    "language": [
+      {
+        "id": "language_pattern_0",
+        "title": "although it was not then called The Silmarillion",
+        "description": "although it was not then called The Silmarillion",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "Indeed, although it was not then called The Silmarillion, it was already in being half a century ago; and in battered notebooks extending back to 1917 can still be read the earliest versions, often ha",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P98",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "language_pattern_1",
+        "title": "it was already in being half a century ago",
+        "description": "it was already in being half a century ago",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "Indeed, although it was not then called The Silmarillion, it was already in being half a century ago; and in battered notebooks extending back to 1917 can still be read the earliest versions, often ha",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P98",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "language_pattern_2",
+        "title": "The number of names that occur in the book is very...",
+        "description": "The number of names that occur in the book is very large",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "The number of names that occur in the book is very large, and I have provided a full index; but the number of persons (Elves and Men) who play an important part in the narrative of the First Age is ve",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P103",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "language_pattern_3",
+        "title": "Then the Ainur were afraid",
+        "description": "Then the Ainur were afraid",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "Then the Ainur were afraid, and they did not yet comprehend the words that were said to them; and Melkor was filled with shame, of which came secret anger.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P119",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "language_pattern_4",
+        "title": "Then there was unrest among the Ainur",
+        "description": "Then there was unrest among the Ainur",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "Then there was unrest among the Ainur; but lluvatar called to them, and said: 'I know the desire of your minds that what ye have seen should verily be, not only in your",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P131",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "language_pattern_5",
+        "title": "who in the Elvish tongue is named lluvatar",
+        "description": "who in the Elvish tongue is named lluvatar",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "In the beginning Eru, the One, who in the Elvish tongue is named lluvatar, made the Ainur of his thought; and they made a great Music before him.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P143",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "language_pattern_6",
+        "title": "These were their names in the Elvish tongue as it ...",
+        "description": "These were their names in the Elvish tongue as it was spoken in Valinor",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "These were their names in the Elvish tongue as it was spoken in Valinor, though they have other names in the speech of the Elves in Middle-earth, and their names among Men are manifold.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P146",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "language_pattern_7",
+        "title": "and their names among Men are manifold",
+        "description": "and their names among Men are manifold",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "These were their names in the Elvish tongue as it was spoken in Valinor, though they have other names in the speech of the Elves in Middle-earth, and their names among Men are manifold.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P146",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "language_pattern_8",
+        "title": "and they are called most often Mandos and Lorien",
+        "description": "and they are called most often Mandos and Lorien",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "The Feanturi, masters of spirits, are brethren, and they are called most often Mandos and Lorien.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P155",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "language_pattern_9",
+        "title": "Yet these are rightly the names of the places of t...",
+        "description": "Yet these are rightly the names of the places of their dwelling",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "Yet these are rightly the names of the places of their dwelling, and their true names are Namo and Irmo.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P155",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "language_pattern_10",
+        "title": "and their true names are Namo and Irmo",
+        "description": "and their true names are Namo and Irmo",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "Yet these are rightly the names of the places of their dwelling, and their true names are Namo and Irmo.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P155",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "language_pattern_11",
+        "title": "Their number is not known to the Elves",
+        "description": "Their number is not known to the Elves",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "Their number is not known to the Elves, and few have names in any of the tongues of the Children of lluvatar; for though it is otherwise in Aman, in Middle-earth the Maiar have seldom appeared in form",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P165",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "language_pattern_12",
+        "title": "Melian was the name of a Maia who served both Vana...",
+        "description": "Melian was the name of a Maia who served both Vana and Este",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "Melian was the name of a Maia who served both Vana and Este; she dwelt long in Lorien, tending the trees that flower in the gardens of Irmo, ere she came to Middle- earth.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P169",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "language_pattern_13",
+        "title": "Last of all is set the name of Melkor",
+        "description": "Last of all is set the name of Melkor",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "Last of all is set the name of Melkor, He who arises in Might.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P173",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "language_pattern_14",
+        "title": "Among those of his servants that have names the gr...",
+        "description": "Among those of his servants that have names the greatest was that spirit whom the Eldar called Sauron",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "Among those of his servants that have names the greatest was that spirit whom the Eldar called Sauron, or Gorthaur the Cruel.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P176",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "language_pattern_15",
+        "title": "and it was named llluin",
+        "description": "and it was named llluin",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "One lamp they raised near to the north of Middle-earth, and it was named llluin; and the other was raised in the south, and it was named Ormal; and the light of the Lamps of the Valar flowed out over ",
+            "book": "silmarillion.txt",
+            "location": "Ch.2, P2",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "language_pattern_16",
+        "title": "and the other was raised in the south",
+        "description": "and the other was raised in the south",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "One lamp they raised near to the north of Middle-earth, and it was named llluin; and the other was raised in the south, and it was named Ormal; and the light of the Lamps of the Valar flowed out over ",
+            "book": "silmarillion.txt",
+            "location": "Ch.2, P2",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "language_pattern_17",
+        "title": "That stronghold was named Utumno",
+        "description": "That stronghold was named Utumno",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "That stronghold was named Utumno.",
+            "book": "silmarillion.txt",
+            "location": "Ch.2, P8",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "language_pattern_18",
+        "title": "and there were their houses",
+        "description": "and there were their houses",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "Behind the walls of the Pelori the Valar established their domain in that region which is called Valinor, and there were their houses, their gardens, and their towers.",
+            "book": "silmarillion.txt",
+            "location": "Ch.2, P13",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "language_pattern_19",
+        "title": "Before its western gate there was a green mound",
+        "description": "Before its western gate there was a green mound",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "Before its western gate there was a green mound, Ezellohar, that is named also Corollaire; and Yavanna hallowed it, and she sat there long upon the green grass and sang a song of power, in which was s",
+            "book": "silmarillion.txt",
+            "location": "Ch.2, P14",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "language_pattern_20",
+        "title": "that is named also Corollaire",
+        "description": "that is named also Corollaire",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "Before its western gate there was a green mound, Ezellohar, that is named also Corollaire; and Yavanna hallowed it, and she sat there long upon the green grass and sang a song of power, in which was s",
+            "book": "silmarillion.txt",
+            "location": "Ch.2, P14",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "language_pattern_21",
+        "title": "Telperion the one was called in Valinor",
+        "description": "Telperion the one was called in Valinor",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "Telperion the one was called in Valinor, and Silpion, and Ninquelote, and many other names; but Laurelin the other was, and Malinalda, and Culurien, and many names in song beside.",
+            "book": "silmarillion.txt",
+            "location": "Ch.2, P17",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "language_pattern_22",
+        "title": "Aule it is who is named the Friend of the Noldor",
+        "description": "Aule it is who is named the Friend of the Noldor",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "Aule it is who is named the Friend of the Noldor, for of him they learned much in after days, and they are the most skilled of the Elves; and in their own fashion, according to the gifts which lluvata",
+            "book": "silmarillion.txt",
+            "location": "Ch.2, P21",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "language_pattern_23",
+        "title": "for poetry is the delight of Manwe",
+        "description": "for poetry is the delight of Manwe",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "The Vanyar he loved best of all the Elves, and of him they received song and poetry; for poetry is the delight of Manwe, and the song of words is his music.",
+            "book": "silmarillion.txt",
+            "location": "Ch.2, P24",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "language_pattern_24",
+        "title": "and the song of words is his music",
+        "description": "and the song of words is his music",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "The Vanyar he loved best of all the Elves, and of him they received song and poetry; for poetry is the delight of Manwe, and the song of words is his music.",
+            "book": "silmarillion.txt",
+            "location": "Ch.2, P24",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "language_pattern_25",
+        "title": "she who in the Sindarin tongue is named Elbereth",
+        "description": "she who in the Sindarin tongue is named Elbereth",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "With Manwe dwelt Varda the most beautiful, she who in the Sindarin tongue is named Elbereth, Queen of the Valar, maker of the stars; and with than were a great host of spirits in blessedness.",
+            "book": "silmarillion.txt",
+            "location": "Ch.2, P24",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "language_pattern_26",
+        "title": "and he was pleased",
+        "description": "and he was pleased",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "Now lluvatar knew what was done, and in the very hour that Aule's work was complete, and he was pleased, and began to instruct the Dwarves in the speech that he had devised for them, lluvatar spoke to",
+            "book": "silmarillion.txt",
+            "location": "Ch.3, P2",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "language_pattern_27",
+        "title": "Balrogs they were named in Middle",
+        "description": "Balrogs they were named in Middle",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "Balrogs they were named in Middle-earth in later days.",
+            "book": "silmarillion.txt",
+            "location": "Ch.4, P3",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "language_pattern_28",
+        "title": "That stronghold was commanded by Sauron",
+        "description": "That stronghold was commanded by Sauron",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "That stronghold was commanded by Sauron, lieutenant of Melkor; and it was named Angband.",
+            "book": "silmarillion.txt",
+            "location": "Ch.4, P4",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "language_pattern_29",
+        "title": "and it was named Angband",
+        "description": "and it was named Angband",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "That stronghold was commanded by Sauron, lieutenant of Melkor; and it was named Angband.",
+            "book": "silmarillion.txt",
+            "location": "Ch.4, P4",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "language_pattern_30",
+        "title": "To Varda ever shall they call at need",
+        "description": "To Varda ever shall they call at need",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "To Varda ever shall they call at need.'",
+            "book": "silmarillion.txt",
+            "location": "Ch.4, P8",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "language_pattern_31",
+        "title": "wherefore she whose name out of the deeps of time ...",
+        "description": "wherefore she whose name out of the deeps of time and the labours of Ea was Tintalle",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "She took the silver dews from the vats of Telperion, and therewith she made new stars and brighter against the coming of the Firstborn; wherefore she whose name out of the deeps of time and the labour",
+            "book": "silmarillion.txt",
+            "location": "Ch.4, P9",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "language_pattern_32",
+        "title": "but that name was after borne only by those who fo...",
+        "description": "but that name was after borne only by those who followed him upon the westward road",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "And Orome loved the Quendi, and named them in their own tongue Eldar, the people of the stars; but that name was after borne only by those who followed him upon the westward road.",
+            "book": "silmarillion.txt",
+            "location": "Ch.4, P17",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "language_pattern_33",
+        "title": "and were willing to depart and follow Orome",
+        "description": "and were willing to depart and follow Orome",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "For the kindred of Ingwe, and the most part of the kindreds of Finwe and Elwe, were swayed by the words of their lords, and were willing to depart and follow Orome; and these were known ever after as ",
+            "book": "silmarillion.txt",
+            "location": "Ch.4, P33",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "language_pattern_34",
+        "title": "and these were known ever after as the Eldar",
+        "description": "and these were known ever after as the Eldar",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "For the kindred of Ingwe, and the most part of the kindreds of Finwe and Elwe, were swayed by the words of their lords, and were willing to depart and follow Orome; and these were known ever after as ",
+            "book": "silmarillion.txt",
+            "location": "Ch.4, P33",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "language_pattern_35",
+        "title": "The smallest host and the first to set forth was l...",
+        "description": "The smallest host and the first to set forth was led by Ingwe",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "The smallest host and the first to set forth was led by Ingwe, the most high lord of all the Elvish race.",
+            "book": "silmarillion.txt",
+            "location": "Ch.4, P34",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "language_pattern_36",
+        "title": "and they are named the Teleri",
+        "description": "and they are named the Teleri",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "The greatest host came last, and they are named the Teleri, for they tarried on the road, and were not wholly of a mind to pass from the dusk to the light of Valinor.",
+            "book": "silmarillion.txt",
+            "location": "Ch.4, P37",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "language_pattern_37",
+        "title": "and were not wholly of a mind to pass from the dus...",
+        "description": "and were not wholly of a mind to pass from the dusk to the light of Valinor",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "The greatest host came last, and they are named the Teleri, for they tarried on the road, and were not wholly of a mind to pass from the dusk to the light of Valinor.",
+            "book": "silmarillion.txt",
+            "location": "Ch.4, P37",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "language_pattern_38",
+        "title": "which was ever the hindmost on the road",
+        "description": "which was ever the hindmost on the road",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "Then one arose in the host of Olwe, which was ever the hindmost on the road; Lenwe he was called.",
+            "book": "silmarillion.txt",
+            "location": "Ch.4, P42",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "language_pattern_39",
+        "title": "Lenwe he was called",
+        "description": "Lenwe he was called",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "Then one arose in the host of Olwe, which was ever the hindmost on the road; Lenwe he was called.",
+            "book": "silmarillion.txt",
+            "location": "Ch.4, P42",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "language_pattern_40",
+        "title": "in those forests that were afterwards named Neldor...",
+        "description": "in those forests that were afterwards named Neldoreth and Region",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "Now when their journey was near its end, as has been told, the people of the Teleri rested long in East Beleriand, beyond the River Gelion; and at that time many of the Noldor still lay to the westwar",
+            "book": "silmarillion.txt",
+            "location": "Ch.5, P2",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "language_pattern_41",
+        "title": "and his people were all the Eldar of Beleriand",
+        "description": "and his people were all the Eldar of Beleriand",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "In after days he became a king renowned, and his people were all the Eldar of Beleriand; the Sindar they were named, the Grey-elves, the Elves of the Twilight and King Greymantle was he, Elu Thingol i",
+            "book": "silmarillion.txt",
+            "location": "Ch.5, P5",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "language_pattern_42",
+        "title": "the Sindar they were named",
+        "description": "the Sindar they were named",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "In after days he became a king renowned, and his people were all the Eldar of Beleriand; the Sindar they were named, the Grey-elves, the Elves of the Twilight and King Greymantle was he, Elu Thingol i",
+            "book": "silmarillion.txt",
+            "location": "Ch.5, P5",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "language_pattern_43",
+        "title": "the Elves of the Twilight and King Greymantle was ...",
+        "description": "the Elves of the Twilight and King Greymantle was he",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "In after days he became a king renowned, and his people were all the Eldar of Beleriand; the Sindar they were named, the Grey-elves, the Elves of the Twilight and King Greymantle was he, Elu Thingol i",
+            "book": "silmarillion.txt",
+            "location": "Ch.5, P5",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "language_pattern_44",
+        "title": "Then the friends of Elwe were left behind",
+        "description": "Then the friends of Elwe were left behind",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "Then the friends of Elwe were left behind; and they called themselves Eglath, the Forsaken People.",
+            "book": "silmarillion.txt",
+            "location": "Ch.6, P7",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "language_pattern_45",
+        "title": "and when they were come to the Bay of Eldamar ",
+        "description": "and when they were come to the Bay of Eldamar ",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "Now Osse followed after the host of Olwe, and when they were come to the Bay of Eldamar (which is Elvenhome) he called to them; and they knew his voice, and begged Ulmo to stay their voyage.",
+            "book": "silmarillion.txt",
+            "location": "Ch.6, P10",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "language_pattern_46",
+        "title": "which is Elvenhome",
+        "description": "which is Elvenhome",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "Now Osse followed after the host of Olwe, and when they were come to the Bay of Eldamar (which is Elvenhome) he called to them; and they knew his voice, and begged Ulmo to stay their voyage.",
+            "book": "silmarillion.txt",
+            "location": "Ch.6, P10",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "language_pattern_47",
+        "title": "and it was called Tol Eressea",
+        "description": "and it was called Tol Eressea",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "But the island was not moved again, and stood there alone in the Bay of Eldamar; and it was called Tol Eressea, the Lonely Isle.",
+            "book": "silmarillion.txt",
+            "location": "Ch.6, P10",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "language_pattern_48",
+        "title": "Galathilion it was named in the Sindarin tongue",
+        "description": "Galathilion it was named in the Sindarin tongue",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "And since of all things in Valinor they loved most the White Tree, Yavanna made for them a tree like to a lesser image of Telperion, save that it did not give light of its own being; Galathilion it wa",
+            "book": "silmarillion.txt",
+            "location": "Ch.6, P13",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "language_pattern_49",
+        "title": "Of these one was afterwards planted in Tol Eressea",
+        "description": "Of these one was afterwards planted in Tol Eressea",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "Of these one was afterwards planted in Tol Eressea, and it prospered there, and was named Celeborn; thence came in me fullness of time as is plspwhprp tnlrl Nimlnth thp White* Tree* nf Nnmpnnr",
+            "book": "silmarillion.txt",
+            "location": "Ch.6, P13",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "language_pattern_50",
+        "title": "and was named Celeborn",
+        "description": "and was named Celeborn",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "Of these one was afterwards planted in Tol Eressea, and it prospered there, and was named Celeborn; thence came in me fullness of time as is plspwhprp tnlrl Nimlnth thp White* Tree* nf Nnmpnnr",
+            "book": "silmarillion.txt",
+            "location": "Ch.6, P13",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "language_pattern_51",
+        "title": "thence came in me fullness of time as is plspwhprp...",
+        "description": "thence came in me fullness of time as is plspwhprp tnlrl Nimlnth thp White",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "Of these one was afterwards planted in Tol Eressea, and it prospered there, and was named Celeborn; thence came in me fullness of time as is plspwhprp tnlrl Nimlnth thp White* Tree* nf Nnmpnnr",
+            "book": "silmarillion.txt",
+            "location": "Ch.6, P13",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "language_pattern_52",
+        "title": "They were changeful in speech",
+        "description": "They were changeful in speech",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "They were changeful in speech, for they had great love of words, and sought ever to find names more fit for all things that they knew or imagined.",
+            "book": "silmarillion.txt",
+            "location": "Ch.6, P15",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "language_pattern_53",
+        "title": "therefore the names and kinship of their princes m...",
+        "description": "therefore the names and kinship of their princes may here be told",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "The Noldor afterwards came back to Middle-earth, and this tale tells mostly of their deeds; therefore the names and kinship of their princes may here be told, in that form which these names later bore",
+            "book": "silmarillion.txt",
+            "location": "Ch.6, P16",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "language_pattern_54",
+        "title": "Feanor was the mightiest in skill of word and of h...",
+        "description": "Feanor was the mightiest in skill of word and of hand",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "Feanor was the mightiest in skill of word and of hand, more learned than his brothers; his spirit burned as a flame.",
+            "book": "silmarillion.txt",
+            "location": "Ch.6, P17",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "language_pattern_55",
+        "title": "Feiniel she was called",
+        "description": "Feiniel she was called",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "Ar-Feiniel she was called, the White Lady of the Noldor, for she was pale though her hair was dark, and she was never arrayed but in silver and white.",
+            "book": "silmarillion.txt",
+            "location": "Ch.6, P20",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "language_pattern_56",
+        "title": "The sons of Finarfin were Finrod the faithful ",
+        "description": "The sons of Finarfin were Finrod the faithful ",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "The sons of Finarfin were Finrod the faithful (who was afterwards named Felagund, Lord of Caves), Orodreth, Angrod, and Aegnor; these four were as close in friendship with the sons of Fingolfin as tho",
+            "book": "silmarillion.txt",
+            "location": "Ch.6, P21",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "language_pattern_57",
+        "title": "who was afterwards named Felagund",
+        "description": "who was afterwards named Felagund",
+        "category": "language",
+        "source_passages": [
+          {
+            "text": "The sons of Finarfin were Finrod the faithful (who was afterwards named Felagund, Lord of Caves), Orodreth, Angrod, and Aegnor; these four were as close in friendship with the sons of Fingolfin as tho",
+            "book": "silmarillion.txt",
+            "location": "Ch.6, P21",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      }
+    ],
+    "technology": [
+      {
+        "id": "technology_0",
+        "title": "No Advanced Technology",
+        "description": "The world does not have advanced technology like computers or modern machinery.",
+        "category": "technology",
+        "source_passages": [
+          {
+            "text": "archive_analytics.send_pageview_on_load({ mediaType: \"texts\", }); } </script> <script src=\"//archive.org/includes/bootstrap.min.js?v3.0.0\" type=\"text/javascript\"></script> <script src=\"//archive.org/i",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P6",
+            "relevance": 1.0
+          },
+          {
+            "text": "<div class=\"col-sm-2 col-xs-7 col-sm-push-4\"> <div class=\"linx\"> <h5>Featured</h5> <a href=\"https://archive.org/details/texts\"><span class=\"iconochive-texts\" aria-hidden=\"true\"></span><span class=\"sr-",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P11",
+            "relevance": 1.0
+          },
+          {
+            "text": "</div><!--/.col-sm-2--> <div class=\"col-sm-2 col-xs-7 col-sm-push-2\"> <div class=\"linx \"> <h5>Top</h5> <a href=\"https://archive.org/details/animationandcartoons\" title=\"Animation &amp; Cartoons\">Anima",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P20",
+            "relevance": 1.0
+          },
+          {
+            "text": "In the body of the book there is a smaller map: the intention of this is to make clear at a glance where lay the kingdoms of the Elves after the return of the Noldor to Middle-earth.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P103",
+            "relevance": 1.0
+          },
+          {
+            "text": "And it came to pass that lluvatar called together all the Ainur and declared to them a mighty theme, unfolding to them things greater and more wonderful than he had yet revealed; and the glory of its ",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P109",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "technology_1",
+        "title": "Craftsmanship is Valued",
+        "description": "The world values craftsmanship and skill in creating things, whether small or large.",
+        "category": "technology",
+        "source_passages": [
+          {
+            "text": "archive_analytics.send_pageview_on_load({ mediaType: \"texts\", }); } </script> <script src=\"//archive.org/includes/bootstrap.min.js?v3.0.0\" type=\"text/javascript\"></script> <script src=\"//archive.org/i",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P6",
+            "relevance": 1.0
+          },
+          {
+            "text": "<div class=\"col-sm-2 col-xs-7 col-sm-push-4\"> <div class=\"linx\"> <h5>Featured</h5> <a href=\"https://archive.org/details/texts\"><span class=\"iconochive-texts\" aria-hidden=\"true\"></span><span class=\"sr-",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P11",
+            "relevance": 1.0
+          },
+          {
+            "text": "</div><!--/.col-sm-2--> <div class=\"col-sm-2 col-xs-7 col-sm-push-2\"> <div class=\"linx \"> <h5>Top</h5> <a href=\"https://archive.org/details/animationandcartoons\" title=\"Animation &amp; Cartoons\">Anima",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P20",
+            "relevance": 1.0
+          },
+          {
+            "text": "In the body of the book there is a smaller map: the intention of this is to make clear at a glance where lay the kingdoms of the Elves after the return of the Noldor to Middle-earth.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P103",
+            "relevance": 1.0
+          },
+          {
+            "text": "And it came to pass that lluvatar called together all the Ainur and declared to them a mighty theme, unfolding to them things greater and more wonderful than he had yet revealed; and the glory of its ",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P109",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "technology_2",
+        "title": "Magic is Possible",
+        "description": "The world has magical elements, such as the Valar's powers and the music of Ulmo.",
+        "category": "technology",
+        "source_passages": [
+          {
+            "text": "archive_analytics.send_pageview_on_load({ mediaType: \"texts\", }); } </script> <script src=\"//archive.org/includes/bootstrap.min.js?v3.0.0\" type=\"text/javascript\"></script> <script src=\"//archive.org/i",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P6",
+            "relevance": 1.0
+          },
+          {
+            "text": "<div class=\"col-sm-2 col-xs-7 col-sm-push-4\"> <div class=\"linx\"> <h5>Featured</h5> <a href=\"https://archive.org/details/texts\"><span class=\"iconochive-texts\" aria-hidden=\"true\"></span><span class=\"sr-",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P11",
+            "relevance": 1.0
+          },
+          {
+            "text": "</div><!--/.col-sm-2--> <div class=\"col-sm-2 col-xs-7 col-sm-push-2\"> <div class=\"linx \"> <h5>Top</h5> <a href=\"https://archive.org/details/animationandcartoons\" title=\"Animation &amp; Cartoons\">Anima",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P20",
+            "relevance": 1.0
+          },
+          {
+            "text": "In the body of the book there is a smaller map: the intention of this is to make clear at a glance where lay the kingdoms of the Elves after the return of the Noldor to Middle-earth.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P103",
+            "relevance": 1.0
+          },
+          {
+            "text": "And it came to pass that lluvatar called together all the Ainur and declared to them a mighty theme, unfolding to them things greater and more wonderful than he had yet revealed; and the glory of its ",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P109",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [
+          "Only certain beings have magical powers"
+        ],
+        "exceptions": []
+      },
+      {
+        "id": "technology_3",
+        "title": "Materials are Natural",
+        "description": "The world uses natural materials like iron, stone, silver, gold, and water.",
+        "category": "technology",
+        "source_passages": [
+          {
+            "text": "archive_analytics.send_pageview_on_load({ mediaType: \"texts\", }); } </script> <script src=\"//archive.org/includes/bootstrap.min.js?v3.0.0\" type=\"text/javascript\"></script> <script src=\"//archive.org/i",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P6",
+            "relevance": 1.0
+          },
+          {
+            "text": "<div class=\"col-sm-2 col-xs-7 col-sm-push-4\"> <div class=\"linx\"> <h5>Featured</h5> <a href=\"https://archive.org/details/texts\"><span class=\"iconochive-texts\" aria-hidden=\"true\"></span><span class=\"sr-",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P11",
+            "relevance": 1.0
+          },
+          {
+            "text": "</div><!--/.col-sm-2--> <div class=\"col-sm-2 col-xs-7 col-sm-push-2\"> <div class=\"linx \"> <h5>Top</h5> <a href=\"https://archive.org/details/animationandcartoons\" title=\"Animation &amp; Cartoons\">Anima",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P20",
+            "relevance": 1.0
+          },
+          {
+            "text": "In the body of the book there is a smaller map: the intention of this is to make clear at a glance where lay the kingdoms of the Elves after the return of the Noldor to Middle-earth.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P103",
+            "relevance": 1.0
+          },
+          {
+            "text": "And it came to pass that lluvatar called together all the Ainur and declared to them a mighty theme, unfolding to them things greater and more wonderful than he had yet revealed; and the glory of its ",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P109",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      }
+    ],
+    "geography": [
+      {
+        "id": "geography_pattern_0",
+        "title": "It may be noted that the great mountain range in t...",
+        "description": "It may be noted that the great mountain range in the east",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "It may be noted that the great mountain range in the east, Ered Luin or Ered Lindon, the Blue Mountains, appears in the extreme west of the map in The Lord of the Rings.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P103",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "geography_pattern_1",
+        "title": "the intention of this is to make clear at a glance...",
+        "description": "the intention of this is to make clear at a glance where lay the kingdoms of the Elves after the return of the Noldor to Middle",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "In the body of the book there is a smaller map: the intention of this is to make clear at a glance where lay the kingdoms of the Elves after the return of the Noldor to Middle-earth.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P103",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "geography_pattern_2",
+        "title": "And it seemed at last that there were two musics p...",
+        "description": "And it seemed at last that there were two musics progressing at one time before the seat of lluvatar",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "And it seemed at last that there were two musics progressing at one time before the seat of lluvatar, and they were utterly at variance.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P116",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "geography_pattern_3",
+        "title": "and they were utterly at variance",
+        "description": "and they were utterly at variance",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "And it seemed at last that there were two musics progressing at one time before the seat of lluvatar, and they were utterly at variance.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P116",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "geography_pattern_4",
+        "title": "and is free from care",
+        "description": "and is free from care",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "and pride of Aule is in the deed of making, and in the thing made, and neither in possession nor in his own mastery; wherefore he gives and hoards not, and is free from care, passing ever on to some n",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P127",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "geography_pattern_5",
+        "title": "This shall be my own kingdom",
+        "description": "This shall be my own kingdom",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "When therefore Earth was yet young and full of flame Melkor coveted it, and he said to the other Valar: This shall be my own kingdom; and I name it unto myself!'",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P134",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "geography_pattern_6",
+        "title": "as a mountain that wades in the sea and has its he...",
+        "description": "as a mountain that wades in the sea and has its head above the clouds and is clad in ice and crowned with smoke and fire",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "And he descended upon Arda in power and majesty greater than any other of the Valar, as a mountain that wades in the sea and has its head above the clouds and is clad in ice and crowned with smoke and",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P139",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "geography_pattern_7",
+        "title": "For what has here been declared is come from the V...",
+        "description": "For what has here been declared is come from the Valar themselves",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "For what has here been declared is come from the Valar themselves, with whom the Eldalie spoke in the land of Valinor, and by whom they were instructed; but little would the Valar ever tell of the war",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P140",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "geography_pattern_8",
+        "title": "and by whom they were instructed",
+        "description": "and by whom they were instructed",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "For what has here been declared is come from the Valar themselves, with whom the Eldalie spoke in the land of Valinor, and by whom they were instructed; but little would the Valar ever tell of the war",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P140",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "geography_pattern_9",
+        "title": "until in the time appointed was made Arda",
+        "description": "until in the time appointed was made Arda",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "Long they laboured in the regions of Ea, which are vast beyond the thought of Elves and Men, until in the time appointed was made Arda, the Kingdom of Earth.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P144",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "geography_pattern_10",
+        "title": "If the Children of Eru beheld him they were filled...",
+        "description": "If the Children of Eru beheld him they were filled with a great dread",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "If the Children of Eru beheld him they were filled with a great dread; for the arising of the King of the Sea was terrible, as a mounting wave that strides to the land, with dark helm foam-crested and",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P150",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "geography_pattern_11",
+        "title": "for the arising of the King of the Sea was terribl...",
+        "description": "for the arising of the King of the Sea was terrible",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "If the Children of Eru beheld him they were filled with a great dread; for the arising of the King of the Sea was terrible, as a mounting wave that strides to the land, with dark helm foam-crested and",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P150",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "geography_pattern_12",
+        "title": "and longing for the sea never leaves them again",
+        "description": "and longing for the sea never leaves them again",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "At times he win come unseen to the shores of Middle-earth, or pass far inland up firths of the sea, and there make music upon his great horns, the Ulumuri, that are wrought of white shell; and those t",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P151",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "geography_pattern_13",
+        "title": "fountains and springs are in his government",
+        "description": "fountains and springs are in his government",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "For all seas, lakes, rivers, fountains and springs are in his government; so that the Elves say that the spirit of Ulmo runs in all the veins of the world.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P151",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "geography_pattern_14",
+        "title": "and the fashioning of all lands was his labour",
+        "description": "and the fashioning of all lands was his labour",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "In the beginning he wrought much in fellowship with Manwe and Ulmo; and the fashioning of all lands was his labour.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P152",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "geography_pattern_15",
+        "title": "His are the gems that lie deep in the Earth and th...",
+        "description": "His are the gems that lie deep in the Earth and the gold that is fair in the hand",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "His are the gems that lie deep in the Earth and the gold that is fair in the hand, no less than the walls of the mountains and the basins of the sea.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P152",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "geography_pattern_16",
+        "title": "In Lorien are his gardens in the land of the Valar",
+        "description": "In Lorien are his gardens in the land of the Valar",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "In Lorien are his gardens in the land of the Valar, and they are the fairest of all places in the world, filled with many spirits.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P157",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "geography_pattern_17",
+        "title": "Her halls are west of West",
+        "description": "Her halls are west of West",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "Her halls are west of West, upon the borders of the world; and she comes seldom to the city of Valimar where all is glad.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P159",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "geography_pattern_18",
+        "title": "and she comes seldom to the city of Valimar where ...",
+        "description": "and she comes seldom to the city of Valimar where all is glad",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "Her halls are west of West, upon the borders of the world; and she comes seldom to the city of Valimar where all is glad.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P159",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "geography_pattern_19",
+        "title": "for which reason he is called Aldaron",
+        "description": "for which reason he is called Aldaron",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "He is a hunter of monsters and fell beasts, and he delights in horses and in hounds; and all trees he loves, for which reason he is called Aldaron, and by the Sindar Tauron, the Lord of Forests.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P161",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "geography_pattern_20",
+        "title": "Osse is a vassal of Ulmo",
+        "description": "Osse is a vassal of Ulmo",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "Osse is a vassal of Ulmo, and he is master of the seas that wash the shores of Middle-earth.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P167",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "geography_pattern_21",
+        "title": "and he is master of the seas that wash the shores ...",
+        "description": "and he is master of the seas that wash the shores of Middle",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "Osse is a vassal of Ulmo, and he is master of the seas that wash the shores of Middle-earth.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P167",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "geography_pattern_22",
+        "title": "His spouse is Uinen",
+        "description": "His spouse is Uinen",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "His spouse is Uinen, the Lady of the Seas, whose hair lies spread through all waters under sky.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P167",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "geography_pattern_23",
+        "title": "So it was that long ago there arose great tumults ...",
+        "description": "So it was that long ago there arose great tumults in the sea that wrought ruin to the lands",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "So it was that long ago there arose great tumults in the sea that wrought ruin to the lands.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P168",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "geography_pattern_24",
+        "title": "Therefore those who dwell by the sea or go up in s...",
+        "description": "Therefore those who dwell by the sea or go up in ships may love him",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "Therefore those who dwell by the sea or go up in ships may love him, but they do not trust him.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P168",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "geography_pattern_25",
+        "title": "and Arda was filled with the sound of his laughter",
+        "description": "and Arda was filled with the sound of his laughter",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "But in the midst of the war a spirit of great strength and hardihood came to the aid of the Valar, hearing in the far heaven that there was battle in the Little Kingdom; and Arda was filled with the s",
+            "book": "silmarillion.txt",
+            "location": "Ch.2, P1",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "geography_pattern_26",
+        "title": "more lofty far than are any mountains of the later...",
+        "description": "more lofty far than are any mountains of the later days",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "Then Varda filled the lamps and Manwe hallowed them, and the Valar set them upon high pillars, more lofty far than are any mountains of the later days.",
+            "book": "silmarillion.txt",
+            "location": "Ch.2, P2",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "geography_pattern_27",
+        "title": "and trees whose tops were crowned with cloud as th...",
+        "description": "and trees whose tops were crowned with cloud as they were living mountains",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "Then the seeds that Yavanna had sown began swiftly to sprout and to burgeon, and there arose a multitude of growing things great and small, mosses and grasses and great ferns, and trees whose tops wer",
+            "book": "silmarillion.txt",
+            "location": "Ch.2, P3",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "geography_pattern_28",
+        "title": "but whose feet were wrapped in a green twilight",
+        "description": "but whose feet were wrapped in a green twilight",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "Then the seeds that Yavanna had sown began swiftly to sprout and to burgeon, and there arose a multitude of growing things great and small, mosses and grasses and great ferns, and trees whose tops wer",
+            "book": "silmarillion.txt",
+            "location": "Ch.2, P3",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "geography_pattern_29",
+        "title": "And there upon the Isle of Almaren in the Great La...",
+        "description": "And there upon the Isle of Almaren in the Great Lake was the first dwelling of the Valar when all things were young",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "And there upon the Isle of Almaren in the Great Lake was the first dwelling of the Valar when all things were young, and new-made green was yet a marvel in the eyes of the makers; and they were long c",
+            "book": "silmarillion.txt",
+            "location": "Ch.2, P4",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "geography_pattern_30",
+        "title": "In the overthrow of the mighty pillars lands were ...",
+        "description": "In the overthrow of the mighty pillars lands were broken and seas arose in tumult",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "In the overthrow of the mighty pillars lands were broken and seas arose in tumult; and when the lamps were spilled destroying flame was poured out over the Earth.",
+            "book": "silmarillion.txt",
+            "location": "Ch.2, P9",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "geography_pattern_31",
+        "title": "and when the lamps were spilled destroying flame w...",
+        "description": "and when the lamps were spilled destroying flame was poured out over the Earth",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "In the overthrow of the mighty pillars lands were broken and seas arose in tumult; and when the lamps were spilled destroying flame was poured out over the Earth.",
+            "book": "silmarillion.txt",
+            "location": "Ch.2, P9",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "geography_pattern_32",
+        "title": "And the shape of Arda and the symmetry of its wate...",
+        "description": "And the shape of Arda and the symmetry of its waters and its lands was marred in that time",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "And the shape of Arda and the symmetry of its waters and its lands was marred in that time, so that the first designs of the Valar were never after restored.",
+            "book": "silmarillion.txt",
+            "location": "Ch.2, P9",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "geography_pattern_33",
+        "title": "so that the first designs of the Valar were never",
+        "description": "so that the first designs of the Valar were never",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "And the shape of Arda and the symmetry of its waters and its lands was marred in that time, so that the first designs of the Valar were never after restored.",
+            "book": "silmarillion.txt",
+            "location": "Ch.2, P9",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "geography_pattern_34",
+        "title": "that is called by the Elves Ekkaia",
+        "description": "that is called by the Elves Ekkaia",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "Therefore they departed from Middle-earth and went to the Land of Aman, the westernmost of all lands upon the borders of the world; for its west shores looked upon the Outer Sea, that is called by the",
+            "book": "silmarillion.txt",
+            "location": "Ch.2, P11",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "geography_pattern_35",
+        "title": "How wide is that sea none know but the Valar",
+        "description": "How wide is that sea none know but the Valar",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "How wide is that sea none know but the Valar; and beyond it are the Walls of the Night.",
+            "book": "silmarillion.txt",
+            "location": "Ch.2, P11",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "geography_pattern_36",
+        "title": "and beyond it are the Walls of the Night",
+        "description": "and beyond it are the Walls of the Night",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "How wide is that sea none know but the Valar; and beyond it are the Walls of the Night.",
+            "book": "silmarillion.txt",
+            "location": "Ch.2, P11",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "geography_pattern_37",
+        "title": "But the east shores of Aman were the uttermost end...",
+        "description": "But the east shores of Aman were the uttermost end of Belegaer",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "But the east shores of Aman were the uttermost end of Belegaer, the Great Sea at the West; and since Melkor was returned to Middle-earth and they could not yet overcome him, the Valar fortified their ",
+            "book": "silmarillion.txt",
+            "location": "Ch.2, P11",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "geography_pattern_38",
+        "title": "And above all the mountains of the Pelori was that...",
+        "description": "And above all the mountains of the Pelori was that height upon whose summit Manwe set his throne",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "And above all the mountains of the Pelori was that height upon whose summit Manwe set his throne.",
+            "book": "silmarillion.txt",
+            "location": "Ch.2, P12",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "geography_pattern_39",
+        "title": "neither was there any stain upon flower or leaf in...",
+        "description": "neither was there any stain upon flower or leaf in that land",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "In that guarded land the Valar gathered great store of light and an the fairest things that were saved from the ruin; and many others yet fairer they made anew, and Valinor became more beautiful even ",
+            "book": "silmarillion.txt",
+            "location": "Ch.2, P13",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "geography_pattern_40",
+        "title": "wrought and the mansions of the Valar were establi...",
+        "description": "wrought and the mansions of the Valar were established",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "And when Valinor was full-wrought and the mansions of the Valar were established, in the midst of the plain beyond the mountains they built their city, Valmar of many bells.",
+            "book": "silmarillion.txt",
+            "location": "Ch.2, P14",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "geography_pattern_41",
+        "title": "that were to all the land of the Valar as wells of...",
+        "description": "that were to all the land of the Valar as wells of water and of light",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "But the light that was spilled from the trees endured long, ere it was taken up into the airs or sank down into the earth; and the dews of Telperion and the rain that fell from Laurelin Varda hoarded ",
+            "book": "silmarillion.txt",
+            "location": "Ch.2, P18",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "geography_pattern_42",
+        "title": "And in the midst of the Blessed Realm were the man...",
+        "description": "And in the midst of the Blessed Realm were the mansions of Aule",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "And in the midst of the Blessed Realm were the mansions of Aule, and there he laboured long.",
+            "book": "silmarillion.txt",
+            "location": "Ch.2, P21",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "geography_pattern_43",
+        "title": "For his throne was set in majesty upon the pinnacl...",
+        "description": "For his throne was set in majesty upon the pinnacle of Taniquetil",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "For his throne was set in majesty upon the pinnacle of Taniquetil, the highest of the mountains of the world, standing upon the margin of the sea.",
+            "book": "silmarillion.txt",
+            "location": "Ch.2, P22",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "geography_pattern_44",
+        "title": "yet some things were hidden even from the eyes of ...",
+        "description": "yet some things were hidden even from the eyes of Manwe and the servants of Manwe",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "Thus they brought word to him of well nigh all that passed in Arda; yet some things were hidden even from the eyes of Manwe and the servants of Manwe, for where Melkor sat in his dark thought impenetr",
+            "book": "silmarillion.txt",
+            "location": "Ch.2, P22",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "geography_pattern_45",
+        "title": "And in that time of dark Yavanna also was unwillin...",
+        "description": "And in that time of dark Yavanna also was unwilling utterly to forsake the Outer Lands",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "And in that time of dark Yavanna also was unwilling utterly to forsake the Outer Lands; for all things teat grow are dear to her, and she mourned for the works that she had begun in Middle-earth but M",
+            "book": "silmarillion.txt",
+            "location": "Ch.2, P26",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "geography_pattern_46",
+        "title": "for all things teat grow are dear to her",
+        "description": "for all things teat grow are dear to her",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "And in that time of dark Yavanna also was unwilling utterly to forsake the Outer Lands; for all things teat grow are dear to her, and she mourned for the works that she had begun in Middle-earth but M",
+            "book": "silmarillion.txt",
+            "location": "Ch.2, P26",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "geography_pattern_47",
+        "title": "and the lands were filled with shadows and deceit",
+        "description": "and the lands were filled with shadows and deceit",
+        "category": "geography",
+        "source_passages": [
+          {
+            "text": "But even as Orome passed the servants of Melkor would gather again; and the lands were filled with shadows and deceit.",
+            "book": "silmarillion.txt",
+            "location": "Ch.2, P27",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.85,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      }
+    ],
+    "creatures": [
+      {
+        "id": "creatures_0",
+        "title": "Creatures of the Valar",
+        "description": "Creatures brought into existence by the Valar are sustained by their thought and can only move when the Valar think to move them.",
+        "category": "creatures",
+        "source_passages": [
+          {
+            "text": "<div id=\"nav-tophat\" class=\"collapse\"> <div class=\"row toprow web\" style=\"max-width:1000px;margin:auto;\"> <div class=\"col-xs-12\"> <div class=\"wayback-txt\"> Search the history of over 341 billion <a st",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P9",
+            "relevance": 1.0
+          },
+          {
+            "text": "The book, though entitled as it must be The Silmarillion, contains not only the Quenta Silmarillion, or Silmarillion proper, but also four other short works.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P102",
+            "relevance": 1.0
+          },
+          {
+            "text": "They are included according to my father's explicit intention; and by their inclusion is set forth the entire history is set forth from the Music of the Ainur in which the world began to the passing o",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P102",
+            "relevance": 1.0
+          },
+          {
+            "text": "But when the Valar entered into Ea they were at first astounded and at a loss, for it was as if naught was yet made which they had seen in vision, and all was but on point to begin and yet unshaped, a",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P134",
+            "relevance": 1.0
+          },
+          {
+            "text": "For the Great Music had been but the growth and flowering of thought in the Tuneless Halls, and the Vision only a foreshowing; but now they had entered in at the beginning of Time, and the Valar perce",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P134",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [
+          "require the Valar's thought to exist",
+          "require the Valar's thought to move"
+        ],
+        "exceptions": []
+      },
+      {
+        "id": "creatures_1",
+        "title": "Children of Iluvatar",
+        "description": "Elves and Men, as the Children of Iluvatar, cannot be altered or added to by the Ainur.",
+        "category": "creatures",
+        "source_passages": [
+          {
+            "text": "<div id=\"nav-tophat\" class=\"collapse\"> <div class=\"row toprow web\" style=\"max-width:1000px;margin:auto;\"> <div class=\"col-xs-12\"> <div class=\"wayback-txt\"> Search the history of over 341 billion <a st",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P9",
+            "relevance": 1.0
+          },
+          {
+            "text": "The book, though entitled as it must be The Silmarillion, contains not only the Quenta Silmarillion, or Silmarillion proper, but also four other short works.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P102",
+            "relevance": 1.0
+          },
+          {
+            "text": "They are included according to my father's explicit intention; and by their inclusion is set forth the entire history is set forth from the Music of the Ainur in which the world began to the passing o",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P102",
+            "relevance": 1.0
+          },
+          {
+            "text": "But when the Valar entered into Ea they were at first astounded and at a loss, for it was as if naught was yet made which they had seen in vision, and all was but on point to begin and yet unshaped, a",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P134",
+            "relevance": 1.0
+          },
+          {
+            "text": "For the Great Music had been but the growth and flowering of thought in the Tuneless Halls, and the Vision only a foreshowing; but now they had entered in at the beginning of Time, and the Valar perce",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P134",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [
+          "cannot be altered or added to by the Ainur"
+        ],
+        "exceptions": []
+      },
+      {
+        "id": "creatures_2",
+        "title": "Quendi's Beauty",
+        "description": "The Quendi (Elves) are destined to be the fairest of all earthly creatures and bring forth more beauty than all other Children of Iluvatar.",
+        "category": "creatures",
+        "source_passages": [
+          {
+            "text": "<div id=\"nav-tophat\" class=\"collapse\"> <div class=\"row toprow web\" style=\"max-width:1000px;margin:auto;\"> <div class=\"col-xs-12\"> <div class=\"wayback-txt\"> Search the history of over 341 billion <a st",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P9",
+            "relevance": 1.0
+          },
+          {
+            "text": "The book, though entitled as it must be The Silmarillion, contains not only the Quenta Silmarillion, or Silmarillion proper, but also four other short works.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P102",
+            "relevance": 1.0
+          },
+          {
+            "text": "They are included according to my father's explicit intention; and by their inclusion is set forth the entire history is set forth from the Music of the Ainur in which the world began to the passing o",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P102",
+            "relevance": 1.0
+          },
+          {
+            "text": "But when the Valar entered into Ea they were at first astounded and at a loss, for it was as if naught was yet made which they had seen in vision, and all was but on point to begin and yet unshaped, a",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P134",
+            "relevance": 1.0
+          },
+          {
+            "text": "For the Great Music had been but the growth and flowering of thought in the Tuneless Halls, and the Vision only a foreshowing; but now they had entered in at the beginning of Time, and the Valar perce",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P134",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "creatures_3",
+        "title": "Monsters of Melkor",
+        "description": "The kingdom of Melkor is inhabited by monsters and fell creatures that can be hunted and pursued by the Valar.",
+        "category": "creatures",
+        "source_passages": [
+          {
+            "text": "<div id=\"nav-tophat\" class=\"collapse\"> <div class=\"row toprow web\" style=\"max-width:1000px;margin:auto;\"> <div class=\"col-xs-12\"> <div class=\"wayback-txt\"> Search the history of over 341 billion <a st",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P9",
+            "relevance": 1.0
+          },
+          {
+            "text": "The book, though entitled as it must be The Silmarillion, contains not only the Quenta Silmarillion, or Silmarillion proper, but also four other short works.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P102",
+            "relevance": 1.0
+          },
+          {
+            "text": "They are included according to my father's explicit intention; and by their inclusion is set forth the entire history is set forth from the Music of the Ainur in which the world began to the passing o",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P102",
+            "relevance": 1.0
+          },
+          {
+            "text": "But when the Valar entered into Ea they were at first astounded and at a loss, for it was as if naught was yet made which they had seen in vision, and all was but on point to begin and yet unshaped, a",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P134",
+            "relevance": 1.0
+          },
+          {
+            "text": "For the Great Music had been but the growth and flowering of thought in the Tuneless Halls, and the Vision only a foreshowing; but now they had entered in at the beginning of Time, and the Valar perce",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P134",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      }
+    ],
+    "history": [
+      {
+        "id": "history_0",
+        "title": "Ages of Middle-earth",
+        "description": "Middle-earth has multiple ages, including the First Age, Third Age, and others, each with distinct events and histories.",
+        "category": "history",
+        "source_passages": [
+          {
+            "text": "<div class=\"col-sm-2 col-xs-7 col-sm-push-4\"> <div class=\"linx\"> <h5>Featured</h5> <a href=\"https://archive.org/details/audio\"><span class=\"iconochive-audio\" aria-hidden=\"true\"></span><span class=\"sr-",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P25",
+            "relevance": 1.0
+          },
+          {
+            "text": "Tolkien's tragic, operatic history of the First Age of Middle-Earth, essential background material for serious readers of the classic Lord of the Rings saga.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P65",
+            "relevance": 1.0
+          },
+          {
+            "text": "Even the love between a human warrior and the daughter of the Elven king cannot defeat Morgoth, but the War of Wrath finally brings down the Dark Lord.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P65",
+            "relevance": 1.0
+          },
+          {
+            "text": "The Silmarillion, now published four years after the death of its author, is an account of the Elder Days, or the First Age of the World.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P97",
+            "relevance": 1.0
+          },
+          {
+            "text": "In The Lord of the Rings were narrated the great events at the end of the Third Age; but the tales of The Silmarillion are legends deriving from a much deeper past, when Morgoth, the first Dark Lord, ",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P97",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "history_1",
+        "title": "Historical Sources",
+        "description": "The history of Middle-earth is compiled from diverse sources, including poems, annals, and oral tales, which have survived through agelong tradition.",
+        "category": "history",
+        "source_passages": [
+          {
+            "text": "<div class=\"col-sm-2 col-xs-7 col-sm-push-4\"> <div class=\"linx\"> <h5>Featured</h5> <a href=\"https://archive.org/details/audio\"><span class=\"iconochive-audio\" aria-hidden=\"true\"></span><span class=\"sr-",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P25",
+            "relevance": 1.0
+          },
+          {
+            "text": "Tolkien's tragic, operatic history of the First Age of Middle-Earth, essential background material for serious readers of the classic Lord of the Rings saga.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P65",
+            "relevance": 1.0
+          },
+          {
+            "text": "Even the love between a human warrior and the daughter of the Elven king cannot defeat Morgoth, but the War of Wrath finally brings down the Dark Lord.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P65",
+            "relevance": 1.0
+          },
+          {
+            "text": "The Silmarillion, now published four years after the death of its author, is an account of the Elder Days, or the First Age of the World.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P97",
+            "relevance": 1.0
+          },
+          {
+            "text": "In The Lord of the Rings were narrated the great events at the end of the Third Age; but the tales of The Silmarillion are legends deriving from a much deeper past, when Morgoth, the first Dark Lord, ",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P97",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [
+          "Sources may be incomplete or inconsistent"
+        ],
+        "exceptions": [
+          "The Silmarillion is a compilation of these sources, but its narrative structure has undergone relatively little radical change over time"
+        ]
+      },
+      {
+        "id": "history_2",
+        "title": "Narrative Structure",
+        "description": "The narrative structure of Middle-earth's history can vary in speed and detail, depending on the source and the time period being described.",
+        "category": "history",
+        "source_passages": [
+          {
+            "text": "<div class=\"col-sm-2 col-xs-7 col-sm-push-4\"> <div class=\"linx\"> <h5>Featured</h5> <a href=\"https://archive.org/details/audio\"><span class=\"iconochive-audio\" aria-hidden=\"true\"></span><span class=\"sr-",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P25",
+            "relevance": 1.0
+          },
+          {
+            "text": "Tolkien's tragic, operatic history of the First Age of Middle-Earth, essential background material for serious readers of the classic Lord of the Rings saga.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P65",
+            "relevance": 1.0
+          },
+          {
+            "text": "Even the love between a human warrior and the daughter of the Elven king cannot defeat Morgoth, but the War of Wrath finally brings down the Dark Lord.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P65",
+            "relevance": 1.0
+          },
+          {
+            "text": "The Silmarillion, now published four years after the death of its author, is an account of the Elder Days, or the First Age of the World.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P97",
+            "relevance": 1.0
+          },
+          {
+            "text": "In The Lord of the Rings were narrated the great events at the end of the Third Age; but the tales of The Silmarillion are legends deriving from a much deeper past, when Morgoth, the first Dark Lord, ",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P97",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [
+          "The narrative structure may be influenced by the source material and the time period being described"
+        ],
+        "exceptions": [
+          "The Silmarillion's narrative structure has undergone relatively little radical change over time"
+        ]
+      },
+      {
+        "id": "history_3",
+        "title": "Time Periods",
+        "description": "Events in Middle-earth's history can be dated to specific time periods, such as the First Age or the Third Age.",
+        "category": "history",
+        "source_passages": [
+          {
+            "text": "<div class=\"col-sm-2 col-xs-7 col-sm-push-4\"> <div class=\"linx\"> <h5>Featured</h5> <a href=\"https://archive.org/details/audio\"><span class=\"iconochive-audio\" aria-hidden=\"true\"></span><span class=\"sr-",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P25",
+            "relevance": 1.0
+          },
+          {
+            "text": "Tolkien's tragic, operatic history of the First Age of Middle-Earth, essential background material for serious readers of the classic Lord of the Rings saga.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P65",
+            "relevance": 1.0
+          },
+          {
+            "text": "Even the love between a human warrior and the daughter of the Elven king cannot defeat Morgoth, but the War of Wrath finally brings down the Dark Lord.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P65",
+            "relevance": 1.0
+          },
+          {
+            "text": "The Silmarillion, now published four years after the death of its author, is an account of the Elder Days, or the First Age of the World.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P97",
+            "relevance": 1.0
+          },
+          {
+            "text": "In The Lord of the Rings were narrated the great events at the end of the Third Age; but the tales of The Silmarillion are legends deriving from a much deeper past, when Morgoth, the first Dark Lord, ",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P97",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "history_4",
+        "title": "Historical Records",
+        "description": "Middle-earth's history is recorded in various forms, including genealogical tables and indexes of names.",
+        "category": "history",
+        "source_passages": [
+          {
+            "text": "<div class=\"col-sm-2 col-xs-7 col-sm-push-4\"> <div class=\"linx\"> <h5>Featured</h5> <a href=\"https://archive.org/details/audio\"><span class=\"iconochive-audio\" aria-hidden=\"true\"></span><span class=\"sr-",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P25",
+            "relevance": 1.0
+          },
+          {
+            "text": "Tolkien's tragic, operatic history of the First Age of Middle-Earth, essential background material for serious readers of the classic Lord of the Rings saga.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P65",
+            "relevance": 1.0
+          },
+          {
+            "text": "Even the love between a human warrior and the daughter of the Elven king cannot defeat Morgoth, but the War of Wrath finally brings down the Dark Lord.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P65",
+            "relevance": 1.0
+          },
+          {
+            "text": "The Silmarillion, now published four years after the death of its author, is an account of the Elder Days, or the First Age of the World.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P97",
+            "relevance": 1.0
+          },
+          {
+            "text": "In The Lord of the Rings were narrated the great events at the end of the Third Age; but the tales of The Silmarillion are legends deriving from a much deeper past, when Morgoth, the first Dark Lord, ",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P97",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [
+          "The records may not be exhaustive or comprehensive"
+        ],
+        "exceptions": [
+          "The Silmarillion includes a full index of names and genealogical tables"
+        ]
+      }
+    ],
+    "themes": [
+      {
+        "id": "themes_0",
+        "title": "Music Creation Process",
+        "description": "The creation of music in the world of The Silmarillion involves the Ainur singing and playing instruments to fashion the theme of Il\u00favatar into a great music.",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "The Silmarillion is J.R.R.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P65",
+            "relevance": 1.0
+          },
+          {
+            "text": "This is epic fantasy at its finest, thrillingly read and gloriously unabridged.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P65",
+            "relevance": 1.0
+          },
+          {
+            "text": "Indeed, although it was not then called The Silmarillion, it was already in being half a century ago; and in battered notebooks extending back to 1917 can still be read the earliest versions, often ha",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P98",
+            "relevance": 1.0
+          },
+          {
+            "text": "But it was never published (though some indication of its content could be gleaned from The Lord of the Rings), and throughout my father's long life he never abandoned it, nor ceased even in his last ",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P98",
+            "relevance": 1.0
+          },
+          {
+            "text": "But it was far indeed from being a fixed text, and did not remain unchanged even in certain fundamental ideas concerning the nature of the world it portrays; while the same legends came to be retold i",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P98",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_1",
+        "title": "Il\u00favatar's Intent",
+        "description": "Il\u00favatar's intent is not fully understood by the Ainur until the end of time, when the themes of Il\u00favatar shall be played aright and take Being in the moment of their utterance.",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "The Silmarillion is J.R.R.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P65",
+            "relevance": 1.0
+          },
+          {
+            "text": "This is epic fantasy at its finest, thrillingly read and gloriously unabridged.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P65",
+            "relevance": 1.0
+          },
+          {
+            "text": "Indeed, although it was not then called The Silmarillion, it was already in being half a century ago; and in battered notebooks extending back to 1917 can still be read the earliest versions, often ha",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P98",
+            "relevance": 1.0
+          },
+          {
+            "text": "But it was never published (though some indication of its content could be gleaned from The Lord of the Rings), and throughout my father's long life he never abandoned it, nor ceased even in his last ",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P98",
+            "relevance": 1.0
+          },
+          {
+            "text": "But it was far indeed from being a fixed text, and did not remain unchanged even in certain fundamental ideas concerning the nature of the world it portrays; while the same legends came to be retold i",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P98",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_2",
+        "title": "Music and Discord",
+        "description": "When Il\u00favatar introduces new thoughts into the music, discord arises, and some of the Ainur grow despondent, while others attune their music to his.",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "The Silmarillion is J.R.R.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P65",
+            "relevance": 1.0
+          },
+          {
+            "text": "This is epic fantasy at its finest, thrillingly read and gloriously unabridged.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P65",
+            "relevance": 1.0
+          },
+          {
+            "text": "Indeed, although it was not then called The Silmarillion, it was already in being half a century ago; and in battered notebooks extending back to 1917 can still be read the earliest versions, often ha",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P98",
+            "relevance": 1.0
+          },
+          {
+            "text": "But it was never published (though some indication of its content could be gleaned from The Lord of the Rings), and throughout my father's long life he never abandoned it, nor ceased even in his last ",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P98",
+            "relevance": 1.0
+          },
+          {
+            "text": "But it was far indeed from being a fixed text, and did not remain unchanged even in certain fundamental ideas concerning the nature of the world it portrays; while the same legends came to be retold i",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P98",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_3",
+        "title": "Il\u00favatar's Control",
+        "description": "Il\u00favatar has control over the music and can introduce new themes, as evidenced by the third theme that grew amid the confusion.",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "The Silmarillion is J.R.R.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P65",
+            "relevance": 1.0
+          },
+          {
+            "text": "This is epic fantasy at its finest, thrillingly read and gloriously unabridged.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P65",
+            "relevance": 1.0
+          },
+          {
+            "text": "Indeed, although it was not then called The Silmarillion, it was already in being half a century ago; and in battered notebooks extending back to 1917 can still be read the earliest versions, often ha",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P98",
+            "relevance": 1.0
+          },
+          {
+            "text": "But it was never published (though some indication of its content could be gleaned from The Lord of the Rings), and throughout my father's long life he never abandoned it, nor ceased even in his last ",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P98",
+            "relevance": 1.0
+          },
+          {
+            "text": "But it was far indeed from being a fixed text, and did not remain unchanged even in certain fundamental ideas concerning the nature of the world it portrays; while the same legends came to be retold i",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P98",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "themes_4",
+        "title": "Unique Music",
+        "description": "The music created by the Ainur in the beginning is unique and has never been repeated, although it has been said that a greater music shall be made before the end of time.",
+        "category": "themes",
+        "source_passages": [
+          {
+            "text": "The Silmarillion is J.R.R.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P65",
+            "relevance": 1.0
+          },
+          {
+            "text": "This is epic fantasy at its finest, thrillingly read and gloriously unabridged.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P65",
+            "relevance": 1.0
+          },
+          {
+            "text": "Indeed, although it was not then called The Silmarillion, it was already in being half a century ago; and in battered notebooks extending back to 1917 can still be read the earliest versions, often ha",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P98",
+            "relevance": 1.0
+          },
+          {
+            "text": "But it was never published (though some indication of its content could be gleaned from The Lord of the Rings), and throughout my father's long life he never abandoned it, nor ceased even in his last ",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P98",
+            "relevance": 1.0
+          },
+          {
+            "text": "But it was far indeed from being a fixed text, and did not remain unchanged even in certain fundamental ideas concerning the nature of the world it portrays; while the same legends came to be retold i",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P98",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      }
+    ],
+    "cosmology": [
+      {
+        "id": "cosmology_0",
+        "title": "Creation of the World",
+        "description": "The world was created by Eru (Il\u00favatar) through the Music of the Ainur, where the Ainur sang a theme given by Il\u00favatar, and the music became the foundation of the world.",
+        "category": "cosmology",
+        "source_passages": [
+          {
+            "text": "Tolkien's tragic, operatic history of the First Age of Middle-Earth, essential background material for serious readers of the classic Lord of the Rings saga.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P65",
+            "relevance": 1.0
+          },
+          {
+            "text": "Tolkien's work sets the standard for fantasy, and this audio version of the \"Bible of Middle- Earth\" does The Silmarillion justice.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P65",
+            "relevance": 1.0
+          },
+          {
+            "text": "Beginning with the Music of the Ainur, The Silmarillion tells a tale of the Elder Days, when Elves and Men became estranged by the Dark Lord Morgoth's lust for the Silmarils, pure and powerful magic j",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P65",
+            "relevance": 1.0
+          },
+          {
+            "text": "Even the love between a human warrior and the daughter of the Elven king cannot defeat Morgoth, but the War of Wrath finally brings down the Dark Lord.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P65",
+            "relevance": 1.0
+          },
+          {
+            "text": "The Silmarillion, now published four years after the death of its author, is an account of the Elder Days, or the First Age of the World.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P97",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "cosmology_1",
+        "title": "Origin of the Ainur",
+        "description": "The Ainur were created by Il\u00favatar as the offspring of his thought, and they existed before the creation of the world.",
+        "category": "cosmology",
+        "source_passages": [
+          {
+            "text": "Tolkien's tragic, operatic history of the First Age of Middle-Earth, essential background material for serious readers of the classic Lord of the Rings saga.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P65",
+            "relevance": 1.0
+          },
+          {
+            "text": "Tolkien's work sets the standard for fantasy, and this audio version of the \"Bible of Middle- Earth\" does The Silmarillion justice.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P65",
+            "relevance": 1.0
+          },
+          {
+            "text": "Beginning with the Music of the Ainur, The Silmarillion tells a tale of the Elder Days, when Elves and Men became estranged by the Dark Lord Morgoth's lust for the Silmarils, pure and powerful magic j",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P65",
+            "relevance": 1.0
+          },
+          {
+            "text": "Even the love between a human warrior and the daughter of the Elven king cannot defeat Morgoth, but the War of Wrath finally brings down the Dark Lord.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P65",
+            "relevance": 1.0
+          },
+          {
+            "text": "The Silmarillion, now published four years after the death of its author, is an account of the Elder Days, or the First Age of the World.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P97",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "cosmology_2",
+        "title": "Il\u00favatar's Role in Creation",
+        "description": "Il\u00favatar is the supreme creator, and he kindled the Ainur with the Flame Imperishable, giving them the power to participate in the creation of the world.",
+        "category": "cosmology",
+        "source_passages": [
+          {
+            "text": "Tolkien's tragic, operatic history of the First Age of Middle-Earth, essential background material for serious readers of the classic Lord of the Rings saga.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P65",
+            "relevance": 1.0
+          },
+          {
+            "text": "Tolkien's work sets the standard for fantasy, and this audio version of the \"Bible of Middle- Earth\" does The Silmarillion justice.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P65",
+            "relevance": 1.0
+          },
+          {
+            "text": "Beginning with the Music of the Ainur, The Silmarillion tells a tale of the Elder Days, when Elves and Men became estranged by the Dark Lord Morgoth's lust for the Silmarils, pure and powerful magic j",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P65",
+            "relevance": 1.0
+          },
+          {
+            "text": "Even the love between a human warrior and the daughter of the Elven king cannot defeat Morgoth, but the War of Wrath finally brings down the Dark Lord.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P65",
+            "relevance": 1.0
+          },
+          {
+            "text": "The Silmarillion, now published four years after the death of its author, is an account of the Elder Days, or the First Age of the World.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P97",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "cosmology_3",
+        "title": "Structure of the World's History",
+        "description": "The world's history is divided into ages, with the First Age being the time of the Elder Days, and the Third Age being the time of the events of The Lord of the Rings.",
+        "category": "cosmology",
+        "source_passages": [
+          {
+            "text": "Tolkien's tragic, operatic history of the First Age of Middle-Earth, essential background material for serious readers of the classic Lord of the Rings saga.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P65",
+            "relevance": 1.0
+          },
+          {
+            "text": "Tolkien's work sets the standard for fantasy, and this audio version of the \"Bible of Middle- Earth\" does The Silmarillion justice.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P65",
+            "relevance": 1.0
+          },
+          {
+            "text": "Beginning with the Music of the Ainur, The Silmarillion tells a tale of the Elder Days, when Elves and Men became estranged by the Dark Lord Morgoth's lust for the Silmarils, pure and powerful magic j",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P65",
+            "relevance": 1.0
+          },
+          {
+            "text": "Even the love between a human warrior and the daughter of the Elven king cannot defeat Morgoth, but the War of Wrath finally brings down the Dark Lord.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P65",
+            "relevance": 1.0
+          },
+          {
+            "text": "The Silmarillion, now published four years after the death of its author, is an account of the Elder Days, or the First Age of the World.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P97",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      }
+    ],
+    "magic": [
+      {
+        "id": "magic_0",
+        "title": "Ainur Power Containment",
+        "description": "The power of the Ainur is contained and bounded within the World, to be within it for ever, until it is complete.",
+        "category": "magic",
+        "source_passages": [
+          {
+            "text": "Martin Shaw's reading is grave and resonant, conveying all the powerful events and emotions that shaped elven and human history long before Bilbo, Frodo, Gandalf and all the rest embarked on their que",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P65",
+            "relevance": 1.0
+          },
+          {
+            "text": "Beginning with the Music of the Ainur, The Silmarillion tells a tale of the Elder Days, when Elves and Men became estranged by the Dark Lord Morgoth's lust for the Silmarils, pure and powerful magic j",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P65",
+            "relevance": 1.0
+          },
+          {
+            "text": "Peace reigns until the evil Sauron recovers the Rings of Power and sets the stage for the events told in the Lord of the Rings.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P65",
+            "relevance": 1.0
+          },
+          {
+            "text": "OF THE RINGS OF POWER",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P92",
+            "relevance": 1.0
+          },
+          {
+            "text": "In the case of the Valaquenta, for instance, we have to assume that while it contains much that must go back to the earliest days of the Eldar in Valinor, it was remodelled in later times; and thus ex",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P101",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [
+          "Within the World",
+          "Until the World is complete"
+        ],
+        "exceptions": []
+      },
+      {
+        "id": "magic_1",
+        "title": "Music of the Ainur Limitation",
+        "description": "The Valar have not seen as with sight the Later Ages or the ending of the World, even though the Music is over all.",
+        "category": "magic",
+        "source_passages": [
+          {
+            "text": "Martin Shaw's reading is grave and resonant, conveying all the powerful events and emotions that shaped elven and human history long before Bilbo, Frodo, Gandalf and all the rest embarked on their que",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P65",
+            "relevance": 1.0
+          },
+          {
+            "text": "Beginning with the Music of the Ainur, The Silmarillion tells a tale of the Elder Days, when Elves and Men became estranged by the Dark Lord Morgoth's lust for the Silmarils, pure and powerful magic j",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P65",
+            "relevance": 1.0
+          },
+          {
+            "text": "Peace reigns until the evil Sauron recovers the Rings of Power and sets the stage for the events told in the Lord of the Rings.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P65",
+            "relevance": 1.0
+          },
+          {
+            "text": "OF THE RINGS OF POWER",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P92",
+            "relevance": 1.0
+          },
+          {
+            "text": "In the case of the Valaquenta, for instance, we have to assume that while it contains much that must go back to the earliest days of the Eldar in Valinor, it was remodelled in later times; and thus ex",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P101",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [
+          "Limited to the scope of the original vision"
+        ],
+        "exceptions": []
+      },
+      {
+        "id": "magic_2",
+        "title": "Darkness Emergence",
+        "description": "Darkness emerged as a new thing when the vision of the World was taken away from the Ainur.",
+        "category": "magic",
+        "source_passages": [
+          {
+            "text": "Martin Shaw's reading is grave and resonant, conveying all the powerful events and emotions that shaped elven and human history long before Bilbo, Frodo, Gandalf and all the rest embarked on their que",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P65",
+            "relevance": 1.0
+          },
+          {
+            "text": "Beginning with the Music of the Ainur, The Silmarillion tells a tale of the Elder Days, when Elves and Men became estranged by the Dark Lord Morgoth's lust for the Silmarils, pure and powerful magic j",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P65",
+            "relevance": 1.0
+          },
+          {
+            "text": "Peace reigns until the evil Sauron recovers the Rings of Power and sets the stage for the events told in the Lord of the Rings.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P65",
+            "relevance": 1.0
+          },
+          {
+            "text": "OF THE RINGS OF POWER",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P92",
+            "relevance": 1.0
+          },
+          {
+            "text": "In the case of the Valaquenta, for instance, we have to assume that while it contains much that must go back to the earliest days of the Eldar in Valinor, it was remodelled in later times; and thus ex",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P101",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [
+          "Requires the absence of the vision"
+        ],
+        "exceptions": []
+      },
+      {
+        "id": "magic_3",
+        "title": "Il\u00favatar's Gift of Power",
+        "description": "Il\u00favatar can give power and knowledge to the Ainur, and can also take it away or limit it.",
+        "category": "magic",
+        "source_passages": [
+          {
+            "text": "Martin Shaw's reading is grave and resonant, conveying all the powerful events and emotions that shaped elven and human history long before Bilbo, Frodo, Gandalf and all the rest embarked on their que",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P65",
+            "relevance": 1.0
+          },
+          {
+            "text": "Beginning with the Music of the Ainur, The Silmarillion tells a tale of the Elder Days, when Elves and Men became estranged by the Dark Lord Morgoth's lust for the Silmarils, pure and powerful magic j",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P65",
+            "relevance": 1.0
+          },
+          {
+            "text": "Peace reigns until the evil Sauron recovers the Rings of Power and sets the stage for the events told in the Lord of the Rings.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P65",
+            "relevance": 1.0
+          },
+          {
+            "text": "OF THE RINGS OF POWER",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P92",
+            "relevance": 1.0
+          },
+          {
+            "text": "In the case of the Valaquenta, for instance, we have to assume that while it contains much that must go back to the earliest days of the Eldar in Valinor, it was remodelled in later times; and thus ex",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P101",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [
+          "Dependent on Il\u00favatar's will"
+        ],
+        "exceptions": []
+      },
+      {
+        "id": "magic_4",
+        "title": "Ainur Creative Freedom",
+        "description": "The Ainur have the freedom to show forth their powers in adorning a theme, each with his own thoughts and devices.",
+        "category": "magic",
+        "source_passages": [
+          {
+            "text": "Martin Shaw's reading is grave and resonant, conveying all the powerful events and emotions that shaped elven and human history long before Bilbo, Frodo, Gandalf and all the rest embarked on their que",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P65",
+            "relevance": 1.0
+          },
+          {
+            "text": "Beginning with the Music of the Ainur, The Silmarillion tells a tale of the Elder Days, when Elves and Men became estranged by the Dark Lord Morgoth's lust for the Silmarils, pure and powerful magic j",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P65",
+            "relevance": 1.0
+          },
+          {
+            "text": "Peace reigns until the evil Sauron recovers the Rings of Power and sets the stage for the events told in the Lord of the Rings.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P65",
+            "relevance": 1.0
+          },
+          {
+            "text": "OF THE RINGS OF POWER",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P92",
+            "relevance": 1.0
+          },
+          {
+            "text": "In the case of the Valaquenta, for instance, we have to assume that while it contains much that must go back to the earliest days of the Eldar in Valinor, it was remodelled in later times; and thus ex",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P101",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [
+          "Within the scope of the original theme"
+        ],
+        "exceptions": [
+          "Melkor's attempt to interweave matters of his own imagining"
+        ]
+      }
+    ],
+    "culture": [
+      {
+        "id": "culture_0",
+        "title": "Elven Mortality",
+        "description": "Elves do not die of natural causes unless they are slain, waste away in grief, or grow weary after many centuries.",
+        "category": "culture",
+        "source_passages": [
+          {
+            "text": "The Silmarillion, now published four years after the death of its author, is an account of the Elder Days, or the First Age of the World.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P97",
+            "relevance": 1.0
+          },
+          {
+            "text": "In all that time The Silmarillion, considered simply as a large narrative structure, underwent relatively little radical change; it became long ago a fixed tradition, and background to later writings.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P98",
+            "relevance": 1.0
+          },
+          {
+            "text": "On my father's death it fell to me to try to bring the work",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P99",
+            "relevance": 1.0
+          },
+          {
+            "text": "In this work the concluding chapters (from the death of Turin Turambar) introduced peculiar difficulties, in that they had remained unchanged for many years, and were in some respects in serious disha",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P100",
+            "relevance": 1.0
+          },
+          {
+            "text": "Moreover, my father came to conceive The Silmarillion as a compilation, a compendious narrative, made long afterwards from sources of great diversity (poems, and annals, and oral tales) that had survi",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P101",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": [
+          "slain",
+          "waste away in grief",
+          "grow weary after many centuries"
+        ]
+      },
+      {
+        "id": "culture_1",
+        "title": "Elven Afterlife",
+        "description": "When Elves die, they are gathered to the halls of Mandos in Valinor.",
+        "category": "culture",
+        "source_passages": [
+          {
+            "text": "The Silmarillion, now published four years after the death of its author, is an account of the Elder Days, or the First Age of the World.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P97",
+            "relevance": 1.0
+          },
+          {
+            "text": "In all that time The Silmarillion, considered simply as a large narrative structure, underwent relatively little radical change; it became long ago a fixed tradition, and background to later writings.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P98",
+            "relevance": 1.0
+          },
+          {
+            "text": "On my father's death it fell to me to try to bring the work",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P99",
+            "relevance": 1.0
+          },
+          {
+            "text": "In this work the concluding chapters (from the death of Turin Turambar) introduced peculiar difficulties, in that they had remained unchanged for many years, and were in some respects in serious disha",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P100",
+            "relevance": 1.0
+          },
+          {
+            "text": "Moreover, my father came to conceive The Silmarillion as a compilation, a compendious narrative, made long afterwards from sources of great diversity (poems, and annals, and oral tales) that had survi",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P101",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "culture_2",
+        "title": "Gifts of Iluvatar",
+        "description": "Iluvatar gives unique gifts to each of the Children of Iluvatar (Elves and Men), which are suited to their nature.",
+        "category": "culture",
+        "source_passages": [
+          {
+            "text": "The Silmarillion, now published four years after the death of its author, is an account of the Elder Days, or the First Age of the World.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P97",
+            "relevance": 1.0
+          },
+          {
+            "text": "In all that time The Silmarillion, considered simply as a large narrative structure, underwent relatively little radical change; it became long ago a fixed tradition, and background to later writings.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P98",
+            "relevance": 1.0
+          },
+          {
+            "text": "On my father's death it fell to me to try to bring the work",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P99",
+            "relevance": 1.0
+          },
+          {
+            "text": "In this work the concluding chapters (from the death of Turin Turambar) introduced peculiar difficulties, in that they had remained unchanged for many years, and were in some respects in serious disha",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P100",
+            "relevance": 1.0
+          },
+          {
+            "text": "Moreover, my father came to conceive The Silmarillion as a compilation, a compendious narrative, made long afterwards from sources of great diversity (poems, and annals, and oral tales) that had survi",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P101",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "culture_3",
+        "title": "Human Mortality",
+        "description": "Men have a short lifespan in the world and are not bound to it, departing soon after their time is up.",
+        "category": "culture",
+        "source_passages": [
+          {
+            "text": "The Silmarillion, now published four years after the death of its author, is an account of the Elder Days, or the First Age of the World.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P97",
+            "relevance": 1.0
+          },
+          {
+            "text": "In all that time The Silmarillion, considered simply as a large narrative structure, underwent relatively little radical change; it became long ago a fixed tradition, and background to later writings.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P98",
+            "relevance": 1.0
+          },
+          {
+            "text": "On my father's death it fell to me to try to bring the work",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P99",
+            "relevance": 1.0
+          },
+          {
+            "text": "In this work the concluding chapters (from the death of Turin Turambar) introduced peculiar difficulties, in that they had remained unchanged for many years, and were in some respects in serious disha",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P100",
+            "relevance": 1.0
+          },
+          {
+            "text": "Moreover, my father came to conceive The Silmarillion as a compilation, a compendious narrative, made long afterwards from sources of great diversity (poems, and annals, and oral tales) that had survi",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P101",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      },
+      {
+        "id": "culture_4",
+        "title": "Ainur Interactions",
+        "description": "The Ainur mostly interact with the Elves, as they are more similar in nature to the Ainur.",
+        "category": "culture",
+        "source_passages": [
+          {
+            "text": "The Silmarillion, now published four years after the death of its author, is an account of the Elder Days, or the First Age of the World.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P97",
+            "relevance": 1.0
+          },
+          {
+            "text": "In all that time The Silmarillion, considered simply as a large narrative structure, underwent relatively little radical change; it became long ago a fixed tradition, and background to later writings.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P98",
+            "relevance": 1.0
+          },
+          {
+            "text": "On my father's death it fell to me to try to bring the work",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P99",
+            "relevance": 1.0
+          },
+          {
+            "text": "In this work the concluding chapters (from the death of Turin Turambar) introduced peculiar difficulties, in that they had remained unchanged for many years, and were in some respects in serious disha",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P100",
+            "relevance": 1.0
+          },
+          {
+            "text": "Moreover, my father came to conceive The Silmarillion as a compilation, a compendious narrative, made long afterwards from sources of great diversity (poems, and annals, and oral tales) that had survi",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P101",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": [
+          "Men, who are given strange gifts"
+        ]
+      },
+      {
+        "id": "culture_5",
+        "title": "Valar's Relationship with Elves",
+        "description": "The Valar, particularly Aule, have a close relationship with the Elves, teaching them and learning from them.",
+        "category": "culture",
+        "source_passages": [
+          {
+            "text": "The Silmarillion, now published four years after the death of its author, is an account of the Elder Days, or the First Age of the World.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P97",
+            "relevance": 1.0
+          },
+          {
+            "text": "In all that time The Silmarillion, considered simply as a large narrative structure, underwent relatively little radical change; it became long ago a fixed tradition, and background to later writings.",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P98",
+            "relevance": 1.0
+          },
+          {
+            "text": "On my father's death it fell to me to try to bring the work",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P99",
+            "relevance": 1.0
+          },
+          {
+            "text": "In this work the concluding chapters (from the death of Turin Turambar) introduced peculiar difficulties, in that they had remained unchanged for many years, and were in some respects in serious disha",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P100",
+            "relevance": 1.0
+          },
+          {
+            "text": "Moreover, my father came to conceive The Silmarillion as a compilation, a compendious narrative, made long afterwards from sources of great diversity (poems, and annals, and oral tales) that had survi",
+            "book": "silmarillion.txt",
+            "location": "Ch.1, P101",
+            "relevance": 1.0
+          }
+        ],
+        "confidence": 0.8,
+        "keywords": [],
+        "related_entities": [],
+        "constraints": [],
+        "exceptions": []
+      }
+    ]
+  },
+  "cultures": {
+    "elves": {
+      "id": "elves",
+      "name": "Elves",
+      "values": [],
+      "customs": [],
+      "taboos": [],
+      "homeland": null,
+      "government": null,
+      "language": null,
+      "lifespan": null,
+      "allies": [],
+      "enemies": [],
+      "source_passages": [
+        {
+          "text": "But he desired rather to subdue to his will both Elves and Men, envying the gifts with which lluvatar promised to endow them; and he wished himself to have subject and servants, and to be called Lord,",
+          "book": "silmarillion.txt",
+          "location": "Ch.1, P124"
+        },
+        {
+          "text": "Aule it is who is named the Friend of the Noldor, for of him they learned much in after days, and they are the most skilled of the Elves; and in their own fashion, according to the gifts which lluvata",
+          "book": "silmarillion.txt",
+          "location": "Ch.2, P21"
+        },
+        {
+          "text": "The dealings of the Ainur have indeed been mostly with the Elves, for lluvatar made them more like in nature to the Ainur, though less in might and stature; whereas to Men he gave strange gifts.",
+          "book": "silmarillion.txt",
+          "location": "Ch.2, P28"
+        },
+        {
+          "text": "But liuvatar knew that Men, being set amid the turmoils of the powers of the world, would stray often, and would not use their gifts in harmony; and he said: \"These too in their time shall find that a",
+          "book": "silmarillion.txt",
+          "location": "Ch.2, P31"
+        },
+        {
+          "text": "It is one with this gift of freedom that the children of Men dwell only a short space in the world alive, and are not bound to it, and depart soon whither the Elves know not.",
+          "book": "silmarillion.txt",
+          "location": "Ch.2, P32"
+        },
+        {
+          "text": "For the Elves die not till tile world dies, unless they are slain or waste in grief (and to both these seeming deaths they are subject); neither does age subdue their strength, unless one grow weary o",
+          "book": "silmarillion.txt",
+          "location": "Ch.2, P32"
+        },
+        {
+          "text": "Then Melkor departed in shame, for he was himself in peril, and he saw not his time yet for revenge; but his heart",
+          "book": "silmarillion.txt",
+          "location": "Ch.8, P27"
+        },
+        {
+          "text": "For said Finwe; 'While the ban lasts upon Feanor my son, that he may not go to Tirion, I hold myself unkinged, and I will not meet my people.' And Feanor came not in raiment of festival, and he wore n",
+          "book": "silmarillion.txt",
+          "location": "Ch.9, P10"
+        },
+        {
+          "text": "Immortal were the Elves, and their wisdom waxed from age to age, and no sickness nor pestilence brought death to them.",
+          "book": "silmarillion.txt",
+          "location": "Ch.13, P7"
+        },
+        {
+          "text": "What may befall their spirits after death the Elves know not.",
+          "book": "silmarillion.txt",
+          "location": "Ch.13, P8"
+        }
+      ]
+    },
+    "men": {
+      "id": "men",
+      "name": "Men",
+      "values": [],
+      "customs": [],
+      "taboos": [],
+      "homeland": null,
+      "government": null,
+      "language": null,
+      "lifespan": null,
+      "allies": [],
+      "enemies": [],
+      "source_passages": [
+        {
+          "text": "But he desired rather to subdue to his will both Elves and Men, envying the gifts with which lluvatar promised to endow them; and he wished himself to have subject and servants, and to be called Lord,",
+          "book": "silmarillion.txt",
+          "location": "Ch.1, P124"
+        },
+        {
+          "text": "Grey is her raiment; and rest is her gift.",
+          "book": "silmarillion.txt",
+          "location": "Ch.1, P157"
+        },
+        {
+          "text": "The dealings of the Ainur have indeed been mostly with the Elves, for lluvatar made them more like in nature to the Ainur, though less in might and stature; whereas to Men he gave strange gifts.",
+          "book": "silmarillion.txt",
+          "location": "Ch.2, P28"
+        },
+        {
+          "text": "But to the Atani I will give a new gift.' Therefore he willed that the hearts of Men should seek beyond the",
+          "book": "silmarillion.txt",
+          "location": "Ch.2, P29"
+        },
+        {
+          "text": "But liuvatar knew that Men, being set amid the turmoils of the powers of the world, would stray often, and would not use their gifts in harmony; and he said: \"These too in their time shall find that a",
+          "book": "silmarillion.txt",
+          "location": "Ch.2, P31"
+        },
+        {
+          "text": "It is one with this gift of freedom that the children of Men dwell only a short space in the world alive, and are not bound to it, and depart soon whither the Elves know not.",
+          "book": "silmarillion.txt",
+          "location": "Ch.2, P32"
+        },
+        {
+          "text": "For said Finwe; 'While the ban lasts upon Feanor my son, that he may not go to Tirion, I hold myself unkinged, and I will not meet my people.' And Feanor came not in raiment of festival, and he wore n",
+          "book": "silmarillion.txt",
+          "location": "Ch.9, P10"
+        },
+        {
+          "text": "But new tidings were at hand, which none in Middle- earth had foreseen, neither Morgoth in his pits nor Melian in Menegroth; for no news came out of Aman whether by messenger, or by spirit, or by visi",
+          "book": "silmarillion.txt",
+          "location": "Ch.11, P26"
+        },
+        {
+          "text": "The fate of Men after death, maybe, is not in the hands of the Valar, nor was all foretold in the Music of the Ainur.",
+          "book": "silmarillion.txt",
+          "location": "Ch.13, P8"
+        },
+        {
+          "text": "Many of Feanor's people indeed repented of the burning at Losgar, and were filled with amazement at the valour that had brought the friends whom they had abandoned over the Ice of the North; and they ",
+          "book": "silmarillion.txt",
+          "location": "Ch.14, P14"
+        }
+      ]
+    },
+    "dwarves": {
+      "id": "dwarves",
+      "name": "Dwarves",
+      "values": [],
+      "customs": [],
+      "taboos": [],
+      "homeland": null,
+      "government": null,
+      "language": null,
+      "lifespan": null,
+      "allies": [],
+      "enemies": [],
+      "source_passages": [
+        {
+          "text": "It came to pass that at the midsummer the Dwarves, as was their custom, bade Eol to a feast in Nogrod; and he rode away.",
+          "book": "silmarillion.txt",
+          "location": "Ch.18, P18"
+        },
+        {
+          "text": "And he spoke no more of what was past, but stooping lifted up the Nauglamir from where it lay before Thingol's chair, and he gave it to him, saying: 'Receive now, lord, the Necklace of the Dwarves, as",
+          "book": "silmarillion.txt",
+          "location": "Ch.24, P34"
+        },
+        {
+          "text": "Then great was the wrath and lamentation of the Dwarves of Nogrod for the death of their kin and their great craftsmen, and they tore their beards, and wailed; and long they sat taking thought for ven",
+          "book": "silmarillion.txt",
+          "location": "Ch.24, P43"
+        },
+        {
+          "text": "Eol Called the Dark Elf; the great smith who dwelt in Nan Elmoth, and took Aredhel Turgon's sister to wife; friend of the Dwarves; maker of the sword Anglachel (Gurthang); father of Maeglin; put to de",
+          "book": "silmarillion.txt",
+          "location": "Ch.28, P64"
+        },
+        {
+          "text": "Nauglamir 'The Necklace of the Dwarves', made for Finrod Felagund by the Dwarves, brought by Hurin out of Nargothrond to Thingol, and the cause of his death. 134, 285-7, 291",
+          "book": "silmarillion.txt",
+          "location": "Ch.29, P215"
+        }
+      ]
+    },
+    "wizards": {
+      "id": "wizards",
+      "name": "Wizards",
+      "values": [],
+      "customs": [],
+      "taboos": [],
+      "homeland": null,
+      "government": null,
+      "language": null,
+      "lifespan": null,
+      "allies": [],
+      "enemies": [],
+      "source_passages": [
+        {
+          "text": "Then Sauron laughed; and he mocked Gorlim, and revealed to him that he had only seen a phantom devised by wizardry to entrap him; for Eilinel was dead. 'Nonetheless I will grant thy prayer,' said Saur",
+          "book": "silmarillion.txt",
+          "location": "Ch.21, P8"
+        },
+        {
+          "text": "Then Celegorm arose amid the throng, and drawing his sword he cried: 'Be he friend or foe, whether demon of Morgoth, of Elf, or child of Men, or any other living thing in Arda, neither law, nor love, ",
+          "book": "silmarillion.txt",
+          "location": "Ch.21, P42"
+        }
+      ]
+    },
+    "orcs": {
+      "id": "orcs",
+      "name": "Orcs",
+      "values": [],
+      "customs": [],
+      "taboos": [],
+      "homeland": null,
+      "government": null,
+      "language": null,
+      "lifespan": null,
+      "allies": [],
+      "enemies": [],
+      "source_passages": [
+        {
+          "text": "Gates of Summer A great festival of Gondolin, on the eve of which the city was assaulted 'by the forces of Morgoth. 300",
+          "book": "silmarillion.txt",
+          "location": "Ch.29, P18"
+        },
+        {
+          "text": "Miriel (2) Daughter of Tar-Palantir, forced into marriage by Ar-Pharazon, and as his queen named Ar- Zimraphel; also called Tar-Miriel. 345-6 Mirkmod See Greenwood the Great.",
+          "book": "silmarillion.txt",
+          "location": "Ch.29, P188"
+        }
+      ]
+    }
+  },
+  "magic_systems": {
+    "general_magic": {
+      "id": "general_magic",
+      "name": "Magic",
+      "source": null,
+      "practitioners": [],
+      "abilities": [
+        "Martin Shaw's reading is grave and resonant, conveying all the powerful events and emotions that sha",
+        "Beginning with the Music of the Ainur, The Silmarillion tells a tale of the Elder Days, when Elves a",
+        "Peace reigns until the evil Sauron recovers the Rings of Power and sets the stage for the events tol",
+        "OF THE RINGS OF POWER",
+        "In the case of the Valaquenta, for instance, we have to assume that while it contains much that must"
+      ],
+      "costs": [],
+      "limitations": [
+        "the Valar, saying: 'Ye mighty of Arda, the Vision of lluvatar was brief and soon taken away, so that",
+        "Yet the lies that Melkor, the mighty and accursed, Morgoth Bauglir, the Power of Terror and of Hate,",
+        "For even after the ruin the hearts of the Dunedain were still set westwards; and though they knew in",
+        "And they taught that, while the new world fell away, the old road and the path of the memory of the "
+      ],
+      "dangers": [],
+      "source_passages": [
+        {
+          "text": "Martin Shaw's reading is grave and resonant, conveying all the powerful events and emotions that shaped elven and human history long before Bilbo, Frodo, Gandalf and all the rest embarked on their que",
+          "book": "silmarillion.txt",
+          "location": "Ch.1, P65"
+        },
+        {
+          "text": "Beginning with the Music of the Ainur, The Silmarillion tells a tale of the Elder Days, when Elves and Men became estranged by the Dark Lord Morgoth's lust for the Silmarils, pure and powerful magic j",
+          "book": "silmarillion.txt",
+          "location": "Ch.1, P65"
+        },
+        {
+          "text": "Peace reigns until the evil Sauron recovers the Rings of Power and sets the stage for the events told in the Lord of the Rings.",
+          "book": "silmarillion.txt",
+          "location": "Ch.1, P65"
+        },
+        {
+          "text": "OF THE RINGS OF POWER",
+          "book": "silmarillion.txt",
+          "location": "Ch.1, P92"
+        },
+        {
+          "text": "In the case of the Valaquenta, for instance, we have to assume that while it contains much that must go back to the earliest days of the Eldar in Valinor, it was remodelled in later times; and thus ex",
+          "book": "silmarillion.txt",
+          "location": "Ch.1, P101"
+        },
+        {
+          "text": "The Ainulindale and Valaquenta, which are given at the beginning, are indeed closely related with The Silmarillion ; but the Akallabeth and Of the Rings of Power, which appear at the end, are (it must",
+          "book": "silmarillion.txt",
+          "location": "Ch.1, P102"
+        },
+        {
+          "text": "It may be noted that the great mountain range in the east, Ered Luin or Ered Lindon, the Blue Mountains, appears in the extreme west of the map in The Lord of the Rings.",
+          "book": "silmarillion.txt",
+          "location": "Ch.1, P103"
+        },
+        {
+          "text": "And since I have kindled you with the Flame Imperishable, ye shall show forth your powers in adorning this theme, each with his own thoughts and devices, if he will.",
+          "book": "silmarillion.txt",
+          "location": "Ch.1, P110"
+        },
+        {
+          "text": "But as the theme progressed, it came into the heart of Melkor to interweave matters of his own imagining that were not in accord with the theme of lluvatar, for he sought therein to increase the power",
+          "book": "silmarillion.txt",
+          "location": "Ch.1, P113"
+        },
+        {
+          "text": "To Melkor among the Ainur had been given the greatest gifts of power and knowledge, and he had a share in all the gifts of his brethren.",
+          "book": "silmarillion.txt",
+          "location": "Ch.1, P113"
+        }
+      ]
+    }
+  },
+  "geography": {
+    "and_it_is_said_by_the_eldar_that_in_water_there_lives_yet_the_echo_of_the_music_of_the_ainur_more_than_in_any_substance_else_that": {
+      "id": "and_it_is_said_by_the_eldar_that_in_water_there_lives_yet_the_echo_of_the_music_of_the_ainur_more_than_in_any_substance_else_that",
+      "name": "And it is said by the Eldar that in water there lives yet the echo of the Music of the Ainur more than in any substance else that",
+      "type": "location",
+      "description": null,
+      "parent_region": null,
+      "notable_features": [],
+      "inhabitants": [],
+      "travel_notes": [],
+      "distances": {},
+      "source_passages": [
+        {
+          "text": "And it is said by the Eldar that in water there lives yet the echo of the Music of the Ainur more than in any substance else that is in this Earth; and many of the Children of lluvatar hearken still u",
+          "book": "silmarillion.txt",
+          "location": "Ch.1, P125"
+        }
+      ]
+    },
+    "in_arda_his_delight": {
+      "id": "in_arda_his_delight",
+      "name": "In Arda his delight",
+      "type": "location",
+      "description": null,
+      "parent_region": null,
+      "notable_features": [],
+      "inhabitants": [],
+      "travel_notes": [],
+      "distances": {},
+      "source_passages": [
+        {
+          "text": "In Arda his delight is in the winds and the clouds, and in all the regions of the air, from the heights to the depths, from the utmost borders of the Veil of Arda to the breezes that blow in the grass",
+          "book": "silmarillion.txt",
+          "location": "Ch.1, P147"
+        }
+      ]
+    },
+    "for_he_coveted_arda_and_all_that": {
+      "id": "for_he_coveted_arda_and_all_that",
+      "name": "For he coveted Arda and all that",
+      "type": "location",
+      "description": null,
+      "parent_region": null,
+      "notable_features": [],
+      "inhabitants": [],
+      "travel_notes": [],
+      "distances": {},
+      "source_passages": [
+        {
+          "text": "For he coveted Arda and all that was in it, desiring the kingship of Manwe and dominion over the realms of his peers.",
+          "book": "silmarillion.txt",
+          "location": "Ch.1, P173"
+        }
+      ]
+    },
+    "now_when_their_journey": {
+      "id": "now_when_their_journey",
+      "name": "Now when their journey",
+      "type": "location",
+      "description": null,
+      "parent_region": null,
+      "notable_features": [],
+      "inhabitants": [],
+      "travel_notes": [],
+      "distances": {},
+      "source_passages": [
+        {
+          "text": "Now when their journey was near its end, as has been told, the people of the Teleri rested long in East Beleriand, beyond the River Gelion; and at that time many of the Noldor still lay to the westwar",
+          "book": "silmarillion.txt",
+          "location": "Ch.5, P2"
+        }
+      ]
+    },
+    "but_it_came_to_pass_at_last_that_the_end_of_bliss": {
+      "id": "but_it_came_to_pass_at_last_that_the_end_of_bliss",
+      "name": "But it came to pass at last that the end of bliss",
+      "type": "location",
+      "description": null,
+      "parent_region": null,
+      "notable_features": [],
+      "inhabitants": [],
+      "travel_notes": [],
+      "distances": {},
+      "source_passages": [
+        {
+          "text": "But it came to pass at last that the end of bliss was at hand, and the noontide of Valinor was drawing to its twilight.",
+          "book": "silmarillion.txt",
+          "location": "Ch.11, P20"
+        }
+      ]
+    },
+    "but_their_chief_fortress": {
+      "id": "but_their_chief_fortress",
+      "name": "But their chief fortress",
+      "type": "location",
+      "description": null,
+      "parent_region": null,
+      "notable_features": [],
+      "inhabitants": [],
+      "travel_notes": [],
+      "distances": {},
+      "source_passages": [
+        {
+          "text": "But their chief fortress was at Eithel Sirion in the east of Ered Wethrin, whence they kept watch upon Ard-galen; and their cavalry rode upon that plain even to the shadow of Thangorodrim, for from fe",
+          "book": "silmarillion.txt",
+          "location": "Ch.16, P5"
+        }
+      ]
+    },
+    "thus_it": {
+      "id": "thus_it",
+      "name": "Thus it",
+      "type": "location",
+      "description": null,
+      "parent_region": null,
+      "notable_features": [],
+      "inhabitants": [],
+      "travel_notes": [],
+      "distances": {},
+      "source_passages": [
+        {
+          "text": "Thus it was in Gondolin; and amid all the bliss of that realm, while its glory lasted, a dark seed of evil was sown.",
+          "book": "silmarillion.txt",
+          "location": "Ch.18, P50"
+        }
+      ]
+    },
+    "wisdom": {
+      "id": "wisdom",
+      "name": "Wisdom",
+      "type": "location",
+      "description": null,
+      "parent_region": null,
+      "notable_features": [],
+      "inhabitants": [],
+      "travel_notes": [],
+      "distances": {},
+      "source_passages": [
+        {
+          "text": "Wisdom was in the words of the Elven- king, and the hearts grew wiser that hearkened to him; for the things of which he sang, of the making of Arda, and the bliss of Aman beyond the shadows of the Sea",
+          "book": "silmarillion.txt",
+          "location": "Ch.19, P6"
+        }
+      ]
+    },
+    "but_barahir_the_brother_of_bregolas": {
+      "id": "but_barahir_the_brother_of_bregolas",
+      "name": "But Barahir the brother of Bregolas",
+      "type": "location",
+      "description": null,
+      "parent_region": null,
+      "notable_features": [],
+      "inhabitants": [],
+      "travel_notes": [],
+      "distances": {},
+      "source_passages": [
+        {
+          "text": "But Barahir the brother of Bregolas was in the fighting farther westward, near to the Pass of Sirion.",
+          "book": "silmarillion.txt",
+          "location": "Ch.20, P8"
+        }
+      ]
+    },
+    "and_the_wise_have_said_that_it": {
+      "id": "and_the_wise_have_said_that_it",
+      "name": "And the wise have said that it",
+      "type": "location",
+      "description": null,
+      "parent_region": null,
+      "notable_features": [],
+      "inhabitants": [],
+      "travel_notes": [],
+      "distances": {},
+      "source_passages": [
+        {
+          "text": "And the wise have said that it was by reason of the power of that holy jewel that they came in time to waters that no vessels save those of the Teleri had known; and they came to the Enchanted Isles a",
+          "book": "silmarillion.txt",
+          "location": "Ch.26, P11"
+        }
+      ]
+    },
+    "battle_there": {
+      "id": "battle_there",
+      "name": "Battle there",
+      "type": "location",
+      "description": null,
+      "parent_region": null,
+      "notable_features": [],
+      "inhabitants": [],
+      "travel_notes": [],
+      "distances": {},
+      "source_passages": [
+        {
+          "text": "Battle there was in Rohan, and Curunir the traitor was thrown down and Isengard broken; and before the City of Gondor a great field was fought, and the Lord of Morgul, Captain of Sauron, there passed ",
+          "book": "silmarillion.txt",
+          "location": "Ch.26, P259"
+        }
+      ]
+    }
+  },
+  "sources": [
+    "silmarillion.txt"
+  ],
+  "last_updated": "2026-02-02T14:37:17.377328"
+}
