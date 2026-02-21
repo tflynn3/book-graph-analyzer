@@ -193,6 +193,7 @@ jobs:
 
     monkeypatch.setattr("book_graph_analyzer.ops.list_open_issues_via_gh", lambda label, limit: issues)
 
+    out_csv = tmp_path / "analysis.csv"
     runner = CliRunner()
     res = runner.invoke(
         main,
@@ -200,12 +201,18 @@ jobs:
             "workflow-analyze-open-failures",
             "--workflow",
             str(wf),
+            "--out-csv",
+            str(out_csv),
         ],
     )
     # Missing secret from issue 41 should fail command
     assert res.exit_code != 0
     assert "Issue #41" in res.output
     assert "Workflow Failure Analysis" in res.output
+    assert out_csv.exists()
+    csv_text = out_csv.read_text(encoding="utf-8")
+    assert "issue_number" in csv_text
+    assert "41" in csv_text
 
 
 def test_build_remediation_report_contains_actions(tmp_path: Path):

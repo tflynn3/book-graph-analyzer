@@ -5192,7 +5192,8 @@ def workflow_analyze_failure_issue(issue_number: int, workflow_path: str, env_fi
     help="Workflow YAML used by failed runs",
 )
 @click.option("--env-file", default="", help="Optional .env file for local secret checks")
-def workflow_analyze_open_failures(label: str, limit: int, workflow_path: str, env_file: str) -> None:
+@click.option("--out-csv", default="", help="Optional output CSV path for batch analysis report")
+def workflow_analyze_open_failures(label: str, limit: int, workflow_path: str, env_file: str, out_csv: str) -> None:
     """Analyze all open failure issues (batch mode) via gh issue list/view.
 
     Skips known parent tracker issues by title prefix '[agentics] Failed runs'.
@@ -5207,6 +5208,7 @@ def workflow_analyze_open_failures(label: str, limit: int, workflow_path: str, e
 
     analyzed = 0
     missing_any = False
+    csv_rows = []
 
     for issue in issues:
         # Skip parent tracker issue
@@ -5222,12 +5224,34 @@ def workflow_analyze_open_failures(label: str, limit: int, workflow_path: str, e
         console.print(f"\n[bold]Issue #{issue.number}: {issue.title}[/bold]")
         _print_workflow_failure_analysis(analysis)
         analyzed += 1
+        csv_rows.append(analysis.to_row(issue.number, issue.title))
         if analysis.missing_secrets:
             missing_any = True
 
     if analyzed == 0:
         console.print("[yellow]No actionable failure issues found after filtering.[/yellow]")
         return
+
+    if out_csv:
+        import csv
+        out_path = Path(out_csv)
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        fieldnames = [
+            "issue_number",
+            "issue_title",
+            "run_id",
+            "run_url",
+            "secret_verification_failed",
+            "required_secrets",
+            "present_secrets",
+            "missing_secrets",
+            "diagnosis",
+        ]
+        with open(out_path, "w", newline="", encoding="utf-8") as f:
+            writer = csv.DictWriter(f, fieldnames=fieldnames)
+            writer.writeheader()
+            writer.writerows(csv_rows)
+        console.print(f"[green]Wrote CSV analysis report:[/green] {out_path}")
 
     if missing_any:
         raise click.Abort()

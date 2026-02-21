@@ -21,6 +21,20 @@ class FailureAnalysis:
     present_secrets: list[str]
     missing_secrets: list[str]
 
+    def to_row(self, issue_number: int, issue_title: str) -> dict[str, str]:
+        """Flatten analysis for CSV/report export."""
+        return {
+            "issue_number": str(issue_number),
+            "issue_title": issue_title,
+            "run_id": str(self.run_id or ""),
+            "run_url": str(self.run_url or ""),
+            "secret_verification_failed": "true" if self.secret_verification_failed else "false",
+            "required_secrets": ";".join(self.required_secrets),
+            "present_secrets": ";".join(self.present_secrets),
+            "missing_secrets": ";".join(self.missing_secrets),
+            "diagnosis": self.summary,
+        }
+
     @property
     def summary(self) -> str:
         if self.secret_verification_failed and self.missing_secrets:
