@@ -6129,13 +6129,17 @@ def lore_genealogy(
             table.add_column("Target", style="cyan")
             table.add_column("House", style="magenta")
             table.add_column("Depth", style="dim")
+            table.add_column("Traits", style="green")
             for r in results:
+                traits = r.get("inheritance_traits") or []
+                traits_text = ", ".join(str(t) for t in traits[:3]) if isinstance(traits, list) else str(traits or "")
                 table.add_row(
                     r.get("source", ""),
                     r.get("rel", ""),
                     r.get("target", ""),
                     r.get("house", "") or "",
                     str(r.get("generation_depth", "")) if r.get("generation_depth") else "",
+                    traits_text,
                 )
             console.print(table)
 

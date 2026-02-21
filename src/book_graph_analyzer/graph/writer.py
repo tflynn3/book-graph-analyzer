@@ -1360,6 +1360,7 @@ class GraphWriter:
                b.canonical_name AS target,
                r.house AS house,
                r.generation_depth AS generation_depth,
+               r.inheritance_traits AS inheritance_traits,
                r.confidence AS confidence,
                r.book AS book
         ORDER BY source, rel, target
