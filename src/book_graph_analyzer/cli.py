@@ -4778,6 +4778,205 @@ def embed_stats(chroma_dir: str, analytics_db: str) -> None:
         console.print(f"[dim]No analytics DB at {analytics_db}. Run 'bga embed build' to populate.[/dim]")
 
 
+# ============================================================================
+# Review Commands — Human Review Interface (Issue #13)
+# ============================================================================
+
+@main.group()
+def review() -> None:
+    """Human review queues for entities, conflicts, rules, and relationships."""
+    pass
+
+
+def _get_review_store(db_path: str = "data/review_queue.db"):
+    from book_graph_analyzer.review import ReviewStore
+    return ReviewStore(db_path=db_path)
+
+
+def _render_review_header(item, idx: int, total: int) -> None:
+    console.print(f"\n[bold][{idx}/{total}] {item.item_type.title()} pending review[/bold]")
+    console.print(f"ID: [cyan]{item.id}[/cyan]  Confidence: {item.confidence:.2f}  Source: {item.source}")
+
+
+def _review_loop(item_type: str, db_path: str, limit: int = 999) -> None:
+    store = _get_review_store(db_path)
+    items = store.get_pending(item_type, limit=limit)
+    if not items:
+        console.print(f"[yellow]No pending {item_type} review items.[/yellow]")
+        return
+
+    i = 0
+    while i < len(items):
+        item = items[i]
+        _render_review_header(item, i + 1, len(items))
+
+        payload = item.payload
+
+        # Type-specific display
+        if item_type == "entity":
+            console.print(f"Cluster: {payload.get('variants') or payload.get('cluster') or payload.get('names')}")
+            console.print(f"Proposed canonical: {payload.get('canonical_name', payload.get('proposed_canonical', 'unknown'))}")
+            console.print(f"Proposed type: {payload.get('entity_type', payload.get('proposed_type', 'unknown'))}")
+            contexts = payload.get("contexts") or payload.get("sample_contexts") or []
+            if isinstance(contexts, str):
+                contexts = [contexts]
+            if contexts:
+                console.print("Sample contexts:")
+                for c in contexts[:2]:
+                    console.print(f"  - {str(c)[:180]}")
+            console.print("\n[A]ccept  [R]eject  [E]dit  [M]erge with existing  [D]efer  [Q]uit")
+            action = click.prompt("Choice", default="d").strip().lower()
+            if action == "m":
+                target = click.prompt("Merge into existing canonical_id")
+                payload["merge_with"] = target
+                store.decide(item.id, "edited", notes=f"Merged with {target}", edited_payload=payload)
+                console.print(f"[green]Merged -> {target}[/green]")
+                i += 1
+                continue
+        elif item_type == "conflict":
+            console.print(f"Summary: {payload.get('summary', 'n/a')}")
+            console.print(f"Resolution policy: {payload.get('resolution_policy', 'flag_for_human')}")
+            claims = payload.get("claims", [])
+            if claims:
+                console.print("Claims:")
+                for c in claims[:2]:
+                    if isinstance(c, dict):
+                        console.print(f"  - {c.get('statement', '')[:180]}")
+                    else:
+                        console.print(f"  - {str(c)[:180]}")
+            console.print("\n[A]ccept  [R]eject  [E]dit  [D]efer  [Q]uit")
+            action = click.prompt("Choice", default="d").strip().lower()
+        elif item_type == "rule":
+            console.print(f"Rule: {payload.get('statement', payload.get('rule_statement', 'n/a'))}")
+            console.print(f"Hardness: {payload.get('hardness', payload.get('proposed_hardness', 'unknown'))}")
+            console.print(f"Cypher check: {payload.get('cypher_check', payload.get('check_query', 'n/a'))}")
+            console.print("\n[A]ccept  [R]eject  [E]dit  [D]efer  [Q]uit")
+            action = click.prompt("Choice", default="d").strip().lower()
+        else:
+            console.print(json.dumps(payload, indent=2)[:800])
+            console.print("\n[A]ccept  [R]eject  [E]dit  [D]efer  [Q]uit")
+            action = click.prompt("Choice", default="d").strip().lower()
+
+        if action == "q":
+            console.print("[yellow]Review session ended.[/yellow]")
+            return
+        elif action == "a":
+            store.decide(item.id, "accepted", notes="Accepted via CLI review")
+            console.print("[green]Accepted[/green]")
+        elif action == "r":
+            store.decide(item.id, "rejected", notes="Rejected via CLI review")
+            console.print("[red]Rejected[/red]")
+        elif action == "e":
+            # lightweight edit path
+            edited = dict(payload)
+            if item_type == "entity":
+                edited["canonical_name"] = click.prompt(
+                    "Canonical name", default=str(payload.get("canonical_name", ""))
+                )
+                edited["entity_type"] = click.prompt(
+                    "Entity type", default=str(payload.get("entity_type", "unknown"))
+                )
+            elif item_type == "rule":
+                edited["hardness"] = click.prompt(
+                    "Hardness (HARD/SOFT)", default=str(payload.get("hardness", "SOFT"))
+                )
+            notes = click.prompt("Notes", default="Edited via CLI")
+            store.decide(item.id, "edited", notes=notes, edited_payload=edited)
+            console.print("[green]Edited + accepted for follow-up[/green]")
+        else:
+            store.decide(item.id, "deferred", notes="Deferred via CLI review")
+            console.print("[yellow]Deferred[/yellow]")
+
+        i += 1
+
+
+@review.command(name="list")
+@click.option("--db", "db_path", default="data/review_queue.db", help="SQLite review DB path")
+def review_list(db_path: str) -> None:
+    """Show pending review items by category."""
+    store = _get_review_store(db_path)
+    counts = store.pending_counts()
+
+    table = Table(title="Review Queue")
+    table.add_column("Category")
+    table.add_column("Pending", justify="right")
+    for key in ["entity", "conflict", "rule", "relationship"]:
+        table.add_row(key, str(counts.get(key, 0)))
+    table.add_row("[bold]total[/bold]", f"[bold]{counts.get('total', 0)}[/bold]")
+    console.print(table)
+
+
+@review.command(name="entities")
+@click.option("--db", "db_path", default="data/review_queue.db", help="SQLite review DB path")
+@click.option("--limit", default=999, help="Max items to step through")
+def review_entities(db_path: str, limit: int) -> None:
+    """Step through entity resolution review queue."""
+    _review_loop("entity", db_path, limit=limit)
+
+
+@review.command(name="conflicts")
+@click.option("--db", "db_path", default="data/review_queue.db", help="SQLite review DB path")
+@click.option("--limit", default=999, help="Max items to step through")
+def review_conflicts(db_path: str, limit: int) -> None:
+    """Step through LoreConflict review queue."""
+    _review_loop("conflict", db_path, limit=limit)
+
+
+@review.command(name="rules")
+@click.option("--db", "db_path", default="data/review_queue.db", help="SQLite review DB path")
+@click.option("--limit", default=999, help="Max items to step through")
+def review_rules(db_path: str, limit: int) -> None:
+    """Step through LoreRule review queue."""
+    _review_loop("rule", db_path, limit=limit)
+
+
+@review.command(name="seed-demo")
+@click.option("--db", "db_path", default="data/review_queue.db", help="SQLite review DB path")
+def review_seed_demo(db_path: str) -> None:
+    """Seed a tiny demo queue for local testing of review commands."""
+    from book_graph_analyzer.review import ReviewStore
+
+    store = ReviewStore(db_path)
+    store.add_item(
+        "entity",
+        0.72,
+        payload={
+            "variants": ["the Grey Pilgrim", "Mithrandir", "Gandalf the Grey", "Gandalf"],
+            "canonical_name": "Gandalf",
+            "entity_type": "character",
+            "contexts": [
+                "...and the Grey Pilgrim walked alone... [Fellowship ch.2]",
+                "...Mithrandir! cried Legolas... [TT ch.5]",
+            ],
+        },
+        item_id="entity_gandalf_cluster",
+    )
+    store.add_item(
+        "conflict",
+        0.69,
+        payload={
+            "summary": "Blue Wizards names differ by source",
+            "resolution_policy": "flag_for_human",
+            "claims": [
+                {"statement": "Alatar and Pallando"},
+                {"statement": "Morinehtar and Romestamo"},
+            ],
+        },
+        item_id="conflict_blue_wizards",
+    )
+    store.add_item(
+        "rule",
+        0.74,
+        payload={
+            "statement": "Elves cannot die of disease",
+            "hardness": "HARD",
+            "cypher_check": "MATCH ...",
+        },
+        item_id="rule_elf_immortality",
+    )
+    console.print("[green]Seeded demo review items.[/green]")
+
+
 if __name__ == "__main__":
     main()
 
