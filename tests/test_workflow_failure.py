@@ -195,6 +195,7 @@ jobs:
 
     out_csv = tmp_path / "analysis.csv"
     out_json = tmp_path / "analysis.json"
+    out_md = tmp_path / "analysis.md"
     runner = CliRunner()
     res = runner.invoke(
         main,
@@ -206,6 +207,8 @@ jobs:
             str(out_csv),
             "--out-json",
             str(out_json),
+            "--out-md",
+            str(out_md),
         ],
     )
     # Missing secret from issue 41 should fail command
@@ -221,6 +224,12 @@ jobs:
     json_text = out_json.read_text(encoding="utf-8")
     assert "issue_number" in json_text
     assert "41" in json_text
+
+    assert out_md.exists()
+    md_text = out_md.read_text(encoding="utf-8")
+    assert "# Open Workflow Failure Analysis" in md_text
+    assert "| Issue | Run ID |" in md_text
+    assert "#41" in md_text
 
 
 def test_build_remediation_report_contains_actions(tmp_path: Path):
