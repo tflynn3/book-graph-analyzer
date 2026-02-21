@@ -133,3 +133,6 @@ def test_scene_generator_accepts_assembled_context():
 
     assert scene.context_snapshot is assembled
     assert "CURRENT STATE" in scene.generation_prompt
+    assert scene.scene_type == "discovery"
+    assert "STYLE GUIDE (fallback):" in scene.generation_prompt
+    assert scene.style_constraints_used is None
