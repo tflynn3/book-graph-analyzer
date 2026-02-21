@@ -250,7 +250,7 @@ not a new top-level package.
 |-------|--------|--------|-------|
 | #45 | Kickoff Slice | ✅ Complete | Models, stubs, CLI placeholders, tests |
 | #46 | Linguistic Engine v1 | ✅ Complete | `GraphWriter.write_linguistic_lineage`, JSON parser, CLI `worldbible languages`, 50 tests |
-| #47 | Deep Genealogy | 🔲 Not started | Stub raises `NotImplementedError` |
+| #47 | Deep Genealogy | 🟡 Slice 1 in progress | Genealogy parser + normalization, rule extraction MVP, `GraphWriter.write_genealogy_batch()`, `query_genealogy()`, `bga lore genealogy` functional path |
 | #48 | Editorial Layers | 🔲 Not started | Stub raises `NotImplementedError` |
 | #49 | Cultural Rules | 🔲 Not started | |
 | #50 | Cosmological Timeline | 🔲 Not started | |
