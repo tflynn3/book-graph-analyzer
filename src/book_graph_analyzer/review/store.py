@@ -1,4 +1,4 @@
-"""Human review queue storage (SQLite) + audit trail + Neo4j decision logging."""
+"""SQLite-backed human review queue + audit trail."""
 
 from __future__ import annotations
 
@@ -8,35 +8,37 @@ import uuid
 from dataclasses import dataclass
 from datetime import datetime, timezone
 from pathlib import Path
-from typing import Optional, Any
+from typing import Any, Optional
 
 
 @dataclass
 class ReviewItem:
     id: str
-    item_type: str  # entity|conflict|rule|relationship
+    item_type: str
     confidence: float
     payload: dict[str, Any]
-    status: str = "pending"  # pending|accepted|rejected|deferred|edited
-    source: str = "pipeline"
-    needs_review: bool = True
-    created_at: str = ""
-    updated_at: str = ""
+    status: str
+    source: str
+    needs_review: bool
+    created_at: str
+    updated_at: str
 
 
 class ReviewStore:
+    """Manage pending review queue and decision audit trail."""
+
     def __init__(self, db_path: str | Path = "data/review_queue.db") -> None:
         self.db_path = Path(db_path)
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
-        self._init()
+        self._init_schema()
 
-    def _connect(self) -> sqlite3.Connection:
+    def _conn(self) -> sqlite3.Connection:
         conn = sqlite3.connect(self.db_path)
         conn.row_factory = sqlite3.Row
         return conn
 
-    def _init(self) -> None:
-        with self._connect() as conn:
+    def _init_schema(self) -> None:
+        with self._conn() as conn:
             conn.execute(
                 """
                 CREATE TABLE IF NOT EXISTS review_items (
@@ -69,7 +71,6 @@ class ReviewStore:
             )
             conn.execute("CREATE INDEX IF NOT EXISTS idx_review_items_type_status ON review_items(item_type, status)")
             conn.execute("CREATE INDEX IF NOT EXISTS idx_review_items_status ON review_items(status)")
-            conn.execute("CREATE INDEX IF NOT EXISTS idx_review_decisions_item ON review_decisions(item_type, item_id)")
 
     def add_item(
         self,
@@ -81,8 +82,8 @@ class ReviewStore:
         needs_review: bool = True,
     ) -> str:
         now = datetime.now(timezone.utc).isoformat()
-        iid = item_id or f"{item_type}_{uuid.uuid4().hex[:12]}"
-        with self._connect() as conn:
+        rid = item_id or f"{item_type}_{uuid.uuid4().hex[:12]}"
+        with self._conn() as conn:
             conn.execute(
                 """
                 INSERT OR REPLACE INTO review_items
@@ -94,89 +95,49 @@ class ReviewStore:
                         ?)
                 """,
                 (
-                    iid,
+                    rid,
                     item_type,
                     float(confidence),
                     json.dumps(payload, ensure_ascii=False),
-                    iid,
+                    rid,
                     source,
                     1 if needs_review else 0,
-                    iid,
+                    rid,
                     now,
                     now,
                 ),
             )
-        return iid
-
-    def add_items(self, items: list[tuple[str, float, dict[str, Any], Optional[str], str, bool]]) -> int:
-        count = 0
-        for item_type, confidence, payload, item_id, source, needs_review in items:
-            self.add_item(item_type, confidence, payload, item_id=item_id, source=source, needs_review=needs_review)
-            count += 1
-        return count
+        return rid
 
     def pending_counts(self) -> dict[str, int]:
-        out = {"entity": 0, "conflict": 0, "rule": 0, "relationship": 0, "total": 0}
-        with self._connect() as conn:
+        counts = {"entity": 0, "conflict": 0, "rule": 0, "relationship": 0, "total": 0}
+        with self._conn() as conn:
             rows = conn.execute(
                 "SELECT item_type, COUNT(*) c FROM review_items WHERE status='pending' GROUP BY item_type"
             ).fetchall()
-            for r in rows:
-                out[r["item_type"]] = int(r["c"])
-                out["total"] += int(r["c"])
-        return out
+        for row in rows:
+            c = int(row["c"])
+            counts[row["item_type"]] = c
+            counts["total"] += c
+        return counts
 
-    def get_pending(self, item_type: Optional[str] = None, limit: int = 100) -> list[ReviewItem]:
-        with self._connect() as conn:
-            if item_type:
-                rows = conn.execute(
-                    "SELECT * FROM review_items WHERE status='pending' AND item_type=? ORDER BY created_at LIMIT ?",
-                    (item_type, limit),
-                ).fetchall()
-            else:
-                rows = conn.execute(
-                    "SELECT * FROM review_items WHERE status='pending' ORDER BY created_at LIMIT ?",
-                    (limit,),
-                ).fetchall()
-
-        items: list[ReviewItem] = []
-        for r in rows:
-            items.append(
-                ReviewItem(
-                    id=r["id"],
-                    item_type=r["item_type"],
-                    confidence=float(r["confidence"]),
-                    payload=json.loads(r["payload_json"]),
-                    status=r["status"],
-                    source=r["source"],
-                    needs_review=bool(r["needs_review"]),
-                    created_at=r["created_at"],
-                    updated_at=r["updated_at"],
-                )
-            )
-        return items
+    def get_pending(self, item_type: str, limit: int = 100) -> list[ReviewItem]:
+        with self._conn() as conn:
+            rows = conn.execute(
+                "SELECT * FROM review_items WHERE item_type=? AND status='pending' ORDER BY created_at LIMIT ?",
+                (item_type, limit),
+            ).fetchall()
+        return [self._row_to_item(r) for r in rows]
 
     def get_item(self, item_id: str) -> Optional[ReviewItem]:
-        with self._connect() as conn:
-            r = conn.execute("SELECT * FROM review_items WHERE id=?", (item_id,)).fetchone()
-        if not r:
-            return None
-        return ReviewItem(
-            id=r["id"],
-            item_type=r["item_type"],
-            confidence=float(r["confidence"]),
-            payload=json.loads(r["payload_json"]),
-            status=r["status"],
-            source=r["source"],
-            needs_review=bool(r["needs_review"]),
-            created_at=r["created_at"],
-            updated_at=r["updated_at"],
-        )
+        with self._conn() as conn:
+            row = conn.execute("SELECT * FROM review_items WHERE id=?", (item_id,)).fetchone()
+        return self._row_to_item(row) if row else None
 
     def decide(
         self,
         item_id: str,
-        decision: str,  # accepted|rejected|edited|deferred
+        decision: str,
         notes: str = "",
         reviewer: str = "human",
         edited_payload: Optional[dict[str, Any]] = None,
@@ -187,18 +148,31 @@ class ReviewStore:
             return False
 
         now = datetime.now(timezone.utc).isoformat()
-        new_payload = edited_payload if edited_payload is not None else item.payload
-        status = {
-            "accepted": "accepted",
-            "rejected": "rejected",
-            "edited": "edited",
-            "deferred": "deferred",
-        }.get(decision, decision)
+        payload_after = edited_payload if edited_payload is not None else item.payload
 
-        with self._connect() as conn:
+        status_map = {
+            "accept": "accepted",
+            "accepted": "accepted",
+            "reject": "rejected",
+            "rejected": "rejected",
+            "edit": "edited",
+            "edited": "edited",
+            "defer": "deferred",
+            "deferred": "deferred",
+        }
+        status = status_map.get(decision.lower(), decision.lower())
+
+        # Acceptance updates confidence per issue requirement
+        new_conf = item.confidence
+        if status in ("accepted", "edited"):
+            new_conf = max(new_conf, 0.95)
+        elif status == "rejected":
+            new_conf = min(new_conf, 0.10)
+
+        with self._conn() as conn:
             conn.execute(
-                "UPDATE review_items SET status=?, payload_json=?, updated_at=? WHERE id=?",
-                (status, json.dumps(new_payload, ensure_ascii=False), now, item_id),
+                "UPDATE review_items SET status=?, confidence=?, payload_json=?, updated_at=? WHERE id=?",
+                (status, float(new_conf), json.dumps(payload_after, ensure_ascii=False), now, item_id),
             )
             conn.execute(
                 """
@@ -211,27 +185,47 @@ class ReviewStore:
                     reviewer,
                     item.item_type,
                     item_id,
-                    decision,
+                    status,
                     now,
                     notes,
                     json.dumps(item.payload, ensure_ascii=False),
-                    json.dumps(new_payload, ensure_ascii=False),
+                    json.dumps(payload_after, ensure_ascii=False),
                 ),
             )
 
         if log_to_neo4j:
-            self._log_decision_to_neo4j(
+            self._log_review_decision_to_neo4j(
                 reviewer=reviewer,
                 item_type=item.item_type,
                 item_id=item_id,
-                decision=decision,
+                decision=status,
                 timestamp=now,
                 notes=notes,
             )
 
         return True
 
-    def _log_decision_to_neo4j(
+    def recent_decisions(self, limit: int = 20) -> list[dict[str, Any]]:
+        with self._conn() as conn:
+            rows = conn.execute(
+                "SELECT * FROM review_decisions ORDER BY timestamp DESC LIMIT ?", (limit,)
+            ).fetchall()
+        return [dict(r) for r in rows]
+
+    def _row_to_item(self, row: sqlite3.Row) -> ReviewItem:
+        return ReviewItem(
+            id=row["id"],
+            item_type=row["item_type"],
+            confidence=float(row["confidence"]),
+            payload=json.loads(row["payload_json"]),
+            status=row["status"],
+            source=row["source"],
+            needs_review=bool(row["needs_review"]),
+            created_at=row["created_at"],
+            updated_at=row["updated_at"],
+        )
+
+    def _log_review_decision_to_neo4j(
         self,
         reviewer: str,
         item_type: str,
@@ -267,12 +261,4 @@ class ReviewStore:
                 )
             driver.close()
         except Exception:
-            # Non-blocking: local audit in sqlite is still authoritative
             return
-
-    def recent_decisions(self, limit: int = 20) -> list[dict[str, Any]]:
-        with self._connect() as conn:
-            rows = conn.execute(
-                "SELECT * FROM review_decisions ORDER BY timestamp DESC LIMIT ?", (limit,)
-            ).fetchall()
-        return [dict(r) for r in rows]
