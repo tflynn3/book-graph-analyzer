@@ -133,7 +133,89 @@ def graph_stats() -> None:
         rel_count = result.single()["count"]
         console.print(f"[bold]Total relationships:[/bold] {rel_count:,}")
 
+        # Temporal coverage — how many relationships have era_start set?
+        result = session.run(
+            "MATCH ()-[r]->() WHERE r.era_start IS NOT NULL RETURN count(r) as cnt"
+        )
+        temporal_cnt = result.single()["cnt"]
+        pct = (temporal_cnt / rel_count * 100) if rel_count else 0
+        console.print(f"[bold]Temporally-tagged relationships:[/bold] {temporal_cnt:,} ({pct:.0f}%)")
+
     driver.close()
+
+
+@graph.command(name="init-eras")
+def graph_init_eras() -> None:
+    """Create Era nodes and FOLLOWED_BY chain in Neo4j."""
+    from book_graph_analyzer.graph.writer import GraphWriter
+    writer = GraphWriter()
+    writer.init_era_chain()
+    console.print("[green]Era chain initialised:[/green]")
+    console.print("  Before Time -> Years of the Lamps -> Years of the Trees")
+    console.print("  -> First Age -> Second Age -> Third Age -> Fourth Age")
+
+
+@graph.command(name="at-time")
+@click.option("--character", "-c", required=True, help="Character canonical name")
+@click.option("--era", "-e", required=True,
+              help="Era name: 'Third Age', 'Second Age', 'First Age', etc.")
+@click.option("--year", "-y", type=int, default=None, help="Year within the era")
+def graph_at_time(character: str, era: str, year: int | None) -> None:
+    """Show everything known about a character at a specific point in time.
+
+    Example:
+        bga graph at-time --character Gandalf --era "Third Age" --year 3018
+    """
+    from book_graph_analyzer.graph.writer import GraphWriter
+
+    writer = GraphWriter()
+    snapshot = writer.query_at_time(character, era, year)
+
+    if "error" in snapshot:
+        console.print(f"[red]{snapshot['error']}[/red]")
+        return
+
+    char = snapshot["character"]
+    at = snapshot["at"]
+    rels = snapshot["relationships"]
+    events = snapshot["events"]
+
+    year_str = f" {at['year']}" if at["year"] else ""
+    console.print(f"\n[bold cyan]{char.get('canonical_name', character)}[/bold cyan]"
+                  f"  at  [bold]{at['era']}{year_str}[/bold]\n")
+
+    if rels:
+        table = Table(show_header=True, header_style="bold")
+        table.add_column("Relationship", style="cyan", width=20)
+        table.add_column("Entity")
+        table.add_column("Type", style="dim", width=12)
+        table.add_column("Valid from", style="dim")
+        table.add_column("Valid until", style="dim")
+
+        for r in rels:
+            era_start = r.get("era_start") or "always"
+            era_end   = r.get("era_end") or "ongoing"
+            yr_s = f" {r['year_start']}" if r.get("year_start") else ""
+            yr_e = f" {r['year_end']}"   if r.get("year_end")   else ""
+            table.add_row(
+                r.get("rel", "?"),
+                r.get("name") or "?",
+                r.get("type") or "?",
+                f"{era_start}{yr_s}",
+                f"{era_end}{yr_e}",
+            )
+        console.print("[bold]Relationships:[/bold]")
+        console.print(table)
+    else:
+        console.print("[dim]No temporally-filtered relationships found.[/dim]")
+
+    if events:
+        console.print(f"\n[bold]Events in {era}:[/bold]")
+        for ev in events:
+            yr = f" ({ev['year']})" if ev.get("year") else ""
+            console.print(f"  [dim]-[/dim] {ev.get('description', '?')}{yr}")
+    else:
+        console.print(f"\n[dim]No events found for {era}.[/dim]")
 
 
 # ============================================================================

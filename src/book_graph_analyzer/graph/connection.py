@@ -50,6 +50,8 @@ def init_schema() -> None:
         "CREATE CONSTRAINT event_id IF NOT EXISTS FOR (e:Event) REQUIRE e.id IS UNIQUE",
         "CREATE CONSTRAINT passage_id IF NOT EXISTS FOR (p:Passage) REQUIRE p.id IS UNIQUE",
         "CREATE CONSTRAINT concept_id IF NOT EXISTS FOR (c:Concept) REQUIRE c.id IS UNIQUE",
+        # Era nodes
+        "CREATE CONSTRAINT era_name IF NOT EXISTS FOR (e:Era) REQUIRE e.name IS UNIQUE",
     ]
 
     indexes = [
@@ -57,10 +59,12 @@ def init_schema() -> None:
         "CREATE INDEX char_name IF NOT EXISTS FOR (c:Character) ON (c.canonical_name)",
         "CREATE INDEX place_name IF NOT EXISTS FOR (p:Place) ON (p.canonical_name)",
         "CREATE INDEX object_name IF NOT EXISTS FOR (o:Object) ON (o.canonical_name)",
+        # Era ordering index
+        "CREATE INDEX era_order IF NOT EXISTS FOR (e:Era) ON (e.era_order)",
+        # Temporal validity indexes on relationships would go here if Neo4j supported it
+        # For now we rely on property filters in Cypher
         # Passage location index
         "CREATE INDEX passage_loc IF NOT EXISTS FOR (p:Passage) ON (p.book, p.chapter_num, p.sentence_num)",
-        # Full-text search on passages
-        # Note: Full-text indexes have different syntax
     ]
 
     with driver.session() as session:

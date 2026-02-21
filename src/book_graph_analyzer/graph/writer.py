@@ -6,6 +6,7 @@ from collections import defaultdict
 from neo4j import Driver
 
 from .connection import get_driver, init_schema
+from .temporal import TemporalValidity, ERA_ORDER, canonicalize_era
 from ..extract.resolver import ResolvedEntity
 from ..extract.relationships import RelationshipExtractionResult
 from ..models.relationships import ExtractedRelationship, RelationshipTriple
@@ -37,6 +38,119 @@ class GraphWriter:
         if not self._initialized:
             init_schema()
             self._initialized = True
+
+    def init_era_chain(self) -> None:
+        """Create Era nodes and FOLLOWED_BY chain in the correct historical order.
+
+        This is idempotent — safe to call multiple times.
+        Era nodes enable temporal ordering queries in Cypher using
+        the era_order property instead of a hardcoded lookup map.
+        """
+        eras = [
+            ("Before Time",        0),
+            ("Years of the Lamps", 1),
+            ("Years of the Trees", 2),
+            ("First Age",          3),
+            ("Second Age",         4),
+            ("Third Age",          5),
+            ("Fourth Age",         6),
+        ]
+
+        with self.driver.session() as session:
+            # Create / update each Era node
+            for name, order in eras:
+                session.run(
+                    "MERGE (e:Era {name: $name}) SET e.era_order = $order",
+                    name=name, order=order,
+                )
+
+            # Create FOLLOWED_BY chain
+            for i in range(len(eras) - 1):
+                session.run(
+                    """
+                    MATCH (a:Era {name: $a})
+                    MATCH (b:Era {name: $b})
+                    MERGE (a)-[:FOLLOWED_BY]->(b)
+                    """,
+                    a=eras[i][0], b=eras[i + 1][0],
+                )
+
+    def query_at_time(
+        self,
+        character_name: str,
+        era: str,
+        year: int | None = None,
+    ) -> dict:
+        """Return a snapshot of everything known about a character at a given point in time.
+
+        Queries all relationships that are valid at era/year and returns:
+            - people they know (KNOWS / MET / FRIEND_OF / ENEMY_OF etc.)
+            - places they are / have been
+            - objects they possess(ed)
+            - events they participated in
+            - emotional state (if available)
+
+        Args:
+            character_name: Canonical name or alias
+            era: Era string e.g. 'Third Age'
+            year: Optional specific year within the era
+
+        Returns:
+            Dict with keys: character, knows, places, objects, events, emotional_state
+        """
+        from .temporal import point_in_time_cypher_where
+
+        era_filter = point_in_time_cypher_where("r", "$era", "$year")
+
+        with self.driver.session() as session:
+
+            # Find the character node
+            char_row = session.run(
+                "MATCH (c) WHERE c.canonical_name = $name OR $name IN coalesce(c.aliases, []) "
+                "RETURN c LIMIT 1",
+                name=character_name,
+            ).single()
+
+            if not char_row:
+                return {"error": f"Character '{character_name}' not found"}
+
+            char = dict(char_row["c"])
+
+            # Relationships to other entities
+            knows_rows = session.run(
+                f"""
+                MATCH (c {{canonical_name: $name}})-[r]->(other)
+                WHERE {era_filter}
+                  AND NOT other:Event AND NOT other:Passage
+                RETURN type(r) as rel, other.canonical_name as name,
+                       other.aliases as aliases, labels(other)[0] as type,
+                       r.era_start as era_start, r.era_end as era_end,
+                       r.year_start as year_start, r.year_end as year_end
+                LIMIT 50
+                """,
+                name=character_name, era=era, year=year,
+            )
+            relationships = [dict(r) for r in knows_rows]
+
+            # Events participated in during this era
+            events_rows = session.run(
+                """
+                MATCH (c {canonical_name: $name})-[:PARTICIPATED_IN]->(e:Event)
+                WHERE (e.era = $era OR e.era IS NULL)
+                RETURN e.description as description, e.era as era,
+                       e.year as year, e.agent as agent
+                LIMIT 20
+                """,
+                name=character_name, era=era,
+            )
+            events = [dict(r) for r in events_rows]
+
+        return {
+            "character": char,
+            "at": {"era": era, "year": year},
+            "relationships": relationships,
+            "events": events,
+        }
 
     def write_entity(self, entity: ResolvedEntity, book: str) -> None:
         """Write a single entity to the graph.
@@ -141,21 +255,33 @@ class GraphWriter:
         if not rel.subject_id or not rel.object_id:
             return  # Need both entities resolved
 
-        # Create relationship with passage reference
-        query = """
-        MATCH (s {id: $subject_id})
-        MATCH (o {id: $object_id})
-        MERGE (s)-[r:""" + rel.predicate.value + """]->(o)
-        ON CREATE SET
-            r.first_passage = $passage_id,
-            r.mention_count = 1,
-            r.passages = [$passage_id]
+        # Build temporal props from the relationship model
+        temporal = TemporalValidity(
+            era_start=canonicalize_era(getattr(rel, "era_start", None)),
+            era_end=canonicalize_era(getattr(rel, "era_end", None)),
+            year_start=getattr(rel, "year_start", None),
+            year_end=getattr(rel, "year_end", None),
+            source_passage_id=rel.passage_id,
+        )
+        temporal_props = temporal.to_dict()
+
+        # Create relationship with passage reference + temporal validity
+        set_clauses = ["r.first_passage = $passage_id", "r.mention_count = 1",
+                       "r.passages = [$passage_id]"]
+        for k in temporal_props:
+            set_clauses.append(f"r.{k} = ${k}")
+
+        query = f"""
+        MATCH (s {{id: $subject_id}})
+        MATCH (o {{id: $object_id}})
+        MERGE (s)-[r:{rel.predicate.value}]->(o)
+        ON CREATE SET {", ".join(set_clauses)}
         ON MATCH SET
             r.mention_count = r.mention_count + 1,
-            r.passages = CASE 
-                WHEN NOT $passage_id IN r.passages 
-                THEN r.passages + $passage_id 
-                ELSE r.passages 
+            r.passages = CASE
+                WHEN NOT $passage_id IN r.passages
+                THEN r.passages + $passage_id
+                ELSE r.passages
             END
         """
 
@@ -165,6 +291,7 @@ class GraphWriter:
                 subject_id=rel.subject_id,
                 object_id=rel.object_id,
                 passage_id=rel.passage_id,
+                **temporal_props,
             )
 
     def write_relationships_batch(
@@ -193,6 +320,11 @@ class GraphWriter:
                     "subject_id": r.subject_id,
                     "object_id": r.object_id,
                     "passage_id": r.passage_id,
+                    # Temporal validity fields
+                    "era_start": canonicalize_era(getattr(r, "era_start", None)),
+                    "era_end":   canonicalize_era(getattr(r, "era_end", None)),
+                    "year_start": getattr(r, "year_start", None),
+                    "year_end":   getattr(r, "year_end", None),
                 }
                 for r in type_rels
             ]
@@ -205,13 +337,17 @@ class GraphWriter:
             ON CREATE SET
                 r.first_passage = item.passage_id,
                 r.mention_count = 1,
-                r.passages = [item.passage_id]
+                r.passages = [item.passage_id],
+                r.era_start  = item.era_start,
+                r.era_end    = item.era_end,
+                r.year_start = item.year_start,
+                r.year_end   = item.year_end
             ON MATCH SET
                 r.mention_count = r.mention_count + 1,
-                r.passages = CASE 
-                    WHEN NOT item.passage_id IN r.passages 
-                    THEN r.passages + item.passage_id 
-                    ELSE r.passages 
+                r.passages = CASE
+                    WHEN NOT item.passage_id IN r.passages
+                    THEN r.passages + item.passage_id
+                    ELSE r.passages
                 END
             """
 
