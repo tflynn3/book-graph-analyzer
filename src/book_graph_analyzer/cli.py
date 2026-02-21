@@ -4206,6 +4206,68 @@ def generate_outline(
     console.print(f"[bold]Chapters generated:[/bold] {len(outline.chapters)}")
 
 
+@generate.command(name="novel")
+@click.option("--outline", "outline_path", type=click.Path(exists=True), required=True, help="Path to outline JSON")
+@click.option("--checkpoint", "checkpoint_dir", type=click.Path(), default="data/checkpoints", show_default=True,
+              help="Checkpoint directory")
+@click.option("--resume/--no-resume", default=True, show_default=True, help="Resume from checkpoint if present")
+@click.option("--world-bible", "world_bible", type=click.Path(exists=True), help="World bible JSON for constraints")
+@click.option("--output", "output_path", type=click.Path(), help="Final story output path")
+def generate_novel(
+    outline_path: str,
+    checkpoint_dir: str,
+    resume: bool,
+    world_bible: str | None,
+    output_path: str | None,
+) -> None:
+    """Generate a full novel from a StoryOutline with checkpoint/resume support."""
+    from book_graph_analyzer.generate import (
+        CanonicalEvent,
+        ChapterOutline,
+        ContextAssembler,
+        NovelDriver,
+        SceneGenerator,
+        ShadowGraph,
+        StoryOutline,
+    )
+
+    raw_outline = json.loads(Path(outline_path).read_text(encoding="utf-8"))
+    anchor_a = CanonicalEvent(**raw_outline["anchor_a"])
+    anchor_b = CanonicalEvent(**raw_outline["anchor_b"])
+    chapters = [ChapterOutline(**row) for row in raw_outline.get("chapters", [])]
+    outline = StoryOutline(
+        id=raw_outline["id"],
+        character=raw_outline.get("character", "Unknown"),
+        anchor_a=anchor_a,
+        anchor_b=anchor_b,
+        chapters=chapters,
+    )
+
+    shadow = ShadowGraph(story_id=outline.id)
+    scene_generator = SceneGenerator(shadow_graph=shadow)
+    if world_bible:
+        scene_generator.load_world_bible(world_bible)
+    assembler = ContextAssembler(shadow_graph=shadow, neo4j_driver=scene_generator.driver)
+    driver = NovelDriver(
+        scene_generator=scene_generator,
+        context_assembler=assembler,
+        shadow_graph=shadow,
+        checkpoint_dir=checkpoint_dir,
+    )
+
+    console.print("[bold]Generating novel from outline...[/bold]")
+    story = driver.generate_novel(outline, resume=resume)
+
+    final_path = Path(output_path) if output_path else (Path(checkpoint_dir) / outline.id / "story.json")
+    final_path.parent.mkdir(parents=True, exist_ok=True)
+    final_path.write_text(json.dumps(story.to_dict(), indent=2, ensure_ascii=False), encoding="utf-8")
+
+    total_scenes = sum(len(ch.scenes) for ch in story.chapters)
+    total_words = sum(sc.word_count for ch in story.chapters for sc in ch.scenes)
+    console.print(f"[green]OK[/green] Story saved to {final_path}")
+    console.print(f"[bold]Chapters:[/bold] {len(story.chapters)} | [bold]Scenes:[/bold] {total_scenes} | [bold]Words:[/bold] {total_words:,}")
+
+
 @generate.command(name="init-schema")
 def generate_init_schema() -> None:
     """Initialize Neo4j schema for generated content."""
