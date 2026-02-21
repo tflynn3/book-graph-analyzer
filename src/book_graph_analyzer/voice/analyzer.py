@@ -245,6 +245,206 @@ class VoiceAnalyzer:
         
         return comparison
     
+    def identify_speaker(
+        self,
+        text: str,
+        profiles: dict[str, CharacterVoiceProfile],
+        top_n: int = 3,
+    ) -> list[tuple[str, float]]:
+        """
+        Given an unmarked quote, identify the most likely speaker.
+        
+        The Blindspot Test: can we identify the speaker from the profile alone?
+        
+        Args:
+            text: The dialogue text to identify
+            profiles: Dict of character name -> CharacterVoiceProfile
+            top_n: Number of candidates to return
+            
+        Returns:
+            List of (character_name, confidence) sorted by confidence desc
+        """
+        if not profiles:
+            return []
+        
+        # Compute text metrics
+        words = text.lower().split()
+        word_count = len(words)
+        
+        # Archaisms
+        archaisms_list = {
+            "thee", "thou", "thy", "thine", "ye", "hath", "doth", "art", "wast",
+            "wherefore", "hither", "thither", "whither", "hence", "thence",
+            "ere", "nay", "aye", "yea", "behold", "lo", "alas", "forsooth",
+            "methinks", "mayhap", "perchance", "betwixt", "amongst", "whilst",
+            "verily", "hark", "hearken", "tarry", "prithee",
+        }
+        text_archaism_count = sum(1 for w in words if w.strip('.,!?"\'') in archaisms_list)
+        text_archaism_rate = (text_archaism_count / word_count * 100) if word_count > 0 else 0
+        
+        # Contraction ratio
+        contraction_patterns = ["n't", "'s", "'re", "'ve", "'ll", "'d", "'m"]
+        text_contractions = sum(1 for w in words if any(p in w for p in contraction_patterns))
+        text_contraction_ratio = text_contractions / word_count if word_count > 0 else 0
+        
+        # Question / exclamation
+        text_is_question = text.rstrip().endswith('?')
+        text_is_exclamation = text.rstrip().endswith('!')
+        
+        # Word length
+        clean_words = [w.strip('.,!?"\'') for w in words if w.strip('.,!?"\'')]
+        text_avg_word_length = sum(len(w) for w in clean_words) / len(clean_words) if clean_words else 0
+        
+        # Formality estimate for the text
+        arch_norm = min(text_archaism_rate / 5.0, 1.0)
+        contr_inv = max(0.0, 1.0 - text_contraction_ratio * 10)
+        wl_norm = min((text_avg_word_length - 3.0) / 3.0, 1.0) if text_avg_word_length > 3 else 0.0
+        text_formality = arch_norm * 0.5 + contr_inv * 0.3 + wl_norm * 0.2
+        
+        # Distinctive word overlap (strip punctuation for matching)
+        text_word_set = set(w.strip('.,!?"\'-') for w in words)
+        
+        scores: list[tuple[str, float]] = []
+        
+        for char_name, profile in profiles.items():
+            score = 0.0
+            weight_total = 0.0
+            
+            # 1. Formality score proximity (weight: 0.25)
+            formality_diff = abs(profile.formality_score - text_formality)
+            formality_score = max(0.0, 1.0 - formality_diff * 2)
+            score += formality_score * 0.25
+            weight_total += 0.25
+            
+            # 2. Archaism rate proximity (weight: 0.25)
+            arch_diff = abs(profile.archaism_rate - text_archaism_rate)
+            arch_score = max(0.0, 1.0 - arch_diff / 5.0)
+            score += arch_score * 0.25
+            weight_total += 0.25
+            
+            # 3. Contraction ratio proximity (weight: 0.15)
+            contr_diff = abs(profile.contraction_ratio - text_contraction_ratio)
+            contr_score = max(0.0, 1.0 - contr_diff * 5)
+            score += contr_score * 0.15
+            weight_total += 0.15
+            
+            # 4. Distinctive word overlap (weight: 0.20)
+            if profile.distinctive_words:
+                dist_set = set(profile.distinctive_words)
+                overlap = len(text_word_set & dist_set) / max(len(dist_set), 1)
+                score += min(overlap * 5, 1.0) * 0.20  # Amplify (usually few overlap)
+            weight_total += 0.20
+            
+            # 5. Signature phrase match (weight: 0.10)
+            if profile.signature_phrases:
+                text_lower = text.lower()
+                phrase_hits = sum(1 for phrase in profile.signature_phrases if phrase in text_lower)
+                if phrase_hits > 0:
+                    score += min(phrase_hits / 2, 1.0) * 0.10
+            weight_total += 0.10
+            
+            # 6. Penalty: text uses "never_says" words (weight: -0.05 per hit)
+            if profile.never_says:
+                never_set = set(profile.never_says)
+                penalty = sum(1 for w in text_word_set if w in never_set)
+                score -= penalty * 0.05
+            
+            # Normalize
+            normalized = max(0.0, score / weight_total) if weight_total > 0 else 0.0
+            scores.append((char_name, round(normalized, 3)))
+        
+        # Sort by confidence desc
+        scores.sort(key=lambda x: -x[1])
+        return scores[:top_n]
+    
+    def check_voice_violations(
+        self,
+        text: str,
+        profile: CharacterVoiceProfile,
+    ) -> list[dict]:
+        """
+        Check generated dialogue for voice consistency violations.
+        
+        Returns list of violation dicts with keys:
+          - type: 'wrong_formality' | 'uses_never_says' | 'missing_signature' | 'anachronism'
+          - severity: 'hard' | 'soft'
+          - message: Human-readable description
+        """
+        violations = []
+        words = text.lower().split()
+        clean_words = set(w.strip('.,!?"\'') for w in words)
+        
+        # Check 1: Wrong formality level
+        archaisms_list = {
+            "thee", "thou", "thy", "thine", "ye", "hath", "doth",
+        }
+        text_archaism_count = sum(1 for w in clean_words if w in archaisms_list)
+        text_contraction_count = sum(
+            1 for w in words if any(p in w for p in ["n't", "'re", "'ve", "'ll", "'d", "'m"])
+        )
+        word_count = len(words) or 1
+        text_formality = (
+            min(text_archaism_count / word_count * 100 / 5.0, 1.0) * 0.5
+            + max(0.0, 1.0 - (text_contraction_count / word_count) * 10) * 0.5
+        )
+        
+        if abs(text_formality - profile.formality_score) > 0.4:
+            direction = "too formal" if text_formality > profile.formality_score else "too informal"
+            violations.append({
+                "type": "wrong_formality",
+                "severity": "hard" if abs(text_formality - profile.formality_score) > 0.6 else "soft",
+                "message": (
+                    f"Formality mismatch: text is {direction} for {profile.character_name} "
+                    f"(text={text_formality:.2f}, expected≈{profile.formality_score:.2f})"
+                ),
+            })
+        
+        # Check 2: Uses words from never_says list
+        if profile.never_says:
+            never_set = set(profile.never_says)
+            banned_words = clean_words & never_set
+            if banned_words:
+                violations.append({
+                    "type": "uses_never_says",
+                    "severity": "soft",
+                    "message": (
+                        f"{profile.character_name} would never say: {', '.join(banned_words)}"
+                    ),
+                })
+        
+        # Check 3: Modern/anachronistic vocabulary
+        modern_words = {
+            "okay", "ok", "alright", "yeah", "yep", "nope", "sure", "cool",
+            "awesome", "totally", "literally", "basically", "actually",
+            "whatever", "stuff", "things", "guys", "hey", "hi", "bye",
+        }
+        anachronisms = clean_words & modern_words
+        if anachronisms:
+            violations.append({
+                "type": "anachronism",
+                "severity": "hard",
+                "message": (
+                    f"Anachronistic vocabulary for {profile.character_name}: "
+                    f"{', '.join(anachronisms)}"
+                ),
+            })
+        
+        # Check 4: Missing signature patterns (only if many phrases defined)
+        if len(profile.signature_phrases) >= 3:
+            text_lower = text.lower()
+            any_sig = any(phrase in text_lower for phrase in profile.signature_phrases)
+            if not any_sig and len(words) > 10:
+                violations.append({
+                    "type": "missing_signature",
+                    "severity": "soft",
+                    "message": (
+                        f"No signature patterns detected for {profile.character_name}. "
+                        f"Consider: {', '.join(profile.signature_phrases[:3])}"
+                    ),
+                })
+        
+        return violations
+
     def save_results(
         self,
         result: VoiceAnalysisResult,
