@@ -5316,6 +5316,67 @@ def workflow_post_diagnosis(issue_number: int, workflow_path: str, env_file: str
         raise click.Abort()
 
 
+@main.command(name="workflow-close-resolved-failures")
+@click.option("--label", default="agentic-workflows", show_default=True, help="Issue label to scan")
+@click.option("--limit", default=20, show_default=True, help="Max open issues to inspect")
+@click.option(
+    "--workflow",
+    "workflow_path",
+    default=".github/workflows/architecture-posture-review.lock.yml",
+    show_default=True,
+    help="Workflow YAML used by failed runs",
+)
+@click.option("--env-file", default="", help="Optional .env file for local secret checks")
+@click.option("--dry-run", is_flag=True, help="Show issues that would be closed without closing")
+def workflow_close_resolved_failures(
+    label: str,
+    limit: int,
+    workflow_path: str,
+    env_file: str,
+    dry_run: bool,
+) -> None:
+    """Close actionable failure sub-issues when analysis indicates resolution.
+
+    Criteria for auto-close:
+      - not the parent tracker issue
+      - no missing required secrets
+      - no explicit secret-verification-failed phrase in issue body
+    """
+    from book_graph_analyzer.ops import list_open_issues_via_gh, close_issue_via_gh
+    from book_graph_analyzer.ops.workflow_failure import analyze_failure_from_issue_text
+
+    issues = list_open_issues_via_gh(label=label, limit=limit)
+    if not issues:
+        console.print("[yellow]No open issues found.[/yellow]")
+        return
+
+    close_candidates = []
+    for issue in issues:
+        if issue.title.strip().lower().startswith("[agentics] failed runs"):
+            continue
+
+        analysis = analyze_failure_from_issue_text(
+            issue.body,
+            workflow_path=workflow_path,
+            env_file=env_file or None,
+        )
+        if (not analysis.missing_secrets) and (not analysis.secret_verification_failed):
+            close_candidates.append(issue)
+
+    if not close_candidates:
+        console.print("[green]No resolved failure issues to close.[/green]")
+        return
+
+    for issue in close_candidates:
+        if dry_run:
+            console.print(f"[yellow][dry-run][/yellow] would close issue #{issue.number}: {issue.title}")
+        else:
+            ok = close_issue_via_gh(issue.number, reason="completed")
+            if ok:
+                console.print(f"[green]Closed issue #{issue.number}[/green]: {issue.title}")
+            else:
+                console.print(f"[red]Failed to close issue #{issue.number}[/red]: {issue.title}")
+
 # ============================================================================
 # World-Building Placeholder Commands (Issue #45 — Tolkien Kickoff)
 # ============================================================================
