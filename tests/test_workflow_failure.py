@@ -194,6 +194,7 @@ jobs:
     monkeypatch.setattr("book_graph_analyzer.ops.list_open_issues_via_gh", lambda label, limit: issues)
 
     out_csv = tmp_path / "analysis.csv"
+    out_json = tmp_path / "analysis.json"
     runner = CliRunner()
     res = runner.invoke(
         main,
@@ -203,6 +204,8 @@ jobs:
             str(wf),
             "--out-csv",
             str(out_csv),
+            "--out-json",
+            str(out_json),
         ],
     )
     # Missing secret from issue 41 should fail command
@@ -213,6 +216,11 @@ jobs:
     csv_text = out_csv.read_text(encoding="utf-8")
     assert "issue_number" in csv_text
     assert "41" in csv_text
+
+    assert out_json.exists()
+    json_text = out_json.read_text(encoding="utf-8")
+    assert "issue_number" in json_text
+    assert "41" in json_text
 
 
 def test_build_remediation_report_contains_actions(tmp_path: Path):
