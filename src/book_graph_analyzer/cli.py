@@ -5211,29 +5211,43 @@ def workflow_remediation_report(issue_number: int, workflow_path: str, env_file:
 # ============================================================================
 
 @worldbible.command(name="languages")
-@click.argument("bible_path", type=click.Path(exists=True))
+@click.argument("bible_path", type=click.Path(exists=True), required=False, default=None)
 @click.option("--entity", "-e", help="Filter by entity ID")
 @click.option("--write-graph", "-w", is_flag=True, help="Write lineages to Neo4j graph")
-def worldbible_languages(bible_path: str, entity: str | None, write_graph: bool) -> None:
-    """Show linguistic lineage / etymology chains from a lineage JSON file.
+@click.option("--text", "-t", "raw_text", help="Extract lineages from inline text")
+@click.option("--file", "-f", "text_file", type=click.Path(exists=True), help="Extract lineages from a text file")
+@click.option("--use-llm", is_flag=True, help="Enable LLM fallback for extraction")
+def worldbible_languages(bible_path: str | None, entity: str | None, write_graph: bool, raw_text: str | None, text_file: str | None, use_llm: bool) -> None:
+    """Show linguistic lineage / etymology chains.
 
-    Displays how names translate across Tolkien's invented languages.
-    Use --write-graph to persist lineages to Neo4j.
+    Reads from a lineage JSON file, or extracts from raw text via --text / --file.
 
-    The input file should be a JSON file with a "lineages" array.
-    See docs/DATA_MODEL.md for the expected format.
-
-    Example:
+    Examples:
         bga worldbible languages lineages.json
         bga worldbible languages lineages.json -e place_rivendell
-        bga worldbible languages lineages.json --write-graph
+        bga worldbible languages --text "Imladris, called Rivendell in Common Speech"
+        bga worldbible languages --file chapter1.txt
     """
     from book_graph_analyzer.worldbible.lineage import load_lineages_from_file
 
-    try:
-        lineages = load_lineages_from_file(bible_path)
-    except (json.JSONDecodeError, KeyError) as exc:
-        console.print(f"[red]Error parsing lineage file: {exc}[/red]")
+    extraction_mode: str | None = None
+
+    if raw_text or text_file:
+        from book_graph_analyzer.worldbible.lineage_extractor import extract_lineages_from_text
+        raw = Path(text_file).read_text(encoding="utf-8") if text_file else raw_text
+        result = extract_lineages_from_text(raw, use_llm_fallback=use_llm, min_hits=1)
+        lineages = result.lineages
+        extraction_mode = result.extraction_mode
+        console.print(f"[dim]Extraction mode: {extraction_mode} ({result.hit_count} hits)[/dim]")
+    elif bible_path:
+        try:
+            lineages = load_lineages_from_file(bible_path)
+        except (json.JSONDecodeError, KeyError) as exc:
+            console.print(f"[red]Error parsing lineage file: {exc}[/red]")
+            raise SystemExit(1)
+        extraction_mode = "json"
+    else:
+        console.print("[red]Provide a lineage JSON file, --text, or --file.[/red]")
         raise SystemExit(1)
 
     if not lineages:

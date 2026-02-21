@@ -37,6 +37,7 @@ class ExtractionConfig:
     min_passages_for_rule: int = 2  # Minimum passages to support a rule
     confidence_threshold: float = 0.5
     max_passages_per_category: int = 100  # Limit for LLM synthesis
+    extract_languages: bool = True  # Enable linguistic lineage extraction (#46)
     
 
 @dataclass
@@ -167,7 +168,23 @@ class WorldBibleExtractor:
             geography = self._extract_geography(by_category[WorldBibleCategory.GEOGRAPHY])
             for entry in geography:
                 bible.geography[entry.id] = entry
-        
+
+        # Extract linguistic lineages (#46)
+        if self.config.extract_languages:
+            self.progress("Extracting linguistic lineages...")
+            from book_graph_analyzer.worldbible.lineage_extractor import extract_lineages_from_text
+            result = extract_lineages_from_text(
+                text,
+                use_llm_fallback=self.config.use_llm,
+                min_hits=1,
+            )
+            if result.lineages:
+                bible.metadata["linguistic_lineages"] = len(result.lineages)
+                bible.metadata["lineage_extraction_mode"] = result.extraction_mode
+                from book_graph_analyzer.worldbible.lineage import lineages_to_json
+                bible.metadata["lineages"] = lineages_to_json(result.lineages)
+                self.progress(f"Found {len(result.lineages)} linguistic lineage(s) via {result.extraction_mode}")
+
         return bible
     
     def _categorize_passages(

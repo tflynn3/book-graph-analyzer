@@ -162,6 +162,48 @@ class EntityResolver:
                     obj = Object(**item)
                     self.db.add_object(obj)
 
+    def load_language_aliases(
+        self,
+        lineages: list | None = None,
+        *,
+        alias_hints: dict[str, list[str]] | None = None,
+    ) -> int:
+        """Inject language-aware alias hints into the resolver database.
+
+        Accepts either a list of ``LinguisticLineage`` objects or a
+        pre-computed ``alias_hints`` dict (entity_id -> [name, ...]).
+        Returns the number of new aliases indexed.
+        """
+        if alias_hints is None:
+            if lineages is None:
+                return 0
+            from book_graph_analyzer.worldbible.lineage_extractor import lineage_alias_hints
+            alias_hints = lineage_alias_hints(lineages)
+
+        count = 0
+        for entity_id, names in alias_hints.items():
+            existing = self.db.get_entity(entity_id)
+            if existing:
+                for name in names:
+                    nl = name.lower()
+                    if nl not in self.db._alias_to_id:
+                        self.db._alias_to_id[nl] = entity_id
+                        etype = "character"
+                        for t, col in [("character", self.db.characters), ("place", self.db.places), ("object", self.db.objects)]:
+                            if entity_id in col:
+                                etype = t
+                                break
+                        self.db._name_to_type[nl] = etype
+                        count += 1
+            else:
+                for name in names:
+                    nl = name.lower()
+                    if nl not in self.db._alias_to_id:
+                        self.db._alias_to_id[nl] = entity_id
+                        self.db._name_to_type[nl] = "place"
+                        count += 1
+        return count
+
     def resolve(self, entity: ExtractedEntity) -> ResolvedEntity:
         """Resolve an extracted entity to a canonical entry.
 

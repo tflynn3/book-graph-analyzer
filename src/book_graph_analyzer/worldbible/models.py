@@ -281,6 +281,7 @@ class WorldBible:
     # Metadata
     sources: list[str] = field(default_factory=list)  # Books processed
     last_updated: Optional[str] = None
+    metadata: dict = field(default_factory=dict)  # Extensible metadata (#46)
     
     def add_rule(self, rule: WorldRule) -> None:
         """Add a rule to the appropriate category."""
