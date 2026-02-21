@@ -151,6 +151,9 @@ class Chapter:
     
     # Planning
     outline: str = ""  # Beat-by-beat outline
+    canonical_constraint: str = ""
+    plot_thread_opens: str = ""
+    plot_thread_closes: str = ""
     target_scenes: int = 5
     
     def add_scene(self, scene: Scene) -> None:
@@ -164,6 +167,9 @@ class Chapter:
             "title": self.title,
             "summary": self.summary,
             "outline": self.outline,
+            "canonical_constraint": self.canonical_constraint,
+            "plot_thread_opens": self.plot_thread_opens,
+            "plot_thread_closes": self.plot_thread_closes,
             "scenes": [s.to_dict() for s in self.scenes],
         }
 
