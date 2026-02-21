@@ -426,6 +426,72 @@ LIMIT 10
 
 ---
 
+## World-Building Extensions
+
+!!! note "Milestone: Tolkien World-Building (#45–#51)"
+    These extensions are being added incrementally. Model stubs exist now;
+    full implementation follows per-issue. See [World-Building RFC](tolkien-worldbuilding-rfc.md).
+
+### Linguistic Lineage (Issue #46)
+
+Tracks etymology chains across Tolkien's invented languages.
+
+```
+(:LanguageForm {
+  id: string,           // "lang_imladris"
+  form: string,         // "Imladris"
+  language: string,     // "Sindarin"
+  entity_id: string,    // FK to Character/Place/Object
+  gloss: string         // "Deep dale of the cleft"
+})
+
+(:LanguageForm)-[:DERIVED_FROM {
+  derivation_type: string  // "translation", "adaptation", "cognate"
+}]->(:LanguageForm)
+```
+
+**Python model:** `book_graph_analyzer.models.worldbuilding.LinguisticLineage`
+
+### Deep Genealogy (Issue #47)
+
+Extends family relationships with generational metadata.
+
+```
+(:Character)-[:PARENT_OF {
+  generation_depth: int,           // 1 for direct, 2+ for grand-
+  house: string,                   // "House of Finwë"
+  inheritance_traits: [string]     // ["longevity", "foresight"]
+}]->(:Character)
+```
+
+**Python model:** `book_graph_analyzer.models.worldbuilding.GenealogyRelation`
+
+### Editorial Provenance (Issue #48)
+
+Tracks which source text and editorial period a fact comes from.
+
+```
+(:Source {
+  id: string,              // "src_silmarillion_1977"
+  title: string,
+  author_period: string,   // "late", "middle", "early"
+  publication_year: int,
+  editorial_status: string // "published", "draft", "notes"
+})
+
+(:Entity)-[:ATTESTED_IN {
+  confidence: float,
+  page_ref: string
+}]->(:Source)
+```
+
+**Python model:** `book_graph_analyzer.models.worldbuilding.EditorialLayer`
+
+Pre-defined sources for major Tolkien works are available in
+`book_graph_analyzer.models.worldbuilding.TOLKIEN_SOURCES`.
+
+---
+
 ## Schema Evolution
 
 The schema will evolve as we discover new requirements. Principles for evolution:

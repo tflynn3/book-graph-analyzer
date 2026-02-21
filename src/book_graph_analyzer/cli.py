@@ -5165,6 +5165,118 @@ def workflow_analyze_open_failures(label: str, limit: int, workflow_path: str, e
         raise click.Abort()
 
 
+# ============================================================================
+# World-Building Placeholder Commands (Issue #45 — Tolkien Kickoff)
+# ============================================================================
+
+@worldbible.command(name="languages")
+@click.argument("bible_path", type=click.Path(exists=True))
+@click.option("--entity", "-e", help="Filter by entity ID")
+def worldbible_languages(bible_path: str, entity: str | None) -> None:
+    """Show linguistic lineage / etymology chains from world bible.
+
+    Displays how names translate across Tolkien's invented languages.
+
+    TODO(#46): Implement linguistic lineage extraction and display.
+
+    Example:
+        bga worldbible languages hobbit_bible.json
+        bga worldbible languages hobbit_bible.json -e place_rivendell
+    """
+    console.print("[yellow]Not yet implemented — see Issue #46 (Linguistic Lineage)[/yellow]")
+    console.print("[dim]This command will show etymology chains across Tolkien's languages.[/dim]")
+    console.print("[dim]e.g., Imladris (Sindarin) → Rivendell (Common Speech) → Karningul (Westron)[/dim]")
+
+
+@lore.command(name="genealogy")
+@click.option("--character", "-c", help="Character to show family tree for")
+@click.option("--house", "-H", help="Filter by house (e.g., 'House of Finwë')")
+@click.option("--depth", "-d", default=3, type=int, help="Generational depth to display")
+def lore_genealogy(character: str | None, house: str | None, depth: int) -> None:
+    """Show deep genealogy for a character or house.
+
+    Displays family trees with generational depth, inheritance traits,
+    and house membership.
+
+    TODO(#47): Implement genealogy extraction and tree display.
+
+    Examples:
+        bga lore genealogy --character Aragorn
+        bga lore genealogy --house "House of Finwë" --depth 5
+    """
+    console.print("[yellow]Not yet implemented — see Issue #47 (Deep Genealogy)[/yellow]")
+    console.print("[dim]This command will show family trees with generational depth.[/dim]")
+    if character:
+        console.print(f"[dim]Requested: ancestry of {character} (depth={depth})[/dim]")
+    if house:
+        console.print(f"[dim]Requested: members of {house}[/dim]")
+
+
+@corpus.command(name="sources")
+@click.argument("corpus_name")
+@click.option("--show-authority", "-a", is_flag=True, help="Show authority weights")
+def corpus_sources(corpus_name: str, show_authority: bool) -> None:
+    """Show editorial source layers for a corpus.
+
+    Displays which source texts have been ingested and their editorial
+    provenance (published, draft, notes, etc.).
+
+    TODO(#48): Implement editorial layer tracking in ingest pipeline.
+
+    Example:
+        bga corpus sources tolkien_works
+        bga corpus sources tolkien_works --show-authority
+    """
+    console.print("[yellow]Not yet implemented — see Issue #48 (Editorial Layers)[/yellow]")
+    console.print("[dim]This command will show editorial provenance for each source text.[/dim]")
+
+    # Show the pre-defined source registry as a preview
+    from book_graph_analyzer.models.worldbuilding import TOLKIEN_SOURCES
+    console.print(f"\n[bold]Known Tolkien Sources ({len(TOLKIEN_SOURCES)}):[/bold]")
+    for src in TOLKIEN_SOURCES:
+        weight = f"  (authority: {src.authority_weight:.0%})" if show_authority else ""
+        console.print(f"  [{src.editorial_status.value}] {src.source_title} ({src.publication_year}){weight}")
+
+
+@pipeline.command(name="worldbuilding")
+@click.argument("path", type=click.Path(exists=True))
+@click.option("--title", "-t", help="Book title")
+@click.option("--pillars", "-p", multiple=True,
+              type=click.Choice(["linguistic", "genealogy", "editorial", "cultural", "cosmological"]),
+              help="Which world-building pillars to run (default: all)")
+def pipeline_worldbuilding(path: str, title: str | None, pillars: tuple[str]) -> None:
+    """Run world-building analysis pipeline on a text.
+
+    Extends the standard pipeline with Tolkien-specific world-building
+    extraction: linguistic lineage, genealogy, editorial layers,
+    cultural rules, and cosmological timeline.
+
+    TODO(#45): Implement as pillars become available (#46–#50).
+
+    Example:
+        bga pipeline worldbuilding the_silmarillion.txt -t "The Silmarillion"
+        bga pipeline worldbuilding lotr.txt --pillars linguistic --pillars genealogy
+    """
+    selected = list(pillars) if pillars else ["linguistic", "genealogy", "editorial", "cultural", "cosmological"]
+
+    console.print(f"[bold]World-Building Pipeline[/bold]")
+    console.print(f"  Source: {path}")
+    console.print(f"  Pillars: {', '.join(selected)}")
+    console.print()
+
+    for pillar in selected:
+        issue_map = {
+            "linguistic": "#46",
+            "genealogy": "#47",
+            "editorial": "#48",
+            "cultural": "#49",
+            "cosmological": "#50",
+        }
+        console.print(f"  [yellow]⏳[/yellow] {pillar.title()} — not yet implemented (Issue {issue_map[pillar]})")
+
+    console.print(f"\n[dim]Each pillar will be implemented incrementally. See docs/tolkien-worldbuilding-rfc.md[/dim]")
+
+
 if __name__ == "__main__":
     main()
 

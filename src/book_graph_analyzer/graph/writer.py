@@ -1052,6 +1052,79 @@ class GraphWriter:
             result = session.run(query, **params)
             return [dict(record) for record in result]
 
+    # =========================================================================
+    # World-Building Layer Stubs (Issue #45 — Tolkien World-Building Kickoff)
+    # =========================================================================
+
+    def write_linguistic_lineage(
+        self,
+        lineage,  # LinguisticLineage
+    ) -> int:
+        """Write a linguistic lineage (etymology chain) to the graph.
+
+        Creates LanguageForm nodes and DERIVED_FROM relationships.
+
+        TODO(#46): Implement full Cypher for LanguageForm nodes and DERIVED_FROM edges
+        TODO(#46): Add batch variant for corpus-wide lineage import
+
+        Args:
+            lineage: LinguisticLineage object with forms and derivations
+
+        Returns:
+            Number of forms written
+        """
+        raise NotImplementedError(
+            "Linguistic lineage writing not yet implemented. See Issue #46."
+        )
+
+    def write_genealogy_batch(
+        self,
+        relations: list,  # list[GenealogyRelation]
+        book: str = "",
+    ) -> int:
+        """Write genealogy relationships with generational metadata.
+
+        Creates typed family edges (PARENT_OF, ANCESTOR_OF, etc.) with
+        generation_depth, house, and inheritance_traits properties.
+
+        TODO(#47): Implement Cypher for genealogy edges with depth/house metadata
+        TODO(#47): Add inverse-relation auto-creation (PARENT_OF ↔ CHILD_OF)
+
+        Args:
+            relations: List of GenealogyRelation objects
+            book: Source book for provenance
+
+        Returns:
+            Number of relations written
+        """
+        raise NotImplementedError(
+            "Genealogy batch writing not yet implemented. See Issue #47."
+        )
+
+    def write_editorial_provenance(
+        self,
+        entity_id: str,
+        source,  # EditorialLayer
+        confidence: float = 1.0,
+        page_ref: str | None = None,
+    ) -> None:
+        """Link an entity to its editorial source via ATTESTED_IN relationship.
+
+        Creates a (:Source) node if needed and an ATTESTED_IN edge.
+
+        TODO(#48): Implement Source node creation and ATTESTED_IN edge
+        TODO(#48): Add batch variant for corpus-wide provenance tagging
+
+        Args:
+            entity_id: ID of the entity being attested
+            source: EditorialLayer describing the source text
+            confidence: How confidently this entity appears in this source
+            page_ref: Optional page/chapter reference
+        """
+        raise NotImplementedError(
+            "Editorial provenance writing not yet implemented. See Issue #48."
+        )
+
     def query_event_ordering(
         self,
         event1_desc: str,
