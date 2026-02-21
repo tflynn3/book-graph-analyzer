@@ -11,6 +11,7 @@ from book_graph_analyzer.ops.workflow_failure import (
     parse_run_url,
     detect_secret_verification_failure,
     analyze_failure_from_issue_text,
+    build_remediation_report,
 )
 from book_graph_analyzer.ops.gh_issue import IssueData
 
@@ -205,3 +206,62 @@ jobs:
     assert res.exit_code != 0
     assert "Issue #41" in res.output
     assert "Workflow Failure Analysis" in res.output
+
+
+def test_build_remediation_report_contains_actions(tmp_path: Path):
+    wf = tmp_path / "wf.yml"
+    wf.write_text(
+        """
+jobs:
+  a:
+    steps:
+      - run: echo hi
+        env:
+          COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_GITHUB_TOKEN }}
+""",
+        encoding="utf-8",
+    )
+    analysis = analyze_failure_from_issue_text(ISSUE_TEXT, workflow_path=wf)
+    report = build_remediation_report(analysis, issue_ref="#41 failed")
+    assert "Remediation Report" in report
+    assert "COPILOT_GITHUB_TOKEN" in report
+    assert "Suggested actions" in report
+
+
+def test_cli_workflow_remediation_report_issue(monkeypatch, tmp_path: Path):
+    wf = tmp_path / "wf.yml"
+    wf.write_text(
+        """
+jobs:
+  a:
+    steps:
+      - run: echo hi
+        env:
+          COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_GITHUB_TOKEN }}
+""",
+        encoding="utf-8",
+    )
+
+    monkeypatch.setattr(
+        "book_graph_analyzer.ops.fetch_issue_via_gh",
+        lambda issue_number: IssueData(number=41, title="failed", body=ISSUE_TEXT, url="u41"),
+    )
+
+    out = tmp_path / "report.md"
+    runner = CliRunner()
+    res = runner.invoke(
+        main,
+        [
+            "workflow-remediation-report",
+            "--issue",
+            "41",
+            "--workflow",
+            str(wf),
+            "--out",
+            str(out),
+        ],
+    )
+    assert res.exit_code != 0  # missing secret -> abort
+    assert out.exists()
+    text = out.read_text(encoding="utf-8")
+    assert "Workflow Failure Remediation Report" in text
