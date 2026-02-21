@@ -1216,9 +1216,93 @@ class GraphWriter:
         Returns:
             Number of relations written
         """
-        raise NotImplementedError(
-            "Genealogy batch writing not yet implemented. See Issue #47."
-        )
+        if not relations:
+            return 0
+
+        query = """
+        MERGE (a:Character {canonical_id: $source_id})
+          ON CREATE SET a.canonical_name = coalesce($source_name, $source_id)
+          ON MATCH SET a.canonical_name = coalesce(a.canonical_name, $source_name, $source_id)
+        MERGE (b:Character {canonical_id: $target_id})
+          ON CREATE SET b.canonical_name = coalesce($target_name, $target_id)
+          ON MATCH SET b.canonical_name = coalesce(b.canonical_name, $target_name, $target_id)
+        MERGE (a)-[r:GENEALOGY {relation_type: $relation_type}]->(b)
+        SET r.generation_depth = $generation_depth,
+            r.house = $house,
+            r.inheritance_traits = $inheritance_traits,
+            r.era = $era,
+            r.passage_ids = $passage_ids,
+            r.confidence = $confidence,
+            r.book = $book,
+            r.updated_at = datetime()
+        """
+
+        count = 0
+        with self.driver.session() as session:
+            for rel in relations:
+                session.run(
+                    query,
+                    source_id=rel.source_id,
+                    source_name=getattr(rel, "source_name", None),
+                    target_id=rel.target_id,
+                    target_name=getattr(rel, "target_name", None),
+                    relation_type=rel.relation_type.value if hasattr(rel.relation_type, "value") else str(rel.relation_type),
+                    generation_depth=getattr(rel, "generation_depth", None),
+                    house=getattr(rel, "house", None),
+                    inheritance_traits=list(getattr(rel, "inheritance_traits", []) or []),
+                    era=getattr(rel, "era", None),
+                    passage_ids=list(getattr(rel, "passage_ids", []) or []),
+                    confidence=float(getattr(rel, "confidence", 1.0) or 1.0),
+                    book=book,
+                )
+                count += 1
+
+        return count
+
+    def query_genealogy(
+        self,
+        character_name: str | None = None,
+        house: str | None = None,
+        depth: int = 3,
+        limit: int = 200,
+    ) -> list[dict]:
+        """Query genealogy edges by character and/or house.
+
+        Returns flattened relationship rows for CLI rendering.
+        """
+        conditions = []
+        params: dict = {"depth": depth, "limit": limit}
+
+        if character_name:
+            conditions.append(
+                "(toLower(a.canonical_name) CONTAINS toLower($character_name) OR toLower(b.canonical_name) CONTAINS toLower($character_name))"
+            )
+            params["character_name"] = character_name
+
+        if house:
+            conditions.append("toLower(coalesce(r.house,'')) CONTAINS toLower($house)")
+            params["house"] = house
+
+        where = " AND ".join(conditions) if conditions else "true"
+
+        query = f"""
+        MATCH (a:Character)-[r:GENEALOGY]->(b:Character)
+        WHERE {where}
+          AND ($depth IS NULL OR r.generation_depth IS NULL OR r.generation_depth <= $depth)
+        RETURN a.canonical_name AS source,
+               r.relation_type AS rel,
+               b.canonical_name AS target,
+               r.house AS house,
+               r.generation_depth AS generation_depth,
+               r.confidence AS confidence,
+               r.book AS book
+        ORDER BY source, rel, target
+        LIMIT $limit
+        """
+
+        with self.driver.session() as session:
+            result = session.run(query, **params)
+            return [dict(record) for record in result]
 
     def write_editorial_provenance(
         self,
@@ -1286,6 +1370,128 @@ class GraphWriter:
                 confidence=max(0.0, min(1.0, float(confidence))),
                 page_ref=page_ref,
             )
+
+    # =========================================================================
+    # Sociolinguistic Registers (Issue #47 slice 1)
+    # =========================================================================
+
+    def write_register_profile(
+        self,
+        entity_id: str,
+        profile,
+        source_passage_id: str | None = None,
+    ) -> None:
+        """Persist the current sociolinguistic register profile for an entity."""
+        with self.driver.session() as session:
+            session.run(
+                """
+                MATCH (e {id: $entity_id})
+                MERGE (rp:RegisterProfile {entity_id: $entity_id})
+                SET rp.dominant_register = $dominant_register,
+                    rp.confidence = $confidence,
+                    rp.formality_score = $formality_score,
+                    rp.archaism_rate = $archaism_rate,
+                    rp.contraction_rate = $contraction_rate,
+                    rp.avg_sentence_length = $avg_sentence_length,
+                    rp.token_count = $token_count,
+                    rp.source_passage_id = $source_passage_id,
+                    rp.updated_at = datetime()
+                MERGE (e)-[:HAS_REGISTER_PROFILE]->(rp)
+                """,
+                entity_id=entity_id,
+                dominant_register=profile.dominant_register,
+                confidence=profile.confidence,
+                formality_score=profile.formality_score,
+                archaism_rate=profile.archaism_rate,
+                contraction_rate=profile.contraction_rate,
+                avg_sentence_length=profile.avg_sentence_length,
+                token_count=profile.token_count,
+                source_passage_id=source_passage_id,
+            )
+
+    def write_register_observation(
+        self,
+        entity_id: str,
+        profile,
+        observed_at: str,
+        source_passage_id: str | None = None,
+    ) -> None:
+        """Write a time-stamped register observation for later drift analysis."""
+        with self.driver.session() as session:
+            session.run(
+                """
+                MATCH (e {id: $entity_id})
+                CREATE (obs:RegisterObservation {
+                    id: randomUUID(),
+                    entity_id: $entity_id,
+                    observed_at: $observed_at,
+                    dominant_register: $dominant_register,
+                    confidence: $confidence,
+                    formality_score: $formality_score,
+                    archaism_rate: $archaism_rate,
+                    contraction_rate: $contraction_rate,
+                    avg_sentence_length: $avg_sentence_length,
+                    token_count: $token_count,
+                    source_passage_id: $source_passage_id,
+                    created_at: datetime()
+                })
+                MERGE (e)-[:HAS_REGISTER_OBSERVATION]->(obs)
+                """,
+                entity_id=entity_id,
+                observed_at=observed_at,
+                dominant_register=profile.dominant_register,
+                confidence=profile.confidence,
+                formality_score=profile.formality_score,
+                archaism_rate=profile.archaism_rate,
+                contraction_rate=profile.contraction_rate,
+                avg_sentence_length=profile.avg_sentence_length,
+                token_count=profile.token_count,
+                source_passage_id=source_passage_id,
+            )
+
+    def query_register_drift(
+        self,
+        entity_id: str,
+        min_delta: float = 0.2,
+        limit: int = 20,
+    ) -> list[dict]:
+        """Query consecutive register observations and calculate drift deltas."""
+        with self.driver.session() as session:
+            result = session.run(
+                """
+                MATCH (e {id: $entity_id})-[:HAS_REGISTER_OBSERVATION]->(obs:RegisterObservation)
+                RETURN obs.observed_at AS observed_at,
+                       obs.dominant_register AS dominant_register,
+                       obs.formality_score AS formality_score,
+                       obs.archaism_rate AS archaism_rate,
+                       obs.confidence AS confidence
+                ORDER BY obs.observed_at ASC
+                LIMIT $limit
+                """,
+                entity_id=entity_id,
+                limit=limit,
+            )
+            rows = [dict(r) for r in result]
+
+        drifts: list[dict] = []
+        for i in range(1, len(rows)):
+            prev = rows[i - 1]
+            cur = rows[i]
+            delta = {
+                "from": prev.get("observed_at"),
+                "to": cur.get("observed_at"),
+                "from_register": prev.get("dominant_register"),
+                "to_register": cur.get("dominant_register"),
+                "formality_shift": (cur.get("formality_score") or 0.0) - (prev.get("formality_score") or 0.0),
+                "archaism_shift": (cur.get("archaism_rate") or 0.0) - (prev.get("archaism_rate") or 0.0),
+            }
+            magnitude = max(abs(delta["formality_shift"]), abs(delta["archaism_shift"]))
+            if delta["from_register"] != delta["to_register"]:
+                magnitude = max(magnitude, 0.3)
+            if magnitude >= min_delta:
+                delta["magnitude"] = round(magnitude, 4)
+                drifts.append(delta)
+        return drifts
 
     def query_event_ordering(
         self,

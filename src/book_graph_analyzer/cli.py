@@ -3137,6 +3137,53 @@ def lore_register_init(dry_run: bool) -> None:
     console.print(f"[green]OK[/green] {count} SceneTemplate nodes written to Neo4j")
 
 
+@lore.command(name="socioreg-profile")
+@click.option("--text", "text", required=True, help="Passage text to classify")
+def lore_socioreg_profile(text: str) -> None:
+    """Classify text into a sociolinguistic register profile (Issue #47 slice 1 MVP)."""
+    from book_graph_analyzer.lore.sociolinguistic_registers import SociolinguisticRegisterClassifier
+
+    classifier = SociolinguisticRegisterClassifier()
+    profile = classifier.classify(text)
+
+    console.print("\n[bold]Sociolinguistic Register Profile[/bold]\n")
+    console.print(f"  Dominant: [cyan]{profile.dominant_register}[/cyan] ({profile.confidence:.2f})")
+    console.print(f"  Formality: {profile.formality_score:.2f}")
+    console.print(f"  Archaism: {profile.archaism_rate:.2f}")
+    console.print(f"  Contractions: {profile.contraction_rate:.2f}")
+    console.print(f"  Avg sentence length: {profile.avg_sentence_length:.1f} words")
+
+    table = Table(show_header=True, header_style="bold")
+    table.add_column("Register", style="cyan")
+    table.add_column("Score", justify="right")
+    for reg, score in list(profile.register_scores.items())[:6]:
+        table.add_row(reg, f"{score:.3f}")
+    console.print(table)
+
+
+@lore.command(name="socioreg-drift")
+@click.option("--baseline", required=True, help="Baseline passage text")
+@click.option("--current", required=True, help="Current passage text")
+def lore_socioreg_drift(baseline: str, current: str) -> None:
+    """Compare two passages and report sociolinguistic register drift."""
+    from book_graph_analyzer.lore.sociolinguistic_registers import (
+        SociolinguisticRegisterClassifier,
+        detect_register_drift,
+    )
+
+    classifier = SociolinguisticRegisterClassifier()
+    drift = detect_register_drift(classifier.classify(baseline), classifier.classify(current))
+
+    console.print("\n[bold]Sociolinguistic Register Drift[/bold]\n")
+    console.print(f"  Baseline register: [cyan]{drift.baseline_register}[/cyan]")
+    console.print(f"  Current register:  [cyan]{drift.current_register}[/cyan]")
+    console.print(f"  Register shift: {drift.register_shift:.3f}")
+    console.print(f"  Formality shift: {drift.formality_shift:+.3f}")
+    console.print(f"  Archaism shift: {drift.archaism_shift:+.3f}")
+    severity_color = "red" if drift.severity == "high" else ("yellow" if drift.severity == "medium" else "green")
+    console.print(f"  Severity: [{severity_color}]{drift.severity.upper()}[/{severity_color}]")
+
+
 @lore.command(name="arc")
 @click.option("--character", "-c", required=True,
               help="Character name (e.g. 'Frodo', 'Sam', 'Gandalf')")
@@ -5371,6 +5418,7 @@ def _print_workflow_failure_analysis(analysis) -> None:
     console.print("[bold]Workflow Failure Analysis[/bold]")
     console.print(f"Run URL: {analysis.run_url or 'n/a'}")
     console.print(f"Run ID: {analysis.run_id or 'n/a'}")
+    console.print(f"Severity: [bold]{analysis.severity}[/bold]")
     console.print(f"Secret verification phrase detected: {analysis.secret_verification_failed}")
 
     table = Table(title="Required Secrets")
@@ -5459,7 +5507,18 @@ def workflow_analyze_failure_issue(issue_number: int, workflow_path: str, env_fi
     help="Workflow YAML used by failed runs",
 )
 @click.option("--env-file", default="", help="Optional .env file for local secret checks")
-def workflow_analyze_open_failures(label: str, limit: int, workflow_path: str, env_file: str) -> None:
+@click.option("--out-csv", default="", help="Optional output CSV path for batch analysis report")
+@click.option("--out-json", default="", help="Optional output JSON path for batch analysis report")
+@click.option("--out-md", default="", help="Optional output markdown summary path")
+def workflow_analyze_open_failures(
+    label: str,
+    limit: int,
+    workflow_path: str,
+    env_file: str,
+    out_csv: str,
+    out_json: str,
+    out_md: str,
+) -> None:
     """Analyze all open failure issues (batch mode) via gh issue list/view.
 
     Skips known parent tracker issues by title prefix '[agentics] Failed runs'.
@@ -5474,6 +5533,7 @@ def workflow_analyze_open_failures(label: str, limit: int, workflow_path: str, e
 
     analyzed = 0
     missing_any = False
+    csv_rows = []
 
     for issue in issues:
         # Skip parent tracker issue
@@ -5489,12 +5549,65 @@ def workflow_analyze_open_failures(label: str, limit: int, workflow_path: str, e
         console.print(f"\n[bold]Issue #{issue.number}: {issue.title}[/bold]")
         _print_workflow_failure_analysis(analysis)
         analyzed += 1
+        csv_rows.append(analysis.to_row(issue.number, issue.title))
         if analysis.missing_secrets:
             missing_any = True
 
     if analyzed == 0:
         console.print("[yellow]No actionable failure issues found after filtering.[/yellow]")
         return
+
+    if out_csv:
+        import csv
+
+        out_path = Path(out_csv)
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        fieldnames = [
+            "issue_number",
+            "issue_title",
+            "run_id",
+            "run_url",
+            "severity",
+            "secret_verification_failed",
+            "required_secrets",
+            "present_secrets",
+            "missing_secrets",
+            "diagnosis",
+        ]
+        with open(out_path, "w", newline="", encoding="utf-8") as f:
+            writer = csv.DictWriter(f, fieldnames=fieldnames)
+            writer.writeheader()
+            writer.writerows(csv_rows)
+        console.print(f"[green]Wrote CSV analysis report:[/green] {out_path}")
+
+    if out_json:
+        import json
+
+        out_path = Path(out_json)
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(out_path, "w", encoding="utf-8") as f:
+            json.dump(csv_rows, f, ensure_ascii=False, indent=2)
+        console.print(f"[green]Wrote JSON analysis report:[/green] {out_path}")
+
+    if out_md:
+        out_path = Path(out_md)
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        lines = [
+            "# Open Workflow Failure Analysis",
+            "",
+            "| Issue | Run ID | Severity | Secret Verification Failed | Missing Secrets | Diagnosis |",
+            "|---|---:|---|:---:|---|---|",
+        ]
+        for row in csv_rows:
+            issue = f"#{row['issue_number']} {row['issue_title']}"
+            run_id = row.get("run_id", "") or "n/a"
+            severity = row.get("severity", "low")
+            svf = row.get("secret_verification_failed", "false")
+            missing = row.get("missing_secrets", "") or "none"
+            diagnosis = (row.get("diagnosis", "") or "").replace("|", "\\|")
+            lines.append(f"| {issue} | {run_id} | {severity} | {svf} | {missing} | {diagnosis} |")
+        out_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        console.print(f"[green]Wrote markdown summary report:[/green] {out_path}")
 
     if missing_any:
         raise click.Abort()
@@ -5583,6 +5696,67 @@ def workflow_post_diagnosis(issue_number: int, workflow_path: str, env_file: str
         raise click.Abort()
 
 
+@main.command(name="workflow-close-resolved-failures")
+@click.option("--label", default="agentic-workflows", show_default=True, help="Issue label to scan")
+@click.option("--limit", default=20, show_default=True, help="Max open issues to inspect")
+@click.option(
+    "--workflow",
+    "workflow_path",
+    default=".github/workflows/architecture-posture-review.lock.yml",
+    show_default=True,
+    help="Workflow YAML used by failed runs",
+)
+@click.option("--env-file", default="", help="Optional .env file for local secret checks")
+@click.option("--dry-run", is_flag=True, help="Show issues that would be closed without closing")
+def workflow_close_resolved_failures(
+    label: str,
+    limit: int,
+    workflow_path: str,
+    env_file: str,
+    dry_run: bool,
+) -> None:
+    """Close actionable failure sub-issues when analysis indicates resolution.
+
+    Criteria for auto-close:
+      - not the parent tracker issue
+      - no missing required secrets
+      - no explicit secret-verification-failed phrase in issue body
+    """
+    from book_graph_analyzer.ops import list_open_issues_via_gh, close_issue_via_gh
+    from book_graph_analyzer.ops.workflow_failure import analyze_failure_from_issue_text
+
+    issues = list_open_issues_via_gh(label=label, limit=limit)
+    if not issues:
+        console.print("[yellow]No open issues found.[/yellow]")
+        return
+
+    close_candidates = []
+    for issue in issues:
+        if issue.title.strip().lower().startswith("[agentics] failed runs"):
+            continue
+
+        analysis = analyze_failure_from_issue_text(
+            issue.body,
+            workflow_path=workflow_path,
+            env_file=env_file or None,
+        )
+        if (not analysis.missing_secrets) and (not analysis.secret_verification_failed):
+            close_candidates.append(issue)
+
+    if not close_candidates:
+        console.print("[green]No resolved failure issues to close.[/green]")
+        return
+
+    for issue in close_candidates:
+        if dry_run:
+            console.print(f"[yellow][dry-run][/yellow] would close issue #{issue.number}: {issue.title}")
+        else:
+            ok = close_issue_via_gh(issue.number, reason="completed")
+            if ok:
+                console.print(f"[green]Closed issue #{issue.number}[/green]: {issue.title}")
+            else:
+                console.print(f"[red]Failed to close issue #{issue.number}[/red]: {issue.title}")
+
 # ============================================================================
 # World-Building Placeholder Commands (Issue #45 — Tolkien Kickoff)
 # ============================================================================
@@ -5655,24 +5829,121 @@ def worldbible_languages(bible_path: str, entity: str | None, write_graph: bool)
 @click.option("--character", "-c", help="Character to show family tree for")
 @click.option("--house", "-H", help="Filter by house (e.g., 'House of Finwë')")
 @click.option("--depth", "-d", default=3, type=int, help="Generational depth to display")
-def lore_genealogy(character: str | None, house: str | None, depth: int) -> None:
-    """Show deep genealogy for a character or house.
+@click.option("--extract", "-e", type=click.Path(exists=True), help="Extract genealogy from text file")
+@click.option("--load", "-l", type=click.Path(exists=True), help="Load genealogy from JSON file")
+@click.option("--write", "-w", is_flag=True, help="Write extracted/loaded genealogy to Neo4j")
+@click.option("--book", "-b", default="", help="Book title for provenance tagging")
+def lore_genealogy(
+    character: str | None,
+    house: str | None,
+    depth: int,
+    extract: str | None,
+    load: str | None,
+    write: bool,
+    book: str,
+) -> None:
+    """Show, extract, or load genealogy for a character or house.
 
     Displays family trees with generational depth, inheritance traits,
-    and house membership.
-
-    TODO(#47): Implement genealogy extraction and tree display.
+    and house membership. Can extract from text or load from JSON.
 
     Examples:
         bga lore genealogy --character Aragorn
         bga lore genealogy --house "House of Finwë" --depth 5
+        bga lore genealogy --extract silmarillion.txt --write -b "The Silmarillion"
+        bga lore genealogy --load family_tree.json --write
     """
-    console.print("[yellow]Not yet implemented — see Issue #47 (Deep Genealogy)[/yellow]")
-    console.print("[dim]This command will show family trees with generational depth.[/dim]")
-    if character:
-        console.print(f"[dim]Requested: ancestry of {character} (depth={depth})[/dim]")
-    if house:
-        console.print(f"[dim]Requested: members of {house}[/dim]")
+    from book_graph_analyzer.worldbible.genealogy import (
+        extract_genealogy_from_text,
+        load_genealogy_from_file,
+        genealogy_to_json,
+        build_ancestor_chain,
+        build_descendant_tree,
+    )
+
+    relations: list = []
+
+    # ── Extract from text ────────────────────────────────────────────────
+    if extract:
+        console.print(f"[bold]Extracting genealogy from:[/bold] {extract}")
+        text = Path(extract).read_text(encoding="utf-8")
+        relations = extract_genealogy_from_text(text, passage_id=extract, house=house)
+        console.print(f"  Found [green]{len(relations)}[/green] relations (incl. inverses)")
+
+        if relations:
+            from rich.table import Table
+            table = Table(title="Extracted Genealogy", show_lines=False)
+            table.add_column("Source", style="cyan")
+            table.add_column("Relation", style="yellow")
+            table.add_column("Target", style="cyan")
+            table.add_column("Conf.", style="dim")
+            for r in relations[:30]:
+                table.add_row(
+                    r.source_name or r.source_id,
+                    r.relation_type.value,
+                    r.target_name or r.target_id,
+                    f"{r.confidence:.1f}",
+                )
+            if len(relations) > 30:
+                table.add_row("...", f"+{len(relations)-30} more", "...", "")
+            console.print(table)
+
+    # ── Load from JSON ───────────────────────────────────────────────────
+    elif load:
+        console.print(f"[bold]Loading genealogy from:[/bold] {load}")
+        relations = load_genealogy_from_file(load)
+        console.print(f"  Loaded [green]{len(relations)}[/green] relations")
+
+    # ── Write to Neo4j ───────────────────────────────────────────────────
+    if write and relations:
+        try:
+            from book_graph_analyzer.graph.writer import GraphWriter
+            writer = GraphWriter()
+            writer.initialize()
+            count = writer.write_genealogy_batch(relations, book=book)
+            console.print(f"  Written [green]{count}[/green] genealogy edges to Neo4j")
+            writer.close()
+        except ConnectionError as exc:
+            console.print(f"[red]Neo4j connection failed: {exc}[/red]")
+            raise SystemExit(1)
+
+    # ── Query mode (character or house) ──────────────────────────────────
+    if (character or house) and not extract and not load:
+        try:
+            from book_graph_analyzer.graph.writer import GraphWriter
+            writer = GraphWriter()
+            results = writer.query_genealogy(
+                character_name=character, house=house, depth=depth,
+            )
+            writer.close()
+
+            if not results:
+                console.print("[dim]No genealogy data found. Use --extract or --load to add data.[/dim]")
+                return
+
+            from rich.table import Table
+            table = Table(title=f"Genealogy: {character or house}", show_lines=False)
+            table.add_column("Source", style="cyan")
+            table.add_column("Relation", style="yellow")
+            table.add_column("Target", style="cyan")
+            table.add_column("House", style="magenta")
+            table.add_column("Depth", style="dim")
+            for r in results:
+                table.add_row(
+                    r.get("source", ""),
+                    r.get("rel", ""),
+                    r.get("target", ""),
+                    r.get("house", "") or "",
+                    str(r.get("generation_depth", "")) if r.get("generation_depth") else "",
+                )
+            console.print(table)
+
+        except ConnectionError as exc:
+            console.print(f"[red]Neo4j connection failed: {exc}[/red]")
+            raise SystemExit(1)
+
+    if not extract and not load and not character and not house:
+        console.print("[dim]Use --character, --house, --extract, or --load. See --help.[/dim]")
 
 
 @corpus.command(name="timeline-reconcile")
@@ -5875,6 +6146,76 @@ def pipeline_worldbuilding(path: str, title: str | None, pillars: tuple[str]) ->
         console.print(f"  [yellow]⏳[/yellow] {pillar.title()} — not yet implemented (Issue {issue_map[pillar]})")
 
     console.print(f"\n[dim]Each pillar will be implemented incrementally. See docs/tolkien-worldbuilding-rfc.md[/dim]")
+
+
+@main.command(name="workflow-post-open-failures-summary")
+@click.option("--parent-issue", default=40, show_default=True, type=int, help="Parent tracker issue number")
+@click.option("--label", default="agentic-workflows", show_default=True, help="Issue label to scan")
+@click.option("--limit", default=20, show_default=True, help="Max open issues to inspect")
+@click.option(
+    "--workflow",
+    "workflow_path",
+    default=".github/workflows/architecture-posture-review.lock.yml",
+    show_default=True,
+    help="Workflow YAML used by failed runs",
+)
+@click.option("--env-file", default="", help="Optional .env file for local secret checks")
+def workflow_post_open_failures_summary(
+    parent_issue: int,
+    label: str,
+    limit: int,
+    workflow_path: str,
+    env_file: str,
+) -> None:
+    """Post a markdown summary of open failure sub-issues to the parent issue."""
+    from book_graph_analyzer.ops import list_open_issues_via_gh, post_issue_comment_via_gh
+    from book_graph_analyzer.ops.workflow_failure import analyze_failure_from_issue_text
+
+    issues = list_open_issues_via_gh(label=label, limit=limit)
+    actionable = [i for i in issues if not i.title.strip().lower().startswith("[agentics] failed runs")]
+
+    lines = [
+        "## Automated Failure Summary",
+        "",
+        "| Issue | Run ID | Severity | Secret Verification Failed | Missing Secrets |",
+        "|---|---:|---|:---:|---|",
+    ]
+
+    unresolved = 0
+    severity_counts = {"critical": 0, "high": 0, "medium": 0, "low": 0}
+    for issue in actionable:
+        analysis = analyze_failure_from_issue_text(
+            issue.body,
+            workflow_path=workflow_path,
+            env_file=env_file or None,
+        )
+        if analysis.missing_secrets:
+            unresolved += 1
+        severity_counts[analysis.severity] = severity_counts.get(analysis.severity, 0) + 1
+        lines.append(
+            f"| #{issue.number} {issue.title} | {analysis.run_id or 'n/a'} | "
+            f"{analysis.severity} | "
+            f"{str(analysis.secret_verification_failed).lower()} | "
+            f"{(';'.join(analysis.missing_secrets) if analysis.missing_secrets else 'none')} |"
+        )
+
+    lines.append("")
+    lines.append(f"Open actionable failures: **{len(actionable)}**")
+    lines.append(f"Unresolved (missing secrets): **{unresolved}**")
+    lines.append(
+        f"Severity breakdown — critical: **{severity_counts['critical']}**, "
+        f"high: **{severity_counts['high']}**, "
+        f"medium: **{severity_counts['medium']}**, "
+        f"low: **{severity_counts['low']}**"
+    )
+
+    body = "\n".join(lines)
+    ok = post_issue_comment_via_gh(parent_issue, body)
+    if not ok:
+        console.print(f"[red]Failed to post summary to issue #{parent_issue}.[/red]")
+        raise click.Abort()
+
+    console.print(f"[green]Posted open-failures summary to issue #{parent_issue}.[/green]")
 
 
 if __name__ == "__main__":

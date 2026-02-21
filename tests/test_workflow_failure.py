@@ -63,6 +63,7 @@ jobs:
     assert analysis.run_id == "22260153462"
     assert "GH_AW_GITHUB_TOKEN" in analysis.present_secrets
     assert "COPILOT_GITHUB_TOKEN" in analysis.missing_secrets
+    assert analysis.severity == "critical"
 
 
 def test_cli_workflow_analyze_failure(tmp_path: Path):
@@ -193,6 +194,9 @@ jobs:
 
     monkeypatch.setattr("book_graph_analyzer.ops.list_open_issues_via_gh", lambda label, limit: issues)
 
+    out_csv = tmp_path / "analysis.csv"
+    out_json = tmp_path / "analysis.json"
+    out_md = tmp_path / "analysis.md"
     runner = CliRunner()
     res = runner.invoke(
         main,
@@ -200,12 +204,35 @@ jobs:
             "workflow-analyze-open-failures",
             "--workflow",
             str(wf),
+            "--out-csv",
+            str(out_csv),
+            "--out-json",
+            str(out_json),
+            "--out-md",
+            str(out_md),
         ],
     )
     # Missing secret from issue 41 should fail command
     assert res.exit_code != 0
     assert "Issue #41" in res.output
     assert "Workflow Failure Analysis" in res.output
+    assert out_csv.exists()
+    csv_text = out_csv.read_text(encoding="utf-8")
+    assert "issue_number" in csv_text
+    assert "severity" in csv_text
+    assert "41" in csv_text
+
+    assert out_json.exists()
+    json_text = out_json.read_text(encoding="utf-8")
+    assert "issue_number" in json_text
+    assert "severity" in json_text
+    assert "41" in json_text
+
+    assert out_md.exists()
+    md_text = out_md.read_text(encoding="utf-8")
+    assert "# Open Workflow Failure Analysis" in md_text
+    assert "| Issue | Run ID | Severity |" in md_text
+    assert "#41" in md_text
 
 
 def test_build_remediation_report_contains_actions(tmp_path: Path):
@@ -267,6 +294,59 @@ jobs:
     assert "Workflow Failure Remediation Report" in text
 
 
+def test_cli_workflow_post_open_failures_summary(monkeypatch, tmp_path: Path):
+    wf = tmp_path / "wf.yml"
+    wf.write_text(
+        """
+jobs:
+  a:
+    steps:
+      - run: echo hi
+        env:
+          COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_GITHUB_TOKEN }}
+""",
+        encoding="utf-8",
+    )
+
+    envf = tmp_path / ".env"
+    envf.write_text("COPILOT_GITHUB_TOKEN=abc\n", encoding="utf-8")
+
+    issues = [
+        IssueData(number=40, title="[agentics] Failed runs", body="parent", url="u40"),
+        IssueData(number=41, title="[agentics] Architecture failed", body=ISSUE_TEXT, url="u41"),
+    ]
+    monkeypatch.setattr("book_graph_analyzer.ops.list_open_issues_via_gh", lambda label, limit: issues)
+
+    captured = {"issue": None, "body": ""}
+
+    def fake_post(issue_number: int, body: str):
+        captured["issue"] = issue_number
+        captured["body"] = body
+        return True
+
+    monkeypatch.setattr("book_graph_analyzer.ops.post_issue_comment_via_gh", fake_post)
+
+    runner = CliRunner()
+    res = runner.invoke(
+        main,
+        [
+            "workflow-post-open-failures-summary",
+            "--parent-issue",
+            "40",
+            "--workflow",
+            str(wf),
+            "--env-file",
+            str(envf),
+        ],
+    )
+    assert res.exit_code == 0
+    assert captured["issue"] == 40
+    assert "Automated Failure Summary" in captured["body"]
+    assert "Severity" in captured["body"]
+    assert "Severity breakdown" in captured["body"]
+    assert "#41" in captured["body"]
+
+
 def test_cli_workflow_post_diagnosis(monkeypatch, tmp_path: Path):
     wf = tmp_path / "wf.yml"
     wf.write_text(
@@ -301,3 +381,79 @@ jobs:
     # Missing secret -> command still aborts non-zero after posting
     assert res.exit_code != 0
     assert "Posted diagnosis report" in res.output
+
+
+def test_cli_workflow_close_resolved_failures_dry_run(monkeypatch, tmp_path: Path):
+    wf = tmp_path / "wf.yml"
+    wf.write_text(
+        """
+jobs:
+  a:
+    steps:
+      - run: echo hi
+        env:
+          COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_GITHUB_TOKEN }}
+""",
+        encoding="utf-8",
+    )
+
+    envf = tmp_path / ".env"
+    envf.write_text("COPILOT_GITHUB_TOKEN=abc\n", encoding="utf-8")
+
+    # Parent tracker + one actionable issue
+    issues = [
+        IssueData(number=40, title="[agentics] Failed runs", body="parent", url="u40"),
+        IssueData(number=41, title="[agentics] Architecture failed", body="Timeout only, no secret errors", url="u41"),
+    ]
+    monkeypatch.setattr("book_graph_analyzer.ops.list_open_issues_via_gh", lambda label, limit: issues)
+
+    runner = CliRunner()
+    res = runner.invoke(
+        main,
+        [
+            "workflow-close-resolved-failures",
+            "--workflow",
+            str(wf),
+            "--env-file",
+            str(envf),
+            "--dry-run",
+        ],
+    )
+    assert res.exit_code == 0
+    assert "would close issue #41" in res.output
+
+
+def test_cli_workflow_close_resolved_failures_real_close(monkeypatch, tmp_path: Path):
+    wf = tmp_path / "wf.yml"
+    wf.write_text(
+        """
+jobs:
+  a:
+    steps:
+      - run: echo hi
+        env:
+          COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_GITHUB_TOKEN }}
+""",
+        encoding="utf-8",
+    )
+
+    envf = tmp_path / ".env"
+    envf.write_text("COPILOT_GITHUB_TOKEN=abc\n", encoding="utf-8")
+
+    issues = [IssueData(number=41, title="[agentics] Architecture failed", body="No secret validation failure.", url="u41")]
+    monkeypatch.setattr("book_graph_analyzer.ops.list_open_issues_via_gh", lambda label, limit: issues)
+    monkeypatch.setattr("book_graph_analyzer.ops.close_issue_via_gh", lambda issue_number, reason="completed": True)
+
+    runner = CliRunner()
+    res = runner.invoke(
+        main,
+        [
+            "workflow-close-resolved-failures",
+            "--workflow",
+            str(wf),
+            "--env-file",
+            str(envf),
+        ],
+    )
+    assert res.exit_code == 0
+    assert "Closed issue #41" in res.output

@@ -373,12 +373,16 @@ class TestBackwardCompat:
             assert hasattr(GraphWriter, method), f"Missing: {method}"
 
     def test_other_stubs_state(self):
-        """genealogy stays TODO; editorial provenance now no-ops for None source."""
+        """genealogy empty batch returns 0; editorial provenance no-ops for None source."""
         from book_graph_analyzer.graph.writer import GraphWriter
 
-        writer = GraphWriter.__new__(GraphWriter)
-        with pytest.raises(NotImplementedError, match="Issue #47"):
-            writer.write_genealogy_batch([])
+        mock_driver = MagicMock()
+        mock_session = MagicMock()
+        mock_driver.session.return_value.__enter__ = MagicMock(return_value=mock_session)
+        mock_driver.session.return_value.__exit__ = MagicMock(return_value=False)
+        writer = GraphWriter(driver=mock_driver)
+
+        assert writer.write_genealogy_batch([]) == 0
         writer.write_editorial_provenance("x", None)
 
     def test_existing_kickoff_test_not_implemented_updated(self):

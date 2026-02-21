@@ -42,8 +42,8 @@ bga corpus sources tolkien_works --show-authority
 
 | Pillar | CLI Group | Issue | Status |
 |--------|-----------|-------|--------|
-| Linguistic Lineage | `worldbible languages` | #46 | 🔲 Stub |
-| Deep Genealogy | `lore genealogy` | #47 | 🔲 Stub |
+| Linguistic Lineage | `worldbible languages` | #46 | ✅ v1 |
+| Deep Genealogy | `lore genealogy` | #47 | 🟡 MVP slice |
 | Editorial Layers | `corpus sources` | #48 | 🟨 Partial (source inference + authority display) |
 | Cultural Rules | `worldbible cultures --rules` | #49 | 🔲 Planned |
 | Spatiotemporal Engine | `lore timeline-reconcile`, `lore timeline-bridge` | #48 | ✅ v2 (era mismatch + extraction bridge) |
