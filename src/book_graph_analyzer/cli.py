@@ -2692,6 +2692,260 @@ def lore_top_passages(limit: int, min_score: float) -> None:
     console.print(table)
 
 
+@lore.command(name="registers")
+@click.option("--register", "-r", default=None,
+              help="Show detail for one specific register")
+def lore_registers(register: str | None) -> None:
+    """List all 7 Tolkien prose registers with style metrics.
+
+    Examples:
+        bga lore registers
+        bga lore registers --register elegiac
+    """
+    from book_graph_analyzer.lore.register import (
+        RegisterClassifier, CANONICAL_SCENE_TEMPLATES
+    )
+    from book_graph_analyzer.models.scene_template import ProseRegister
+
+    classifier = RegisterClassifier()
+
+    if register:
+        # Show detail for one register
+        description = classifier.describe_register(register)
+        if "No template" in description:
+            console.print(f"[red]{description}[/red]")
+            console.print("\nValid registers: " + ", ".join(ProseRegister))
+            return
+        console.print(f"\n[bold cyan]{register}[/bold cyan]\n")
+        console.print(description)
+        tmpl = CANONICAL_SCENE_TEMPLATES.get(register)
+        if tmpl and tmpl.common_openings:
+            console.print("\n[bold]Common openings:[/bold]")
+            for o in tmpl.common_openings[:3]:
+                console.print(f"  {o}")
+        if tmpl and tmpl.example_passages:
+            console.print("\n[bold]Example passage:[/bold]")
+            console.print(f'  "{tmpl.example_passages[0][:250]}"')
+        return
+
+    # List all 7 registers
+    console.print("\n[bold]The 7 Tolkien Prose Registers[/bold]\n")
+
+    table = Table(show_header=True, header_style="bold")
+    table.add_column("Register", style="cyan", width=16)
+    table.add_column("AvgSent", justify="right", width=7)
+    table.add_column("Passive", justify="right", width=8)
+    table.add_column("Dialogue", justify="right", width=9)
+    table.add_column("Archaic", justify="right", width=8)
+    table.add_column("Imagery focus", width=26)
+    table.add_column("Structural pattern (brief)")
+
+    for reg in ProseRegister:
+        tmpl = CANONICAL_SCENE_TEMPLATES.get(reg)
+        if tmpl:
+            focus = ", ".join(tmpl.descriptive_focus[:3])
+            pattern_brief = tmpl.structural_pattern[:60]
+            table.add_row(
+                reg,
+                f"{tmpl.avg_sentence_length:.0f}w",
+                f"{tmpl.passive_ratio:.0%}",
+                f"{tmpl.dialogue_density:.0%}",
+                f"{tmpl.archaic_word_rate:.0%}",
+                focus,
+                pattern_brief + "..." if len(tmpl.structural_pattern) > 60 else pattern_brief,
+            )
+
+    console.print(table)
+    console.print("\n[dim]Use --register <name> for full detail and example passages.[/dim]")
+
+
+@lore.command(name="classify")
+@click.option("--passage-id", "-p", default=None,
+              help="Passage ID to fetch from Neo4j and classify")
+@click.option("--text", "-t", default=None,
+              help="Raw text to classify (offline, no Neo4j needed)")
+@click.option("--threshold", default=0.2, type=float,
+              help="Minimum confidence to show (default 0.2)")
+@click.option("--write", is_flag=True,
+              help="Write EXEMPLIFIES edges to Neo4j")
+def lore_classify(
+    passage_id: str | None,
+    text: str | None,
+    threshold: float,
+    write: bool,
+) -> None:
+    """Classify a passage by Tolkien prose register.
+
+    Equivalent to: bga analyze register --passage-id X
+
+    Examples:
+        bga lore classify --text "In a hole in the ground there lived a hobbit..."
+        bga lore classify --passage-id p_001 --write
+    """
+    from book_graph_analyzer.lore.register import RegisterClassifier, SceneTemplateNeo4jWriter
+    from book_graph_analyzer.graph.connection import check_neo4j_connection, get_driver
+
+    classifier = RegisterClassifier()
+
+    if not passage_id and not text:
+        console.print("[red]Provide --passage-id or --text.[/red]")
+        return
+
+    if text:
+        classification = classifier.classify(text, passage_id or "inline", threshold)
+    else:
+        if not check_neo4j_connection():
+            console.print("[red]Cannot connect to Neo4j. Use --text for offline.[/red]")
+            return
+        driver = get_driver()
+        with driver.session() as session:
+            row = session.run("MATCH (p:Passage {id: $id}) RETURN p.text AS text", id=passage_id).single()
+        driver.close()
+        if not row or not row["text"]:
+            console.print(f"[red]Passage '{passage_id}' not found in Neo4j.[/red]")
+            return
+        classification = classifier.classify(row["text"], passage_id, threshold)
+
+    console.print(f"\n[bold]Register Classification:[/bold] {classification.passage_id}\n")
+    console.print(f'  "{classification.passage_text_snippet}"\n')
+
+    if not classification.classifications:
+        console.print("[yellow]No register detected above threshold.[/yellow]")
+        return
+
+    table = Table(show_header=True, header_style="bold")
+    table.add_column("Register", style="cyan", width=16)
+    table.add_column("Confidence", width=15)
+    table.add_column("Score")
+
+    for reg, conf in classification.classifications:
+        bar = "█" * int(conf * 12) + "░" * (12 - int(conf * 12))
+        table.add_row(reg, f"{conf:.2f}", bar)
+
+    console.print(table)
+    primary = classification.primary_register()
+    console.print(f"\n  Primary register: [bold cyan]{primary}[/bold cyan]")
+
+    if write and passage_id and check_neo4j_connection():
+        from book_graph_analyzer.models.scene_template import ExemplifiesEdge
+        writer = SceneTemplateNeo4jWriter()
+        writer.upsert_all_canonical()
+        for reg, conf in classification.classifications:
+            if conf >= 0.5:
+                writer.upsert_exemplifies_edge(ExemplifiesEdge(
+                    passage_id=passage_id,
+                    template_id=reg,
+                    confidence=conf,
+                ))
+        writer.close()
+        console.print(f"[green]OK[/green] EXEMPLIFIES edges written for {len([c for _, c in classification.classifications if c >= 0.5])} registers")
+
+
+@lore.command(name="anchors")
+@click.option("--register", "-r", required=True,
+              help="Register to get anchor passages for (e.g. elegiac)")
+@click.option("--min-confidence", default=0.7, type=float,
+              help="Minimum confidence score (default: 0.7)")
+@click.option("--limit", "-n", default=5, type=int,
+              help="Number of anchor passages (default: 5)")
+@click.option("--show-prompt", is_flag=True,
+              help="Show the assembled generation prompt fragment")
+def lore_anchors(
+    register: str,
+    min_confidence: float,
+    limit: int,
+    show_prompt: bool,
+) -> None:
+    """Get style anchor passages for a register (for generation injection).
+
+    Queries Neo4j for actual Tolkien passages classified with this register,
+    then assembles a generation prompt fragment.
+
+    Examples:
+        bga lore anchors --register elegiac
+        bga lore anchors --register fellowship --show-prompt
+        bga lore anchors --register dread -n 3 --min-confidence 0.8
+    """
+    from book_graph_analyzer.lore.register import (
+        SceneTemplateNeo4jWriter, CANONICAL_SCENE_TEMPLATES,
+        build_generation_prompt,
+    )
+    from book_graph_analyzer.graph.connection import check_neo4j_connection
+
+    tmpl = CANONICAL_SCENE_TEMPLATES.get(register)
+    if not tmpl:
+        from book_graph_analyzer.models.scene_template import ProseRegister
+        console.print(f"[red]Unknown register '{register}'.[/red]")
+        console.print(f"Valid: {', '.join(ProseRegister)}")
+        return
+
+    # Show canonical examples if Neo4j not available
+    if not check_neo4j_connection():
+        console.print(f"\n[bold]Style anchors for: [cyan]{register}[/cyan][/bold] (built-in examples)\n")
+        console.print(f"[dim]{tmpl.description}[/dim]\n")
+        for i, example in enumerate(tmpl.example_passages, 1):
+            console.print(f"[{i}] {example}\n")
+        if show_prompt:
+            console.print("\n[bold]Generation Prompt Fragment:[/bold]\n")
+            console.print(build_generation_prompt(register, tmpl.example_passages))
+        return
+
+    writer = SceneTemplateNeo4jWriter()
+    passages = writer.query_anchor_passages(register, min_confidence, limit)
+    writer.close()
+
+    console.print(f"\n[bold]Style anchors for: [cyan]{register}[/cyan][/bold]")
+    console.print(f"[dim]{tmpl.description[:120]}...[/dim]\n")
+
+    if not passages:
+        console.print(f"[yellow]No classified passages found (min_confidence={min_confidence}).[/yellow]")
+        console.print("[dim]Run 'bga lore classify --write' on corpus passages first.[/dim]")
+        if tmpl.example_passages:
+            console.print("\n[dim]Built-in examples:[/dim]")
+            for example in tmpl.example_passages:
+                console.print(f'  "{example[:120]}"')
+        return
+
+    anchor_texts = []
+    for p in passages:
+        txt = p.get("text", "")
+        conf = p.get("confidence", 0.0)
+        console.print(f"[{conf:.2f}] {txt[:150]}{'...' if len(txt)>150 else ''}\n")
+        anchor_texts.append(txt)
+
+    if show_prompt:
+        console.print("\n[bold]Generation Prompt Fragment:[/bold]\n")
+        console.print(build_generation_prompt(register, anchor_texts))
+
+
+@lore.command(name="register-init")
+@click.option("--dry-run", is_flag=True, help="Show what would be written")
+def lore_register_init(dry_run: bool) -> None:
+    """Write all 7 canonical SceneTemplate nodes to Neo4j.
+
+    Example:
+        bga lore register-init
+    """
+    from book_graph_analyzer.lore.register import CANONICAL_SCENE_TEMPLATES, SceneTemplateNeo4jWriter
+    from book_graph_analyzer.graph.connection import check_neo4j_connection
+
+    console.print(f"[bold]Initialising {len(CANONICAL_SCENE_TEMPLATES)} SceneTemplate nodes[/bold]")
+
+    if dry_run:
+        for reg, tmpl in CANONICAL_SCENE_TEMPLATES.items():
+            console.print(f"  {tmpl.id} ({reg})")
+        return
+
+    if not check_neo4j_connection():
+        console.print("[red]Cannot connect to Neo4j.[/red]")
+        return
+
+    writer = SceneTemplateNeo4jWriter()
+    count = writer.upsert_all_canonical()
+    writer.close()
+    console.print(f"[green]OK[/green] {count} SceneTemplate nodes written to Neo4j")
+
+
 @lore.command(name="arc")
 @click.option("--character", "-c", required=True,
               help="Character name (e.g. 'Frodo', 'Sam', 'Gandalf')")
