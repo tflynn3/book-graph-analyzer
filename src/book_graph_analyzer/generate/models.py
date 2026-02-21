@@ -80,6 +80,21 @@ class SceneScores:
             "overall": self.overall,
         }
 
+    @classmethod
+    def from_dict(cls, data: dict) -> "SceneScores":
+        return cls(
+            lore_score=float(data.get("lore_score", 0.0) or 0.0),
+            style_score=float(data.get("style_score", 0.0) or 0.0),
+            narrative_score=float(data.get("narrative_score", 0.0) or 0.0),
+            consistency_score=float(data.get("consistency_score", 0.0) or 0.0),
+            engagement=float(data.get("engagement", 0.0) or 0.0),
+            pacing=float(data.get("pacing", 0.0) or 0.0),
+            dialogue=float(data.get("dialogue", 0.0) or 0.0),
+            imagery=float(data.get("imagery", 0.0) or 0.0),
+            emotional_weight=float(data.get("emotional_weight", 0.0) or 0.0),
+            overall=float(data.get("overall", 0.0) or 0.0),
+        )
+
 
 @dataclass
 class Scene:
@@ -138,6 +153,49 @@ class Scene:
             ),
         }
 
+    @classmethod
+    def from_dict(cls, data: dict) -> "Scene":
+        from .context import AssembledContext
+
+        generated_at_raw = data.get("generated_at")
+        generated_at = datetime.now()
+        if generated_at_raw:
+            try:
+                generated_at = datetime.fromisoformat(generated_at_raw)
+            except ValueError:
+                pass
+
+        status_raw = data.get("status", GenerationStatus.DRAFT.value)
+        try:
+            status = GenerationStatus(status_raw)
+        except ValueError:
+            status = GenerationStatus.DRAFT
+
+        context_snapshot_raw = data.get("context_snapshot")
+        context_snapshot = None
+        if isinstance(context_snapshot_raw, dict):
+            context_snapshot = AssembledContext.from_dict(context_snapshot_raw)
+
+        return cls(
+            id=str(data.get("id", "")),
+            number=int(data.get("number", 0) or 0),
+            text=str(data.get("text", "")),
+            summary=str(data.get("summary", "")),
+            characters=list(data.get("characters", [])),
+            places=list(data.get("places", [])),
+            objects=list(data.get("objects", [])),
+            events_depicted=list(data.get("events_depicted", [])),
+            scores=SceneScores.from_dict(data.get("scores", {}) or {}),
+            status=status,
+            critique_notes=list(data.get("critique_notes", [])),
+            revision_count=int(data.get("revision_count", 0) or 0),
+            word_count=int(data.get("word_count", 0) or 0),
+            generated_at=generated_at,
+            model_used=str(data.get("model_used", "")),
+            generation_prompt=str(data.get("generation_prompt", "")),
+            context_snapshot=context_snapshot,
+        )
+
 
 @dataclass
 class Chapter:
@@ -172,6 +230,22 @@ class Chapter:
             "plot_thread_closes": self.plot_thread_closes,
             "scenes": [s.to_dict() for s in self.scenes],
         }
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "Chapter":
+        chapter = cls(
+            id=str(data.get("id", "")),
+            number=int(data.get("number", 0) or 0),
+            title=str(data.get("title", "")),
+            summary=str(data.get("summary", "")),
+            outline=str(data.get("outline", "")),
+            canonical_constraint=str(data.get("canonical_constraint", "")),
+            plot_thread_opens=str(data.get("plot_thread_opens", "")),
+            plot_thread_closes=str(data.get("plot_thread_closes", "")),
+            target_scenes=int(data.get("target_scenes", 5) or 5),
+        )
+        chapter.scenes = [Scene.from_dict(s) for s in data.get("scenes", [])]
+        return chapter
 
 
 @dataclass
@@ -209,3 +283,34 @@ class Story:
             "created_at": self.created_at.isoformat(),
             "updated_at": self.updated_at.isoformat(),
         }
+
+    @classmethod
+    def from_dict(cls, data: dict) -> "Story":
+        created_at_raw = data.get("created_at")
+        updated_at_raw = data.get("updated_at")
+
+        created_at = datetime.now()
+        updated_at = datetime.now()
+
+        if created_at_raw:
+            try:
+                created_at = datetime.fromisoformat(created_at_raw)
+            except ValueError:
+                pass
+        if updated_at_raw:
+            try:
+                updated_at = datetime.fromisoformat(updated_at_raw)
+            except ValueError:
+                pass
+
+        story = cls(
+            id=str(data.get("id", "")),
+            title=str(data.get("title", "Untitled Story")),
+            corpus_name=str(data.get("corpus_name", "")),
+            premise=str(data.get("premise", "")),
+            outline=str(data.get("outline", "")),
+            created_at=created_at,
+            updated_at=updated_at,
+        )
+        story.chapters = [Chapter.from_dict(c) for c in data.get("chapters", [])]
+        return story

@@ -12,6 +12,8 @@ from .judge import NarrativeJudge
 from .writer import GenerationWriter
 from .context import ContextAssembler, AssembledContext
 from .outliner import OutlinerEngine, StoryOutline, ChapterOutline, CanonicalEvent
+from .driver import NovelDriver
+from .shadow.graph import ShadowGraph
 
 __all__ = [
     "Story",
@@ -27,4 +29,6 @@ __all__ = [
     "StoryOutline",
     "ChapterOutline",
     "CanonicalEvent",
+    "NovelDriver",
+    "ShadowGraph",
 ]

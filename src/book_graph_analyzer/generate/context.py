@@ -75,6 +75,15 @@ class AssembledContext:
             "active_plot_threads": self.active_plot_threads,
         }
 
+    @classmethod
+    def from_dict(cls, data: dict) -> "AssembledContext":
+        return cls(
+            character_states=[],
+            recent_summaries=list(data.get("recent_summaries", [])),
+            place_facts=dict(data.get("place_facts", {})),
+            active_plot_threads=list(data.get("active_plot_threads", [])),
+        )
+
 
 class ContextAssembler:
     """Assembles a structured context block from Shadow Graph + Neo4j."""
