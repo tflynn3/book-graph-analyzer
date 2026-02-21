@@ -5193,7 +5193,15 @@ def workflow_analyze_failure_issue(issue_number: int, workflow_path: str, env_fi
 )
 @click.option("--env-file", default="", help="Optional .env file for local secret checks")
 @click.option("--out-csv", default="", help="Optional output CSV path for batch analysis report")
-def workflow_analyze_open_failures(label: str, limit: int, workflow_path: str, env_file: str, out_csv: str) -> None:
+@click.option("--out-json", default="", help="Optional output JSON path for batch analysis report")
+def workflow_analyze_open_failures(
+    label: str,
+    limit: int,
+    workflow_path: str,
+    env_file: str,
+    out_csv: str,
+    out_json: str,
+) -> None:
     """Analyze all open failure issues (batch mode) via gh issue list/view.
 
     Skips known parent tracker issues by title prefix '[agentics] Failed runs'.
@@ -5234,6 +5242,7 @@ def workflow_analyze_open_failures(label: str, limit: int, workflow_path: str, e
 
     if out_csv:
         import csv
+
         out_path = Path(out_csv)
         out_path.parent.mkdir(parents=True, exist_ok=True)
         fieldnames = [
@@ -5252,6 +5261,15 @@ def workflow_analyze_open_failures(label: str, limit: int, workflow_path: str, e
             writer.writeheader()
             writer.writerows(csv_rows)
         console.print(f"[green]Wrote CSV analysis report:[/green] {out_path}")
+
+    if out_json:
+        import json
+
+        out_path = Path(out_json)
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(out_path, "w", encoding="utf-8") as f:
+            json.dump(csv_rows, f, ensure_ascii=False, indent=2)
+        console.print(f"[green]Wrote JSON analysis report:[/green] {out_path}")
 
     if missing_any:
         raise click.Abort()
