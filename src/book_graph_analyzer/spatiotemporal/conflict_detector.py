@@ -63,6 +63,18 @@ class ConflictDetector:
             links = causal_links if causal_links is not None else self.causal_links
             if links:
                 conflicts.extend(self._detect_causal_paradoxes(events, links))
+
+        events_by_id = {e.id: e for e in events}
+        for conflict in conflicts:
+            ev_a = events_by_id.get(conflict.event_a_id or "")
+            ev_b = events_by_id.get(conflict.event_b_id or "")
+            if ev_a:
+                conflict.event_a_source_book = ev_a.source_book
+                conflict.event_a_source_authority_weight = ev_a.source_authority_weight
+            if ev_b:
+                conflict.event_b_source_book = ev_b.source_book
+                conflict.event_b_source_authority_weight = ev_b.source_authority_weight
+
         conflicts.sort(key=lambda c: -c.confidence)
         return conflicts
 

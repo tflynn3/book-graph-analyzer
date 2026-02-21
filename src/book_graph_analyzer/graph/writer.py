@@ -365,6 +365,11 @@ class GraphWriter:
         chapter_num: int,
         paragraph_num: int,
         sentence_num: int,
+        source_id: str | None = None,
+        source_title: str | None = None,
+        source_stratum: str | None = None,
+        source_authority_weight: float | None = None,
+        provenance_tags: list[str] | None = None,
     ) -> None:
         """Write a passage node to the graph.
 
@@ -384,6 +389,11 @@ class GraphWriter:
             p.chapter_num = $chapter_num,
             p.paragraph_num = $paragraph_num,
             p.sentence_num = $sentence_num
+        SET p.source_id = coalesce($source_id, p.source_id),
+            p.source_title = coalesce($source_title, p.source_title),
+            p.source_stratum = coalesce($source_stratum, p.source_stratum),
+            p.source_authority_weight = coalesce($source_authority_weight, p.source_authority_weight),
+            p.provenance_tags = coalesce($provenance_tags, p.provenance_tags)
         """
 
         with self.driver.session() as session:
@@ -395,7 +405,58 @@ class GraphWriter:
                 chapter_num=chapter_num,
                 paragraph_num=paragraph_num,
                 sentence_num=sentence_num,
+                source_id=source_id,
+                source_title=source_title,
+                source_stratum=source_stratum,
+                source_authority_weight=source_authority_weight,
+                provenance_tags=provenance_tags,
             )
+
+    def write_passage_provenance(
+        self,
+        passage_id: str,
+        source_id: str,
+        source_title: str,
+        source_stratum: str = "core_text",
+        authority_weight: float = 1.0,
+        confidence: float = 1.0,
+    ) -> None:
+        """Attach a Passage to a Source and stratum metadata for layer-aware queries."""
+        query = """
+        MATCH (p:Passage {id: $passage_id})
+        MERGE (s:Source {id: $source_id})
+        SET s.source_title = $source_title,
+            s.authority_weight = $authority_weight
+        MERGE (p)-[r:ATTESTED_IN]->(s)
+        SET r.source_stratum = $source_stratum,
+            r.confidence = $confidence
+        """
+        with self.driver.session() as session:
+            session.run(
+                query,
+                passage_id=passage_id,
+                source_id=source_id,
+                source_title=source_title,
+                source_stratum=source_stratum,
+                authority_weight=authority_weight,
+                confidence=max(0.0, min(1.0, float(confidence))),
+            )
+
+    def query_layer_report(self, source_id: str | None = None, limit: int = 200) -> list[dict]:
+        """Summarize passages by source and stratum for reporting."""
+        query = """
+        MATCH (p:Passage)
+        WHERE $source_id IS NULL OR p.source_id = $source_id
+        RETURN coalesce(p.source_id, p.book) AS source,
+               coalesce(p.source_stratum, 'core_text') AS stratum,
+               count(*) AS passage_count,
+               avg(coalesce(p.source_authority_weight, 1.0)) AS avg_authority
+        ORDER BY source, stratum
+        LIMIT $limit
+        """
+        with self.driver.session() as session:
+            result = session.run(query, source_id=source_id, limit=limit)
+            return [dict(r) for r in result]
 
     def link_entity_to_passage(
         self,
@@ -494,6 +555,11 @@ class GraphWriter:
                     chapter_num=result.passage.chapter_num,
                     paragraph_num=result.passage.paragraph_num,
                     sentence_num=result.passage.sentence_num,
+                    source_id=getattr(result.passage, "source_id", None),
+                    source_title=getattr(result.passage, "source_title", None),
+                    source_stratum=getattr(result.passage, "source_stratum", None),
+                    source_authority_weight=getattr(result.passage, "source_authority_weight", None),
+                    provenance_tags=getattr(result.passage, "provenance_tags", None),
                 )
                 stats["passages_written"] += 1
 
@@ -1372,6 +1438,142 @@ class GraphWriter:
             )
 
     # =========================================================================
+    # Lore Depth Engine (Issue #50 slice 1)
+    # =========================================================================
+
+    def write_lore_artifacts_batch(self, artifacts: list, book: str = "") -> int:
+        """Persist lore artifacts (songs/poems/artifacts) as first-class nodes."""
+        if not artifacts:
+            return 0
+
+        with self.driver.session() as session:
+            for art in artifacts:
+                session.run(
+                    """
+                    MERGE (a:LoreArtifact {id: $id})
+                    SET a.name = $name,
+                        a.artifact_type = $artifact_type,
+                        a.description = $description,
+                        a.source_book = $source_book,
+                        a.confidence = $confidence,
+                        a.updated_at = datetime()
+                    """,
+                    id=art.id,
+                    name=art.name,
+                    artifact_type=getattr(getattr(art, "artifact_type", None), "value", None)
+                    or str(getattr(art, "artifact_type", "artifact")),
+                    description=getattr(art, "description", None),
+                    source_book=getattr(art, "source_book", None) or book,
+                    confidence=float(getattr(art, "confidence", 0.7) or 0.7),
+                )
+                if getattr(art, "passage_id", None):
+                    session.run(
+                        """
+                        MATCH (a:LoreArtifact {id: $artifact_id})
+                        MATCH (p:Passage {id: $passage_id})
+                        MERGE (a)-[:ATTESTED_IN]->(p)
+                        """,
+                        artifact_id=art.id,
+                        passage_id=art.passage_id,
+                    )
+        return len(artifacts)
+
+    def write_broken_references_batch(self, refs: list) -> int:
+        """Persist unresolved references for later curation."""
+        if not refs:
+            return 0
+
+        with self.driver.session() as session:
+            for ref in refs:
+                session.run(
+                    """
+                    MERGE (u:UnresolvedReference {id: $id})
+                    SET u.mention_text = $mention_text,
+                        u.context_text = $context_text,
+                        u.context_before = $context_before,
+                        u.context_after = $context_after,
+                        u.expected_type = $expected_type,
+                        u.source_book = $source_book,
+                        u.passage_id = $passage_id,
+                        u.resolved_entity_id = $resolved_entity_id,
+                        u.confidence = $confidence,
+                        u.candidates = $candidates,
+                        u.provenance_notes = $provenance_notes,
+                        u.conflict_weight = $conflict_weight,
+                        u.updated_at = datetime()
+                    """,
+                    id=ref.id,
+                    mention_text=getattr(ref, "mention_text", ""),
+                    context_text=getattr(ref, "context_text", None),
+                    context_before=getattr(ref, "context_before", None),
+                    context_after=getattr(ref, "context_after", None),
+                    expected_type=getattr(ref, "expected_type", None),
+                    source_book=getattr(ref, "source_book", None),
+                    passage_id=getattr(ref, "passage_id", None),
+                    resolved_entity_id=getattr(ref, "resolved_entity_id", None),
+                    confidence=float(getattr(ref, "confidence", 0.6) or 0.6),
+                    candidates=[c.model_dump() if hasattr(c, "model_dump") else c for c in (getattr(ref, "candidates", None) or [])],
+                    provenance_notes=list(getattr(ref, "provenance_notes", None) or []),
+                    conflict_weight=float(getattr(ref, "conflict_weight", 0.0) or 0.0),
+                )
+        return len(refs)
+
+    def query_lore_artifacts(self, artifact_type: str | None = None, limit: int = 100) -> list[dict]:
+        """Query lore artifacts by optional type."""
+        where = "true"
+        params: dict = {"limit": limit}
+        if artifact_type:
+            where = "a.artifact_type = $artifact_type"
+            params["artifact_type"] = artifact_type
+
+        with self.driver.session() as session:
+            result = session.run(
+                f"""
+                MATCH (a:LoreArtifact)
+                WHERE {where}
+                RETURN a.id AS id, a.name AS name, a.artifact_type AS artifact_type,
+                       a.description AS description, a.source_book AS source_book,
+                       a.confidence AS confidence
+                ORDER BY a.name
+                LIMIT $limit
+                """,
+                **params,
+            )
+            return [dict(r) for r in result]
+
+    def query_unresolved_references(self, source_book: str | None = None, limit: int = 100) -> list[dict]:
+        """Query unresolved references, filtered by source book if provided."""
+        where = "u.resolved_entity_id IS NULL"
+        params: dict = {"limit": limit}
+        if source_book:
+            where += " AND toLower(coalesce(u.source_book,'')) CONTAINS toLower($source_book)"
+            params["source_book"] = source_book
+
+        with self.driver.session() as session:
+            result = session.run(
+                f"""
+                MATCH (u:UnresolvedReference)
+                WHERE {where}
+                RETURN u.id AS id, u.mention_text AS mention_text,
+                       u.expected_type AS expected_type,
+                       u.source_book AS source_book,
+                       u.passage_id AS passage_id,
+                       u.confidence AS confidence,
+                       coalesce(u.conflict_weight, 0.0) AS conflict_weight,
+                       coalesce(u.candidates, []) AS candidates,
+                       coalesce(u.provenance_notes, []) AS provenance_notes
+                ORDER BY (coalesce(u.conflict_weight, 0.0) + coalesce(u.confidence, 0.0)) DESC
+                LIMIT $limit
+                """,
+                **params,
+            )
+            return [dict(r) for r in result]
+
+    def query_unresolved_reference_queue(self, source_book: str | None = None, limit: int = 100) -> list[dict]:
+        """Alias query optimized for downstream generation/review queue."""
+        return self.query_unresolved_references(source_book=source_book, limit=limit)
+
+    # =========================================================================
     # Sociolinguistic Registers (Issue #47 slice 1)
     # =========================================================================
 
@@ -1768,6 +1970,8 @@ class GraphWriter:
             e.location_id = $location_id, e.location_name = $location_name,
             e.description = $description, e.event_type = $event_type,
             e.source_book = $source_book, e.source_passage_id = $source_passage_id,
+            e.source_id = $source_id, e.editorial_status = $editorial_status,
+            e.source_authority_weight = $source_authority_weight,
             e.time_era = $time_era, e.time_year_start = $time_year_start,
             e.time_year_end = $time_year_end, e.time_confidence = $time_confidence,
             e.time_raw_text = $time_raw_text
@@ -1778,6 +1982,9 @@ class GraphWriter:
             "location_name": event.location_name, "description": event.description,
             "event_type": event.event_type, "source_book": event.source_book,
             "source_passage_id": event.source_passage_id,
+            "source_id": getattr(event, "source_id", None),
+            "editorial_status": getattr(event, "editorial_status", None),
+            "source_authority_weight": getattr(event, "source_authority_weight", None),
             "time_era": event.time.era, "time_year_start": event.time.year_start,
             "time_year_end": event.time.year_end, "time_confidence": event.time.confidence,
             "time_raw_text": event.time.raw_text,
@@ -1859,6 +2066,10 @@ class GraphWriter:
             c.description = $description, c.event_a_id = $event_a_id,
             c.event_b_id = $event_b_id, c.entity_id = $entity_id,
             c.suggestion = $suggestion, c.confidence = $confidence,
+            c.event_a_source_book = $event_a_source_book,
+            c.event_b_source_book = $event_b_source_book,
+            c.event_a_source_authority_weight = $event_a_source_authority_weight,
+            c.event_b_source_authority_weight = $event_b_source_authority_weight,
             c.updated_at = datetime()
         """
         params = {
@@ -1871,6 +2082,10 @@ class GraphWriter:
             "entity_id": conflict.entity_id,
             "suggestion": conflict.suggestion,
             "confidence": conflict.confidence,
+            "event_a_source_book": getattr(conflict, "event_a_source_book", None),
+            "event_b_source_book": getattr(conflict, "event_b_source_book", None),
+            "event_a_source_authority_weight": getattr(conflict, "event_a_source_authority_weight", None),
+            "event_b_source_authority_weight": getattr(conflict, "event_b_source_authority_weight", None),
         }
         with self.driver.session() as session:
             session.run(query, **params)
@@ -1935,7 +2150,11 @@ class GraphWriter:
                c.severity AS severity, c.description AS description,
                c.event_a_id AS event_a_id, c.event_b_id AS event_b_id,
                c.entity_id AS entity_id, c.suggestion AS suggestion,
-               c.confidence AS confidence
+               c.confidence AS confidence,
+               c.event_a_source_book AS event_a_source_book,
+               c.event_b_source_book AS event_b_source_book,
+               c.event_a_source_authority_weight AS event_a_source_authority_weight,
+               c.event_b_source_authority_weight AS event_b_source_authority_weight
         ORDER BY c.confidence DESC
         LIMIT $limit
         """

@@ -209,9 +209,10 @@ not a new top-level package.
 
 ### Phase 4 - Editorial Layers (Issue #48)
 
-- Source-text metadata tagging in ingest
-- Provenance-weighted lore conflict resolution
-- CLI: `bga corpus sources`
+- ✅ Source-text metadata tagging in ingest + bridge/corpus reconciliation paths
+- ✅ Provenance-weighted lore conflict resolution (authority-aware calibration + persisted conflict source fields)
+- ✅ CLI: `bga corpus sources`
+- ✅ Cross-book reconcile compatibility with both normalized and raw `lore events` JSON payloads
 
 ### Phase 5 - Cultural Rules (Issue #49)
 
@@ -255,10 +256,10 @@ not a new top-level package.
 |-------|--------|--------|-------|
 | #45 | Kickoff Slice | ✅ Complete | Models, stubs, CLI placeholders, tests |
 | #46 | Linguistic Engine v1 | ✅ Complete | `GraphWriter.write_linguistic_lineage`, JSON parser, CLI `worldbible languages`, 50 tests |
-| #47 | Deep Genealogy + Sociolinguistic Registers | 🟡 Closeout slice in progress | Added safe model-assisted fallback path, corpus-wide socioreg profiling/drift summaries, richer graph query/report helpers, and CLI ergonomics (`--json`, corpus mode, voice/style alignment hint). |
-| #48 | Editorial Layers | 🔲 Not started | Stub raises `NotImplementedError` |
+| #47 | Deep Genealogy + Sociolinguistic Registers | 🟡 Closeout slice in progress | Genealogy closeout (entity/depth/house inference + graph support) plus socioreg closeout work: safer model fallback, corpus-wide profiling/drift summaries, and richer CLI/query ergonomics. |
+| #48/#51 | Editorial Layers / Meta-Layer | 🟨 In progress | Source strata model + passage provenance tags + MVP divergence detector + layer-aware graph/CLI reporting |
 | #49 | Cultural Rules | 🔲 Not started | |
-| #50 | Cosmological Timeline | 🔲 Not started | |
+| #50 | Cosmological Timeline | 🟡 Slice 2 in progress | Lore-depth extraction + unresolved ref queue + resolver candidate linking |
 | #51 | Integration Testing | 🔲 Not started | |
 
 ### #46 Remaining TODOs
@@ -268,3 +269,28 @@ not a new top-level package.
 - [ ] Batch-optimized Cypher (current impl uses per-lineage transactions)
 - [ ] `worldbible.extractor` integration for automatic language category extraction
 - [ ] Query helpers: "all names for entity X across languages" as a CLI subcommand
+
+### #50 Slice 1 (Impression-of-Depth Engine) Update
+
+Implemented in this slice:
+- Added first-class lore-depth models (`LoreArtifact`, `BrokenReference`) in `models/lore_depth.py`
+- Added extraction helper `lore.depth.extract_lore_depth(...)` for artifact-like mentions and unresolved markers
+- Added GraphWriter persistence/query helpers for lore depth nodes and unresolved-reference reporting
+- Added CLI commands under existing families:
+  - `worldbible artifacts`
+  - `lore unresolved-refs`
+- Added tests in `tests/test_issue_50_lore_depth_slice1.py`
+
+### #50 Slice 2 (Precision + Candidate Linking) Update
+
+Implemented in this slice:
+- context-window extraction for unresolved references (`context_before/context_after`)
+- optional LLM-assisted fallback when heuristic extraction misses references
+- resolver-backed candidate linking (`ReferenceCandidate`) for unresolved mentions
+- provenance/conflict weighting fields persisted to graph and exposed via queue query
+- unresolved-reference queue semantics surfaced in model and CLI output
+
+Remaining for Issue #50:
+- editorial-layer-aware weighting calibration against real corpora
+- generation pipeline integration that consumes unresolved queue automatically
+- end-to-end cosmological timeline checks tied to these unresolved links

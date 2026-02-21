@@ -36,6 +36,7 @@ from .sociolinguistic_registers import (
     SociolinguisticRegisterClassifier,
     detect_register_drift,
 )
+from .depth import extract_lore_depth, link_broken_reference_candidates
 
 __all__ = [
     "LoreChecker",
@@ -68,4 +69,6 @@ __all__ = [
     "RegisterDrift",
     "SociolinguisticRegisterClassifier",
     "detect_register_drift",
+    "extract_lore_depth",
+    "link_broken_reference_candidates",
 ]
