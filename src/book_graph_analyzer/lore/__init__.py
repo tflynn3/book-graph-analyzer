@@ -29,6 +29,13 @@ from .conflicts import (
     LoreConflictNeo4jWriter,
     KNOWN_TOLKIEN_CONFLICTS,
 )
+from .sociolinguistic_registers import (
+    SociolinguisticRegister,
+    RegisterProfile,
+    RegisterDrift,
+    SociolinguisticRegisterClassifier,
+    detect_register_drift,
+)
 
 __all__ = [
     "LoreChecker",
@@ -56,4 +63,9 @@ __all__ = [
     "ConflictAwareValidator",
     "LoreConflictNeo4jWriter",
     "KNOWN_TOLKIEN_CONFLICTS",
+    "SociolinguisticRegister",
+    "RegisterProfile",
+    "RegisterDrift",
+    "SociolinguisticRegisterClassifier",
+    "detect_register_drift",
 ]
