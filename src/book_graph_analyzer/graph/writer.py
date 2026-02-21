@@ -1583,6 +1583,8 @@ class GraphWriter:
             e.location_id = $location_id, e.location_name = $location_name,
             e.description = $description, e.event_type = $event_type,
             e.source_book = $source_book, e.source_passage_id = $source_passage_id,
+            e.source_id = $source_id, e.editorial_status = $editorial_status,
+            e.source_authority_weight = $source_authority_weight,
             e.time_era = $time_era, e.time_year_start = $time_year_start,
             e.time_year_end = $time_year_end, e.time_confidence = $time_confidence,
             e.time_raw_text = $time_raw_text
@@ -1593,6 +1595,9 @@ class GraphWriter:
             "location_name": event.location_name, "description": event.description,
             "event_type": event.event_type, "source_book": event.source_book,
             "source_passage_id": event.source_passage_id,
+            "source_id": getattr(event, "source_id", None),
+            "editorial_status": getattr(event, "editorial_status", None),
+            "source_authority_weight": getattr(event, "source_authority_weight", None),
             "time_era": event.time.era, "time_year_start": event.time.year_start,
             "time_year_end": event.time.year_end, "time_confidence": event.time.confidence,
             "time_raw_text": event.time.raw_text,
@@ -1674,6 +1679,10 @@ class GraphWriter:
             c.description = $description, c.event_a_id = $event_a_id,
             c.event_b_id = $event_b_id, c.entity_id = $entity_id,
             c.suggestion = $suggestion, c.confidence = $confidence,
+            c.event_a_source_book = $event_a_source_book,
+            c.event_b_source_book = $event_b_source_book,
+            c.event_a_source_authority_weight = $event_a_source_authority_weight,
+            c.event_b_source_authority_weight = $event_b_source_authority_weight,
             c.updated_at = datetime()
         """
         params = {
@@ -1686,6 +1695,10 @@ class GraphWriter:
             "entity_id": conflict.entity_id,
             "suggestion": conflict.suggestion,
             "confidence": conflict.confidence,
+            "event_a_source_book": getattr(conflict, "event_a_source_book", None),
+            "event_b_source_book": getattr(conflict, "event_b_source_book", None),
+            "event_a_source_authority_weight": getattr(conflict, "event_a_source_authority_weight", None),
+            "event_b_source_authority_weight": getattr(conflict, "event_b_source_authority_weight", None),
         }
         with self.driver.session() as session:
             session.run(query, **params)
@@ -1750,7 +1763,11 @@ class GraphWriter:
                c.severity AS severity, c.description AS description,
                c.event_a_id AS event_a_id, c.event_b_id AS event_b_id,
                c.entity_id AS entity_id, c.suggestion AS suggestion,
-               c.confidence AS confidence
+               c.confidence AS confidence,
+               c.event_a_source_book AS event_a_source_book,
+               c.event_b_source_book AS event_b_source_book,
+               c.event_a_source_authority_weight AS event_a_source_authority_weight,
+               c.event_b_source_authority_weight AS event_b_source_authority_weight
         ORDER BY c.confidence DESC
         LIMIT $limit
         """
