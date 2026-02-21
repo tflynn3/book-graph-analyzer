@@ -129,11 +129,33 @@
 (:Location {id: string, name: string, region: string, x: float, y: float, aliases: [string]})
 ```
 
+### TimelineConflict (Slice 3 — Issue #48)
+```cypher
+(:TimelineConflict {
+  id: string, conflict_type: string,       -- temporal_overlap | travel_infeasible | causal_paradox | era_mismatch
+  severity: string,                         -- error | warning
+  description: string, suggestion: string,
+  event_a_id: string, event_b_id: string,
+  entity_id: string, confidence: float,
+  updated_at: datetime
+})
+```
+
+### CausalLink (Slice 3+4 — Issue #48)
+```cypher
+(:CausalLink {
+  cause_event_id: string, effect_event_id: string,
+  description: string, confidence: float, updated_at: datetime
+})
+```
+
 ### Spatiotemporal Relationships
 ```cypher
 (:Entity)-[:PARTICIPATED_IN]->(:SpatiotemporalEvent)
 (:SpatiotemporalEvent)-[:LOCATED_AT]->(:Location)
+(:SpatiotemporalEvent)-[:CAUSES {description: string, confidence: float}]->(:SpatiotemporalEvent)
 (:Location)-[:TRAVEL_ROUTE {travel_days: float, mode: string, difficulty: string}]->(:Location)
+(:TimelineConflict)-[:INVOLVES]->(:SpatiotemporalEvent)
 ```
 
 ## Example Queries

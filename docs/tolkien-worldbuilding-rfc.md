@@ -1,9 +1,9 @@
 # RFC: Tolkien World-Building Integration
 
-> **Status:** In Progress — #46 Linguistic Engine v1 complete, #48 Spatiotemporal Engine v1 complete  
-> **Milestone:** [Tolkien World-Building](https://github.com/tflynn3/book-graph-analyzer/milestone/2)  
-> **Issues:** #45–#51  
-> **Author:** BGA Core  
+> **Status:** In Progress - #46 Linguistic Engine v1 complete, #48 Spatiotemporal Engine v5 (LLM causal extraction, confidence calibration, location seeding) complete  
+> **Milestone:** [Tolkien World-Building](https://github.com/tflynn3/book-graph-analyzer/milestone/2)
+> **Issues:** #45-#51
+> **Author:** BGA Core
 > **Date:** 2026-02-21
 
 ---
@@ -24,7 +24,7 @@ layers that make Tolkien's legendarium unique:
 | **Cosmological timeline** | Arda's timeline spans Ainulindalë → Fourth Age; temporal anchoring must handle mythic time. |
 
 This RFC maps these five pillars onto the **existing** BGA pipeline and defines
-how each integrates — no parallel datastore, no separate pipeline.
+how each integrates - no parallel datastore, no separate pipeline.
 
 ---
 
@@ -32,7 +32,7 @@ how each integrates — no parallel datastore, no separate pipeline.
 
 ### 2.1 Linguistic Lineage (Issue #46)
 
-**What:** Track etymology chains — e.g., _Imladris_ (Sindarin) → _Rivendell_ (Common Speech) → _Karningul_ (Westron).
+**What:** Track etymology chains - e.g., _Imladris_ (Sindarin) → _Rivendell_ (Common Speech) → _Karningul_ (Westron).
 
 **Integration points:**
 
@@ -94,7 +94,7 @@ how each integrates — no parallel datastore, no separate pipeline.
 | Module | Hook |
 |--------|------|
 | `graph.temporal` | Extended `ERA_ORDER` with pre-First-Age eras (already partially done) |
-| `graph.writer` | `init_era_chain()` already covers this — extend with sub-age granularity |
+| `graph.writer` | `init_era_chain()` already covers this - extend with sub-age granularity |
 | `models.era_reference` | Mythic-era support in `EraReference` |
 | `lore.temporal` | Temporal validation for pre-First-Age events |
 
@@ -179,7 +179,7 @@ not a new top-level package.
 
 ## 5. Implementation Plan
 
-### Phase 1 — Kickoff Slice (this PR)
+### Phase 1 - Kickoff Slice (this PR)
 
 - [x] RFC document (this file)
 - [x] Model stubs: `LinguisticLineage`, `GenealogyRelation`, `EditorialLayer`
@@ -188,14 +188,14 @@ not a new top-level package.
 - [x] Docs updates (ARCHITECTURE.md, DATA_MODEL.md, pipeline.md, nav)
 - [x] Tests validating integration touchpoints
 
-### Phase 2 — Linguistic Lineage (Issue #46)
+### Phase 2 - Linguistic Lineage (Issue #46)
 
 - Implement `LinguisticLineage` extraction from Tolkien texts
 - Build `DERIVED_FROM` chain writer
 - Integrate with entity resolver for language-aware alias matching
 - CLI: `bga worldbible languages`
 
-### Phase 3 — Deep Genealogy (Issue #47)
+### Phase 3 - Deep Genealogy (Issue #47)
 
 - Slice 1 (this PR): Sociolinguistic register profile + drift MVP
   - Rule-first classifier (`SociolinguisticRegisterClassifier`)
@@ -207,19 +207,19 @@ not a new top-level package.
 - Family-tree context assembly for generation
 - CLI: `bga lore genealogy`
 
-### Phase 4 — Editorial Layers (Issue #48)
+### Phase 4 - Editorial Layers (Issue #48)
 
 - Source-text metadata tagging in ingest
 - Provenance-weighted lore conflict resolution
 - CLI: `bga corpus sources`
 
-### Phase 5 — Cultural Rules (Issue #49)
+### Phase 5 - Cultural Rules (Issue #49)
 
 - Structured culture rule extraction
 - Culture-scoped lore validation
 - CLI: `bga worldbible cultures --rules`
 
-### Phase 6 — Cosmological Timeline (Issue #50)
+### Phase 6 - Cosmological Timeline (Issue #50)
 
 - Sub-age granularity in era chain
 - Mythic-time temporal validation

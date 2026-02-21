@@ -58,12 +58,21 @@ def ingest(path: str, title: str | None) -> None:
 
     from book_graph_analyzer.ingest.loader import load_book
     from book_graph_analyzer.ingest.splitter import split_into_passages
+    from book_graph_analyzer.models.worldbuilding import infer_editorial_layer
 
     file_path = Path(path)
     book_title = title or file_path.stem.replace("_", " ").replace("-", " ").title()
 
     console.print(f"[bold]Ingesting:[/bold] {book_title}")
-    console.print(f"[dim]Source: {file_path}[/dim]\n")
+    console.print(f"[dim]Source: {file_path}[/dim]")
+    source_layer = infer_editorial_layer(book_title) or infer_editorial_layer(str(file_path))
+    if source_layer:
+        console.print(
+            f"[dim]Editorial source: {source_layer.source_title} "
+            f"[{source_layer.editorial_status.value}, authority={source_layer.authority_weight:.0%}]"
+            "[/dim]"
+        )
+    console.print()
 
     # Load the book
     with console.status("Loading book..."):
@@ -4121,6 +4130,264 @@ def lore_timeline_reconcile(events_file: str, locations: str | None, output: str
         console.print(f"\n[bold green]{report.summary_line()}[/bold green]")
 
 
+@lore.command(name="timeline-bridge")
+@click.argument("events_file", type=click.Path(exists=True))
+@click.option("--locations", "-l", type=click.Path(exists=True),
+              help="Location graph JSON file (nodes + edges)")
+@click.option("--seed-locations", is_flag=True,
+              help="Use built-in Middle-earth location seeds instead of --locations")
+@click.option("--output", "-o", type=click.Path(), help="Output file")
+@click.option("--format", "fmt", type=click.Choice(["text", "json"]), default="text",
+              help="Output format")
+@click.option("--source-book", "-b", default=None, help="Source book name for events")
+@click.option("--write-neo4j", is_flag=True,
+              help="Persist events and detected conflicts to Neo4j")
+@click.option("--causal-links", is_flag=True,
+              help="Extract causal link candidates and check for paradoxes")
+@click.option("--use-llm", is_flag=True,
+              help="Use LLM-assisted causal link extraction (falls back to heuristic)")
+@click.option("--calibrate", is_flag=True,
+              help="Apply source authority confidence calibration")
+def lore_timeline_bridge(
+    events_file: str, locations: str | None, seed_locations: bool,
+    output: str | None, fmt: str, source_book: str | None,
+    write_neo4j: bool = False, causal_links: bool = False,
+    use_llm: bool = False, calibrate: bool = False,
+) -> None:
+    """Bridge extracted events through spatiotemporal normalization and reconcile.
+
+    Reads a JSON events file (from 'bga lore events'), normalizes time
+    expressions, detects conflicts including era mismatches, and reports
+    extraction-vs-normalized confidence deltas.
+
+    Use --causal-links to extract causal link candidates and feed them
+    into paradox detection. Add --use-llm for higher-quality LLM-assisted
+    extraction (falls back to heuristic if unavailable).
+
+    Use --seed-locations to load built-in Middle-earth location data for
+    travel feasibility checks.
+
+    Use --calibrate to adjust confidence scores using source authority weights.
+
+    Examples:
+        bga lore timeline-bridge hobbit_events.json
+        bga lore timeline-bridge events.json -l locations.json --format json -o report.json
+        bga lore timeline-bridge events.json --causal-links --use-llm --calibrate
+        bga lore timeline-bridge events.json --seed-locations --causal-links --write-neo4j
+    """
+    from book_graph_analyzer.lore.events import Event, EventGraph
+    from book_graph_analyzer.spatiotemporal import (
+        ConflictDetector, ReconciliationReport,
+        LocationNode, LocationEdge, ExtractionBridge,
+        extract_causal_links,
+        calibrate_event_confidence,
+        calibrate_causal_link_confidence,
+        calibrate_conflict_confidence,
+        SourceAuthorityRegistry,
+        load_seed_location_graph,
+    )
+
+    # Load events from lore event format
+    with open(events_file, "r", encoding="utf-8") as f:
+        raw = json.load(f)
+
+    # Parse as EventGraph or raw list
+    if isinstance(raw, dict) and "events" in raw:
+        graph = EventGraph.from_dict(raw)
+        lore_events = list(graph.events.values())
+    elif isinstance(raw, list):
+        lore_events = [Event.from_dict(e) for e in raw]
+    else:
+        console.print("[red]Unrecognized events file format[/red]")
+        return
+
+    console.print(f"[dim]Loaded {len(lore_events)} extracted events from {events_file}[/dim]")
+
+    # Bridge to spatiotemporal events
+    bridge = ExtractionBridge()
+    bridge_report = bridge.bridge_events(lore_events, source_book=source_book)
+    st_events = bridge_report.events
+
+    console.print(f"[dim]Bridged {bridge_report.total} events through normalization[/dim]")
+
+    # Confidence calibration
+    calibration_result = None
+    if calibrate:
+        registry = SourceAuthorityRegistry.default_tolkien()
+        cal = calibrate_event_confidence(st_events, registry)
+        calibration_result = cal
+        console.print(f"[dim]Calibrated {cal.events_calibrated} events (avg authority: {cal.avg_authority_weight:.2f})[/dim]")
+
+    # Extract causal links if requested
+    causal_result = None
+    extracted_links = []
+    if causal_links:
+        llm_client = None
+        if use_llm:
+            try:
+                from book_graph_analyzer.llm import LLMClient
+                llm_client = LLMClient()
+                console.print("[dim]LLM client initialized for causal extraction[/dim]")
+            except Exception:
+                console.print("[yellow]Could not initialize LLM client, using heuristic fallback[/yellow]")
+
+        causal_result = extract_causal_links(
+            st_events, use_llm=use_llm, llm_client=llm_client,
+        )
+        extracted_links = causal_result.links
+        console.print(
+            f"[dim]Extracted {len(extracted_links)} causal links "
+            f"(mode: {causal_result.mode.value})[/dim]"
+        )
+
+        # Calibrate causal links too
+        if calibrate and calibration_result:
+            registry = SourceAuthorityRegistry.default_tolkien()
+            link_cal = calibrate_causal_link_confidence(extracted_links, st_events, registry)
+            calibration_result.links_calibrated = link_cal.links_calibrated
+
+    # Load locations
+    loc_nodes: dict[str, LocationNode] = {}
+    loc_edges: list[LocationEdge] = []
+    if seed_locations:
+        loc_nodes, loc_edges = load_seed_location_graph()
+        console.print(f"[dim]Loaded {len(loc_nodes)} seed locations, {len(loc_edges)} routes[/dim]")
+    elif locations:
+        with open(locations, "r", encoding="utf-8") as f:
+            loc_data = json.load(f)
+        for n in loc_data.get("locations", loc_data.get("nodes", [])):
+            node = LocationNode(**n)
+            loc_nodes[node.id] = node
+        for e in loc_data.get("edges", loc_data.get("routes", [])):
+            loc_edges.append(LocationEdge(**e))
+        console.print(f"[dim]Loaded {len(loc_nodes)} locations, {len(loc_edges)} routes[/dim]")
+
+    # Detect conflicts including era mismatches and causal paradoxes
+    detector = ConflictDetector(locations=loc_nodes, edges=loc_edges)
+    conflicts = detector.detect_conflicts(
+        st_events, check_era_mismatches=True,
+        check_causal_paradoxes=bool(extracted_links),
+        causal_links=extracted_links,
+    )
+
+    # Calibrate conflict confidence
+    if calibrate and calibration_result:
+        registry = SourceAuthorityRegistry.default_tolkien()
+        conf_cal = calibrate_conflict_confidence(conflicts, st_events, registry)
+        calibration_result.conflicts_calibrated = conf_cal.conflicts_calibrated
+
+    report = ReconciliationReport(
+        conflicts=conflicts, events=st_events, bridge_report=bridge_report,
+        causal_result=causal_result, calibration=calibration_result,
+    )
+
+    # Write to Neo4j if requested
+    if write_neo4j:
+        from book_graph_analyzer.graph.writer import GraphWriter
+        from book_graph_analyzer.graph.connection import check_neo4j_connection
+
+        if not check_neo4j_connection():
+            console.print("[red]Cannot connect to Neo4j for --write-neo4j[/red]")
+        else:
+            writer = GraphWriter()
+            ev_count = writer.write_spatiotemporal_events_batch(st_events)
+            cf_count = writer.write_timeline_conflicts_batch(conflicts)
+            cl_count = 0
+            if extracted_links:
+                cl_count = writer.write_causal_links_batch(extracted_links)
+            writer.close()
+            console.print(f"[green]OK[/green] Wrote {ev_count} events, {cf_count} conflicts, {cl_count} causal links to Neo4j")
+
+    if fmt == "json":
+        result = report.to_dict()
+        if output:
+            with open(output, "w", encoding="utf-8") as f:
+                json.dump(result, f, indent=2)
+            console.print(f"[green]OK[/green] Report saved to {output}")
+        else:
+            console.print(json.dumps(result, indent=2))
+    else:
+        text = report.to_text()
+        if output:
+            with open(output, "w", encoding="utf-8") as f:
+                f.write(text)
+            console.print(f"[green]OK[/green] Report saved to {output}")
+        else:
+            console.print(text)
+
+    if conflicts:
+        if report.error_count:
+            console.print(f"\n[bold red]{report.summary_line()}[/bold red]")
+        else:
+            console.print(f"\n[bold yellow]{report.summary_line()}[/bold yellow]")
+    else:
+        console.print(f"\n[bold green]{report.summary_line()}[/bold green]")
+
+
+@lore.command(name="timeline-conflicts")
+@click.option("--conflict-type", "-t", default=None,
+              help="Filter: temporal_overlap, travel_infeasible, causal_paradox, era_mismatch")
+@click.option("--severity", "-s", default=None, type=click.Choice(["error", "warning"]),
+              help="Filter by severity")
+@click.option("--entity", "-e", default=None, help="Filter by entity ID")
+@click.option("--critical", is_flag=True, help="Show only recent critical (error) conflicts")
+@click.option("--limit", "-n", default=20, type=int, help="Max results")
+def lore_timeline_conflicts(
+    conflict_type: str | None, severity: str | None, entity: str | None,
+    critical: bool, limit: int,
+) -> None:
+    """Query persisted spatiotemporal conflicts from Neo4j.
+
+    Examples:
+        bga lore timeline-conflicts
+        bga lore timeline-conflicts --conflict-type causal_paradox
+        bga lore timeline-conflicts --critical
+        bga lore timeline-conflicts --entity gandalf --severity error
+    """
+    from book_graph_analyzer.graph.writer import GraphWriter
+    from book_graph_analyzer.graph.connection import check_neo4j_connection
+
+    if not check_neo4j_connection():
+        console.print("[red]Cannot connect to Neo4j[/red]")
+        return
+
+    writer = GraphWriter()
+
+    if critical:
+        results = writer.query_recent_critical_conflicts(limit=limit)
+    else:
+        results = writer.query_timeline_conflicts(
+            conflict_type=conflict_type, severity=severity,
+            entity_id=entity, limit=limit,
+        )
+    writer.close()
+
+    if not results:
+        console.print("[yellow]No timeline conflicts found in Neo4j.[/yellow]")
+        console.print("[dim]Run 'bga lore timeline-bridge --write-neo4j' to persist conflicts.[/dim]")
+        return
+
+    console.print(f"\n[bold]Timeline Conflicts ({len(results)})[/bold]\n")
+
+    from rich.table import Table as RichTable
+    table = RichTable(show_header=True, header_style="bold")
+    table.add_column("Type", style="cyan", width=18)
+    table.add_column("Sev", width=7)
+    table.add_column("Conf", justify="right", width=6)
+    table.add_column("Description")
+
+    for r in results:
+        sev = r.get("severity", "?")
+        sev_styled = f"[red]{sev}[/red]" if sev == "error" else f"[yellow]{sev}[/yellow]"
+        table.add_row(
+            r.get("conflict_type", "?"),
+            sev_styled,
+            f"{r.get('confidence', 0):.0%}",
+            (r.get("description") or "")[:80],
+        )
+    console.print(table)
+
+
 @lore.command(name="interactive")
 @click.option("--bible", "-b", type=click.Path(exists=True), help="World bible file")
 @click.option("--corpus", "-c", help="Corpus name for entity lookup")
@@ -5679,26 +5946,163 @@ def lore_genealogy(
         console.print("[dim]Use --character, --house, --extract, or --load. See --help.[/dim]")
 
 
+@corpus.command(name="timeline-reconcile")
+@click.argument("corpus_name")
+@click.option("--events-dir", "-e", type=click.Path(exists=True),
+              help="Directory with per-book event JSON files (default: data/output/)")
+@click.option("--locations", "-l", type=click.Path(exists=True),
+              help="Location graph JSON file")
+@click.option("--output", "-o", type=click.Path(), help="Output file")
+@click.option("--format", "fmt", type=click.Choice(["text", "json"]), default="text",
+              help="Output format")
+@click.option("--causal-links", is_flag=True, default=True,
+              help="Extract causal link candidates (default: on)")
+@click.option("--write-neo4j", is_flag=True,
+              help="Persist results to Neo4j")
+def corpus_timeline_reconcile(
+    corpus_name: str, events_dir: str | None, locations: str | None,
+    output: str | None, fmt: str, causal_links: bool, write_neo4j: bool,
+) -> None:
+    """Reconcile timelines across all books in a corpus.
+
+    Evaluates spatiotemporal conflicts within each book and across books.
+    Extracts causal link candidates and checks for paradoxes.
+
+    Each book needs a corresponding event JSON file (from 'bga lore events'
+    or 'bga corpus events').
+
+    Examples:
+        bga corpus timeline-reconcile tolkien_works
+        bga corpus timeline-reconcile tolkien_works -e data/events/ --format json -o report.json
+        bga corpus timeline-reconcile tolkien_works --write-neo4j
+    """
+    from book_graph_analyzer.corpus import CorpusManager
+    from book_graph_analyzer.spatiotemporal import (
+        CorpusReconciler, LocationNode, LocationEdge, SpatiotemporalEvent,
+    )
+
+    manager = CorpusManager(corpus_name)
+    books = manager.list_books()
+    if not books:
+        console.print("[yellow]No books in corpus[/yellow]")
+        return
+
+    # Load locations if provided
+    loc_nodes: dict[str, LocationNode] = {}
+    loc_edges: list[LocationEdge] = []
+    if locations:
+        with open(locations, "r", encoding="utf-8") as f:
+            loc_data = json.load(f)
+        for n in loc_data.get("locations", loc_data.get("nodes", [])):
+            node = LocationNode(**n)
+            loc_nodes[node.id] = node
+        for e in loc_data.get("edges", loc_data.get("routes", [])):
+            loc_edges.append(LocationEdge(**e))
+
+    reconciler = CorpusReconciler(
+        locations=loc_nodes, edges=loc_edges, extract_causal=causal_links,
+    )
+
+    # Find event files for each book
+    search_dir = Path(events_dir) if events_dir else Path("data/output")
+    loaded = 0
+    for book in books:
+        book_slug = book.id or book.title.lower().replace(" ", "_")
+        candidates = [
+            search_dir / f"{book_slug}_events.json",
+            search_dir / f"{corpus_name}_{book_slug}_events.json",
+            search_dir / f"{book_slug}.json",
+        ]
+        found = None
+        for c in candidates:
+            if c.exists():
+                found = c
+                break
+        if not found:
+            console.print(f"[yellow]No event file found for '{book.title}' (tried {book_slug}_events.json)[/yellow]")
+            continue
+        count = reconciler.add_book_from_json(str(found), book.id, book.title)
+        console.print(f"[dim]Loaded {count} events for '{book.title}' from {found.name}[/dim]")
+        loaded += 1
+
+    if loaded == 0:
+        console.print("[red]No event files found. Run 'bga lore events' or 'bga corpus events' first.[/red]")
+        return
+
+    console.print(f"\n[bold]Reconciling {loaded} book(s) in corpus: {corpus_name}[/bold]")
+    result = reconciler.reconcile()
+
+    # Write to Neo4j if requested
+    if write_neo4j:
+        from book_graph_analyzer.graph.writer import GraphWriter
+        from book_graph_analyzer.graph.connection import check_neo4j_connection
+
+        if not check_neo4j_connection():
+            console.print("[red]Cannot connect to Neo4j[/red]")
+        else:
+            writer = GraphWriter()
+            ev_total = 0
+            for book in result.books:
+                ev_total += writer.write_spatiotemporal_events_batch(book.events)
+            cf_total = 0
+            for conflicts in result.per_book_conflicts.values():
+                cf_total += writer.write_timeline_conflicts_batch(conflicts)
+            cf_total += writer.write_timeline_conflicts_batch(result.cross_book_conflicts)
+            cl_total = writer.write_causal_links_batch(result.all_causal_links)
+            writer.close()
+            console.print(
+                f"[green]OK[/green] Wrote {ev_total} events, {cf_total} conflicts, "
+                f"{cl_total} causal links to Neo4j"
+            )
+
+    if fmt == "json":
+        out = result.to_dict()
+        if output:
+            with open(output, "w", encoding="utf-8") as f:
+                json.dump(out, f, indent=2)
+            console.print(f"[green]OK[/green] Report saved to {output}")
+        else:
+            console.print(json.dumps(out, indent=2))
+    else:
+        text = result.summary_text()
+        if output:
+            with open(output, "w", encoding="utf-8") as f:
+                f.write(text)
+            console.print(f"[green]OK[/green] Report saved to {output}")
+        else:
+            console.print(text)
+
+
 @corpus.command(name="sources")
 @click.argument("corpus_name")
 @click.option("--show-authority", "-a", is_flag=True, help="Show authority weights")
 def corpus_sources(corpus_name: str, show_authority: bool) -> None:
-    """Show editorial source layers for a corpus.
+    """Show editorial source layers for a corpus."""
+    from book_graph_analyzer.models.worldbuilding import TOLKIEN_SOURCES, infer_editorial_layer
 
-    Displays which source texts have been ingested and their editorial
-    provenance (published, draft, notes, etc.).
+    corpus_dir = Path("data") / "corpora" / corpus_name
+    candidates: list[str] = []
+    if corpus_dir.exists():
+        candidates.extend(str(p) for p in corpus_dir.rglob("*.txt"))
+        candidates.extend(str(p) for p in corpus_dir.rglob("*.epub"))
 
-    TODO(#48): Implement editorial layer tracking in ingest pipeline.
+    inferred = []
+    for item in candidates:
+        layer = infer_editorial_layer(item)
+        if layer:
+            inferred.append((Path(item).name, layer))
 
-    Example:
-        bga corpus sources tolkien_works
-        bga corpus sources tolkien_works --show-authority
-    """
-    console.print("[yellow]Not yet implemented — see Issue #48 (Editorial Layers)[/yellow]")
-    console.print("[dim]This command will show editorial provenance for each source text.[/dim]")
+    if inferred:
+        console.print(f"[bold]Corpus sources ({len(inferred)} matched):[/bold]")
+        for file_name, src in sorted(inferred, key=lambda x: x[0].lower()):
+            weight = f" (authority: {src.authority_weight:.0%})" if show_authority else ""
+            console.print(
+                f"  {file_name} -> [{src.editorial_status.value}] "
+                f"{src.source_title} ({src.publication_year}){weight}"
+            )
+    else:
+        console.print("[yellow]No local corpus files matched known editorial layers.[/yellow]")
 
-    # Show the pre-defined source registry as a preview
-    from book_graph_analyzer.models.worldbuilding import TOLKIEN_SOURCES
     console.print(f"\n[bold]Known Tolkien Sources ({len(TOLKIEN_SOURCES)}):[/bold]")
     for src in TOLKIEN_SOURCES:
         weight = f"  (authority: {src.authority_weight:.0%})" if show_authority else ""

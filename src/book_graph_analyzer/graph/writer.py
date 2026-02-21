@@ -1314,19 +1314,62 @@ class GraphWriter:
         """Link an entity to its editorial source via ATTESTED_IN relationship.
 
         Creates a (:Source) node if needed and an ATTESTED_IN edge.
-
-        TODO(#48): Implement Source node creation and ATTESTED_IN edge
-        TODO(#48): Add batch variant for corpus-wide provenance tagging
-
-        Args:
-            entity_id: ID of the entity being attested
-            source: EditorialLayer describing the source text
-            confidence: How confidently this entity appears in this source
-            page_ref: Optional page/chapter reference
         """
-        raise NotImplementedError(
-            "Editorial provenance writing not yet implemented. See Issue #48."
-        )
+        if not entity_id or source is None:
+            return
+
+        source_props = {
+            "source_id": getattr(source, "source_id", None),
+            "source_title": getattr(source, "source_title", None),
+            "editorial_status": getattr(getattr(source, "editorial_status", None), "value", None)
+            or str(getattr(source, "editorial_status", ""))
+            or None,
+            "author_period": getattr(getattr(source, "author_period", None), "value", None)
+            or str(getattr(source, "author_period", ""))
+            or None,
+            "publication_year": getattr(source, "publication_year", None),
+            "editor": getattr(source, "editor", None),
+            "volume": getattr(source, "volume", None),
+            "authority_weight": float(getattr(source, "authority_weight", 1.0) or 1.0),
+            "notes": getattr(source, "notes", None),
+        }
+
+        source_id = source_props["source_id"] or source_props["source_title"]
+        if not source_id:
+            return
+
+        query = """
+        MATCH (e {id: $entity_id})
+        MERGE (s:Source {id: $source_id})
+        SET s.source_title = $source_title,
+            s.editorial_status = $editorial_status,
+            s.author_period = $author_period,
+            s.publication_year = $publication_year,
+            s.editor = $editor,
+            s.volume = $volume,
+            s.authority_weight = $authority_weight,
+            s.notes = $notes
+        MERGE (e)-[r:ATTESTED_IN]->(s)
+        SET r.confidence = $confidence,
+            r.page_ref = $page_ref
+        """
+
+        with self.driver.session() as session:
+            session.run(
+                query,
+                entity_id=entity_id,
+                source_id=source_id,
+                source_title=source_props["source_title"],
+                editorial_status=source_props["editorial_status"],
+                author_period=source_props["author_period"],
+                publication_year=source_props["publication_year"],
+                editor=source_props["editor"],
+                volume=source_props["volume"],
+                authority_weight=source_props["authority_weight"],
+                notes=source_props["notes"],
+                confidence=max(0.0, min(1.0, float(confidence))),
+                page_ref=page_ref,
+            )
 
     # =========================================================================
     # Sociolinguistic Registers (Issue #47 slice 1)
@@ -1619,6 +1662,124 @@ class GraphWriter:
                 results.append(dict(record))
         return results
 
+    def write_timeline_conflict(self, conflict) -> None:
+        """Persist a TimelineConflict node to Neo4j.
+
+        Idempotent: uses MERGE on conflict id.
+        Links to involved SpatiotemporalEvent nodes if they exist.
+        """
+        query = """
+        MERGE (c:TimelineConflict {id: $id})
+        SET c.conflict_type = $conflict_type, c.severity = $severity,
+            c.description = $description, c.event_a_id = $event_a_id,
+            c.event_b_id = $event_b_id, c.entity_id = $entity_id,
+            c.suggestion = $suggestion, c.confidence = $confidence,
+            c.updated_at = datetime()
+        """
+        params = {
+            "id": conflict.id,
+            "conflict_type": conflict.conflict_type.value if hasattr(conflict.conflict_type, "value") else str(conflict.conflict_type),
+            "severity": conflict.severity,
+            "description": conflict.description,
+            "event_a_id": conflict.event_a_id,
+            "event_b_id": conflict.event_b_id,
+            "entity_id": conflict.entity_id,
+            "suggestion": conflict.suggestion,
+            "confidence": conflict.confidence,
+        }
+        with self.driver.session() as session:
+            session.run(query, **params)
+            # Link to event nodes if they exist
+            if conflict.event_a_id:
+                session.run("""
+                    MATCH (c:TimelineConflict {id: $cid})
+                    MATCH (e:SpatiotemporalEvent {id: $eid})
+                    MERGE (c)-[:INVOLVES]->(e)
+                """, cid=conflict.id, eid=conflict.event_a_id)
+            if conflict.event_b_id:
+                session.run("""
+                    MATCH (c:TimelineConflict {id: $cid})
+                    MATCH (e:SpatiotemporalEvent {id: $eid})
+                    MERGE (c)-[:INVOLVES]->(e)
+                """, cid=conflict.id, eid=conflict.event_b_id)
+
+    def write_timeline_conflicts_batch(self, conflicts: list) -> int:
+        """Write a batch of TimelineConflict objects. Returns count written."""
+        for conflict in conflicts:
+            self.write_timeline_conflict(conflict)
+        return len(conflicts)
+
+    def query_timeline_conflicts(
+        self,
+        conflict_type: str | None = None,
+        severity: str | None = None,
+        entity_id: str | None = None,
+        min_confidence: float = 0.0,
+        limit: int = 50,
+    ) -> list[dict]:
+        """Query persisted timeline conflicts from Neo4j.
+
+        Args:
+            conflict_type: Filter by type (e.g. 'causal_paradox', 'temporal_overlap')
+            severity: Filter by severity ('error' or 'warning')
+            entity_id: Filter by involved entity
+            min_confidence: Minimum confidence threshold
+            limit: Max results
+
+        Returns:
+            List of conflict dicts sorted by confidence descending
+        """
+        conditions = ["c.confidence >= $min_conf"]
+        params: dict = {"min_conf": min_confidence, "limit": limit}
+
+        if conflict_type:
+            conditions.append("c.conflict_type = $ctype")
+            params["ctype"] = conflict_type
+        if severity:
+            conditions.append("c.severity = $sev")
+            params["sev"] = severity
+        if entity_id:
+            conditions.append("c.entity_id = $eid")
+            params["eid"] = entity_id
+
+        where = " AND ".join(conditions)
+        query = f"""
+        MATCH (c:TimelineConflict)
+        WHERE {where}
+        RETURN c.id AS id, c.conflict_type AS conflict_type,
+               c.severity AS severity, c.description AS description,
+               c.event_a_id AS event_a_id, c.event_b_id AS event_b_id,
+               c.entity_id AS entity_id, c.suggestion AS suggestion,
+               c.confidence AS confidence
+        ORDER BY c.confidence DESC
+        LIMIT $limit
+        """
+        results = []
+        with self.driver.session() as session:
+            for record in session.run(query, **params):
+                results.append(dict(record))
+        return results
+
+    def query_recent_critical_conflicts(self, limit: int = 20) -> list[dict]:
+        """Query recent high-severity timeline conflicts.
+
+        Returns error-level conflicts ordered by most recently updated.
+        """
+        query = """
+        MATCH (c:TimelineConflict)
+        WHERE c.severity = 'error'
+        RETURN c.id AS id, c.conflict_type AS conflict_type,
+               c.description AS description, c.confidence AS confidence,
+               c.entity_id AS entity_id, c.updated_at AS updated_at
+        ORDER BY c.updated_at DESC, c.confidence DESC
+        LIMIT $limit
+        """
+        results = []
+        with self.driver.session() as session:
+            for record in session.run(query, limit=limit):
+                results.append(dict(record))
+        return results
+
     def query_travel_infeasibility(self, entity_id: str, max_speed_per_year: float = 365.0) -> list[dict]:
         """Find consecutive events where travel time exceeds available time."""
         query = """
@@ -1646,5 +1807,100 @@ class GraphWriter:
         results = []
         with self.driver.session() as session:
             for record in session.run(query, eid=entity_id, speed=max_speed_per_year):
+                results.append(dict(record))
+        return results
+
+    # ------------------------------------------------------------------
+    # CausalLink persistence (Slice 4 — Issue #48)
+    # ------------------------------------------------------------------
+
+    def write_causal_link(self, link) -> None:
+        """Persist a CausalLink as an edge between SpatiotemporalEvent nodes.
+
+        Creates a :CAUSES relationship with description and confidence.
+        Idempotent: uses MERGE on the (cause, effect) pair.
+        Also creates a :CausalLink node for queryability.
+        """
+        # Node for queryability
+        node_q = """
+        MERGE (cl:CausalLink {cause_event_id: $cause_id, effect_event_id: $effect_id})
+        SET cl.description = $desc, cl.confidence = $conf, cl.updated_at = datetime()
+        """
+        # Edge between events
+        edge_q = """
+        MATCH (a:SpatiotemporalEvent {id: $cause_id})
+        MATCH (b:SpatiotemporalEvent {id: $effect_id})
+        MERGE (a)-[r:CAUSES]->(b)
+        SET r.description = $desc, r.confidence = $conf
+        """
+        params = {
+            "cause_id": link.cause_event_id,
+            "effect_id": link.effect_event_id,
+            "desc": link.description,
+            "conf": link.confidence,
+        }
+        with self.driver.session() as session:
+            session.run(node_q, **params)
+            session.run(edge_q, **params)
+
+    def write_causal_links_batch(self, links: list) -> int:
+        """Write a batch of CausalLink objects. Returns count written."""
+        for link in links:
+            self.write_causal_link(link)
+        return len(links)
+
+    def query_causal_chain(self, event_id: str, direction: str = "forward", max_depth: int = 10) -> list[dict]:
+        """Query causal chain from an event.
+
+        Args:
+            event_id: Starting event ID
+            direction: 'forward' (effects) or 'backward' (causes)
+            max_depth: Maximum chain depth
+
+        Returns:
+            List of dicts with event info and chain depth
+        """
+        if direction == "forward":
+            query = f"""
+            MATCH path = (start:SpatiotemporalEvent {{id: $eid}})-[:CAUSES*1..{max_depth}]->(e:SpatiotemporalEvent)
+            RETURN e.id AS id, e.description AS description, e.entity_name AS entity_name,
+                   e.time_era AS era, e.time_year_start AS year, length(path) AS depth
+            ORDER BY depth
+            """
+        else:
+            query = f"""
+            MATCH path = (e:SpatiotemporalEvent)-[:CAUSES*1..{max_depth}]->(target:SpatiotemporalEvent {{id: $eid}})
+            RETURN e.id AS id, e.description AS description, e.entity_name AS entity_name,
+                   e.time_era AS era, e.time_year_start AS year, length(path) AS depth
+            ORDER BY depth
+            """
+        results = []
+        with self.driver.session() as session:
+            for record in session.run(query, eid=event_id):
+                results.append(dict(record))
+        return results
+
+    def query_causal_violations(self, min_confidence: float = 0.0, limit: int = 50) -> list[dict]:
+        """Find causal links where effect occurs before cause (paradoxes).
+
+        Uses the graph to find CAUSES edges where the effect event's time
+        is earlier than the cause event's time.
+        """
+        query = """
+        MATCH (cause:SpatiotemporalEvent)-[r:CAUSES]->(effect:SpatiotemporalEvent)
+        WHERE r.confidence >= $min_conf
+          AND cause.time_era = effect.time_era
+          AND effect.time_year_end IS NOT NULL AND cause.time_year_start IS NOT NULL
+          AND effect.time_year_end < cause.time_year_start
+        RETURN cause.id AS cause_id, cause.description AS cause_desc,
+               effect.id AS effect_id, effect.description AS effect_desc,
+               r.confidence AS confidence, r.description AS link_desc,
+               cause.time_era AS era
+        ORDER BY r.confidence DESC
+        LIMIT $limit
+        """
+        results = []
+        with self.driver.session() as session:
+            for record in session.run(query, min_conf=min_confidence, limit=limit):
                 results.append(dict(record))
         return results

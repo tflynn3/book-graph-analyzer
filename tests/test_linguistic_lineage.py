@@ -372,8 +372,8 @@ class TestBackwardCompat:
         ]:
             assert hasattr(GraphWriter, method), f"Missing: {method}"
 
-    def test_editorial_stub_still_raises(self):
-        """editorial provenance remains a planned stub."""
+    def test_other_stubs_state(self):
+        """genealogy empty batch returns 0; editorial provenance no-ops for None source."""
         from book_graph_analyzer.graph.writer import GraphWriter
 
         mock_driver = MagicMock()
@@ -383,8 +383,7 @@ class TestBackwardCompat:
         writer = GraphWriter(driver=mock_driver)
 
         assert writer.write_genealogy_batch([]) == 0
-        with pytest.raises(NotImplementedError, match="Issue #48"):
-            writer.write_editorial_provenance("x", None)
+        writer.write_editorial_provenance("x", None)
 
     def test_existing_kickoff_test_not_implemented_updated(self):
         """The old test expected NotImplementedError for linguistic lineage.

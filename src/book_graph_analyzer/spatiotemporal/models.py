@@ -123,6 +123,21 @@ class LocationEdge(BaseModel):
     bidirectional: bool = True
 
 
+class CausalLink(BaseModel):
+    """A declared causal relationship: cause_event causes effect_event.
+
+    Used by the paradox detector to find impossible causal orderings
+    where the effect temporally precedes the cause.
+
+    TODO(#48): Extract causal links from LLM event extraction pipeline.
+    """
+
+    cause_event_id: str
+    effect_event_id: str
+    description: str = ""
+    confidence: float = 0.7
+
+
 class TimelineConflict(BaseModel):
     """A detected inconsistency in the spatiotemporal graph."""
 

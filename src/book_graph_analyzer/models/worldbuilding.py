@@ -17,6 +17,7 @@ Milestone Issues: #45–#51
 from __future__ import annotations
 
 from enum import Enum
+import re
 from pydantic import BaseModel, Field
 
 
@@ -296,3 +297,44 @@ TOLKIEN_SOURCES: list[EditorialLayer] = [
         notes="Author's own statements about intent and lore",
     ),
 ]
+
+
+def find_editorial_layer(source_name: str) -> EditorialLayer | None:
+    """Find a known editorial layer by title/id with fuzzy normalization."""
+    key = source_name.strip().lower().replace("_", " ").replace("-", " ")
+    if not key:
+        return None
+
+    compact = " ".join(key.split())
+    for layer in TOLKIEN_SOURCES:
+        candidates = {
+            layer.source_id.lower(),
+            layer.source_title.lower(),
+            layer.source_title.lower().replace("the ", "", 1),
+        }
+        if compact in candidates:
+            return layer
+
+        slug = layer.source_title.lower().replace("-", " ")
+        if compact == " ".join(slug.split()):
+            return layer
+
+    # Loose contains/token fallback for common CLI/file-name forms.
+    key_tokens = set(re.findall(r"[a-z0-9]+", compact))
+    for layer in TOLKIEN_SOURCES:
+        title = layer.source_title.lower()
+        if compact in title or title in compact:
+            return layer
+
+        title_tokens = set(re.findall(r"[a-z0-9]+", title)) - {"the", "of"}
+        if title_tokens and title_tokens.issubset(key_tokens):
+            return layer
+
+    return None
+
+
+def infer_editorial_layer(path_or_title: str) -> EditorialLayer | None:
+    """Infer source layer from a file path or title string."""
+    normalized = path_or_title.replace("\\", "/").split("/")[-1]
+    stem = normalized.rsplit(".", 1)[0]
+    return find_editorial_layer(stem) or find_editorial_layer(path_or_title)
