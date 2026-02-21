@@ -8,6 +8,7 @@ from .workflow_failure import (
     analyze_failure_from_issue_text,
     analyze_failure_from_issue_file,
 )
+from .gh_issue import IssueData, fetch_issue_via_gh
 
 __all__ = [
     "extract_required_secrets",
@@ -18,4 +19,6 @@ __all__ = [
     "detect_secret_verification_failure",
     "analyze_failure_from_issue_text",
     "analyze_failure_from_issue_file",
+    "IssueData",
+    "fetch_issue_via_gh",
 ]

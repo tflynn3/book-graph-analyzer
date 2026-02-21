@@ -12,6 +12,7 @@ from book_graph_analyzer.ops.workflow_failure import (
     detect_secret_verification_failure,
     analyze_failure_from_issue_text,
 )
+from book_graph_analyzer.ops.gh_issue import IssueData
 
 
 ISSUE_TEXT = """
@@ -131,3 +132,40 @@ jobs:
     )
     assert res.exit_code == 0
     assert "Diagnosis" in res.output
+
+
+def test_cli_workflow_analyze_failure_issue(monkeypatch, tmp_path: Path):
+    wf = tmp_path / "wf.yml"
+    wf.write_text(
+        """
+jobs:
+  a:
+    steps:
+      - run: echo hi
+        env:
+          COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_GITHUB_TOKEN }}
+""",
+        encoding="utf-8",
+    )
+
+    def fake_fetch(issue_number: int):
+        assert issue_number == 41
+        return IssueData(number=41, title="failed", body=ISSUE_TEXT, url="https://example")
+
+    monkeypatch.setattr("book_graph_analyzer.ops.fetch_issue_via_gh", fake_fetch)
+
+    runner = CliRunner()
+    res = runner.invoke(
+        main,
+        [
+            "workflow-analyze-failure-issue",
+            "--issue",
+            "41",
+            "--workflow",
+            str(wf),
+        ],
+    )
+    # Missing token -> non-zero + analysis printed
+    assert res.exit_code != 0
+    assert "Issue #41" in res.output
+    assert "Workflow Failure Analysis" in res.output
