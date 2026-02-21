@@ -133,9 +133,16 @@ class NERPipeline:
                     )
                 )
 
-        # Also extract proper nouns that might be missed
+        # Also extract proper nouns that might be missed.
+        # en_core_web_sm often tags fictional proper names (Gandalf, Frodo)
+        # as NOUN rather than PROPN, so we also catch uppercase-starting NOUNs.
         for token in doc:
-            if token.pos_ == "PROPN" and not any(
+            is_candidate = (
+                token.pos_ in ("PROPN", "NOUN")
+                and token.text[0].isupper()
+                and len(token.text) > 1  # skip single-letter abbreviations
+            )
+            if is_candidate and not any(
                 e.start_char <= token.idx < e.end_char for e in entities
             ):
                 # Check if it's part of a noun chunk

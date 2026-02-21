@@ -32,6 +32,12 @@ class ProseRegister(str, Enum):
     LORE_REVEAL    = "lore_reveal"  # Deep history as narrative
     FELLOWSHIP     = "fellowship"   # Companions under pressure, loyalty, humor
 
+    def __str__(self) -> str:
+        return self.value
+
+    def __format__(self, format_spec: str) -> str:
+        return format(self.value, format_spec)
+
 
 # Canonical description of each register's prose characteristics
 REGISTER_DESCRIPTIONS: dict[str, str] = {
