@@ -1,7 +1,15 @@
 ﻿"""Command-line interface for Book Graph Analyzer."""
 
+import io
 import json
+import sys
 from pathlib import Path
+
+# Fix Windows cp1252 encoding — ensure stdout/stderr always speak UTF-8
+if hasattr(sys.stdout, "buffer") and getattr(sys.stdout, "encoding", "utf-8").lower() != "utf-8":
+    sys.stdout = io.TextIOWrapper(sys.stdout.buffer, encoding="utf-8", errors="replace")
+if hasattr(sys.stderr, "buffer") and getattr(sys.stderr, "encoding", "utf-8").lower() != "utf-8":
+    sys.stderr = io.TextIOWrapper(sys.stderr.buffer, encoding="utf-8", errors="replace")
 
 import click
 from rich.console import Console
@@ -2633,6 +2641,94 @@ def generate_by_character(character: str, min_quality: float) -> None:
         )
     
     console.print(table)
+
+
+@main.command("bootstrap")
+@click.argument("input_path", type=click.Path(exists=True))
+@click.option("-o", "--output", type=click.Path(), help="Write results to JSON file")
+@click.option("--neo4j", is_flag=True, help="Write accepted entities to Neo4j graph")
+@click.option("--no-llm", is_flag=True, help="Skip LLM canonicalisation (faster, lower accuracy)")
+@click.option("--min-frequency", default=2, show_default=True, help="Minimum mentions to consider an entity")
+@click.option("--verbose", is_flag=True, default=True, show_default=True)
+def bootstrap_cmd(input_path, output, neo4j, no_llm, min_frequency, verbose):
+    """Bootstrap canonical entities from text without seed files.
+
+    INPUT_PATH may be a single .txt file or a directory of .txt files.
+    """
+    from .extract.bootstrap import EntityBootstrapper
+
+    path = Path(input_path)
+    texts = sorted(path.glob("*.txt")) if path.is_dir() else [path]
+
+    if not texts:
+        console.print("[red]No .txt files found.[/red]")
+        return
+
+    bootstrapper = EntityBootstrapper(use_llm=not no_llm)
+    bootstrapper.MIN_FREQUENCY = min_frequency
+
+    all_entities = []
+    for text_file in texts:
+        console.print(f"\n[bold cyan]Processing:[/bold cyan] {text_file.name}")
+        text = text_file.read_text(encoding="utf-8", errors="replace")
+        result = bootstrapper.bootstrap(text, verbose=verbose)
+
+        console.print(f"  [green]Accepted:[/green] {result.stats['accepted']}  "
+                      f"[yellow]Flagged:[/yellow] {result.stats['flagged']}  "
+                      f"[dim]Skipped:[/dim] {result.stats['skipped']}")
+
+        # Print top entities
+        table = Table(show_header=True, header_style="bold")
+        table.add_column("Type", style="cyan", width=10)
+        table.add_column("Canonical Name", style="bold")
+        table.add_column("Variants", style="dim")
+        table.add_column("Freq", justify="right")
+        table.add_column("Conf", justify="right")
+        table.add_column("Review?", justify="center")
+
+        for entity in (result.entities + result.flagged)[:30]:
+            table.add_row(
+                entity.entity_type,
+                entity.canonical_name or max(entity.variants, key=len),
+                ", ".join(entity.variants[:4]),
+                str(entity.frequency),
+                f"{entity.cluster_confidence:.2f}",
+                "[yellow]YES[/yellow]" if entity.needs_review else "[green]no[/green]",
+            )
+        console.print(table)
+
+        all_entities.extend(result.to_dict_list())
+
+        if neo4j:
+            try:
+                from .graph.connection import get_driver
+                driver = get_driver()
+                written = 0
+                with driver.session() as s:
+                    for e in result.entities:
+                        canonical = e.canonical_name or max(e.variants, key=len)
+                        label = {
+                            "character": "Character", "place": "Place",
+                            "object": "Object", "concept": "Entity",
+                        }.get(e.entity_type, "Entity")
+                        s.run(
+                            f"MERGE (n:{label} {{canonical_name: $name}}) "
+                            "SET n.aliases = $aliases, n.bootstrap_confidence = $conf, "
+                            "n.needs_review = $review, n.source = 'inferred', "
+                            "n.mention_count = $freq",
+                            name=canonical, aliases=e.variants,
+                            conf=e.cluster_confidence, review=e.needs_review,
+                            freq=e.frequency,
+                        )
+                        written += 1
+                console.print(f"  [green]Written {written} entities to Neo4j[/green]")
+            except Exception as exc:
+                console.print(f"  [red]Neo4j write failed: {exc}[/red]")
+
+    if output:
+        import json as _json
+        Path(output).write_text(_json.dumps(all_entities, indent=2), encoding="utf-8")
+        console.print(f"\n[green]Results written to {output}[/green]")
 
 
 if __name__ == "__main__":

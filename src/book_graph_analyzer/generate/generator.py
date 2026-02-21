@@ -170,9 +170,10 @@ Keep the same general content and length, just fix the problems.'''
             return "No world bible loaded."
         
         rules = []
-        for rule in self.world_bible.rules:
-            if categories is None or rule.category.value in categories:
-                rules.append(f"- {rule.text}")
+        for category, rule_list in self.world_bible.rules.items():
+            for rule in rule_list:
+                if categories is None or category.value in categories:
+                    rules.append(f"- [{category.value}] {rule.title}: {rule.description}")
         
         return "\n".join(rules[:20])  # Limit to avoid context overflow
     
