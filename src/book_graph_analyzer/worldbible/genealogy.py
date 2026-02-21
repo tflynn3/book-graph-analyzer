@@ -11,6 +11,7 @@ from __future__ import annotations
 
 import json
 import re
+from collections import defaultdict, deque
 from pathlib import Path
 from typing import Any
 
@@ -82,6 +83,48 @@ def _canon_id(name: str) -> str:
     return f"char_{_slug(name)}"
 
 
+_HONORIFICS = {
+    "king", "queen", "lord", "lady", "prince", "princess", "sir", "captain",
+    "master", "steward", "high", "saint",
+}
+
+
+def _normalize_person_name(raw: str) -> str:
+    """Best-effort cleanup for extracted person names.
+
+    Removes leading honorifics and trailing appositive clauses to improve
+    canonical-id stability for genealogy extraction.
+    """
+    name = re.sub(r"\s+", " ", (raw or "").strip(" ,.;:"))
+    if not name:
+        return name
+    # Drop trailing appositives: "Aragorn, son of Arathorn" -> "Aragorn"
+    name = re.split(r",\s*(?:son|daughter|child|father|mother|brother|sister|heir)\b", name, maxsplit=1, flags=re.I)[0]
+    parts = name.split()
+    while parts and parts[0].lower() in _HONORIFICS:
+        parts = parts[1:]
+    # Trim trailing epithet: "the Tall", "the Younger"
+    if len(parts) >= 3 and parts[-2].lower() == "the":
+        parts = parts[:-2]
+    return " ".join(parts) if parts else name
+
+
+def _resolve_name(raw: str, seen: dict[str, str]) -> str:
+    """Resolve a surface form against names already seen in this passage."""
+    cleaned = _normalize_person_name(raw)
+    key = cleaned.lower()
+    if key in seen:
+        return seen[key]
+    # Backoff: single-token mention maps to unique prior full-name tail token.
+    if " " not in cleaned:
+        token = cleaned.lower()
+        matches = [v for k, v in seen.items() if k.endswith(f" {token}") or k == token]
+        if len(set(matches)) == 1:
+            return matches[0]
+    seen[key] = cleaned
+    return cleaned
+
+
 def _make_relation(
     source_name: str,
     target_name: str,
@@ -121,6 +164,75 @@ def _add_with_inverse(relations: list[GenealogyRelation], relation: GenealogyRel
     )
 
 
+_HOUSE_PATTERNS = [
+    re.compile(r"\b(House of [A-Z][\w'’\-]+(?: [A-Z][\w'’\-]+)*)\b"),
+    re.compile(r"\b(?:of|from) (?:the )?(House [A-Z][\w'’\-]+(?: [A-Z][\w'’\-]+)*)\b"),
+    re.compile(r"\b(?:of|from) (?:the )?(clan [A-Z][\w'’\-]+(?: [A-Z][\w'’\-]+)*)\b", re.I),
+]
+
+
+def infer_house_from_context(text: str, start: int, end: int, explicit_house: str | None = None) -> str | None:
+    """Infer house/clan near a matched genealogy statement."""
+    if explicit_house:
+        return explicit_house
+    window_start = max(0, start - 120)
+    window_end = min(len(text), end + 120)
+    window = text[window_start:window_end]
+    for pat in _HOUSE_PATTERNS:
+        m = pat.search(window)
+        if m:
+            h = m.group(1).strip()
+            if h.lower().startswith("clan "):
+                return f"Clan {h[6:]}"
+            return h
+    return None
+
+
+def infer_generation_depths(relations: list[GenealogyRelation]) -> list[GenealogyRelation]:
+    """Infer missing generation_depth via relationship type + graph traversal."""
+    parent_to_child: dict[str, set[str]] = defaultdict(set)
+    child_to_parent: dict[str, set[str]] = defaultdict(set)
+
+    for r in relations:
+        if r.relation_type == GenealogyRelationType.PARENT_OF:
+            parent_to_child[r.source_id].add(r.target_id)
+            child_to_parent[r.target_id].add(r.source_id)
+        elif r.relation_type == GenealogyRelationType.CHILD_OF:
+            parent_to_child[r.target_id].add(r.source_id)
+            child_to_parent[r.source_id].add(r.target_id)
+
+    def shortest_up(src: str, tgt: str) -> int | None:
+        q = deque([(src, 0)])
+        seen = {src}
+        while q:
+            cur, d = q.popleft()
+            if cur == tgt:
+                return d
+            for nxt in child_to_parent.get(cur, set()):
+                if nxt not in seen:
+                    seen.add(nxt)
+                    q.append((nxt, d + 1))
+        return None
+
+    for r in relations:
+        if r.generation_depth is not None:
+            continue
+        if r.relation_type in (GenealogyRelationType.PARENT_OF, GenealogyRelationType.CHILD_OF):
+            r.generation_depth = 1
+        elif r.relation_type in (GenealogyRelationType.GRANDPARENT_OF, GenealogyRelationType.GRANDCHILD_OF):
+            r.generation_depth = 2
+        elif r.relation_type in (GenealogyRelationType.SIBLING_OF, GenealogyRelationType.HALF_SIBLING_OF, GenealogyRelationType.SPOUSE_OF):
+            r.generation_depth = 0
+        elif r.relation_type == GenealogyRelationType.ANCESTOR_OF:
+            d = shortest_up(r.target_id, r.source_id)
+            r.generation_depth = d if d is not None else None
+        elif r.relation_type == GenealogyRelationType.DESCENDANT_OF:
+            d = shortest_up(r.source_id, r.target_id)
+            r.generation_depth = d if d is not None else None
+
+    return relations
+
+
 _RULES: list[tuple[re.Pattern[str], GenealogyRelationType, float]] = [
     (re.compile(r"\b([A-Z][a-z]+(?: [A-Z][a-z]+)*)\s+son of\s+([A-Z][a-z]+(?: [A-Z][a-z]+)*)\b"), GenealogyRelationType.CHILD_OF, 0.9),
     (re.compile(r"\b([A-Z][a-z]+(?: [A-Z][a-z]+)*)\s+daughter of\s+([A-Z][a-z]+(?: [A-Z][a-z]+)*)\b"), GenealogyRelationType.CHILD_OF, 0.9),
@@ -146,17 +258,20 @@ def extract_genealogy_from_text(
     ``llm_client`` is provided, tries a best-effort JSON fallback.
     """
     relations: list[GenealogyRelation] = []
+    seen_names: dict[str, str] = {}
 
     for pattern, relation_type, confidence in _RULES:
         for match in pattern.finditer(text):
-            source_name, target_name = match.group(1).strip(), match.group(2).strip()
+            source_name = _resolve_name(match.group(1).strip(), seen_names)
+            target_name = _resolve_name(match.group(2).strip(), seen_names)
             if source_name == target_name:
                 continue
-            rel = _make_relation(source_name, target_name, relation_type, house, passage_id, confidence)
+            inferred_house = infer_house_from_context(text, match.start(), match.end(), explicit_house=house)
+            rel = _make_relation(source_name, target_name, relation_type, inferred_house, passage_id, confidence)
             _add_with_inverse(relations, rel)
 
     if relations or llm_client is None:
-        return _dedupe_relations(relations)
+        return infer_generation_depths(_dedupe_relations(relations))
 
     # Optional fallback: extremely defensive JSON contract.
     prompt = (
@@ -181,7 +296,7 @@ def extract_genealogy_from_text(
     except Exception:
         pass
 
-    return _dedupe_relations(relations)
+    return infer_generation_depths(_dedupe_relations(relations))
 
 
 def _dedupe_relations(relations: list[GenealogyRelation]) -> list[GenealogyRelation]:
@@ -241,14 +356,44 @@ def genealogy_to_json(relations: list[GenealogyRelation]) -> dict[str, Any]:
 
 
 def build_ancestor_chain(relations: list[GenealogyRelation], character_id: str, depth: int = 3) -> list[GenealogyRelation]:
-    return [
-        r for r in relations
-        if r.source_id == character_id and r.relation_type in (GenealogyRelationType.CHILD_OF, GenealogyRelationType.DESCENDANT_OF)
-    ][:depth]
+    q = deque([(character_id, 0)])
+    seen = {character_id}
+    out: list[GenealogyRelation] = []
+    by_source: dict[str, list[GenealogyRelation]] = defaultdict(list)
+    for r in relations:
+        by_source[r.source_id].append(r)
+
+    while q:
+        node, d = q.popleft()
+        if d >= depth:
+            continue
+        for r in by_source.get(node, []):
+            if r.relation_type not in (GenealogyRelationType.CHILD_OF, GenealogyRelationType.DESCENDANT_OF):
+                continue
+            out.append(r)
+            if r.target_id not in seen:
+                seen.add(r.target_id)
+                q.append((r.target_id, d + 1))
+    return out
 
 
 def build_descendant_tree(relations: list[GenealogyRelation], character_id: str, depth: int = 3) -> list[GenealogyRelation]:
-    return [
-        r for r in relations
-        if r.source_id == character_id and r.relation_type in (GenealogyRelationType.PARENT_OF, GenealogyRelationType.ANCESTOR_OF)
-    ][:depth]
+    q = deque([(character_id, 0)])
+    seen = {character_id}
+    out: list[GenealogyRelation] = []
+    by_source: dict[str, list[GenealogyRelation]] = defaultdict(list)
+    for r in relations:
+        by_source[r.source_id].append(r)
+
+    while q:
+        node, d = q.popleft()
+        if d >= depth:
+            continue
+        for r in by_source.get(node, []):
+            if r.relation_type not in (GenealogyRelationType.PARENT_OF, GenealogyRelationType.ANCESTOR_OF):
+                continue
+            out.append(r)
+            if r.target_id not in seen:
+                seen.add(r.target_id)
+                q.append((r.target_id, d + 1))
+    return out

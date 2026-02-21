@@ -209,9 +209,10 @@ not a new top-level package.
 
 ### Phase 4 - Editorial Layers (Issue #48)
 
-- Source-text metadata tagging in ingest
-- Provenance-weighted lore conflict resolution
-- CLI: `bga corpus sources`
+- ✅ Source-text metadata tagging in ingest + bridge/corpus reconciliation paths
+- ✅ Provenance-weighted lore conflict resolution (authority-aware calibration + persisted conflict source fields)
+- ✅ CLI: `bga corpus sources`
+- ✅ Cross-book reconcile compatibility with both normalized and raw `lore events` JSON payloads
 
 ### Phase 5 - Cultural Rules (Issue #49)
 
@@ -255,8 +256,8 @@ not a new top-level package.
 |-------|--------|--------|-------|
 | #45 | Kickoff Slice | ✅ Complete | Models, stubs, CLI placeholders, tests |
 | #46 | Linguistic Engine v1 | ✅ Complete | `GraphWriter.write_linguistic_lineage`, JSON parser, CLI `worldbible languages`, 50 tests |
-| #47 | Deep Genealogy + Sociolinguistic Registers | 🟡 Slice 1 in progress | Genealogy slice-1 parser/normalization/rules + batch writer/query/CLI, plus sociolinguistic register profile/drift MVP with GraphWriter + CLI integration |
-| #48 | Editorial Layers | 🔲 Not started | Stub raises `NotImplementedError` |
+| #47 | Deep Genealogy + Sociolinguistic Registers | 🟡 Slice 2 closeout in progress | Extends genealogy with improved name normalization/entity matching, context-based house/clan inference, traversal-derived generation depth, and adds genealogy-focused schema/index support; sociolinguistic register profile/drift MVP remains from slice 1 |
+| #48/#51 | Editorial Layers / Meta-Layer | 🟨 In progress | Source strata model + passage provenance tags + MVP divergence detector + layer-aware graph/CLI reporting |
 | #49 | Cultural Rules | 🔲 Not started | |
 | #50 | Cosmological Timeline | 🟡 Slice 2 in progress | Lore-depth extraction + unresolved ref queue + resolver candidate linking |
 | #51 | Integration Testing | 🔲 Not started | |
