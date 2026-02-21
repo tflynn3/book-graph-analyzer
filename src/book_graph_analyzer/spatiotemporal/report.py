@@ -41,6 +41,10 @@ class ReconciliationReport:
     def era_mismatch_count(self) -> int:
         return sum(1 for c in self.conflicts if c.conflict_type == ConflictType.ERA_MISMATCH)
 
+    @property
+    def causal_paradox_count(self) -> int:
+        return sum(1 for c in self.conflicts if c.conflict_type == ConflictType.CAUSAL_PARADOX)
+
     def to_text(self) -> str:
         lines = [
             "=" * 60, "  TIMELINE RECONCILIATION REPORT", "=" * 60, "",
@@ -51,6 +55,8 @@ class ReconciliationReport:
         ]
         if self.era_mismatch_count:
             lines.append(f"  Era mismatches: {self.era_mismatch_count}")
+        if self.causal_paradox_count:
+            lines.append(f"  Causal paradoxes: {self.causal_paradox_count}")
         lines.append("")
 
         # Confidence bridge summary
@@ -96,6 +102,7 @@ class ReconciliationReport:
             "errors": self.error_count,
             "warnings": self.warning_count,
             "era_mismatches": self.era_mismatch_count,
+            "causal_paradoxes": self.causal_paradox_count,
             "conflicts": [c.to_dict() for c in self.conflicts],
         }
         if self.bridge_report:

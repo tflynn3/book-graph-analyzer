@@ -14,6 +14,7 @@ from .models import (
     LocationEdge,
     TimelineConflict,
     ConflictType,
+    CausalLink,
 )
 from .normalizer import TimeNormalizer
 from .conflict_detector import ConflictDetector
@@ -27,6 +28,7 @@ __all__ = [
     "LocationEdge",
     "TimelineConflict",
     "ConflictType",
+    "CausalLink",
     "TimeNormalizer",
     "ConflictDetector",
     "ReconciliationReport",

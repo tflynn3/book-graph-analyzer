@@ -83,16 +83,32 @@ A new `spatiotemporal` package provides cartography + interlaced timeline reconc
 
 ```
 spatiotemporal/
-  models.py            # NormalizedTime, SpatiotemporalEvent, LocationNode/Edge, TimelineConflict
+  models.py            # NormalizedTime, SpatiotemporalEvent, LocationNode/Edge,
+                       # TimelineConflict, CausalLink (slice 3)
   normalizer.py        # Parse temporal expressions → NormalizedTime
-  conflict_detector.py # Detect overlaps, infeasible travel, causal paradoxes
+  conflict_detector.py # Detect overlaps, infeasible travel, era mismatches,
+                       # causal paradoxes + cycle detection (slice 3)
   report.py            # Human-readable reconciliation reports
+  extraction_bridge.py # Bridge lore Events → SpatiotemporalEvents (slice 2)
 ```
 
 **Integration points:**
 - `graph.writer` — `write_spatiotemporal_event()`, `write_location_graph()`,
-  `query_conflicting_overlaps()`, `query_travel_infeasibility()`
-- `cli.py` — `bga lore timeline-reconcile <events.json>` command
+  `query_conflicting_overlaps()`, `query_travel_infeasibility()`,
+  `write_timeline_conflict()`, `write_timeline_conflicts_batch()`,
+  `query_timeline_conflicts()`, `query_recent_critical_conflicts()` (slice 3)
+- `cli.py` — `bga lore timeline-reconcile`, `bga lore timeline-bridge`,
+  `bga lore timeline-conflicts` (slice 3: query persisted conflicts)
 - Builds on existing `graph.temporal` era ordering and `TemporalValidity`
+
+**Slice 3 additions (causal paradox detection + Neo4j persistence):**
+- `CausalLink` model: declares "event A causes event B"
+- `ConflictDetector._detect_causal_paradoxes()`: finds effect-before-cause violations
+  and cycles in causal graphs via DFS
+- `GraphWriter.write_timeline_conflict()`: idempotent MERGE of TimelineConflict nodes
+  with INVOLVES edges to SpatiotemporalEvent nodes
+- `bga lore timeline-bridge --write-neo4j`: persist events + conflicts to Neo4j
+- `bga lore timeline-conflicts`: query persisted conflicts by type/severity/entity
+- TODO(#48): Extract CausalLinks from LLM event extraction pipeline
 
 See [Pipeline docs](pipeline.md#timeline-reconciliation) for usage.

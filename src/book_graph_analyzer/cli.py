@@ -4082,9 +4082,11 @@ def lore_timeline_reconcile(events_file: str, locations: str | None, output: str
 @click.option("--format", "fmt", type=click.Choice(["text", "json"]), default="text",
               help="Output format")
 @click.option("--source-book", "-b", default=None, help="Source book name for events")
+@click.option("--write-neo4j", is_flag=True,
+              help="Persist events and detected conflicts to Neo4j")
 def lore_timeline_bridge(
     events_file: str, locations: str | None, output: str | None,
-    fmt: str, source_book: str | None,
+    fmt: str, source_book: str | None, write_neo4j: bool = False,
 ) -> None:
     """Bridge extracted events through spatiotemporal normalization and reconcile.
 
@@ -4145,6 +4147,20 @@ def lore_timeline_bridge(
         conflicts=conflicts, events=st_events, bridge_report=bridge_report,
     )
 
+    # Write to Neo4j if requested
+    if write_neo4j:
+        from book_graph_analyzer.graph.writer import GraphWriter
+        from book_graph_analyzer.graph.connection import check_neo4j_connection
+
+        if not check_neo4j_connection():
+            console.print("[red]Cannot connect to Neo4j for --write-neo4j[/red]")
+        else:
+            writer = GraphWriter()
+            ev_count = writer.write_spatiotemporal_events_batch(st_events)
+            cf_count = writer.write_timeline_conflicts_batch(conflicts)
+            writer.close()
+            console.print(f"[green]OK[/green] Wrote {ev_count} events, {cf_count} conflicts to Neo4j")
+
     if fmt == "json":
         result = report.to_dict()
         if output:
@@ -4169,6 +4185,70 @@ def lore_timeline_bridge(
             console.print(f"\n[bold yellow]{report.summary_line()}[/bold yellow]")
     else:
         console.print(f"\n[bold green]{report.summary_line()}[/bold green]")
+
+
+@lore.command(name="timeline-conflicts")
+@click.option("--conflict-type", "-t", default=None,
+              help="Filter: temporal_overlap, travel_infeasible, causal_paradox, era_mismatch")
+@click.option("--severity", "-s", default=None, type=click.Choice(["error", "warning"]),
+              help="Filter by severity")
+@click.option("--entity", "-e", default=None, help="Filter by entity ID")
+@click.option("--critical", is_flag=True, help="Show only recent critical (error) conflicts")
+@click.option("--limit", "-n", default=20, type=int, help="Max results")
+def lore_timeline_conflicts(
+    conflict_type: str | None, severity: str | None, entity: str | None,
+    critical: bool, limit: int,
+) -> None:
+    """Query persisted spatiotemporal conflicts from Neo4j.
+
+    Examples:
+        bga lore timeline-conflicts
+        bga lore timeline-conflicts --conflict-type causal_paradox
+        bga lore timeline-conflicts --critical
+        bga lore timeline-conflicts --entity gandalf --severity error
+    """
+    from book_graph_analyzer.graph.writer import GraphWriter
+    from book_graph_analyzer.graph.connection import check_neo4j_connection
+
+    if not check_neo4j_connection():
+        console.print("[red]Cannot connect to Neo4j[/red]")
+        return
+
+    writer = GraphWriter()
+
+    if critical:
+        results = writer.query_recent_critical_conflicts(limit=limit)
+    else:
+        results = writer.query_timeline_conflicts(
+            conflict_type=conflict_type, severity=severity,
+            entity_id=entity, limit=limit,
+        )
+    writer.close()
+
+    if not results:
+        console.print("[yellow]No timeline conflicts found in Neo4j.[/yellow]")
+        console.print("[dim]Run 'bga lore timeline-bridge --write-neo4j' to persist conflicts.[/dim]")
+        return
+
+    console.print(f"\n[bold]Timeline Conflicts ({len(results)})[/bold]\n")
+
+    from rich.table import Table as RichTable
+    table = RichTable(show_header=True, header_style="bold")
+    table.add_column("Type", style="cyan", width=18)
+    table.add_column("Sev", width=7)
+    table.add_column("Conf", justify="right", width=6)
+    table.add_column("Description")
+
+    for r in results:
+        sev = r.get("severity", "?")
+        sev_styled = f"[red]{sev}[/red]" if sev == "error" else f"[yellow]{sev}[/yellow]"
+        table.add_row(
+            r.get("conflict_type", "?"),
+            sev_styled,
+            f"{r.get('confidence', 0):.0%}",
+            (r.get("description") or "")[:80],
+        )
+    console.print(table)
 
 
 @lore.command(name="interactive")

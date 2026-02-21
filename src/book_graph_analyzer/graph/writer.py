@@ -1413,6 +1413,124 @@ class GraphWriter:
                 results.append(dict(record))
         return results
 
+    def write_timeline_conflict(self, conflict) -> None:
+        """Persist a TimelineConflict node to Neo4j.
+
+        Idempotent: uses MERGE on conflict id.
+        Links to involved SpatiotemporalEvent nodes if they exist.
+        """
+        query = """
+        MERGE (c:TimelineConflict {id: $id})
+        SET c.conflict_type = $conflict_type, c.severity = $severity,
+            c.description = $description, c.event_a_id = $event_a_id,
+            c.event_b_id = $event_b_id, c.entity_id = $entity_id,
+            c.suggestion = $suggestion, c.confidence = $confidence,
+            c.updated_at = datetime()
+        """
+        params = {
+            "id": conflict.id,
+            "conflict_type": conflict.conflict_type.value if hasattr(conflict.conflict_type, "value") else str(conflict.conflict_type),
+            "severity": conflict.severity,
+            "description": conflict.description,
+            "event_a_id": conflict.event_a_id,
+            "event_b_id": conflict.event_b_id,
+            "entity_id": conflict.entity_id,
+            "suggestion": conflict.suggestion,
+            "confidence": conflict.confidence,
+        }
+        with self.driver.session() as session:
+            session.run(query, **params)
+            # Link to event nodes if they exist
+            if conflict.event_a_id:
+                session.run("""
+                    MATCH (c:TimelineConflict {id: $cid})
+                    MATCH (e:SpatiotemporalEvent {id: $eid})
+                    MERGE (c)-[:INVOLVES]->(e)
+                """, cid=conflict.id, eid=conflict.event_a_id)
+            if conflict.event_b_id:
+                session.run("""
+                    MATCH (c:TimelineConflict {id: $cid})
+                    MATCH (e:SpatiotemporalEvent {id: $eid})
+                    MERGE (c)-[:INVOLVES]->(e)
+                """, cid=conflict.id, eid=conflict.event_b_id)
+
+    def write_timeline_conflicts_batch(self, conflicts: list) -> int:
+        """Write a batch of TimelineConflict objects. Returns count written."""
+        for conflict in conflicts:
+            self.write_timeline_conflict(conflict)
+        return len(conflicts)
+
+    def query_timeline_conflicts(
+        self,
+        conflict_type: str | None = None,
+        severity: str | None = None,
+        entity_id: str | None = None,
+        min_confidence: float = 0.0,
+        limit: int = 50,
+    ) -> list[dict]:
+        """Query persisted timeline conflicts from Neo4j.
+
+        Args:
+            conflict_type: Filter by type (e.g. 'causal_paradox', 'temporal_overlap')
+            severity: Filter by severity ('error' or 'warning')
+            entity_id: Filter by involved entity
+            min_confidence: Minimum confidence threshold
+            limit: Max results
+
+        Returns:
+            List of conflict dicts sorted by confidence descending
+        """
+        conditions = ["c.confidence >= $min_conf"]
+        params: dict = {"min_conf": min_confidence, "limit": limit}
+
+        if conflict_type:
+            conditions.append("c.conflict_type = $ctype")
+            params["ctype"] = conflict_type
+        if severity:
+            conditions.append("c.severity = $sev")
+            params["sev"] = severity
+        if entity_id:
+            conditions.append("c.entity_id = $eid")
+            params["eid"] = entity_id
+
+        where = " AND ".join(conditions)
+        query = f"""
+        MATCH (c:TimelineConflict)
+        WHERE {where}
+        RETURN c.id AS id, c.conflict_type AS conflict_type,
+               c.severity AS severity, c.description AS description,
+               c.event_a_id AS event_a_id, c.event_b_id AS event_b_id,
+               c.entity_id AS entity_id, c.suggestion AS suggestion,
+               c.confidence AS confidence
+        ORDER BY c.confidence DESC
+        LIMIT $limit
+        """
+        results = []
+        with self.driver.session() as session:
+            for record in session.run(query, **params):
+                results.append(dict(record))
+        return results
+
+    def query_recent_critical_conflicts(self, limit: int = 20) -> list[dict]:
+        """Query recent high-severity timeline conflicts.
+
+        Returns error-level conflicts ordered by most recently updated.
+        """
+        query = """
+        MATCH (c:TimelineConflict)
+        WHERE c.severity = 'error'
+        RETURN c.id AS id, c.conflict_type AS conflict_type,
+               c.description AS description, c.confidence AS confidence,
+               c.entity_id AS entity_id, c.updated_at AS updated_at
+        ORDER BY c.updated_at DESC, c.confidence DESC
+        LIMIT $limit
+        """
+        results = []
+        with self.driver.session() as session:
+            for record in session.run(query, limit=limit):
+                results.append(dict(record))
+        return results
+
     def query_travel_infeasibility(self, entity_id: str, max_speed_per_year: float = 365.0) -> list[dict]:
         """Find consecutive events where travel time exceeds available time."""
         query = """
