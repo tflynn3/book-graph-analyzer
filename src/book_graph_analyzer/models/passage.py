@@ -21,6 +21,13 @@ class Passage(BaseModel):
     scene_type: str | None = None  # dialogue, action, description
 
     # -----------------------------------------------------------------------
+    # Author period — when Tolkien wrote/revised this text
+    # Used for conflict resolution (later texts supersede earlier for retcons)
+    # -----------------------------------------------------------------------
+    author_period: Optional[str] = None  # 'early' | 'middle' | 'late' (AuthorPeriod)
+    source_compilation: Optional[str] = None  # e.g. 'Unfinished Tales', 'HoME Vol. 5'
+
+    # -----------------------------------------------------------------------
     # Story-time frame (when this passage *occurs* in the narrative)
     # -----------------------------------------------------------------------
     story_era: Optional[str] = None    # e.g. 'Third Age'
