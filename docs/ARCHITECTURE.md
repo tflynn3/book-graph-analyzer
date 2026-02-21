@@ -76,3 +76,23 @@ Three new model families live in `models.worldbuilding`:
 
 These models are pure Pydantic/dataclass with no LLM dependency.
 See [Data Model](DATA_MODEL.md#world-building-extensions) for schema details.
+
+### Spatiotemporal Engine (#48)
+
+A new `spatiotemporal` package provides cartography + interlaced timeline reconciliation:
+
+```
+spatiotemporal/
+  models.py            # NormalizedTime, SpatiotemporalEvent, LocationNode/Edge, TimelineConflict
+  normalizer.py        # Parse temporal expressions → NormalizedTime
+  conflict_detector.py # Detect overlaps, infeasible travel, causal paradoxes
+  report.py            # Human-readable reconciliation reports
+```
+
+**Integration points:**
+- `graph.writer` — `write_spatiotemporal_event()`, `write_location_graph()`,
+  `query_conflicting_overlaps()`, `query_travel_infeasibility()`
+- `cli.py` — `bga lore timeline-reconcile <events.json>` command
+- Builds on existing `graph.temporal` era ordering and `TemporalValidity`
+
+See [Pipeline docs](pipeline.md#timeline-reconciliation) for usage.

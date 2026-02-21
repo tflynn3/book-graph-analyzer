@@ -111,6 +111,31 @@
 (:DialogueLine)-[:IN_PASSAGE]->(:Passage)
 ```
 
+## Spatiotemporal Nodes (Issue #48)
+
+### SpatiotemporalEvent
+```cypher
+(:SpatiotemporalEvent {
+  id: string, entity_id: string, entity_name: string,
+  location_id: string, location_name: string,
+  description: string, event_type: string,
+  time_era: string, time_year_start: int, time_year_end: int,
+  time_confidence: float, time_raw_text: string
+})
+```
+
+### Location
+```cypher
+(:Location {id: string, name: string, region: string, x: float, y: float, aliases: [string]})
+```
+
+### Spatiotemporal Relationships
+```cypher
+(:Entity)-[:PARTICIPATED_IN]->(:SpatiotemporalEvent)
+(:SpatiotemporalEvent)-[:LOCATED_AT]->(:Location)
+(:Location)-[:TRAVEL_ROUTE {travel_days: float, mode: string, difficulty: string}]->(:Location)
+```
+
 ## Example Queries
 
 ### "How does Gandalf speak?"

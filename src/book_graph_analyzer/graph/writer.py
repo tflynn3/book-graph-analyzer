@@ -1318,3 +1318,127 @@ class GraphWriter:
                 "era2": record["era2"],
                 "year2": record["year2"],
             }
+
+    # =========================================================================
+    # Spatiotemporal Engine (Issue #48)
+    # =========================================================================
+
+    def write_spatiotemporal_event(self, event) -> None:
+        """Persist a SpatiotemporalEvent node with normalized time fields.
+
+        Creates :SpatiotemporalEvent node linked to entity and location.
+        """
+        query = """
+        MERGE (e:SpatiotemporalEvent {id: $id})
+        SET e.entity_id = $entity_id, e.entity_name = $entity_name,
+            e.location_id = $location_id, e.location_name = $location_name,
+            e.description = $description, e.event_type = $event_type,
+            e.source_book = $source_book, e.source_passage_id = $source_passage_id,
+            e.time_era = $time_era, e.time_year_start = $time_year_start,
+            e.time_year_end = $time_year_end, e.time_confidence = $time_confidence,
+            e.time_raw_text = $time_raw_text
+        """
+        params = {
+            "id": event.id, "entity_id": event.entity_id,
+            "entity_name": event.entity_name, "location_id": event.location_id,
+            "location_name": event.location_name, "description": event.description,
+            "event_type": event.event_type, "source_book": event.source_book,
+            "source_passage_id": event.source_passage_id,
+            "time_era": event.time.era, "time_year_start": event.time.year_start,
+            "time_year_end": event.time.year_end, "time_confidence": event.time.confidence,
+            "time_raw_text": event.time.raw_text,
+        }
+        with self.driver.session() as session:
+            session.run(query, **params)
+            if event.entity_id:
+                session.run("""
+                    MATCH (se:SpatiotemporalEvent {id: $se_id})
+                    MATCH (ent) WHERE ent.canonical_name = $ename OR ent.id = $eid
+                    MERGE (ent)-[:PARTICIPATED_IN]->(se)
+                """, se_id=event.id, ename=event.entity_name, eid=event.entity_id)
+            if event.location_id:
+                session.run("""
+                    MATCH (se:SpatiotemporalEvent {id: $se_id})
+                    MERGE (loc:Location {id: $loc_id})
+                    ON CREATE SET loc.name = $loc_name
+                    MERGE (se)-[:LOCATED_AT]->(loc)
+                """, se_id=event.id, loc_id=event.location_id, loc_name=event.location_name)
+
+    def write_spatiotemporal_events_batch(self, events: list) -> int:
+        """Write a batch of SpatiotemporalEvent objects. Returns count written."""
+        for event in events:
+            self.write_spatiotemporal_event(event)
+        return len(events)
+
+    def write_location_graph(self, locations: list, edges: list) -> dict:
+        """Persist location nodes and travel edges."""
+        with self.driver.session() as session:
+            for loc in locations:
+                session.run("""
+                    MERGE (l:Location {id: $id})
+                    SET l.name = $name, l.region = $region, l.x = $x, l.y = $y, l.aliases = $aliases
+                """, id=loc.id, name=loc.name, region=loc.region, x=loc.x, y=loc.y, aliases=loc.aliases)
+            for edge in edges:
+                session.run("""
+                    MATCH (a:Location {id: $src}), (b:Location {id: $tgt})
+                    MERGE (a)-[r:TRAVEL_ROUTE]->(b)
+                    SET r.travel_days = $days, r.mode = $mode, r.difficulty = $difficulty
+                """, src=edge.source_id, tgt=edge.target_id,
+                    days=edge.travel_days, mode=edge.mode, difficulty=edge.difficulty)
+                if edge.bidirectional:
+                    session.run("""
+                        MATCH (a:Location {id: $tgt}), (b:Location {id: $src})
+                        MERGE (a)-[r:TRAVEL_ROUTE]->(b)
+                        SET r.travel_days = $days, r.mode = $mode, r.difficulty = $difficulty
+                    """, src=edge.source_id, tgt=edge.target_id,
+                        days=edge.travel_days, mode=edge.mode, difficulty=edge.difficulty)
+        return {"locations_written": len(locations), "edges_written": len(edges)}
+
+    def query_conflicting_overlaps(self, entity_id: str) -> list[dict]:
+        """Find SpatiotemporalEvents where entity is at two places at once."""
+        query = """
+        MATCH (e1:SpatiotemporalEvent {entity_id: $eid}),
+              (e2:SpatiotemporalEvent {entity_id: $eid})
+        WHERE e1.id < e2.id AND e1.location_id <> e2.location_id
+          AND e1.time_era = e2.time_era
+          AND (e1.time_year_start <= e2.time_year_end AND e2.time_year_start <= e1.time_year_end
+               OR e1.time_year_start IS NULL OR e2.time_year_start IS NULL)
+        RETURN e1.id AS event1_id, e1.description AS desc1, e1.location_name AS loc1,
+               e2.id AS event2_id, e2.description AS desc2, e2.location_name AS loc2
+        LIMIT 50
+        """
+        results = []
+        with self.driver.session() as session:
+            for record in session.run(query, eid=entity_id):
+                results.append(dict(record))
+        return results
+
+    def query_travel_infeasibility(self, entity_id: str, max_speed_per_year: float = 365.0) -> list[dict]:
+        """Find consecutive events where travel time exceeds available time."""
+        query = """
+        MATCH (e:SpatiotemporalEvent {entity_id: $eid})
+        WHERE e.time_year_start IS NOT NULL AND e.location_id IS NOT NULL
+        WITH e ORDER BY e.time_era, e.time_year_start
+        WITH collect(e) AS events
+        UNWIND range(0, size(events)-2) AS i
+        WITH events[i] AS e1, events[i+1] AS e2
+        WHERE e1.location_id <> e2.location_id
+        OPTIONAL MATCH (l1:Location {id: e1.location_id})
+        OPTIONAL MATCH (l2:Location {id: e2.location_id})
+        WITH e1, e2, l1, l2,
+             CASE WHEN l1 IS NOT NULL AND l2 IS NOT NULL
+                  THEN sqrt((l1.x - l2.x)^2 + (l1.y - l2.y)^2)
+                  ELSE null END AS distance,
+             CASE WHEN e1.time_era = e2.time_era
+                  THEN abs(e2.time_year_start - e1.time_year_start)
+                  ELSE null END AS year_gap
+        WHERE distance IS NOT NULL AND year_gap IS NOT NULL
+          AND distance > year_gap * $speed
+        RETURN e1.id AS from_id, e1.location_name AS from_loc,
+               e2.id AS to_id, e2.location_name AS to_loc, distance, year_gap
+        """
+        results = []
+        with self.driver.session() as session:
+            for record in session.run(query, eid=entity_id, speed=max_speed_per_year):
+                results.append(dict(record))
+        return results

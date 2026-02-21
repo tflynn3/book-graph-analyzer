@@ -46,6 +46,7 @@ bga corpus sources tolkien_works --show-authority
 | Deep Genealogy | `lore genealogy` | #47 | 🔲 Stub |
 | Editorial Layers | `corpus sources` | #48 | 🔲 Stub |
 | Cultural Rules | `worldbible cultures --rules` | #49 | 🔲 Planned |
+| Spatiotemporal Engine | `lore timeline-reconcile` | #48 | ✅ v1 |
 | Cosmological Timeline | `lore timeline --cosmological` | #50 | 🔲 Planned |
 
 ### Integration with Standard Pipeline
@@ -56,3 +57,18 @@ existing modules:
 - **Models** — `models.worldbuilding` adds `LinguisticLineage`, `GenealogyRelation`, `EditorialLayer`
 - **Graph** — `graph.writer` gains `write_linguistic_lineage()`, `write_genealogy_batch()`, `write_editorial_provenance()`
 - **CLI** — New commands live under existing groups (`worldbible`, `lore`, `corpus`, `pipeline`)
+
+### Timeline Reconciliation
+
+The spatiotemporal engine (`spatiotemporal/`) detects timeline inconsistencies:
+
+```bash
+bga lore timeline-reconcile events.json
+bga lore timeline-reconcile events.json -l locations.json
+bga lore timeline-reconcile events.json --format json -o report.json
+```
+
+**Conflict types detected:**
+- **Temporal overlap** — same character at two locations at overlapping times
+- **Travel infeasibility** — entity moves faster than physically possible
+- **Causal paradox** / **Era mismatch** — planned for future iterations
