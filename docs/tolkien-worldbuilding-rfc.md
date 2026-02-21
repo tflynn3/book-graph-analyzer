@@ -1,6 +1,6 @@
 # RFC: Tolkien World-Building Integration
 
-> **Status:** In Progress — #46 Linguistic Engine v1 complete, #48 Spatiotemporal Engine v1 complete  
+> **Status:** In Progress — #46 Linguistic Engine v1 complete, #48 Spatiotemporal Engine v2 (extraction bridge + era mismatch) complete  
 > **Milestone:** [Tolkien World-Building](https://github.com/tflynn3/book-graph-analyzer/milestone/2)  
 > **Issues:** #45–#51  
 > **Author:** BGA Core  

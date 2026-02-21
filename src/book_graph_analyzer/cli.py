@@ -4074,6 +4074,103 @@ def lore_timeline_reconcile(events_file: str, locations: str | None, output: str
         console.print(f"\n[bold green]{report.summary_line()}[/bold green]")
 
 
+@lore.command(name="timeline-bridge")
+@click.argument("events_file", type=click.Path(exists=True))
+@click.option("--locations", "-l", type=click.Path(exists=True),
+              help="Location graph JSON file (nodes + edges)")
+@click.option("--output", "-o", type=click.Path(), help="Output file")
+@click.option("--format", "fmt", type=click.Choice(["text", "json"]), default="text",
+              help="Output format")
+@click.option("--source-book", "-b", default=None, help="Source book name for events")
+def lore_timeline_bridge(
+    events_file: str, locations: str | None, output: str | None,
+    fmt: str, source_book: str | None,
+) -> None:
+    """Bridge extracted events through spatiotemporal normalization and reconcile.
+
+    Reads a JSON events file (from 'bga lore events'), normalizes time
+    expressions, detects conflicts including era mismatches, and reports
+    extraction-vs-normalized confidence deltas.
+
+    Examples:
+        bga lore timeline-bridge hobbit_events.json
+        bga lore timeline-bridge events.json -l locations.json --format json -o report.json
+    """
+    from book_graph_analyzer.lore.events import Event, EventGraph
+    from book_graph_analyzer.spatiotemporal import (
+        ConflictDetector, ReconciliationReport,
+        LocationNode, LocationEdge, ExtractionBridge,
+    )
+
+    # Load events from lore event format
+    with open(events_file, "r", encoding="utf-8") as f:
+        raw = json.load(f)
+
+    # Parse as EventGraph or raw list
+    if isinstance(raw, dict) and "events" in raw:
+        graph = EventGraph.from_dict(raw)
+        lore_events = list(graph.events.values())
+    elif isinstance(raw, list):
+        lore_events = [Event.from_dict(e) for e in raw]
+    else:
+        console.print("[red]Unrecognized events file format[/red]")
+        return
+
+    console.print(f"[dim]Loaded {len(lore_events)} extracted events from {events_file}[/dim]")
+
+    # Bridge to spatiotemporal events
+    bridge = ExtractionBridge()
+    bridge_report = bridge.bridge_events(lore_events, source_book=source_book)
+    st_events = bridge_report.events
+
+    console.print(f"[dim]Bridged {bridge_report.total} events through normalization[/dim]")
+
+    # Load locations if provided
+    loc_nodes: dict[str, LocationNode] = {}
+    loc_edges: list[LocationEdge] = []
+    if locations:
+        with open(locations, "r", encoding="utf-8") as f:
+            loc_data = json.load(f)
+        for n in loc_data.get("locations", loc_data.get("nodes", [])):
+            node = LocationNode(**n)
+            loc_nodes[node.id] = node
+        for e in loc_data.get("edges", loc_data.get("routes", [])):
+            loc_edges.append(LocationEdge(**e))
+        console.print(f"[dim]Loaded {len(loc_nodes)} locations, {len(loc_edges)} routes[/dim]")
+
+    # Detect conflicts including era mismatches
+    detector = ConflictDetector(locations=loc_nodes, edges=loc_edges)
+    conflicts = detector.detect_conflicts(st_events, check_era_mismatches=True)
+    report = ReconciliationReport(
+        conflicts=conflicts, events=st_events, bridge_report=bridge_report,
+    )
+
+    if fmt == "json":
+        result = report.to_dict()
+        if output:
+            with open(output, "w", encoding="utf-8") as f:
+                json.dump(result, f, indent=2)
+            console.print(f"[green]OK[/green] Report saved to {output}")
+        else:
+            console.print(json.dumps(result, indent=2))
+    else:
+        text = report.to_text()
+        if output:
+            with open(output, "w", encoding="utf-8") as f:
+                f.write(text)
+            console.print(f"[green]OK[/green] Report saved to {output}")
+        else:
+            console.print(text)
+
+    if conflicts:
+        if report.error_count:
+            console.print(f"\n[bold red]{report.summary_line()}[/bold red]")
+        else:
+            console.print(f"\n[bold yellow]{report.summary_line()}[/bold yellow]")
+    else:
+        console.print(f"\n[bold green]{report.summary_line()}[/bold green]")
+
+
 @lore.command(name="interactive")
 @click.option("--bible", "-b", type=click.Path(exists=True), help="World bible file")
 @click.option("--corpus", "-c", help="Corpus name for entity lookup")

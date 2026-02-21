@@ -44,11 +44,77 @@ class ConflictDetector:
             return dist / self.travel_speed if self.travel_speed > 0 else None
         return None
 
-    def detect_conflicts(self, events: list[SpatiotemporalEvent]) -> list[TimelineConflict]:
+    def detect_conflicts(
+        self,
+        events: list[SpatiotemporalEvent],
+        *,
+        check_era_mismatches: bool = True,
+    ) -> list[TimelineConflict]:
         conflicts: list[TimelineConflict] = []
         conflicts.extend(self._detect_temporal_overlaps(events))
         conflicts.extend(self._detect_travel_infeasibility(events))
+        if check_era_mismatches:
+            conflicts.extend(self._detect_era_mismatches(events))
         conflicts.sort(key=lambda c: -c.confidence)
+        return conflicts
+
+    def _detect_era_mismatches(self, events: list[SpatiotemporalEvent]) -> list[TimelineConflict]:
+        """Detect events where an entity's claimed era contradicts other events.
+
+        If entity X has N events in era A and 1 event in era B, and those eras
+        are non-adjacent, the outlier is flagged as a likely era mismatch.
+        """
+        conflicts: list[TimelineConflict] = []
+        by_entity: dict[str, list[SpatiotemporalEvent]] = defaultdict(list)
+        for event in events:
+            if event.time.era:
+                by_entity[event.entity_id].append(event)
+
+        for entity_id, entity_events in by_entity.items():
+            # Count events per era
+            era_counts: dict[str, list[SpatiotemporalEvent]] = defaultdict(list)
+            for ev in entity_events:
+                if ev.time.era:
+                    era_counts[ev.time.era].append(ev)
+
+            if len(era_counts) < 2:
+                continue
+
+            # Find the dominant era (most events)
+            dominant_era = max(era_counts, key=lambda e: len(era_counts[e]))
+            dominant_order = era_to_order(dominant_era)
+
+            for era, era_events in era_counts.items():
+                if era == dominant_era:
+                    continue
+                other_order = era_to_order(era)
+                # Non-adjacent eras (gap > 1 in ordering) are suspicious
+                gap = abs(dominant_order - other_order)
+                if gap <= 1:
+                    continue
+
+                for ev in era_events:
+                    entity_name = ev.entity_name or entity_id
+                    confidence = ev.time.confidence * 0.7
+                    conflicts.append(TimelineConflict(
+                        id=f"era_mismatch_{uuid.uuid4().hex[:8]}",
+                        conflict_type=ConflictType.ERA_MISMATCH,
+                        severity="error" if confidence > 0.5 else "warning",
+                        description=(
+                            f"{entity_name} has {len(era_counts[dominant_era])} event(s) "
+                            f"in {dominant_era} but event '{ev.description or ev.id}' "
+                            f"is placed in {era} (era gap: {gap})"
+                        ),
+                        event_a_id=era_counts[dominant_era][0].id,
+                        event_b_id=ev.id,
+                        entity_id=entity_id,
+                        suggestion=(
+                            f"Verify era for '{ev.description or ev.id}' — "
+                            f"expected {dominant_era}, found {era}"
+                        ),
+                        confidence=confidence,
+                    ))
+
         return conflicts
 
     def _detect_temporal_overlaps(self, events: list[SpatiotemporalEvent]) -> list[TimelineConflict]:

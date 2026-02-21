@@ -18,6 +18,7 @@ from .models import (
 from .normalizer import TimeNormalizer
 from .conflict_detector import ConflictDetector
 from .report import ReconciliationReport
+from .extraction_bridge import ExtractionBridge, NormalizationResult, BridgeReport
 
 __all__ = [
     "NormalizedTime",
@@ -29,4 +30,7 @@ __all__ = [
     "TimeNormalizer",
     "ConflictDetector",
     "ReconciliationReport",
+    "ExtractionBridge",
+    "NormalizationResult",
+    "BridgeReport",
 ]
