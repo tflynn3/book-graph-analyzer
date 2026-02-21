@@ -2692,6 +2692,212 @@ def lore_top_passages(limit: int, min_score: float) -> None:
     console.print(table)
 
 
+@lore.command(name="arc")
+@click.option("--character", "-c", required=True,
+              help="Character name (e.g. 'Frodo', 'Sam', 'Gandalf')")
+@click.option("--year", "-y", default=None, type=int,
+              help="Show expected state at a specific story year")
+def lore_arc(character: str, year: int | None) -> None:
+    """Show a character's canonical emotional arc.
+
+    Displays all arc checkpoints with valid/invalid registers.
+
+    Examples:
+        bga lore arc --character Frodo
+        bga lore arc --character Frodo --year 3019
+        bga lore arc --character Sam
+    """
+    from book_graph_analyzer.lore.emotional_arc import EmotionalArcValidator
+
+    validator = EmotionalArcValidator()
+    arc = validator.get_arc(character)
+
+    if not arc:
+        console.print(f"[red]No canonical arc found for '{character}'.[/red]")
+        console.print(f"\n[bold]Characters with registered arcs:[/bold]")
+        for name in validator.all_characters():
+            console.print(f"  {name}")
+        return
+
+    console.print(f"\n[bold]Emotional Arc:[/bold] [cyan]{arc.character_name}[/cyan]\n")
+
+    if year is not None:
+        cp = validator.expected_state(character, year)
+        if not cp:
+            console.print(f"[yellow]No checkpoint covers TA {year} for {arc.character_name}.[/yellow]")
+        else:
+            console.print(f"[bold]At TA {year} — Checkpoint: '{cp.label}'[/bold]")
+            console.print(f"  {cp.description}")
+            console.print(f"  Register: [cyan]{cp.emotional_state.dominant_register if cp.emotional_state else '?'}[/cyan]")
+            console.print(f"  Valence:  {cp.emotional_state.valence:.2f}  Agency: {cp.emotional_state.agency:.2f}" if cp.emotional_state else "")
+            console.print(f"  Hardness: {'[red]HARD[/red]' if cp.hardness == 'HARD' else '[yellow]SOFT[/yellow]'}")
+            if cp.valid_registers:
+                console.print(f"  Valid: {', '.join(cp.valid_registers)}")
+            if cp.invalid_registers:
+                console.print(f"  [red]Invalid: {', '.join(cp.invalid_registers)}[/red]")
+        return
+
+    table = Table(show_header=True, header_style="bold")
+    table.add_column("Label", style="cyan", width=26)
+    table.add_column("Year(s)", width=12)
+    table.add_column("Register", width=16)
+    table.add_column("Val", justify="right", width=5)
+    table.add_column("Agt", justify="right", width=5)
+    table.add_column("Hard", width=6)
+    table.add_column("Context")
+
+    for cp in arc.checkpoints:
+        yr = str(cp.story_year)
+        if cp.story_year_end:
+            yr += f"-{cp.story_year_end}"
+        reg = cp.emotional_state.dominant_register if cp.emotional_state else "?"
+        val = f"{cp.emotional_state.valence:+.1f}" if cp.emotional_state else "-"
+        agt = f"{cp.emotional_state.agency:+.1f}" if cp.emotional_state else "-"
+        hard = "[red]HARD[/red]" if cp.hardness == "HARD" else "[yellow]SOFT[/yellow]"
+        context = cp.description[:70] + "..." if len(cp.description) > 70 else cp.description
+        table.add_row(cp.label, yr, reg, val, agt, hard, context)
+
+    console.print(table)
+    hard = sum(1 for cp in arc.checkpoints if cp.hardness == "HARD")
+    console.print(f"\n  {len(arc.checkpoints)} checkpoints · {hard} HARD")
+
+
+@lore.command(name="validate-arc")
+@click.option("--character", "-c", required=True,
+              help="Character name (e.g. 'Frodo', 'Sam', 'Gandalf')")
+@click.option("--story-year", "-y", required=True, type=int,
+              help="Story year in Third Age (e.g. 3019)")
+@click.option("--generated-state", "-s", default=None,
+              help="Proposed emotional state (register name or description text)")
+@click.option("--text", "-t", default=None,
+              help="Full passage text to extract state from automatically")
+def lore_validate_arc(
+    character: str,
+    story_year: int,
+    generated_state: str | None,
+    text: str | None,
+) -> None:
+    """Validate a character's emotional state against the canonical arc.
+
+    Checks whether the proposed state is consistent with what is canonically
+    expected at this point in the story.
+
+    Examples:
+        bga lore validate-arc --character Frodo --story-year 3019 --generated-state 'cozy'
+        bga lore validate-arc --character Frodo --story-year 3019 \\
+            --text "Frodo felt hopeful and light-hearted as he walked through Mordor."
+        bga lore validate-arc --character Sam --story-year 3019 --generated-state 'resolute'
+    """
+    from book_graph_analyzer.lore.emotional_arc import (
+        EmotionalArcValidator, extract_emotional_state_from_text
+    )
+
+    validator = EmotionalArcValidator()
+
+    if not generated_state and not text:
+        console.print("[red]Provide --generated-state or --text.[/red]")
+        return
+
+    if text:
+        is_valid, detected_register, explanation = validator.validate_arc_from_text(
+            character=character,
+            story_year=story_year,
+            text=text,
+        )
+        console.print(f"\n[bold]Arc Validation:[/bold] {character} at TA {story_year}\n")
+        console.print(f"  Extracted register: [cyan]{detected_register}[/cyan]")
+        if is_valid:
+            console.print(f"  [bold green]✓ PASS[/bold green]")
+        else:
+            console.print(f"  [bold red]✗ VIOLATION[/bold red]")
+        console.print(f"\n  {explanation}")
+    else:
+        is_valid, explanation = validator.validate_arc(
+            character=character,
+            story_year=story_year,
+            proposed_register=generated_state,
+        )
+        console.print(f"\n[bold]Arc Validation:[/bold] {character} at TA {story_year}\n")
+        console.print(f"  Proposed register: [cyan]{generated_state}[/cyan]")
+        if is_valid:
+            console.print(f"  [bold green]✓ PASS[/bold green]")
+        else:
+            console.print(f"  [bold red]✗ VIOLATION[/bold red]")
+        console.print(f"\n  {explanation}")
+
+    # Show the expected checkpoint
+    cp = validator.expected_state(character, story_year)
+    if cp:
+        console.print(f"\n[dim]Expected checkpoint '{cp.label}':")
+        console.print(f"  Valid: {cp.valid_registers}")
+        if cp.invalid_registers:
+            console.print(f"  [red]Invalid: {cp.invalid_registers}[/red]")
+        console.print(f"[/dim]")
+
+
+@lore.command(name="sentiment")
+@click.option("--from-character", "-f", default=None,
+              help="Filter by source character")
+@click.option("--to-character", "-t", default=None,
+              help="Filter by target character")
+def lore_sentiment(
+    from_character: str | None,
+    to_character: str | None,
+) -> None:
+    """Show canonical relational sentiment between characters.
+
+    Demonstrates the asymmetric nature of relationships (how A feels about B
+    is not the same as how B feels about A).
+
+    Examples:
+        bga lore sentiment
+        bga lore sentiment --from-character samwise_gamgee
+        bga lore sentiment --to-character frodo_baggins
+    """
+    from book_graph_analyzer.lore.emotional_arc import TOLKIEN_RELATIONSHIP_SENTIMENTS
+
+    edges = TOLKIEN_RELATIONSHIP_SENTIMENTS
+    if from_character:
+        edges = [e for e in edges if e.from_character_id == from_character]
+    if to_character:
+        edges = [e for e in edges if e.to_character_id == to_character]
+
+    if not edges:
+        console.print("[yellow]No matching sentiment edges.[/yellow]")
+        return
+
+    console.print(f"\n[bold]Relational Sentiments ({len(edges)})[/bold]\n")
+
+    table = Table(show_header=True, header_style="bold")
+    table.add_column("From", style="cyan", width=20)
+    table.add_column("→ To", style="cyan", width=20)
+    table.add_column("Sentiment", width=12)
+    table.add_column("Valence", justify="right", width=8)
+    table.add_column("Trajectory", width=14)
+
+    for e in edges:
+        val_str = f"{e.valence:+.2f}"
+        traj_color = (
+            "[green]" if e.valence_trajectory == "improving" else
+            "[red]" if e.valence_trajectory == "deteriorating" else
+            "[yellow]" if e.valence_trajectory == "volatile" else ""
+        )
+        traj_end = "[/green]" if "green" in traj_color else (
+            "[/red]" if "red" in traj_color else (
+                "[/yellow]" if "yellow" in traj_color else ""
+            )
+        )
+        table.add_row(
+            e.from_character_id,
+            e.to_character_id,
+            e.sentiment,
+            val_str,
+            f"{traj_color}{e.valence_trajectory}{traj_end}",
+        )
+    console.print(table)
+    console.print("\n[dim]Note: sentiment is asymmetric — each direction is independent.[/dim]")
+
+
 @lore.group(name="conflicts")
 def lore_conflicts() -> None:
     """Track and manage intra/inter-book lore contradictions."""
