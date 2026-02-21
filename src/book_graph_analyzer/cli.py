@@ -5032,6 +5032,49 @@ def workflow_check_secrets(workflow_path: str, env_file: str) -> None:
     console.print("\n[green]All required secrets found.[/green]")
 
 
+@main.command(name="workflow-analyze-failure")
+@click.option("--issue-file", required=True, type=click.Path(exists=True), help="Path to saved issue body markdown/text")
+@click.option(
+    "--workflow",
+    "workflow_path",
+    default=".github/workflows/architecture-posture-review.lock.yml",
+    show_default=True,
+    help="Workflow YAML used by the failed run",
+)
+@click.option("--env-file", default="", help="Optional .env file for local secret checks")
+def workflow_analyze_failure(issue_file: str, workflow_path: str, env_file: str) -> None:
+    """Analyze a failed-workflow issue body and print likely root cause.
+
+    Designed for agentic workflow failure issues (e.g. #40/#41).
+    """
+    from book_graph_analyzer.ops.workflow_failure import analyze_failure_from_issue_file
+
+    analysis = analyze_failure_from_issue_file(
+        issue_file=issue_file,
+        workflow_path=workflow_path,
+        env_file=env_file or None,
+    )
+
+    console.print("[bold]Workflow Failure Analysis[/bold]")
+    console.print(f"Run URL: {analysis.run_url or 'n/a'}")
+    console.print(f"Run ID: {analysis.run_id or 'n/a'}")
+    console.print(f"Secret verification phrase detected: {analysis.secret_verification_failed}")
+
+    table = Table(title="Required Secrets")
+    table.add_column("Secret")
+    table.add_column("Status")
+    for s in analysis.present_secrets:
+        table.add_row(s, "[green]present[/green]")
+    for s in analysis.missing_secrets:
+        table.add_row(s, "[red]missing[/red]")
+    console.print(table)
+
+    console.print(f"\n[bold]Diagnosis:[/bold] {analysis.summary}")
+
+    if analysis.missing_secrets:
+        raise click.Abort()
+
+
 if __name__ == "__main__":
     main()
 
