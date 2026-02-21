@@ -14,6 +14,14 @@ from .checker import LoreChecker, ValidationResult, ValidationStatus
 from .parser import ClaimParser, ParsedClaim, ClaimType
 from .temporal import Timeline, TemporalEntity, TemporalExtractor, Era
 from .events import Event, EventGraph, EventExtractor, EventRelation
+from .rules import (
+    LoreRuleRegistry,
+    LoreRuleValidator,
+    WorldBibleRuleMapper,
+    LoreRuleNeo4jWriter,
+    SceneContext,
+    TOLKIEN_LORE_RULES,
+)
 
 __all__ = [
     "LoreChecker",
@@ -30,4 +38,10 @@ __all__ = [
     "EventGraph",
     "EventExtractor",
     "EventRelation",
+    "LoreRuleRegistry",
+    "LoreRuleValidator",
+    "WorldBibleRuleMapper",
+    "LoreRuleNeo4jWriter",
+    "SceneContext",
+    "TOLKIEN_LORE_RULES",
 ]

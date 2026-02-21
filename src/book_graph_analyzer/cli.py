@@ -2692,6 +2692,311 @@ def lore_top_passages(limit: int, min_score: float) -> None:
     console.print(table)
 
 
+@lore.group(name="rules")
+def lore_rules() -> None:
+    """Manage LoreRule nodes — lore laws as executable Cypher contracts."""
+    pass
+
+
+@lore_rules.command(name="list")
+@click.option("--category", "-c", default=None,
+              help="Filter by category (race, magic, cosmology, geography, politics, metaphysics, objects, history)")
+@click.option("--hardness", "-H", default=None,
+              help="Filter by hardness: HARD or SOFT")
+@click.option("--neo4j", is_flag=True, help="Read from Neo4j instead of built-in rules")
+def lore_rules_list(category: str | None, hardness: str | None, neo4j: bool) -> None:
+    """List all LoreRule definitions.
+
+    Examples:
+        bga lore rules list
+        bga lore rules list --category magic
+        bga lore rules list --hardness HARD
+        bga lore rules list --neo4j
+    """
+    from book_graph_analyzer.lore.rules import LoreRuleRegistry, LoreRuleNeo4jWriter, TOLKIEN_LORE_RULES
+    from book_graph_analyzer.graph.connection import check_neo4j_connection
+
+    if neo4j:
+        if not check_neo4j_connection():
+            console.print("[red]Cannot connect to Neo4j.[/red]")
+            return
+        writer = LoreRuleNeo4jWriter()
+        rules_raw = writer.query_rules(category=category, hardness=hardness)
+        writer.close()
+
+        if not rules_raw:
+            console.print("[yellow]No LoreRule nodes found in Neo4j. Run 'bga lore rules extract' first.[/yellow]")
+            return
+
+        console.print(f"\n[bold]LoreRules in Neo4j ({len(rules_raw)})[/bold]\n")
+        for r in rules_raw:
+            hardness_tag = "[red]HARD[/red]" if r.get("hardness") == "HARD" else "[yellow]SOFT[/yellow]"
+            console.print(f"  {hardness_tag} [{r.get('category', '?')}] [cyan]{r.get('id')}[/cyan]")
+            console.print(f"    {r.get('statement', '')}")
+            console.print()
+        return
+
+    # Built-in registry
+    registry = LoreRuleRegistry.from_tolkien_defaults()
+    rules = registry.all()
+    if category:
+        rules = [r for r in rules if r.category == category]
+    if hardness:
+        rules = [r for r in rules if r.hardness == hardness.upper()]
+
+    console.print(f"\n[bold]Built-in Tolkien LoreRules ({len(rules)})[/bold]\n")
+
+    table = Table(show_header=True, header_style="bold")
+    table.add_column("ID", style="cyan", width=28)
+    table.add_column("Hard?", width=6)
+    table.add_column("Cat", width=11)
+    table.add_column("Scope", width=14)
+    table.add_column("Statement")
+
+    for rule in sorted(rules, key=lambda r: (r.category, r.hardness)):
+        hardness_cell = "[red]HARD[/red]" if rule.is_hard else "[yellow]SOFT[/yellow]"
+        scope = rule.scope_entity_type or rule.scope_era or "Universal"
+        table.add_row(
+            rule.id,
+            hardness_cell,
+            rule.category,
+            scope[:14],
+            rule.statement[:80],
+        )
+    console.print(table)
+
+    hard_count = sum(1 for r in rules if r.is_hard)
+    soft_count = len(rules) - hard_count
+    console.print(f"\n  {hard_count} HARD rules · {soft_count} SOFT rules")
+
+
+@lore_rules.command(name="show")
+@click.argument("rule_id")
+def lore_rules_show(rule_id: str) -> None:
+    """Show full detail for a single LoreRule.
+
+    Example:
+        bga lore rules show magic_ring_corruption
+    """
+    from book_graph_analyzer.lore.rules import LoreRuleRegistry
+
+    registry = LoreRuleRegistry.from_tolkien_defaults()
+    rule = registry.get(rule_id)
+
+    if not rule:
+        console.print(f"[red]Rule '{rule_id}' not found.[/red]")
+        console.print("\nAvailable rule IDs:")
+        for r in registry.all():
+            console.print(f"  {r.id}")
+        return
+
+    tag = "[red]HARD — blocks scene acceptance[/red]" if rule.is_hard else "[yellow]SOFT — warning only[/yellow]"
+    console.print(f"\n[bold cyan]{rule.id}[/bold cyan]  {tag}")
+    console.print(f"\n[bold]Statement:[/bold] {rule.statement}")
+    console.print(f"[bold]Category:[/bold] {rule.category}")
+    console.print(f"[bold]Confidence:[/bold] {rule.confidence:.0%}")
+    if rule.scope_entity_type:
+        console.print(f"[bold]Scoped to:[/bold] {rule.scope_entity_type}")
+    if rule.scope_era:
+        console.print(f"[bold]Era scope:[/bold] {rule.scope_era}")
+
+    if rule.cypher_check:
+        console.print(f"\n[bold]Cypher check:[/bold]")
+        console.print(f"[dim]{rule.cypher_check}[/dim]")
+    else:
+        console.print("\n[dim]No Cypher check defined (cultural/contextual rule).[/dim]")
+
+
+@lore_rules.command(name="extract")
+@click.option("--bible", "-b", type=click.Path(exists=True), required=True,
+              help="World bible JSON file to extract rules from")
+@click.option("--output", "-o", default="json",
+              type=click.Choice(["json", "neo4j", "both"]),
+              help="Output target (default: json)")
+@click.option("--out-file", type=click.Path(), default=None,
+              help="JSON output file path (when output=json or both)")
+def lore_rules_extract(bible: str, output: str, out_file: str | None) -> None:
+    """Extract LoreRules from a world bible JSON file.
+
+    Reads WorldBible rules and maps them to LoreRule objects with HARD/SOFT
+    classification and optional Cypher check templates.
+
+    Examples:
+        bga lore rules extract -b hobbit_bible.json -o json
+        bga lore rules extract -b silmarillion_bible.json -o neo4j
+        bga lore rules extract -b lotr_bible.json -o both --out-file lotr_rules.json
+    """
+    import json as _json
+    from book_graph_analyzer.worldbible import WorldBibleExtractor
+    from book_graph_analyzer.lore.rules import WorldBibleRuleMapper, LoreRuleNeo4jWriter
+    from book_graph_analyzer.graph.connection import check_neo4j_connection
+
+    extractor = WorldBibleExtractor()
+    bible_obj = extractor.load_bible(bible)
+
+    mapper = WorldBibleRuleMapper()
+
+    with console.status("Mapping world bible rules to LoreRules..."):
+        rules = mapper.map_bible(bible_obj)
+
+    console.print(f"[green]Mapped {len(rules)} rules from world bible[/green]")
+
+    hard_count = sum(1 for r in rules if r.is_hard)
+    soft_count = len(rules) - hard_count
+    console.print(f"  HARD: {hard_count}  ·  SOFT: {soft_count}")
+
+    # JSON output
+    if output in ("json", "both"):
+        json_path = out_file or Path(bible).with_suffix(".lore_rules.json")
+        with open(json_path, "w", encoding="utf-8") as f:
+            _json.dump([r.to_dict() for r in rules], f, indent=2)
+        console.print(f"[green]OK[/green] Rules saved to {json_path}")
+
+    # Neo4j output
+    if output in ("neo4j", "both"):
+        if not check_neo4j_connection():
+            console.print("[red]Cannot connect to Neo4j.[/red]")
+            return
+        writer = LoreRuleNeo4jWriter()
+        writer.ensure_schema()
+        count = writer.upsert_many(rules)
+        writer.close()
+        console.print(f"[green]OK[/green] {count} LoreRule nodes written to Neo4j")
+
+    # Sample output
+    console.print("\n[bold]Sample extracted rules:[/bold]")
+    for rule in rules[:5]:
+        tag = "[red]HARD[/red]" if rule.is_hard else "[yellow]SOFT[/yellow]"
+        console.print(f"  {tag} [{rule.category}] {rule.statement[:70]}")
+
+
+@lore_rules.command(name="init")
+@click.option("--dry-run", is_flag=True, help="Show what would be written without writing")
+def lore_rules_init(dry_run: bool) -> None:
+    """Write all built-in Tolkien LoreRules to Neo4j.
+
+    This initialises the lore contract database with the canonical Tolkien rules.
+    Safe to run multiple times (idempotent MERGE).
+
+    Example:
+        bga lore rules init
+    """
+    from book_graph_analyzer.lore.rules import LoreRuleRegistry, LoreRuleNeo4jWriter
+    from book_graph_analyzer.graph.connection import check_neo4j_connection
+
+    registry = LoreRuleRegistry.from_tolkien_defaults()
+    rules = registry.all()
+
+    console.print(f"[bold]Initialising {len(rules)} built-in LoreRules[/bold]")
+
+    if dry_run:
+        console.print("\n[yellow][DRY RUN] Would write:[/yellow]")
+        for rule in rules:
+            tag = "HARD" if rule.is_hard else "SOFT"
+            console.print(f"  [{tag}] {rule.id}: {rule.statement}")
+        return
+
+    if not check_neo4j_connection():
+        console.print("[red]Cannot connect to Neo4j.[/red]")
+        return
+
+    writer = LoreRuleNeo4jWriter()
+    writer.ensure_schema()
+    count = writer.upsert_many(rules)
+    writer.close()
+
+    console.print(f"[green]OK[/green] {count} LoreRule nodes written to Neo4j")
+
+
+@lore.command(name="validate-scene")
+@click.option("--scene-id", "-s", default=None,
+              help="Scene node ID in Neo4j to validate")
+@click.option("--text", "-t", default=None,
+              help="Raw scene text to validate (offline — no Neo4j needed)")
+@click.option("--era", "-e", default=None,
+              help="Story-time era for context (e.g. 'Third Age')")
+@click.option("--category", "-c", multiple=True,
+              help="Limit check to specific categories (repeat for multiple)")
+@click.option("--neo4j", is_flag=True,
+              help="Run Cypher checks via Neo4j (requires --scene-id)")
+@click.option("--output", "-o", type=click.Path(), help="Save result to JSON file")
+def lore_validate_scene(
+    scene_id: str | None,
+    text: str | None,
+    era: str | None,
+    category: tuple[str],
+    neo4j: bool,
+    output: str | None,
+) -> None:
+    """Validate a scene against all applicable LoreRules.
+
+    Runs HARD and SOFT rule checks. Hard violations block acceptance;
+    soft violations produce warnings.
+
+    Examples:
+        bga lore validate-scene --text "An Elf died peacefully of old age."
+        bga lore validate-scene --scene-id scene_83ac87fb --neo4j
+        bga lore validate-scene --text "Boromir picked up the One Ring." --era "Third Age"
+    """
+    import json as _json
+    from book_graph_analyzer.lore.rules import LoreRuleValidator, LoreRuleRegistry
+
+    validator = LoreRuleValidator(LoreRuleRegistry.from_tolkien_defaults())
+
+    cats = list(category) if category else None
+
+    if not scene_id and not text:
+        console.print("[red]Provide --scene-id or --text.[/red]")
+        return
+
+    if neo4j and scene_id:
+        from book_graph_analyzer.graph.connection import check_neo4j_connection
+        if not check_neo4j_connection():
+            console.print("[red]Cannot connect to Neo4j.[/red]")
+            return
+        console.print(f"[bold]Validating scene:[/bold] {scene_id} (via Neo4j Cypher checks)\n")
+        result = validator.validate_scene_neo4j(scene_id)
+    elif text:
+        console.print(f"[bold]Validating text:[/bold] \"{text[:80]}{'...' if len(text)>80 else ''}\"\n")
+        result = validator.validate_text(
+            text=text,
+            scene_id=scene_id or "inline",
+            story_era=era,
+        )
+    elif scene_id:
+        console.print("[yellow]No --neo4j flag — running offline heuristic validation.[/yellow]")
+        console.print("[dim]For Cypher-based validation, add --neo4j[/dim]\n")
+        result = validator.validate_text(scene_id, scene_id, era)
+    else:
+        console.print("[red]Cannot validate: provide --text or --scene-id --neo4j[/red]")
+        return
+
+    # Display result
+    if result.passed:
+        console.print(f"[bold green]✓ PASS[/bold green]  —  {result.rules_checked} rules checked")
+    else:
+        console.print(f"[bold red]✗ FAIL[/bold red]  —  {result.rules_checked} rules checked, "
+                      f"{len(result.hard_violations)} hard violation(s)")
+
+    if result.hard_violations:
+        console.print("\n[bold red]Hard Violations (BLOCKED):[/bold red]")
+        for v in result.hard_violations:
+            console.print(f"  • [{v.rule_id}] {v.description}")
+
+    if result.soft_warnings:
+        console.print("\n[bold yellow]Soft Warnings (allowed):[/bold yellow]")
+        for v in result.soft_warnings:
+            console.print(f"  ~ [{v.rule_id}] {v.description}")
+
+    if not result.hard_violations and not result.soft_warnings:
+        console.print("  No violations detected.")
+
+    if output:
+        with open(output, "w", encoding="utf-8") as f:
+            _json.dump(result.to_dict(), f, indent=2)
+        console.print(f"\n[green]OK[/green] Result saved to {output}")
+
+
 @lore.command(name="query-passages")
 @click.option("--temporal-depth", "-d", default=None,
               help="Minimum temporal depth era (e.g. 'First Age'). "
