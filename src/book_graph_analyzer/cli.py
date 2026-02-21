@@ -5825,6 +5825,122 @@ def worldbible_languages(bible_path: str, entity: str | None, write_graph: bool)
             raise SystemExit(1)
 
 
+@worldbible.command(name="artifacts")
+@click.argument("path", type=click.Path(exists=True))
+@click.option("--book", "book", default=None, help="Source book label")
+@click.option("--output", "output", type=click.Path(), help="Write extracted lore-depth JSON")
+@click.option("--write-graph", is_flag=True, help="Persist artifacts/unresolved refs to Neo4j")
+@click.option("--context-window", default=80, show_default=True, type=int,
+              help="Chars of before/after context for unresolved refs")
+@click.option("--link-candidates/--no-link-candidates", default=True,
+              help="Attach resolver-backed candidate links to unresolved refs")
+@click.option("--llm-fallback", is_flag=True,
+              help="Optional model-assisted unresolved-reference fallback")
+def worldbible_artifacts(
+    path: str,
+    book: str | None,
+    output: str | None,
+    write_graph: bool,
+    context_window: int,
+    link_candidates: bool,
+    llm_fallback: bool,
+) -> None:
+    """Extract lore artifacts and broken references from raw text."""
+    from book_graph_analyzer.lore.depth import extract_lore_depth, link_broken_reference_candidates
+
+    file_path = Path(path)
+    text = file_path.read_text(encoding="utf-8", errors="replace")
+    source_book = book or file_path.stem.replace("_", " ").replace("-", " ").title()
+
+    llm_client = None
+    if llm_fallback:
+        try:
+            from book_graph_analyzer.llm import LLMClient
+            llm_client = LLMClient()
+        except Exception:
+            console.print("[yellow]LLM unavailable; continuing with heuristic extraction only.[/yellow]")
+
+    result = extract_lore_depth(
+        text,
+        source_book=source_book,
+        passage_id=file_path.name,
+        context_window=context_window,
+        llm_client=llm_client,
+    )
+    if link_candidates:
+        link_broken_reference_candidates(result.broken_references, book=source_book)
+
+    console.print(f"[bold]Lore depth extraction:[/bold] {file_path.name}")
+    console.print(f"  Artifacts: [green]{len(result.artifacts)}[/green]")
+    console.print(f"  Unresolved refs: [yellow]{len(result.broken_references)}[/yellow]")
+
+    if result.artifacts:
+        table = Table(title="Artifacts", show_lines=False)
+        table.add_column("Type", style="cyan")
+        table.add_column("Name", style="bold")
+        table.add_column("Confidence", style="dim")
+        for art in result.artifacts[:20]:
+            atype = getattr(art.artifact_type, "value", str(art.artifact_type))
+            table.add_row(atype, art.name, f"{art.confidence:.2f}")
+        console.print(table)
+
+    if output:
+        data = {
+            "artifacts": [a.model_dump() for a in result.artifacts],
+            "broken_references": [b.model_dump() for b in result.broken_references],
+        }
+        Path(output).write_text(json.dumps(data, indent=2), encoding="utf-8")
+        console.print(f"[green]OK[/green] Saved to {output}")
+
+    if write_graph:
+        from book_graph_analyzer.graph.writer import GraphWriter
+        writer = GraphWriter()
+        a_count = writer.write_lore_artifacts_batch(result.artifacts, book=source_book)
+        b_count = writer.write_broken_references_batch(result.broken_references)
+        writer.close()
+        console.print(f"[green]OK[/green] Wrote {a_count} artifacts and {b_count} unresolved references to Neo4j")
+
+
+@lore.command(name="unresolved-refs")
+@click.option("--book", "book", default=None, help="Filter by source book")
+@click.option("--limit", "limit", default=50, type=int, help="Max rows")
+def lore_unresolved_refs(book: str | None, limit: int) -> None:
+    """Query unresolved references persisted by lore-depth extraction."""
+    from book_graph_analyzer.graph.writer import GraphWriter
+
+    writer = GraphWriter()
+    rows = writer.query_unresolved_reference_queue(source_book=book, limit=limit)
+    writer.close()
+
+    if not rows:
+        console.print("[yellow]No unresolved references found.[/yellow]")
+        return
+
+    table = Table(title=f"Unresolved Reference Queue ({len(rows)})")
+    table.add_column("ID", style="dim", width=24)
+    table.add_column("Mention", style="cyan")
+    table.add_column("Type")
+    table.add_column("Book", style="dim")
+    table.add_column("Score", justify="right")
+    table.add_column("Top Candidate", style="magenta")
+    for r in rows:
+        candidates = r.get("candidates") or []
+        top = "-"
+        if candidates and isinstance(candidates, list):
+            first = candidates[0]
+            top = first.get("canonical_id", "-") if isinstance(first, dict) else str(first)
+        score = (r.get("confidence") or 0) + (r.get("conflict_weight") or 0)
+        table.add_row(
+            r.get("id", "")[:24],
+            r.get("mention_text", "")[:50],
+            r.get("expected_type") or "-",
+            r.get("source_book") or "-",
+            f"{score:.2f}",
+            top,
+        )
+    console.print(table)
+
+
 @lore.command(name="genealogy")
 @click.option("--character", "-c", help="Character to show family tree for")
 @click.option("--house", "-H", help="Filter by house (e.g., 'House of Finwë')")

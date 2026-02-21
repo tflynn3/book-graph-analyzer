@@ -1438,6 +1438,142 @@ class GraphWriter:
             )
 
     # =========================================================================
+    # Lore Depth Engine (Issue #50 slice 1)
+    # =========================================================================
+
+    def write_lore_artifacts_batch(self, artifacts: list, book: str = "") -> int:
+        """Persist lore artifacts (songs/poems/artifacts) as first-class nodes."""
+        if not artifacts:
+            return 0
+
+        with self.driver.session() as session:
+            for art in artifacts:
+                session.run(
+                    """
+                    MERGE (a:LoreArtifact {id: $id})
+                    SET a.name = $name,
+                        a.artifact_type = $artifact_type,
+                        a.description = $description,
+                        a.source_book = $source_book,
+                        a.confidence = $confidence,
+                        a.updated_at = datetime()
+                    """,
+                    id=art.id,
+                    name=art.name,
+                    artifact_type=getattr(getattr(art, "artifact_type", None), "value", None)
+                    or str(getattr(art, "artifact_type", "artifact")),
+                    description=getattr(art, "description", None),
+                    source_book=getattr(art, "source_book", None) or book,
+                    confidence=float(getattr(art, "confidence", 0.7) or 0.7),
+                )
+                if getattr(art, "passage_id", None):
+                    session.run(
+                        """
+                        MATCH (a:LoreArtifact {id: $artifact_id})
+                        MATCH (p:Passage {id: $passage_id})
+                        MERGE (a)-[:ATTESTED_IN]->(p)
+                        """,
+                        artifact_id=art.id,
+                        passage_id=art.passage_id,
+                    )
+        return len(artifacts)
+
+    def write_broken_references_batch(self, refs: list) -> int:
+        """Persist unresolved references for later curation."""
+        if not refs:
+            return 0
+
+        with self.driver.session() as session:
+            for ref in refs:
+                session.run(
+                    """
+                    MERGE (u:UnresolvedReference {id: $id})
+                    SET u.mention_text = $mention_text,
+                        u.context_text = $context_text,
+                        u.context_before = $context_before,
+                        u.context_after = $context_after,
+                        u.expected_type = $expected_type,
+                        u.source_book = $source_book,
+                        u.passage_id = $passage_id,
+                        u.resolved_entity_id = $resolved_entity_id,
+                        u.confidence = $confidence,
+                        u.candidates = $candidates,
+                        u.provenance_notes = $provenance_notes,
+                        u.conflict_weight = $conflict_weight,
+                        u.updated_at = datetime()
+                    """,
+                    id=ref.id,
+                    mention_text=getattr(ref, "mention_text", ""),
+                    context_text=getattr(ref, "context_text", None),
+                    context_before=getattr(ref, "context_before", None),
+                    context_after=getattr(ref, "context_after", None),
+                    expected_type=getattr(ref, "expected_type", None),
+                    source_book=getattr(ref, "source_book", None),
+                    passage_id=getattr(ref, "passage_id", None),
+                    resolved_entity_id=getattr(ref, "resolved_entity_id", None),
+                    confidence=float(getattr(ref, "confidence", 0.6) or 0.6),
+                    candidates=[c.model_dump() if hasattr(c, "model_dump") else c for c in (getattr(ref, "candidates", None) or [])],
+                    provenance_notes=list(getattr(ref, "provenance_notes", None) or []),
+                    conflict_weight=float(getattr(ref, "conflict_weight", 0.0) or 0.0),
+                )
+        return len(refs)
+
+    def query_lore_artifacts(self, artifact_type: str | None = None, limit: int = 100) -> list[dict]:
+        """Query lore artifacts by optional type."""
+        where = "true"
+        params: dict = {"limit": limit}
+        if artifact_type:
+            where = "a.artifact_type = $artifact_type"
+            params["artifact_type"] = artifact_type
+
+        with self.driver.session() as session:
+            result = session.run(
+                f"""
+                MATCH (a:LoreArtifact)
+                WHERE {where}
+                RETURN a.id AS id, a.name AS name, a.artifact_type AS artifact_type,
+                       a.description AS description, a.source_book AS source_book,
+                       a.confidence AS confidence
+                ORDER BY a.name
+                LIMIT $limit
+                """,
+                **params,
+            )
+            return [dict(r) for r in result]
+
+    def query_unresolved_references(self, source_book: str | None = None, limit: int = 100) -> list[dict]:
+        """Query unresolved references, filtered by source book if provided."""
+        where = "u.resolved_entity_id IS NULL"
+        params: dict = {"limit": limit}
+        if source_book:
+            where += " AND toLower(coalesce(u.source_book,'')) CONTAINS toLower($source_book)"
+            params["source_book"] = source_book
+
+        with self.driver.session() as session:
+            result = session.run(
+                f"""
+                MATCH (u:UnresolvedReference)
+                WHERE {where}
+                RETURN u.id AS id, u.mention_text AS mention_text,
+                       u.expected_type AS expected_type,
+                       u.source_book AS source_book,
+                       u.passage_id AS passage_id,
+                       u.confidence AS confidence,
+                       coalesce(u.conflict_weight, 0.0) AS conflict_weight,
+                       coalesce(u.candidates, []) AS candidates,
+                       coalesce(u.provenance_notes, []) AS provenance_notes
+                ORDER BY (coalesce(u.conflict_weight, 0.0) + coalesce(u.confidence, 0.0)) DESC
+                LIMIT $limit
+                """,
+                **params,
+            )
+            return [dict(r) for r in result]
+
+    def query_unresolved_reference_queue(self, source_book: str | None = None, limit: int = 100) -> list[dict]:
+        """Alias query optimized for downstream generation/review queue."""
+        return self.query_unresolved_references(source_book=source_book, limit=limit)
+
+    # =========================================================================
     # Sociolinguistic Registers (Issue #47 slice 1)
     # =========================================================================
 

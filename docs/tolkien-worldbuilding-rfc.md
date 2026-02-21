@@ -259,7 +259,7 @@ not a new top-level package.
 | #47 | Deep Genealogy + Sociolinguistic Registers | 🟡 Slice 2 closeout in progress | Extends genealogy with improved name normalization/entity matching, context-based house/clan inference, traversal-derived generation depth, and adds genealogy-focused schema/index support; sociolinguistic register profile/drift MVP remains from slice 1 |
 | #48/#51 | Editorial Layers / Meta-Layer | 🟨 In progress | Source strata model + passage provenance tags + MVP divergence detector + layer-aware graph/CLI reporting |
 | #49 | Cultural Rules | 🔲 Not started | |
-| #50 | Cosmological Timeline | 🔲 Not started | |
+| #50 | Cosmological Timeline | 🟡 Slice 2 in progress | Lore-depth extraction + unresolved ref queue + resolver candidate linking |
 | #51 | Integration Testing | 🔲 Not started | |
 
 ### #46 Remaining TODOs
@@ -269,3 +269,28 @@ not a new top-level package.
 - [ ] Batch-optimized Cypher (current impl uses per-lineage transactions)
 - [ ] `worldbible.extractor` integration for automatic language category extraction
 - [ ] Query helpers: "all names for entity X across languages" as a CLI subcommand
+
+### #50 Slice 1 (Impression-of-Depth Engine) Update
+
+Implemented in this slice:
+- Added first-class lore-depth models (`LoreArtifact`, `BrokenReference`) in `models/lore_depth.py`
+- Added extraction helper `lore.depth.extract_lore_depth(...)` for artifact-like mentions and unresolved markers
+- Added GraphWriter persistence/query helpers for lore depth nodes and unresolved-reference reporting
+- Added CLI commands under existing families:
+  - `worldbible artifacts`
+  - `lore unresolved-refs`
+- Added tests in `tests/test_issue_50_lore_depth_slice1.py`
+
+### #50 Slice 2 (Precision + Candidate Linking) Update
+
+Implemented in this slice:
+- context-window extraction for unresolved references (`context_before/context_after`)
+- optional LLM-assisted fallback when heuristic extraction misses references
+- resolver-backed candidate linking (`ReferenceCandidate`) for unresolved mentions
+- provenance/conflict weighting fields persisted to graph and exposed via queue query
+- unresolved-reference queue semantics surfaced in model and CLI output
+
+Remaining for Issue #50:
+- editorial-layer-aware weighting calibration against real corpora
+- generation pipeline integration that consumes unresolved queue automatically
+- end-to-end cosmological timeline checks tied to these unresolved links
