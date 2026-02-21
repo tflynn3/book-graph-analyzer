@@ -5204,6 +5204,50 @@ def workflow_remediation_report(issue_number: int, workflow_path: str, env_file:
 
     if analysis.missing_secrets:
         raise click.Abort()
+
+
+@main.command(name="workflow-post-diagnosis")
+@click.option("--issue", "issue_number", required=True, type=int, help="GitHub issue number")
+@click.option(
+    "--workflow",
+    "workflow_path",
+    default=".github/workflows/architecture-posture-review.lock.yml",
+    show_default=True,
+    help="Workflow YAML used by the failed run",
+)
+@click.option("--env-file", default="", help="Optional .env file for local secret checks")
+def workflow_post_diagnosis(issue_number: int, workflow_path: str, env_file: str) -> None:
+    """Analyze an issue and post markdown diagnosis comment back to that issue."""
+    from book_graph_analyzer.ops import fetch_issue_via_gh, post_issue_comment_via_gh
+    from book_graph_analyzer.ops.workflow_failure import (
+        analyze_failure_from_issue_text,
+        build_remediation_report,
+    )
+
+    issue = fetch_issue_via_gh(issue_number)
+    if not issue:
+        console.print(f"[red]Could not fetch issue #{issue_number} via gh CLI.[/red]")
+        raise click.Abort()
+
+    analysis = analyze_failure_from_issue_text(
+        issue.body,
+        workflow_path=workflow_path,
+        env_file=env_file or None,
+    )
+    report = build_remediation_report(analysis, issue_ref=f"#{issue.number} {issue.title}")
+
+    ok = post_issue_comment_via_gh(issue_number, report)
+    if not ok:
+        console.print(f"[red]Failed to post diagnosis comment to issue #{issue_number}.[/red]")
+        raise click.Abort()
+
+    console.print(f"[green]Posted diagnosis report to issue #{issue_number}.[/green]")
+
+    if analysis.missing_secrets:
+        # Keep non-zero behavior if unresolved
+        raise click.Abort()
+
+
 # ============================================================================
 # World-Building Placeholder Commands (Issue #45 — Tolkien Kickoff)
 # ============================================================================

@@ -5,7 +5,11 @@ from __future__ import annotations
 import json
 from types import SimpleNamespace
 
-from book_graph_analyzer.ops.gh_issue import fetch_issue_via_gh, list_open_issues_via_gh
+from book_graph_analyzer.ops.gh_issue import (
+    fetch_issue_via_gh,
+    list_open_issues_via_gh,
+    post_issue_comment_via_gh,
+)
 
 
 def test_fetch_issue_via_gh_success(monkeypatch):
@@ -50,3 +54,19 @@ def test_list_open_issues_via_gh(monkeypatch):
     assert len(issues) == 2
     assert issues[0].number == 40
     assert issues[1].number == 41
+
+
+def test_post_issue_comment_via_gh_success(monkeypatch):
+    def fake_run(*args, **kwargs):
+        return SimpleNamespace(returncode=0, stdout="ok", stderr="")
+
+    monkeypatch.setattr("subprocess.run", fake_run)
+    assert post_issue_comment_via_gh(41, "report") is True
+
+
+def test_post_issue_comment_via_gh_failure(monkeypatch):
+    def fake_run(*args, **kwargs):
+        return SimpleNamespace(returncode=1, stdout="", stderr="boom")
+
+    monkeypatch.setattr("subprocess.run", fake_run)
+    assert post_issue_comment_via_gh(41, "report") is False
