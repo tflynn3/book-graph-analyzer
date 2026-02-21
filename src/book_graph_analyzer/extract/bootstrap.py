@@ -19,6 +19,9 @@ from typing import Optional
 from rapidfuzz import fuzz
 
 from ..llm import get_llm_client
+from .normalizer import TextNormalizer as _TextNormalizer
+
+_normalizer = _TextNormalizer()
 
 # ---------------------------------------------------------------------------
 # Stop-words: common capitalized words that are NOT proper nouns
@@ -132,6 +135,9 @@ class EntityBootstrapper:
 
             # Filter stop-words and too-short tokens
             if name in _STOPWORDS or len(name) < 3:
+                continue
+            # Filter encoding artifacts (â€œ etc.) — P0 fix
+            if _normalizer.find_artifacts(name):
                 continue
             # Filter if it looks like a sentence-start capitalisation (preceded by . or ?)
             preceding = text[max(0, match.start() - 2): match.start()].strip()
@@ -297,6 +303,9 @@ class EntityBootstrapper:
         """
         if verbose:
             print(f"Bootstrapping entities from {len(text):,} chars of text...")
+
+        # P0 fix: normalize encoding before any NER/extraction
+        text = _normalizer.normalize(text)
 
         candidates = self.extract_candidates(text)
         if verbose:

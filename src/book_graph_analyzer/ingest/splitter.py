@@ -85,11 +85,13 @@ def split_into_chapters(text: str) -> list[tuple[str, str]]:
     Returns list of (chapter_title, chapter_text) tuples.
     """
     # Common chapter patterns
+    # NOTE: use [ \t]* (not \s*) before .* to prevent matching across newlines,
+    # since re.MULTILINE makes ^ / $ line-anchored but \s also matches \n.
     chapter_patterns = [
-        r"^(Chapter\s+[IVXLC\d]+[:\.]?\s*.*)$",  # Chapter I, Chapter 1, etc.
-        r"^(CHAPTER\s+[IVXLC\d]+[:\.]?\s*.*)$",  # CHAPTER I
-        r"^(\d+\.\s+.+)$",  # 1. Title
-        r"^(Part\s+[IVXLC\d]+[:\.]?\s*.*)$",  # Part I
+        r"^(Chapter[ \t]+[IVXLC\d]+[:\.]?[ \t]*.*)$",  # Chapter I, Chapter 1, etc.
+        r"^(CHAPTER[ \t]+[IVXLC\d]+[:\.]?[ \t]*.*)$",  # CHAPTER I
+        r"^(\d+\.[ \t]+.+)$",  # 1. Title
+        r"^(Part[ \t]+[IVXLC\d]+[:\.]?[ \t]*.*)$",  # Part I
     ]
 
     combined_pattern = "|".join(f"({p})" for p in chapter_patterns)
