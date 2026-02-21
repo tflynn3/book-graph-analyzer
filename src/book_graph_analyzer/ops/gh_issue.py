@@ -46,3 +46,39 @@ def fetch_issue_via_gh(issue_number: int) -> Optional[IssueData]:
         )
     except Exception:
         return None
+
+
+def list_open_issues_via_gh(label: str = "", limit: int = 20) -> list[IssueData]:
+    """List open issues via gh CLI with optional label filter."""
+    args = [
+        "gh",
+        "issue",
+        "list",
+        "--state",
+        "open",
+        "--limit",
+        str(limit),
+        "--json",
+        "number,title,body,url",
+    ]
+    if label:
+        args += ["--label", label]
+
+    try:
+        proc = subprocess.run(args, check=False, capture_output=True, text=True)
+        if proc.returncode != 0:
+            return []
+        arr = json.loads(proc.stdout or "[]")
+        out: list[IssueData] = []
+        for d in arr:
+            out.append(
+                IssueData(
+                    number=int(d.get("number", 0)),
+                    title=str(d.get("title", "")),
+                    body=str(d.get("body", "")),
+                    url=str(d.get("url", "")),
+                )
+            )
+        return out
+    except Exception:
+        return []
