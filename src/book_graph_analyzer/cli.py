@@ -5113,6 +5113,58 @@ def workflow_analyze_failure_issue(issue_number: int, workflow_path: str, env_fi
         raise click.Abort()
 
 
+@main.command(name="workflow-analyze-open-failures")
+@click.option("--label", default="agentic-workflows", show_default=True, help="Issue label to scan")
+@click.option("--limit", default=20, show_default=True, help="Max open issues to inspect")
+@click.option(
+    "--workflow",
+    "workflow_path",
+    default=".github/workflows/architecture-posture-review.lock.yml",
+    show_default=True,
+    help="Workflow YAML used by failed runs",
+)
+@click.option("--env-file", default="", help="Optional .env file for local secret checks")
+def workflow_analyze_open_failures(label: str, limit: int, workflow_path: str, env_file: str) -> None:
+    """Analyze all open failure issues (batch mode) via gh issue list/view.
+
+    Skips known parent tracker issues by title prefix '[agentics] Failed runs'.
+    """
+    from book_graph_analyzer.ops import list_open_issues_via_gh
+    from book_graph_analyzer.ops.workflow_failure import analyze_failure_from_issue_text
+
+    issues = list_open_issues_via_gh(label=label, limit=limit)
+    if not issues:
+        console.print("[yellow]No open issues found for analysis.[/yellow]")
+        return
+
+    analyzed = 0
+    missing_any = False
+
+    for issue in issues:
+        # Skip parent tracker issue
+        if issue.title.strip().lower().startswith("[agentics] failed runs"):
+            continue
+
+        analysis = analyze_failure_from_issue_text(
+            issue.body,
+            workflow_path=workflow_path,
+            env_file=env_file or None,
+        )
+
+        console.print(f"\n[bold]Issue #{issue.number}: {issue.title}[/bold]")
+        _print_workflow_failure_analysis(analysis)
+        analyzed += 1
+        if analysis.missing_secrets:
+            missing_any = True
+
+    if analyzed == 0:
+        console.print("[yellow]No actionable failure issues found after filtering.[/yellow]")
+        return
+
+    if missing_any:
+        raise click.Abort()
+
+
 if __name__ == "__main__":
     main()
 

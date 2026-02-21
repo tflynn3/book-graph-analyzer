@@ -169,3 +169,39 @@ jobs:
     assert res.exit_code != 0
     assert "Issue #41" in res.output
     assert "Workflow Failure Analysis" in res.output
+
+
+def test_cli_workflow_analyze_open_failures(monkeypatch, tmp_path: Path):
+    wf = tmp_path / "wf.yml"
+    wf.write_text(
+        """
+jobs:
+  a:
+    steps:
+      - run: echo hi
+        env:
+          COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_GITHUB_TOKEN }}
+""",
+        encoding="utf-8",
+    )
+
+    issues = [
+        IssueData(number=40, title="[agentics] Failed runs", body="parent", url="u40"),
+        IssueData(number=41, title="[agentics] Architecture failed", body=ISSUE_TEXT, url="u41"),
+    ]
+
+    monkeypatch.setattr("book_graph_analyzer.ops.list_open_issues_via_gh", lambda label, limit: issues)
+
+    runner = CliRunner()
+    res = runner.invoke(
+        main,
+        [
+            "workflow-analyze-open-failures",
+            "--workflow",
+            str(wf),
+        ],
+    )
+    # Missing secret from issue 41 should fail command
+    assert res.exit_code != 0
+    assert "Issue #41" in res.output
+    assert "Workflow Failure Analysis" in res.output
