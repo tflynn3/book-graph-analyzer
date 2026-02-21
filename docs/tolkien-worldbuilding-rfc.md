@@ -209,9 +209,10 @@ not a new top-level package.
 
 ### Phase 4 - Editorial Layers (Issue #48)
 
-- Source-text metadata tagging in ingest
-- Provenance-weighted lore conflict resolution
-- CLI: `bga corpus sources`
+- ✅ Source-text metadata tagging in ingest + bridge/corpus reconciliation paths
+- ✅ Provenance-weighted lore conflict resolution (authority-aware calibration + persisted conflict source fields)
+- ✅ CLI: `bga corpus sources`
+- ✅ Cross-book reconcile compatibility with both normalized and raw `lore events` JSON payloads
 
 ### Phase 5 - Cultural Rules (Issue #49)
 

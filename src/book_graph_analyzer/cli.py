@@ -6012,6 +6012,8 @@ def corpus_timeline_reconcile(
             search_dir / f"{book_slug}_events.json",
             search_dir / f"{corpus_name}_{book_slug}_events.json",
             search_dir / f"{book_slug}.json",
+            search_dir / book_slug / "events.json",
+            search_dir / book_slug / f"{book_slug}_events.json",
         ]
         found = None
         for c in candidates:

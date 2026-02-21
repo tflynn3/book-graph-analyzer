@@ -504,6 +504,27 @@ class TestConflictDetector:
         assert "some_elf" in conflict.entity_ids
         assert len(conflict.claims) == 2
 
+    def test_detect_new_conflict_enriches_claim_source_metadata_when_known(self):
+        conflict = self.detector.detect_new_conflict(
+            entity_ids=["blue_wizards"],
+            rule_ids=[],
+            new_statement="Blue Wizards are Morinehtar and Romestamo",
+            source_book="Unfinished Tales",
+            author_period=AuthorPeriod.LATE,
+            existing_statement="Blue Wizards are Alatar and Pallando",
+            existing_source="The Hobbit",
+            existing_period=AuthorPeriod.MIDDLE,
+        )
+        existing_claim, new_claim = conflict.claims
+
+        assert existing_claim.source_id == "src_hobbit"
+        assert existing_claim.editorial_status == "published"
+        assert existing_claim.source_authority_weight is not None
+
+        assert new_claim.source_id == "src_unfinished_tales"
+        assert new_claim.editorial_status == "unfinished"
+        assert new_claim.source_authority_weight is not None
+
     def test_detect_new_conflict_same_period_is_direct(self):
         conflict = self.detector.detect_new_conflict(
             entity_ids=["aragorn"],
