@@ -130,6 +130,8 @@ class Scene:
     model_used: str = ""
     generation_prompt: str = ""
     context_snapshot: Optional["AssembledContext"] = None
+    scene_type: Optional[str] = None
+    style_constraints_used: Optional[dict] = None
     
     def __post_init__(self):
         if not self.word_count:
@@ -153,9 +155,12 @@ class Scene:
             "word_count": self.word_count,
             "generated_at": self.generated_at.isoformat(),
             "model_used": self.model_used,
+            "generation_prompt": self.generation_prompt,
             "context_snapshot": (
                 self.context_snapshot.to_dict() if self.context_snapshot else None
             ),
+            "scene_type": self.scene_type,
+            "style_constraints_used": self.style_constraints_used,
         }
 
     @classmethod
@@ -200,6 +205,16 @@ class Scene:
             model_used=str(data.get("model_used", "")),
             generation_prompt=str(data.get("generation_prompt", "")),
             context_snapshot=context_snapshot,
+            scene_type=(
+                str(data.get("scene_type"))
+                if data.get("scene_type") is not None
+                else None
+            ),
+            style_constraints_used=(
+                dict(data.get("style_constraints_used"))
+                if isinstance(data.get("style_constraints_used"), dict)
+                else None
+            ),
         )
 
 
