@@ -22,6 +22,13 @@ from .rules import (
     SceneContext,
     TOLKIEN_LORE_RULES,
 )
+from .conflicts import (
+    ConflictRegistry,
+    ConflictDetector,
+    ConflictAwareValidator,
+    LoreConflictNeo4jWriter,
+    KNOWN_TOLKIEN_CONFLICTS,
+)
 
 __all__ = [
     "LoreChecker",
@@ -44,4 +51,9 @@ __all__ = [
     "LoreRuleNeo4jWriter",
     "SceneContext",
     "TOLKIEN_LORE_RULES",
+    "ConflictRegistry",
+    "ConflictDetector",
+    "ConflictAwareValidator",
+    "LoreConflictNeo4jWriter",
+    "KNOWN_TOLKIEN_CONFLICTS",
 ]

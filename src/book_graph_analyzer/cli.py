@@ -2692,6 +2692,236 @@ def lore_top_passages(limit: int, min_score: float) -> None:
     console.print(table)
 
 
+@lore.group(name="conflicts")
+def lore_conflicts() -> None:
+    """Track and manage intra/inter-book lore contradictions."""
+    pass
+
+
+@lore_conflicts.command(name="list")
+@click.option("--conflict-type", "-t", default=None,
+              help="Filter by type: direct_contradiction, retcon, ambiguity, interpretation")
+@click.option("--resolved", is_flag=True, default=False, help="Show only resolved conflicts")
+@click.option("--unresolved", is_flag=True, default=False, help="Show only unresolved conflicts")
+@click.option("--neo4j", is_flag=True, help="Read from Neo4j instead of built-in conflicts")
+def lore_conflicts_list(
+    conflict_type: str | None, resolved: bool, unresolved: bool, neo4j: bool
+) -> None:
+    """List all tracked lore conflicts.
+
+    Examples:
+        bga lore conflicts list
+        bga lore conflicts list --unresolved
+        bga lore conflicts list --conflict-type retcon
+        bga lore conflicts list --neo4j
+    """
+    from book_graph_analyzer.lore.conflicts import ConflictRegistry, LoreConflictNeo4jWriter
+    from book_graph_analyzer.graph.connection import check_neo4j_connection
+
+    if neo4j:
+        if not check_neo4j_connection():
+            console.print("[red]Cannot connect to Neo4j.[/red]")
+            return
+        writer = LoreConflictNeo4jWriter()
+        conflicts_raw = writer.query_conflicts(
+            conflict_type=conflict_type,
+            resolved=True if resolved else (False if unresolved else None),
+            needs_human=False,
+        )
+        writer.close()
+        if not conflicts_raw:
+            console.print("[yellow]No conflicts found in Neo4j. Run 'bga lore conflicts init' first.[/yellow]")
+            return
+        console.print(f"\n[bold]LoreConflicts in Neo4j ({len(conflicts_raw)})[/bold]\n")
+        for c in conflicts_raw:
+            status = "[green]✓[/green]" if c.get("resolved") else "[yellow]?[/yellow]"
+            console.print(f"  {status} [{c.get('conflict_type', '?')}] [cyan]{c.get('id')}[/cyan]")
+            console.print(f"    {c.get('summary', '')[:80]}")
+            console.print(f"    Policy: {c.get('resolution_policy', '?')}")
+            console.print()
+        return
+
+    # Built-in registry
+    registry = ConflictRegistry.from_tolkien_defaults()
+    conflicts = registry.all()
+    if conflict_type:
+        conflicts = [c for c in conflicts if c.conflict_type == conflict_type]
+    if resolved:
+        conflicts = [c for c in conflicts if c.is_resolved]
+    elif unresolved:
+        conflicts = [c for c in conflicts if not c.is_resolved]
+
+    console.print(f"\n[bold]Known Tolkien Lore Conflicts ({len(conflicts)})[/bold]\n")
+
+    table = Table(show_header=True, header_style="bold")
+    table.add_column("ID", style="cyan", width=28)
+    table.add_column("Type", width=20)
+    table.add_column("Policy", width=22)
+    table.add_column("✓", width=3)
+    table.add_column("Summary")
+
+    for conflict in sorted(conflicts, key=lambda c: c.id):
+        status = "[green]✓[/green]" if conflict.is_resolved else "[yellow]?[/yellow]"
+        table.add_row(
+            conflict.id,
+            conflict.conflict_type,
+            conflict.resolution_policy,
+            status,
+            conflict.summary[:60] + "..." if len(conflict.summary) > 60 else conflict.summary,
+        )
+    console.print(table)
+
+    res = sum(1 for c in conflicts if c.is_resolved)
+    unres = len(conflicts) - res
+    console.print(f"\n  {res} resolved · {unres} unresolved")
+
+
+@lore_conflicts.command(name="show")
+@click.argument("conflict_id")
+def lore_conflicts_show(conflict_id: str) -> None:
+    """Show full detail for a single LoreConflict.
+
+    Example:
+        bga lore conflicts show glorfindel_identity
+    """
+    from book_graph_analyzer.lore.conflicts import ConflictRegistry
+
+    registry = ConflictRegistry.from_tolkien_defaults()
+    conflict = registry.get(conflict_id)
+
+    if not conflict:
+        console.print(f"[red]Conflict '{conflict_id}' not found.[/red]")
+        console.print("\nAvailable conflict IDs:")
+        for c in registry.all():
+            console.print(f"  {c.id}")
+        return
+
+    console.print(f"\n{conflict.detail()}")
+
+
+@lore_conflicts.command(name="unresolved")
+def lore_conflicts_unresolved() -> None:
+    """Show conflicts needing human attention (flag_for_human or irresolvable).
+
+    Example:
+        bga lore conflicts unresolved
+    """
+    from book_graph_analyzer.lore.conflicts import ConflictRegistry
+
+    registry = ConflictRegistry.from_tolkien_defaults()
+    human_needed = registry.needing_human_review()
+
+    if not human_needed:
+        console.print("[green]No conflicts need human review.[/green]")
+        return
+
+    console.print(f"\n[bold yellow]Conflicts requiring human review ({len(human_needed)}):[/bold yellow]\n")
+    for conflict in human_needed:
+        console.print(f"  [yellow]⚠[/yellow] [cyan]{conflict.id}[/cyan]  [{conflict.conflict_type}]")
+        console.print(f"    {conflict.summary[:100]}")
+        if conflict.claims:
+            for i, claim in enumerate(conflict.claims, 1):
+                console.print(f"      [{i}] ({claim.author_period} / {claim.source_book}) {claim.statement[:80]}")
+        console.print()
+
+
+@lore_conflicts.command(name="resolve")
+@click.option("--id", "conflict_id", required=True, help="Conflict ID to resolve")
+@click.option("--policy", required=True,
+              type=click.Choice([
+                  "use_later_text", "use_earlier_text", "both_valid_in_universe",
+                  "flag_for_human", "use_most_cited", "irresolvable"
+              ]),
+              help="Resolution policy to apply")
+@click.option("--notes", default="", help="Notes explaining the resolution")
+@click.option("--neo4j", is_flag=True, help="Also persist resolution to Neo4j")
+def lore_conflicts_resolve(
+    conflict_id: str, policy: str, notes: str, neo4j: bool
+) -> None:
+    """Apply a resolution policy to a conflict.
+
+    Examples:
+        bga lore conflicts resolve --id orc_origin --policy use_later_text
+        bga lore conflicts resolve --id bombadil_nature --policy irresolvable --notes "Tolkien's intent"
+        bga lore conflicts resolve --id glorfindel_identity --policy use_later_text --neo4j
+    """
+    from book_graph_analyzer.lore.conflicts import ConflictRegistry, LoreConflictNeo4jWriter
+    from book_graph_analyzer.graph.connection import check_neo4j_connection
+
+    registry = ConflictRegistry.from_tolkien_defaults()
+    success = registry.resolve(conflict_id, policy, notes)
+
+    if not success:
+        console.print(f"[red]Conflict '{conflict_id}' not found in built-in registry.[/red]")
+        return
+
+    conflict = registry.get(conflict_id)
+    status = "[green]✓ Resolved[/green]" if conflict.resolved else "[yellow]Flagged[/yellow]"
+    console.print(f"\n{status}: [{conflict_id}] → {policy}")
+
+    winner = conflict.winning_claim()
+    if winner:
+        console.print(f"  Active claim: ({winner.author_period} / {winner.source_book}) {winner.statement[:80]}")
+
+    if neo4j:
+        if not check_neo4j_connection():
+            console.print("[red]Cannot connect to Neo4j.[/red]")
+            return
+        writer = LoreConflictNeo4jWriter()
+        writer.resolve_conflict(conflict_id, policy, notes)
+        writer.close()
+        console.print("[green]OK[/green] Neo4j updated.")
+
+
+@lore_conflicts.command(name="init")
+@click.option("--dry-run", is_flag=True, help="Show what would be written without writing")
+def lore_conflicts_init(dry_run: bool) -> None:
+    """Write all known Tolkien conflicts to Neo4j.
+
+    This seeds the conflict database. Safe to run multiple times (idempotent MERGE).
+
+    Example:
+        bga lore conflicts init
+        bga lore conflicts init --dry-run
+    """
+    from book_graph_analyzer.lore.conflicts import ConflictRegistry, LoreConflictNeo4jWriter
+    from book_graph_analyzer.graph.connection import check_neo4j_connection
+
+    registry = ConflictRegistry.from_tolkien_defaults()
+    conflicts = registry.all()
+
+    console.print(f"[bold]Initialising {len(conflicts)} known Tolkien conflicts[/bold]")
+
+    if dry_run:
+        console.print("\n[yellow][DRY RUN] Would write:[/yellow]")
+        for c in conflicts:
+            status = "✓" if c.is_resolved else "?"
+            console.print(f"  [{status}] {c.id}: {c.summary[:70]}")
+        return
+
+    if not check_neo4j_connection():
+        console.print("[red]Cannot connect to Neo4j.[/red]")
+        return
+
+    writer = LoreConflictNeo4jWriter()
+    writer.ensure_schema()
+    count = writer.upsert_many(conflicts)
+
+    # Create CONFLICTS_WITH edges for rule-linked conflicts
+    for c in conflicts:
+        if len(c.rule_ids) >= 2:
+            for i in range(len(c.rule_ids) - 1):
+                try:
+                    writer.create_conflicts_with_edge(
+                        c.rule_ids[i], c.rule_ids[i + 1], c.id
+                    )
+                except Exception:
+                    pass  # Rules may not exist yet
+
+    writer.close()
+    console.print(f"[green]OK[/green] {count} LoreConflict nodes written to Neo4j")
+
+
 @lore.group(name="rules")
 def lore_rules() -> None:
     """Manage LoreRule nodes — lore laws as executable Cypher contracts."""
