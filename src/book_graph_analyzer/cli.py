@@ -3139,12 +3139,27 @@ def lore_register_init(dry_run: bool) -> None:
 
 @lore.command(name="socioreg-profile")
 @click.option("--text", "text", required=True, help="Passage text to classify")
-def lore_socioreg_profile(text: str) -> None:
+@click.option("--json", "as_json", is_flag=True, help="Emit JSON output")
+@click.option("--voice-formality", type=float, default=None, help="Optional voice formality score (0-1) for alignment hint")
+def lore_socioreg_profile(text: str, as_json: bool, voice_formality: float | None) -> None:
     """Classify text into a sociolinguistic register profile (Issue #47 slice 1 MVP)."""
     from book_graph_analyzer.lore.sociolinguistic_registers import SociolinguisticRegisterClassifier
 
     classifier = SociolinguisticRegisterClassifier()
     profile = classifier.classify(text)
+
+    if as_json:
+        click.echo(json.dumps({
+            "dominant_register": profile.dominant_register,
+            "confidence": profile.confidence,
+            "formality_score": profile.formality_score,
+            "archaism_rate": profile.archaism_rate,
+            "contraction_rate": profile.contraction_rate,
+            "avg_sentence_length": profile.avg_sentence_length,
+            "token_count": profile.token_count,
+            "register_scores": profile.register_scores,
+        }, indent=2))
+        return
 
     console.print("\n[bold]Sociolinguistic Register Profile[/bold]\n")
     console.print(f"  Dominant: [cyan]{profile.dominant_register}[/cyan] ({profile.confidence:.2f})")
@@ -3152,6 +3167,10 @@ def lore_socioreg_profile(text: str) -> None:
     console.print(f"  Archaism: {profile.archaism_rate:.2f}")
     console.print(f"  Contractions: {profile.contraction_rate:.2f}")
     console.print(f"  Avg sentence length: {profile.avg_sentence_length:.1f} words")
+    if voice_formality is not None:
+        delta = profile.formality_score - max(0.0, min(1.0, voice_formality))
+        color = "green" if abs(delta) <= 0.15 else ("yellow" if abs(delta) <= 0.3 else "red")
+        console.print(f"  Voice alignment delta: [{color}]{delta:+.2f}[/{color}] vs provided voice-formality")
 
     table = Table(show_header=True, header_style="bold")
     table.add_column("Register", style="cyan")
@@ -3164,7 +3183,8 @@ def lore_socioreg_profile(text: str) -> None:
 @lore.command(name="socioreg-drift")
 @click.option("--baseline", required=True, help="Baseline passage text")
 @click.option("--current", required=True, help="Current passage text")
-def lore_socioreg_drift(baseline: str, current: str) -> None:
+@click.option("--json", "as_json", is_flag=True, help="Emit JSON output")
+def lore_socioreg_drift(baseline: str, current: str, as_json: bool) -> None:
     """Compare two passages and report sociolinguistic register drift."""
     from book_graph_analyzer.lore.sociolinguistic_registers import (
         SociolinguisticRegisterClassifier,
@@ -3174,6 +3194,17 @@ def lore_socioreg_drift(baseline: str, current: str) -> None:
     classifier = SociolinguisticRegisterClassifier()
     drift = detect_register_drift(classifier.classify(baseline), classifier.classify(current))
 
+    if as_json:
+        click.echo(json.dumps({
+            "baseline_register": drift.baseline_register,
+            "current_register": drift.current_register,
+            "register_shift": drift.register_shift,
+            "formality_shift": drift.formality_shift,
+            "archaism_shift": drift.archaism_shift,
+            "severity": drift.severity,
+        }, indent=2))
+        return
+
     console.print("\n[bold]Sociolinguistic Register Drift[/bold]\n")
     console.print(f"  Baseline register: [cyan]{drift.baseline_register}[/cyan]")
     console.print(f"  Current register:  [cyan]{drift.current_register}[/cyan]")
@@ -3182,6 +3213,60 @@ def lore_socioreg_drift(baseline: str, current: str) -> None:
     console.print(f"  Archaism shift: {drift.archaism_shift:+.3f}")
     severity_color = "red" if drift.severity == "high" else ("yellow" if drift.severity == "medium" else "green")
     console.print(f"  Severity: [{severity_color}]{drift.severity.upper()}[/{severity_color}]")
+
+
+@lore.command(name="socioreg-corpus")
+@click.option("--input", "input_path", required=True, type=click.Path(exists=True), help="JSON array of {text, entity_id?, order?}")
+@click.option("--top-drifts", default=5, show_default=True, type=int, help="Number of strongest drifts to display")
+@click.option("--json", "as_json", is_flag=True, help="Emit JSON output")
+def lore_socioreg_corpus(input_path: str, top_drifts: int, as_json: bool) -> None:
+    """Run corpus-wide automated socioreg profiling and drift reporting."""
+    from book_graph_analyzer.lore.sociolinguistic_registers import load_socioreg_samples_json, profile_corpus_registers
+
+    samples = load_socioreg_samples_json(input_path)
+    report = profile_corpus_registers(samples)
+
+    if as_json:
+        click.echo(json.dumps({
+            "total_samples": report.total_samples,
+            "dominant_distribution": report.dominant_distribution,
+            "avg_formality": report.avg_formality,
+            "avg_archaism_rate": report.avg_archaism_rate,
+            "avg_contraction_rate": report.avg_contraction_rate,
+            "top_drifts": [
+                {
+                    "baseline_register": d.baseline_register,
+                    "current_register": d.current_register,
+                    "register_shift": d.register_shift,
+                    "formality_shift": d.formality_shift,
+                    "archaism_shift": d.archaism_shift,
+                    "severity": d.severity,
+                }
+                for d in report.strongest_drifts[: max(0, top_drifts)]
+            ],
+        }, indent=2))
+        return
+
+    console.print("\n[bold]Corpus Socioreg Profile[/bold]\n")
+    console.print(f"  Samples: {report.total_samples}")
+    console.print(f"  Avg formality: {report.avg_formality:.3f}")
+    console.print(f"  Avg archaism rate: {report.avg_archaism_rate:.3f}")
+    console.print(f"  Avg contraction rate: {report.avg_contraction_rate:.3f}")
+
+    table = Table(show_header=True, header_style="bold")
+    table.add_column("Register", style="cyan")
+    table.add_column("Count", justify="right")
+    for reg, count in sorted(report.dominant_distribution.items(), key=lambda x: x[1], reverse=True):
+        table.add_row(reg, str(count))
+    console.print(table)
+
+    if report.strongest_drifts:
+        console.print("\n[bold]Strongest Drift Transitions[/bold]")
+        for d in report.strongest_drifts[: max(0, top_drifts)]:
+            console.print(
+                f"  {d.baseline_register} -> {d.current_register} "
+                f"(sev={d.severity}, reg={d.register_shift:.3f}, form={d.formality_shift:+.3f}, arch={d.archaism_shift:+.3f})"
+            )
 
 
 @lore.command(name="arc")

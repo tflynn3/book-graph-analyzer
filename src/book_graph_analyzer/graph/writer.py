@@ -1615,6 +1615,69 @@ class GraphWriter:
                 drifts.append(delta)
         return drifts
 
+    def query_register_observations(
+        self,
+        entity_id: str,
+        limit: int = 25,
+    ) -> list[dict]:
+        """Return recent register observations for an entity."""
+        with self.driver.session() as session:
+            result = session.run(
+                """
+                MATCH (e {id: $entity_id})-[:HAS_REGISTER_OBSERVATION]->(obs:RegisterObservation)
+                RETURN obs.observed_at AS observed_at,
+                       obs.dominant_register AS dominant_register,
+                       obs.confidence AS confidence,
+                       obs.formality_score AS formality_score,
+                       obs.archaism_rate AS archaism_rate,
+                       obs.contraction_rate AS contraction_rate,
+                       obs.source_passage_id AS source_passage_id
+                ORDER BY obs.observed_at DESC
+                LIMIT $limit
+                """,
+                entity_id=entity_id,
+                limit=limit,
+            )
+            return [dict(r) for r in result]
+
+    def query_register_drift_summary(
+        self,
+        entity_id: str,
+        min_delta: float = 0.2,
+        limit: int = 100,
+    ) -> dict:
+        """Summarize drift counts and strongest transition for reporting."""
+        drifts = self.query_register_drift(entity_id=entity_id, min_delta=min_delta, limit=limit)
+        if not drifts:
+            return {
+                "entity_id": entity_id,
+                "drift_count": 0,
+                "high": 0,
+                "medium": 0,
+                "low": 0,
+                "strongest": None,
+            }
+
+        def _severity(d: dict) -> str:
+            mag = float(d.get("magnitude") or 0.0)
+            if mag >= 0.45:
+                return "high"
+            if mag >= 0.25:
+                return "medium"
+            return "low"
+
+        counts = {"high": 0, "medium": 0, "low": 0}
+        for d in drifts:
+            counts[_severity(d)] += 1
+
+        strongest = max(drifts, key=lambda d: float(d.get("magnitude") or 0.0))
+        return {
+            "entity_id": entity_id,
+            "drift_count": len(drifts),
+            **counts,
+            "strongest": strongest,
+        }
+
     def query_event_ordering(
         self,
         event1_desc: str,
