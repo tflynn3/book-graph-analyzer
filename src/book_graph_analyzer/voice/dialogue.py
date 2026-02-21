@@ -11,6 +11,8 @@ import re
 import spacy
 from spacy.tokens import Doc
 
+from .audience import classify_dialogue_line
+
 
 # Speech verbs for attribution detection
 SPEECH_VERBS = {
@@ -94,6 +96,13 @@ class DialogueLine:
     is_question: bool = False
     is_exclamation: bool = False
     is_statement: bool = True
+    is_imperative: bool = False         # Starts with a verb (command/request)
+    is_verse: bool = False              # Detected as song/poetry
+    
+    # Audience & context type (Issue #10)
+    audience_type: str = "neutral"      # 'hobbit'|'elf'|'man'|'dwarf'|'enemy'|'neutral'|'self'|'prayer'
+    context_type: str = "statement"     # 'crisis'|'explanation'|'command'|'comfort'|'warning'|'farewell'|'statement'
+    audience_confidence: float = 0.0    # Confidence in audience classification
     
     # Confidence
     attribution_confidence: float = 0.0  # How confident we are about the speaker
@@ -194,6 +203,19 @@ def extract_dialogue(
         is_exclamation = quote_text.rstrip().endswith('!')
         is_statement = not is_question and not is_exclamation
         
+        # Detect imperative (starts with a base-form verb, no subject pronoun)
+        is_imperative = _detect_imperative(quote_text)
+        
+        # Detect verse/song (short lines, often rhythmic, may have internal newlines)
+        is_verse = _detect_verse(quote_text)
+        
+        # Audience & context classification
+        ctx_before_window = context_before[-100:] if len(context_before) > 100 else context_before
+        ctx_after_window = context_after[:100] if len(context_after) > 100 else context_after
+        audience_cls = classify_dialogue_line(
+            quote_text, ctx_before_window, ctx_after_window, speaker
+        )
+        
         line = DialogueLine(
             text=quote_text,
             speaker=speaker,
@@ -205,6 +227,11 @@ def extract_dialogue(
             is_question=is_question,
             is_exclamation=is_exclamation,
             is_statement=is_statement,
+            is_imperative=is_imperative,
+            is_verse=is_verse,
+            audience_type=audience_cls.audience_type,
+            context_type=audience_cls.context_type,
+            audience_confidence=audience_cls.confidence,
             attribution_confidence=confidence,
         )
         
@@ -314,6 +341,61 @@ def _attribute_speaker(
             return speaker, speech_verb, confidence
     
     return None, None, 0.0
+
+
+def _detect_imperative(text: str) -> bool:
+    """
+    Heuristically detect imperative sentences.
+    
+    Imperatives typically start with a base-form verb with no subject.
+    """
+    # Common imperative starters
+    imperative_starters = {
+        # Motion
+        "go", "come", "stay", "stop", "run", "flee", "follow", "lead",
+        "move", "walk", "ride", "fly", "climb", "fall",
+        # Action
+        "take", "bring", "give", "hold", "keep", "put", "set", "get",
+        "make", "do", "let", "leave", "return", "stand", "sit", "rise",
+        # Perception
+        "look", "see", "watch", "hear", "listen", "read", "speak",
+        # Archaic
+        "heed", "behold", "hearken", "hark", "tarry", "stay",
+        # Negative
+        "do not", "do not", "never", "fear not", "worry not",
+    }
+    tokens = text.lower().split()
+    first_word = tokens[0].strip('.,!?"\'-') if tokens else ""
+    first_two_raw = tokens[:2] if len(tokens) >= 2 else tokens
+    first_two = " ".join(w.strip('.,!?"\'-') for w in first_two_raw)
+    
+    return first_word in imperative_starters or first_two in imperative_starters
+
+
+def _detect_verse(text: str) -> bool:
+    """
+    Heuristically detect verse/songs.
+    
+    Verse often has:
+    - Internal newlines
+    - Short, rhythmic lines
+    - May start with 'O' or have unusual capitalization mid-sentence
+    """
+    # Check for internal newlines (multi-line speech)
+    if '\n' in text:
+        return True
+    
+    # Check for verse markers
+    verse_patterns = [
+        r'\bO\s+[A-Z]',             # "O Elbereth" type invocations
+        r'\b(sing|song|sang|sung)\b',  # References to singing
+        r'[,;]\s+\w+\s+\w+[,;]',    # Comma-delimited short phrases (rhythmic)
+    ]
+    for pattern in verse_patterns:
+        if re.search(pattern, text):
+            return True
+    
+    return False
 
 
 def extract_dialogue_from_passages(

@@ -1265,6 +1265,188 @@ def voice_quotes(results_path: str, character: str, limit: int) -> None:
     console.print(f"\n[dim]Total lines: {profile.total_lines}[/dim]")
 
 
+@voice.command(name="identify")
+@click.option("--text", "-t", required=True, help="Dialogue text to identify the speaker of")
+@click.option("--results", "-r", type=click.Path(exists=True), help="Pre-computed voice profiles JSON")
+@click.option("--top", "-n", default=3, help="Number of candidates to show (default: 3)")
+def voice_identify(text: str, results: str | None, top: int) -> None:
+    """Identify the most likely speaker of an unmarked quote.
+    
+    The Blindspot Test: given an unmarked Tolkien quote, identify the speaker.
+    
+    Examples:
+        bga voice identify --text 'You shall not pass!'
+        bga voice identify --text 'Precious, my precious.' --results hobbit_voices.json
+    """
+    from book_graph_analyzer.voice import VoiceAnalyzer, VoiceAnalysisResult
+
+    analyzer = VoiceAnalyzer()
+    
+    if results:
+        result = analyzer.load_results(results)
+        profiles = result.profiles
+    else:
+        # Use built-in Tolkien character sketches for demo
+        from book_graph_analyzer.voice.profile import CharacterVoiceProfile
+        from collections import Counter
+        
+        # Bootstrap minimal profiles from known characteristics
+        profiles = _build_demo_profiles()
+    
+    if not profiles:
+        console.print("[red]No profiles available. Run 'bga voice analyze' first or provide --results.[/red]")
+        return
+    
+    console.print(f"\n[bold]Voice Identification[/bold]")
+    console.print(f'  Text: "{text[:100]}{"..." if len(text) > 100 else ""}"\n')
+    
+    candidates = analyzer.identify_speaker(text, profiles, top_n=top)
+    
+    if not candidates:
+        console.print("[yellow]Could not identify speaker.[/yellow]")
+        return
+    
+    table = Table(title="Speaker Identification")
+    table.add_column("Rank", width=5, style="dim")
+    table.add_column("Character", style="cyan")
+    table.add_column("Confidence", justify="right")
+    table.add_column("Match bar")
+    
+    for i, (char_name, confidence) in enumerate(candidates, 1):
+        bar_len = int(confidence * 20)
+        bar = "█" * bar_len + "░" * (20 - bar_len)
+        table.add_row(str(i), char_name, f"{confidence:.2%}", bar)
+    
+    console.print(table)
+    
+    if candidates:
+        top_char, top_conf = candidates[0]
+        console.print(f"\n  Best match: [bold cyan]{top_char}[/bold cyan]  (confidence: {top_conf:.0%})")
+        
+        # Show why
+        p = profiles.get(top_char)
+        if p:
+            console.print(f"  Profile: formality={p.formality_score:.2f}, archaism_rate={p.archaism_rate:.2f}/100w")
+
+
+def _build_demo_profiles() -> dict:
+    """Build minimal demo profiles for Tolkien characters (for identify without pre-analysis)."""
+    from book_graph_analyzer.voice.profile import CharacterVoiceProfile
+    
+    # These profiles capture the key distinguishing features manually
+    demos = {}
+    
+    # Gandalf: high formality, archaic, imperative, rhetorical
+    g = CharacterVoiceProfile(character_name="Gandalf")
+    g.formality_score = 0.85
+    g.archaism_rate = 4.2
+    g.contraction_ratio = 0.01
+    g.imperative_ratio = 0.35
+    g.rhetorical_density = 0.6
+    g.avg_utterance_length = 18.5
+    g.question_ratio = 0.2
+    g.distinctive_words = ["pass", "fool", "shadow", "ancient", "servant", "nameless", "fire"]
+    g.signature_phrases = ["you shall not", "i am", "the grey", "in the ancient"]
+    g.never_says = ["yeah", "ok", "stuff", "things", "gonna", "cool"]
+    g.topic_distribution = {"wisdom": 0.4, "history": 0.3, "war": 0.2, "nature": 0.1}
+    demos["Gandalf"] = g
+    
+    # Sam: low formality, contractions, practical, respectful
+    s = CharacterVoiceProfile(character_name="Samwise")
+    s.formality_score = 0.15
+    s.archaism_rate = 0.3
+    s.contraction_ratio = 0.12
+    s.imperative_ratio = 0.05
+    s.avg_utterance_length = 9.2
+    s.question_ratio = 0.15
+    s.distinctive_words = ["mr", "begging", "pardon", "mister", "taters", "gaffer", "bless"]
+    s.signature_phrases = ["begging your pardon", "mr frodo", "i don't"]
+    s.never_says = ["verily", "forsooth", "thou", "thee", "hath"]
+    s.topic_distribution = {"practical": 0.5, "fellowship": 0.3, "nature": 0.2}
+    demos["Samwise"] = s
+    
+    # Gollum: unique, obsessive, self-referential
+    gol = CharacterVoiceProfile(character_name="Gollum")
+    gol.formality_score = 0.10
+    gol.archaism_rate = 0.5
+    gol.contraction_ratio = 0.05
+    gol.imperative_ratio = 0.08
+    gol.avg_utterance_length = 6.5
+    gol.question_ratio = 0.35
+    gol.distinctive_words = ["precious", "gollum", "nasty", "tricksy", "false", "wicked", "smeagol"]
+    gol.signature_phrases = ["my precious", "we wants it", "we hates"]
+    gol.never_says = ["fellowship", "wisdom", "honour", "courage", "friend"]
+    gol.topic_distribution = {"practical": 0.6, "war": 0.2, "fellowship": 0.2}
+    demos["Gollum"] = gol
+    
+    # Aragorn: moderate formality, command register, warrior
+    a = CharacterVoiceProfile(character_name="Aragorn")
+    a.formality_score = 0.60
+    a.archaism_rate = 1.8
+    a.contraction_ratio = 0.04
+    a.imperative_ratio = 0.30
+    a.avg_utterance_length = 14.0
+    a.question_ratio = 0.12
+    a.distinctive_words = ["rangers", "dunedain", "strider", "isildur", "blade", "king", "hope"]
+    a.signature_phrases = ["hold on", "men of", "the king", "it is not"]
+    a.never_says = ["precious", "taters", "begging", "yeah", "cool"]
+    a.topic_distribution = {"war": 0.4, "wisdom": 0.3, "history": 0.2, "fellowship": 0.1}
+    demos["Aragorn"] = a
+    
+    return demos
+
+
+@voice.command(name="check")
+@click.option("--text", "-t", required=True, help="Generated dialogue text to check")
+@click.option("--character", "-c", required=True, help="Character the text is supposed to be from")
+@click.option("--results", "-r", type=click.Path(exists=True), help="Pre-computed voice profiles JSON")
+def voice_check(text: str, character: str, results: str | None) -> None:
+    """Check generated dialogue for voice consistency violations.
+    
+    Detects: wrong formality, anachronistic vocabulary, never-says words,
+    missing signature patterns.
+    
+    Examples:
+        bga voice check --text 'Yeah, cool, let us go!' --character Gandalf
+        bga voice check --text 'Mr. Frodo sir, I will follow.' --character Samwise --results hobbit_voices.json
+    """
+    from book_graph_analyzer.voice import VoiceAnalyzer
+
+    analyzer = VoiceAnalyzer()
+    
+    if results:
+        result = analyzer.load_results(results)
+        profile = result.get_profile(character)
+    else:
+        # Use demo profiles
+        profiles = _build_demo_profiles()
+        profile = profiles.get(character)
+    
+    if not profile:
+        console.print(f"[red]Character '{character}' not found.[/red]")
+        return
+    
+    violations = analyzer.check_voice_violations(text, profile)
+    
+    console.print(f"\n[bold]Voice Check:[/bold] {character}")
+    console.print(f'  "{text[:100]}{"..." if len(text) > 100 else ""}"\n')
+    
+    if not violations:
+        console.print("[bold green]✓ PASS[/bold green] — No voice violations detected")
+    else:
+        hard = [v for v in violations if v["severity"] == "hard"]
+        soft = [v for v in violations if v["severity"] == "soft"]
+        
+        if hard:
+            console.print(f"[bold red]✗ FAIL — {len(hard)} hard violation(s)[/bold red]")
+        else:
+            console.print(f"[bold yellow]⚠ WARNING — {len(soft)} soft violation(s)[/bold yellow]")
+        
+        for v in violations:
+            icon = "[red]✗[/red]" if v["severity"] == "hard" else "[yellow]~[/yellow]"
+            console.print(f"  {icon} [{v['type']}] {v['message']}")
+
+
 # ============================================================================
 # Pipeline Commands - Unified Analysis
 # ============================================================================
