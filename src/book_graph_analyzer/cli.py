@@ -5194,6 +5194,7 @@ def workflow_analyze_failure_issue(issue_number: int, workflow_path: str, env_fi
 @click.option("--env-file", default="", help="Optional .env file for local secret checks")
 @click.option("--out-csv", default="", help="Optional output CSV path for batch analysis report")
 @click.option("--out-json", default="", help="Optional output JSON path for batch analysis report")
+@click.option("--out-md", default="", help="Optional output markdown summary path")
 def workflow_analyze_open_failures(
     label: str,
     limit: int,
@@ -5201,6 +5202,7 @@ def workflow_analyze_open_failures(
     env_file: str,
     out_csv: str,
     out_json: str,
+    out_md: str,
 ) -> None:
     """Analyze all open failure issues (batch mode) via gh issue list/view.
 
@@ -5270,6 +5272,25 @@ def workflow_analyze_open_failures(
         with open(out_path, "w", encoding="utf-8") as f:
             json.dump(csv_rows, f, ensure_ascii=False, indent=2)
         console.print(f"[green]Wrote JSON analysis report:[/green] {out_path}")
+
+    if out_md:
+        out_path = Path(out_md)
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        lines = [
+            "# Open Workflow Failure Analysis",
+            "",
+            "| Issue | Run ID | Secret Verification Failed | Missing Secrets | Diagnosis |",
+            "|---|---:|:---:|---|---|",
+        ]
+        for row in csv_rows:
+            issue = f"#{row['issue_number']} {row['issue_title']}"
+            run_id = row.get("run_id", "") or "n/a"
+            svf = row.get("secret_verification_failed", "false")
+            missing = row.get("missing_secrets", "") or "none"
+            diagnosis = (row.get("diagnosis", "") or "").replace("|", "\\|")
+            lines.append(f"| {issue} | {run_id} | {svf} | {missing} | {diagnosis} |")
+        out_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
+        console.print(f"[green]Wrote markdown summary report:[/green] {out_path}")
 
     if missing_any:
         raise click.Abort()
