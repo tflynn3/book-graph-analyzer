@@ -257,7 +257,7 @@ not a new top-level package.
 | #45 | Kickoff Slice | ✅ Complete | Models, stubs, CLI placeholders, tests |
 | #46 | Linguistic Engine v1 | ✅ Complete | `GraphWriter.write_linguistic_lineage`, JSON parser, CLI `worldbible languages`, 50 tests |
 | #47 | Deep Genealogy + Sociolinguistic Registers | 🟡 Slice 1 in progress | Genealogy slice-1 parser/normalization/rules + batch writer/query/CLI, plus sociolinguistic register profile/drift MVP with GraphWriter + CLI integration |
-| #48 | Editorial Layers | 🔲 Not started | Stub raises `NotImplementedError` |
+| #48/#51 | Editorial Layers / Meta-Layer | 🟨 In progress | Source strata model + passage provenance tags + MVP divergence detector + layer-aware graph/CLI reporting |
 | #49 | Cultural Rules | 🔲 Not started | |
 | #50 | Cosmological Timeline | 🔲 Not started | |
 | #51 | Integration Testing | 🔲 Not started | |
