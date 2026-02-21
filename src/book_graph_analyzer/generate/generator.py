@@ -14,7 +14,35 @@ from .judge import NarrativeJudge
 
 class SceneGenerator:
     """Generates scenes grounded in Neo4j knowledge graph."""
-    
+
+    FOG_OF_WAR_PROMPT = '''You are writing a scene in the style of J.R.R. Tolkien.
+
+SETTING: {setting}
+CHARACTERS PRESENT: {characters}
+OBJECTS OF NOTE: {objects}
+
+WHAT THE CHARACTER KNOWS:
+{character_knowledge}
+
+SCENE GOAL: {scene_goal}
+
+WORLD RULES TO RESPECT:
+{world_rules}
+
+Write this scene from a position of UNCERTAINTY. The character does not know the history of
+this place or the nature of what they encounter. Write as Tolkien wrote Moria before the
+Fellowship knew what happened to Balin: let the atmosphere speak, let the architecture hint
+at past greatness or horror, let silence carry weight. Do not explain — suggest.
+
+Tolkien's style in scenes of mystery:
+- The landscape itself feels conscious and watching
+- Details are physical and sensory — cold stone, old smell, soundlessness
+- The character notices without understanding
+- Formal, measured prose; no modern psychological interiority
+- Dread or wonder conveyed through what is NOT said
+
+Write 400-800 words. Begin the scene directly, no preamble.'''
+
     GENERATION_PROMPT = '''You are writing a scene in the style of J.R.R. Tolkien.
 
 SETTING: {setting}
@@ -99,8 +127,15 @@ Keep the same general content and length, just fix the problems.'''
         characters: list[str],
         place: str,
         limit: int = 10,
+        fog_of_war: bool = False,
     ) -> dict:
-        """Query Neo4j for relevant context."""
+        """Query Neo4j for relevant context.
+
+        Args:
+            fog_of_war: When True, only fetch the physical description of the place.
+                Character histories and event records are withheld — the LLM writes
+                from the character's limited, ground-level perspective.
+        """
         context = {
             "characters": [],
             "place": None,
@@ -113,7 +148,7 @@ Keep the same general content and length, just fix the problems.'''
             return context
         
         with self.driver.session() as session:
-            # Get character info
+            # In fog_of_war mode: omit character history — just their names/races
             for char_name in characters:
                 result = session.run("""
                     MATCH (c:Character)
@@ -125,14 +160,23 @@ Keep the same general content and length, just fix the problems.'''
                 """, name=char_name)
                 record = result.single()
                 if record:
-                    context["characters"].append({
-                        "name": record["name"],
-                        "type": record["type"],
-                        "description": record["desc"],
-                        "relations": record["relations"],
-                    })
+                    if fog_of_war:
+                        # Strip relational/historical context
+                        context["characters"].append({
+                            "name": record["name"],
+                            "type": record["type"],
+                            "description": None,
+                            "relations": [],
+                        })
+                    else:
+                        context["characters"].append({
+                            "name": record["name"],
+                            "type": record["type"],
+                            "description": record["desc"],
+                            "relations": record["relations"],
+                        })
             
-            # Get place info
+            # Place: always fetch physical description
             if place:
                 result = session.run("""
                     MATCH (p:Place)
@@ -148,8 +192,8 @@ Keep the same general content and length, just fix the problems.'''
                         "region": record["region"],
                     }
             
-            # Get recent events involving these characters
-            if characters:
+            # Events: withheld entirely in fog_of_war mode
+            if characters and not fog_of_war:
                 result = session.run("""
                     MATCH (e:Event)
                     WHERE any(c IN $characters WHERE toLower(e.agent) CONTAINS toLower(c))
@@ -163,6 +207,24 @@ Keep the same general content and length, just fix the problems.'''
                 ]
         
         return context
+
+    def _build_character_knowledge(
+        self,
+        characters: list[str],
+        previous_context: str,
+    ) -> str:
+        """
+        For Fog of War mode: what does the character actually know?
+        Only their personal history from the scene summaries — nothing omniscient.
+        """
+        lines = []
+        if previous_context:
+            lines.append(f"What has happened so far (from the character's perspective):")
+            lines.append(previous_context.strip())
+        else:
+            lines.append(f"{', '.join(characters)} approach this place knowing only what they have witnessed on their journey.")
+            lines.append("They know nothing of this location's history.")
+        return "\n".join(lines)
     
     def get_world_rules(self, categories: list[str] = None) -> str:
         """Get relevant world bible rules as text."""
@@ -184,11 +246,21 @@ Keep the same general content and length, just fix the problems.'''
         place: str,
         previous_context: str = "",
         objects: list[str] = None,
+        fog_of_war: bool = False,
     ) -> Scene:
-        """Generate a scene with full pipeline."""
+        """Generate a scene with full pipeline.
+
+        Args:
+            fog_of_war: When True, restricts context to physical place description only.
+                The characters know nothing of the location's history. The LLM writes
+                from a position of uncertainty — producing naturally ominous, mysterious prose.
+                Use for: entering Moria, approaching a ruined city, Fog-filled valleys.
+        """
         
-        # 1. Get context from Neo4j
-        neo4j_context = self.get_context_from_neo4j(characters, place)
+        # 1. Get context from Neo4j (restricted in fog_of_war mode)
+        neo4j_context = self.get_context_from_neo4j(
+            characters, place, fog_of_war=fog_of_war
+        )
         
         # Format context for prompt
         char_descriptions = []
@@ -215,14 +287,29 @@ Keep the same general content and length, just fix the problems.'''
             )
         
         # 2. Generate initial scene
-        prompt = self.GENERATION_PROMPT.format(
-            setting=place_desc or place,
-            characters="\n".join(char_descriptions) or ", ".join(characters),
-            objects=", ".join(objects or []) or "None specified",
-            previous_context=previous_context or events_text or "Beginning of story",
-            scene_goal=scene_goal,
-            world_rules=self.get_world_rules(),
-        )
+        if fog_of_war:
+            # Fog of War: character only knows their own situation and the physical place.
+            # No history, no events, no omniscient context — pure sensory grounding.
+            character_knowledge = self._build_character_knowledge(
+                characters, previous_context
+            )
+            prompt = self.FOG_OF_WAR_PROMPT.format(
+                setting=place_desc or place,
+                characters="\n".join(char_descriptions) or ", ".join(characters),
+                objects=", ".join(objects or []) or "None specified",
+                character_knowledge=character_knowledge,
+                scene_goal=scene_goal,
+                world_rules=self.get_world_rules(),
+            )
+        else:
+            prompt = self.GENERATION_PROMPT.format(
+                setting=place_desc or place,
+                characters="\n".join(char_descriptions) or ", ".join(characters),
+                objects=", ".join(objects or []) or "None specified",
+                previous_context=previous_context or events_text or "Beginning of story",
+                scene_goal=scene_goal,
+                world_rules=self.get_world_rules(),
+            )
         
         scene_text = self.llm.generate(prompt, temperature=self.config.temperature)
         

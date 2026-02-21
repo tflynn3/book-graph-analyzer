@@ -113,7 +113,7 @@ class ValidationResult:
             ValidationStatus.INVALID: "[X]",
             ValidationStatus.UNKNOWN: "[?]",
             ValidationStatus.PARTIAL: "[~]",
-            ValidationStatus.PLAUSIBLE: "[~]",
+            ValidationStatus.PLAUSIBLE: "[+]",   # [+] = creative addition accepted
         }[self.status]
         
         lines = [
@@ -306,6 +306,47 @@ class LoreChecker:
         """
         claims = self.parser.parse_multiple(text)
         return [self.check(c.original_text) for c in claims]
+
+    def check_addition(self, claim_text: str) -> ValidationResult:
+        """
+        Check whether a claim is a creative ADDITION — not a contradiction.
+
+        This is the permissive RAG path used by the LoreChecker when evaluating
+        newly invented entities from the Lore Incubator. The distinction:
+
+            CONTRADICTION (hard fail): Claim violates a known canon fact.
+                e.g. "Tuor met Elrond in Nevrast" — Elrond isn't born yet.
+                → Returns INVALID.
+
+            ADDITION (pass): Claim introduces something new that is absent from
+                canon but consistent with World Bible rules.
+                e.g. "Tuor found an ancient Elven dagger named Aeglos-minor"
+                → No canon record found, but rule "Elves make named daggers" exists.
+                → Returns PLAUSIBLE: creative addition accepted.
+
+        The key difference from check(): UNKNOWN + no contradicting evidence
+        is promoted to PLAUSIBLE rather than left as uncertain.
+        """
+        result = self.check(claim_text)
+
+        # UNKNOWN with no contradictions = consistent addition
+        if result.status == ValidationStatus.UNKNOWN and not result.contradicting:
+            result.status = ValidationStatus.PLAUSIBLE
+            result.explanation = (
+                "No canon record found — consistent with World Bible rules. "
+                "Creative addition accepted."
+            )
+            result.confidence = max(result.confidence, 0.6)
+
+        # PARTIAL with only supporting evidence = also plausible
+        elif result.status == ValidationStatus.PARTIAL and not result.contradicting:
+            result.status = ValidationStatus.PLAUSIBLE
+            result.explanation = (
+                "Partially consistent with known rules. "
+                "Creative addition accepted."
+            )
+
+        return result
     
     def _check_entity_exists(self, claim: ParsedClaim, result: ValidationResult) -> ValidationResult:
         """Check if an entity exists with claimed properties."""
