@@ -41,13 +41,24 @@ class Event:
     confidence: float = 1.0
     
     def to_dict(self) -> dict:
+        def _s(v):
+            if v is None: return None
+            if isinstance(v, list): return " ".join(str(x) for x in v if x) or None
+            return str(v)
+        # Handle era being either an Enum or a plain string
+        if self.era is None:
+            era_val = None
+        elif isinstance(self.era, str):
+            era_val = self.era
+        else:
+            era_val = self.era.value
         return {
             "id": self.id,
             "description": self.description,
-            "agent": self.agent,
-            "action": self.action,
-            "patient": self.patient,
-            "era": self.era.value if self.era else None,
+            "agent": _s(self.agent),
+            "action": _s(self.action),
+            "patient": _s(self.patient),
+            "era": era_val,
             "year": self.year,
             "year_text": self.year_text,
             "source_text": self.source_text,
@@ -378,18 +389,27 @@ class EventExtractor:
         
         return graph
     
+    @staticmethod
+    def _coerce_str(val) -> str:
+        """Coerce a field that may be str, list, or None to a plain string."""
+        if val is None:
+            return ""
+        if isinstance(val, list):
+            return " ".join(str(v) for v in val if v)
+        return str(val)
+
     def _normalize_event_key(self, event: Event) -> str:
         """Create a normalized key for deduplication."""
         parts = []
-        if event.agent:
-            parts.append(event.agent.lower().strip())
+        agent = self._coerce_str(event.agent).lower().strip()
+        if agent:
+            parts.append(agent)
         if event.action:
-            # Normalize verb tenses
-            action = event.action.lower().strip()
+            action = self._coerce_str(event.action).lower().strip()
             action = action.rstrip('ed').rstrip('s')
             parts.append(action)
         if event.patient:
-            patient = event.patient.lower().strip()
+            patient = self._coerce_str(event.patient).lower().strip()
             patient = patient.replace("the ", "").replace("a ", "")
             parts.append(patient)
         return "|".join(parts) if parts else event.description.lower()[:50]
