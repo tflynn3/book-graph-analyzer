@@ -178,6 +178,15 @@ class EditorialStatus(str, Enum):
     UNFINISHED = "unfinished"  # Unfinished Tales — explicitly incomplete
 
 
+class SourceStratum(str, Enum):
+    """Where a passage sits inside a source document's editorial layers."""
+
+    CORE_TEXT = "core_text"
+    APPENDIX = "appendix"
+    GLOSS = "gloss"
+    ANNOTATION = "annotation"
+
+
 class AuthorPeriod(str, Enum):
     """Tolkien's writing periods, affecting interpretation of contradictions."""
 
@@ -218,6 +227,7 @@ class EditorialLayer(BaseModel):
     volume: str | None = None  # e.g., "HoME Vol. X"
     authority_weight: float = 1.0  # 0.0–1.0, used in conflict resolution
     notes: str | None = None
+    default_stratum: SourceStratum = SourceStratum.CORE_TEXT
 
     @property
     def is_primary_canon(self) -> bool:

@@ -365,6 +365,11 @@ class GraphWriter:
         chapter_num: int,
         paragraph_num: int,
         sentence_num: int,
+        source_id: str | None = None,
+        source_title: str | None = None,
+        source_stratum: str | None = None,
+        source_authority_weight: float | None = None,
+        provenance_tags: list[str] | None = None,
     ) -> None:
         """Write a passage node to the graph.
 
@@ -384,6 +389,11 @@ class GraphWriter:
             p.chapter_num = $chapter_num,
             p.paragraph_num = $paragraph_num,
             p.sentence_num = $sentence_num
+        SET p.source_id = coalesce($source_id, p.source_id),
+            p.source_title = coalesce($source_title, p.source_title),
+            p.source_stratum = coalesce($source_stratum, p.source_stratum),
+            p.source_authority_weight = coalesce($source_authority_weight, p.source_authority_weight),
+            p.provenance_tags = coalesce($provenance_tags, p.provenance_tags)
         """
 
         with self.driver.session() as session:
@@ -395,7 +405,58 @@ class GraphWriter:
                 chapter_num=chapter_num,
                 paragraph_num=paragraph_num,
                 sentence_num=sentence_num,
+                source_id=source_id,
+                source_title=source_title,
+                source_stratum=source_stratum,
+                source_authority_weight=source_authority_weight,
+                provenance_tags=provenance_tags,
             )
+
+    def write_passage_provenance(
+        self,
+        passage_id: str,
+        source_id: str,
+        source_title: str,
+        source_stratum: str = "core_text",
+        authority_weight: float = 1.0,
+        confidence: float = 1.0,
+    ) -> None:
+        """Attach a Passage to a Source and stratum metadata for layer-aware queries."""
+        query = """
+        MATCH (p:Passage {id: $passage_id})
+        MERGE (s:Source {id: $source_id})
+        SET s.source_title = $source_title,
+            s.authority_weight = $authority_weight
+        MERGE (p)-[r:ATTESTED_IN]->(s)
+        SET r.source_stratum = $source_stratum,
+            r.confidence = $confidence
+        """
+        with self.driver.session() as session:
+            session.run(
+                query,
+                passage_id=passage_id,
+                source_id=source_id,
+                source_title=source_title,
+                source_stratum=source_stratum,
+                authority_weight=authority_weight,
+                confidence=max(0.0, min(1.0, float(confidence))),
+            )
+
+    def query_layer_report(self, source_id: str | None = None, limit: int = 200) -> list[dict]:
+        """Summarize passages by source and stratum for reporting."""
+        query = """
+        MATCH (p:Passage)
+        WHERE $source_id IS NULL OR p.source_id = $source_id
+        RETURN coalesce(p.source_id, p.book) AS source,
+               coalesce(p.source_stratum, 'core_text') AS stratum,
+               count(*) AS passage_count,
+               avg(coalesce(p.source_authority_weight, 1.0)) AS avg_authority
+        ORDER BY source, stratum
+        LIMIT $limit
+        """
+        with self.driver.session() as session:
+            result = session.run(query, source_id=source_id, limit=limit)
+            return [dict(r) for r in result]
 
     def link_entity_to_passage(
         self,
@@ -494,6 +555,11 @@ class GraphWriter:
                     chapter_num=result.passage.chapter_num,
                     paragraph_num=result.passage.paragraph_num,
                     sentence_num=result.passage.sentence_num,
+                    source_id=getattr(result.passage, "source_id", None),
+                    source_title=getattr(result.passage, "source_title", None),
+                    source_stratum=getattr(result.passage, "source_stratum", None),
+                    source_authority_weight=getattr(result.passage, "source_authority_weight", None),
+                    provenance_tags=getattr(result.passage, "provenance_tags", None),
                 )
                 stats["passages_written"] += 1
 
@@ -1583,6 +1649,8 @@ class GraphWriter:
             e.location_id = $location_id, e.location_name = $location_name,
             e.description = $description, e.event_type = $event_type,
             e.source_book = $source_book, e.source_passage_id = $source_passage_id,
+            e.source_id = $source_id, e.editorial_status = $editorial_status,
+            e.source_authority_weight = $source_authority_weight,
             e.time_era = $time_era, e.time_year_start = $time_year_start,
             e.time_year_end = $time_year_end, e.time_confidence = $time_confidence,
             e.time_raw_text = $time_raw_text
@@ -1593,6 +1661,9 @@ class GraphWriter:
             "location_name": event.location_name, "description": event.description,
             "event_type": event.event_type, "source_book": event.source_book,
             "source_passage_id": event.source_passage_id,
+            "source_id": getattr(event, "source_id", None),
+            "editorial_status": getattr(event, "editorial_status", None),
+            "source_authority_weight": getattr(event, "source_authority_weight", None),
             "time_era": event.time.era, "time_year_start": event.time.year_start,
             "time_year_end": event.time.year_end, "time_confidence": event.time.confidence,
             "time_raw_text": event.time.raw_text,
@@ -1674,6 +1745,10 @@ class GraphWriter:
             c.description = $description, c.event_a_id = $event_a_id,
             c.event_b_id = $event_b_id, c.entity_id = $entity_id,
             c.suggestion = $suggestion, c.confidence = $confidence,
+            c.event_a_source_book = $event_a_source_book,
+            c.event_b_source_book = $event_b_source_book,
+            c.event_a_source_authority_weight = $event_a_source_authority_weight,
+            c.event_b_source_authority_weight = $event_b_source_authority_weight,
             c.updated_at = datetime()
         """
         params = {
@@ -1686,6 +1761,10 @@ class GraphWriter:
             "entity_id": conflict.entity_id,
             "suggestion": conflict.suggestion,
             "confidence": conflict.confidence,
+            "event_a_source_book": getattr(conflict, "event_a_source_book", None),
+            "event_b_source_book": getattr(conflict, "event_b_source_book", None),
+            "event_a_source_authority_weight": getattr(conflict, "event_a_source_authority_weight", None),
+            "event_b_source_authority_weight": getattr(conflict, "event_b_source_authority_weight", None),
         }
         with self.driver.session() as session:
             session.run(query, **params)
@@ -1750,7 +1829,11 @@ class GraphWriter:
                c.severity AS severity, c.description AS description,
                c.event_a_id AS event_a_id, c.event_b_id AS event_b_id,
                c.entity_id AS entity_id, c.suggestion AS suggestion,
-               c.confidence AS confidence
+               c.confidence AS confidence,
+               c.event_a_source_book AS event_a_source_book,
+               c.event_b_source_book AS event_b_source_book,
+               c.event_a_source_authority_weight AS event_a_source_authority_weight,
+               c.event_b_source_authority_weight AS event_b_source_authority_weight
         ORDER BY c.confidence DESC
         LIMIT $limit
         """

@@ -254,6 +254,10 @@ class TestWriterConflictPersistence:
             id="test_c1", conflict_type=ConflictType.CAUSAL_PARADOX,
             severity="error", description="test", confidence=0.9,
             event_a_id="e1", event_b_id="e2",
+            event_a_source_book="The Hobbit",
+            event_b_source_book="Unfinished Tales",
+            event_a_source_authority_weight=1.0,
+            event_b_source_authority_weight=0.7,
         )
         writer.write_timeline_conflict(conflict)
         # Should have at least the MERGE query
@@ -261,6 +265,11 @@ class TestWriterConflictPersistence:
         for s in driver.sessions:
             all_queries.extend(s.queries)
         assert any("MERGE (c:TimelineConflict" in q for q, _ in all_queries)
+        merge_params = next(params for q, params in all_queries if "MERGE (c:TimelineConflict" in q)
+        assert merge_params["event_a_source_book"] == "The Hobbit"
+        assert merge_params["event_b_source_book"] == "Unfinished Tales"
+        assert merge_params["event_a_source_authority_weight"] == 1.0
+        assert merge_params["event_b_source_authority_weight"] == 0.7
 
     def test_write_batch(self):
         from book_graph_analyzer.graph.writer import GraphWriter
