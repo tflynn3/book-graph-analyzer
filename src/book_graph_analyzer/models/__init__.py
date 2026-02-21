@@ -13,6 +13,7 @@ from book_graph_analyzer.models.lore_depth import (
     LoreArtifact,
     LoreArtifactType,
     LoreDepthExtractionResult,
+    ReferenceCandidate,
 )
 
 __all__ = [
@@ -31,4 +32,5 @@ __all__ = [
     "LoreArtifact",
     "BrokenReference",
     "LoreDepthExtractionResult",
+    "ReferenceCandidate",
 ]

@@ -258,7 +258,7 @@ not a new top-level package.
 | #47 | Deep Genealogy + Sociolinguistic Registers | 🟡 Slice 1 in progress | Genealogy slice-1 parser/normalization/rules + batch writer/query/CLI, plus sociolinguistic register profile/drift MVP with GraphWriter + CLI integration |
 | #48 | Editorial Layers | 🔲 Not started | Stub raises `NotImplementedError` |
 | #49 | Cultural Rules | 🔲 Not started | |
-| #50 | Cosmological Timeline | 🔲 Not started | |
+| #50 | Cosmological Timeline | 🟡 Slice 2 in progress | Lore-depth extraction + unresolved ref queue + resolver candidate linking |
 | #51 | Integration Testing | 🔲 Not started | |
 
 ### #46 Remaining TODOs
@@ -280,8 +280,16 @@ Implemented in this slice:
   - `lore unresolved-refs`
 - Added tests in `tests/test_issue_50_lore_depth_slice1.py`
 
+### #50 Slice 2 (Precision + Candidate Linking) Update
+
+Implemented in this slice:
+- context-window extraction for unresolved references (`context_before/context_after`)
+- optional LLM-assisted fallback when heuristic extraction misses references
+- resolver-backed candidate linking (`ReferenceCandidate`) for unresolved mentions
+- provenance/conflict weighting fields persisted to graph and exposed via queue query
+- unresolved-reference queue semantics surfaced in model and CLI output
+
 Remaining for Issue #50:
-- stronger context-aware extraction and disambiguation
-- resolver-backed candidate linking for broken references
-- richer provenance/conflict weighting across editorial layers
-- generation-time consumption of unresolved reference queues
+- editorial-layer-aware weighting calibration against real corpora
+- generation pipeline integration that consumes unresolved queue automatically
+- end-to-end cosmological timeline checks tied to these unresolved links

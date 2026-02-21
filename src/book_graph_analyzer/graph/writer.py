@@ -1424,21 +1424,31 @@ class GraphWriter:
                     MERGE (u:UnresolvedReference {id: $id})
                     SET u.mention_text = $mention_text,
                         u.context_text = $context_text,
+                        u.context_before = $context_before,
+                        u.context_after = $context_after,
                         u.expected_type = $expected_type,
                         u.source_book = $source_book,
                         u.passage_id = $passage_id,
                         u.resolved_entity_id = $resolved_entity_id,
                         u.confidence = $confidence,
+                        u.candidates = $candidates,
+                        u.provenance_notes = $provenance_notes,
+                        u.conflict_weight = $conflict_weight,
                         u.updated_at = datetime()
                     """,
                     id=ref.id,
                     mention_text=getattr(ref, "mention_text", ""),
                     context_text=getattr(ref, "context_text", None),
+                    context_before=getattr(ref, "context_before", None),
+                    context_after=getattr(ref, "context_after", None),
                     expected_type=getattr(ref, "expected_type", None),
                     source_book=getattr(ref, "source_book", None),
                     passage_id=getattr(ref, "passage_id", None),
                     resolved_entity_id=getattr(ref, "resolved_entity_id", None),
                     confidence=float(getattr(ref, "confidence", 0.6) or 0.6),
+                    candidates=[c.model_dump() if hasattr(c, "model_dump") else c for c in (getattr(ref, "candidates", None) or [])],
+                    provenance_notes=list(getattr(ref, "provenance_notes", None) or []),
+                    conflict_weight=float(getattr(ref, "conflict_weight", 0.0) or 0.0),
                 )
         return len(refs)
 
@@ -1482,13 +1492,20 @@ class GraphWriter:
                        u.expected_type AS expected_type,
                        u.source_book AS source_book,
                        u.passage_id AS passage_id,
-                       u.confidence AS confidence
-                ORDER BY u.confidence DESC
+                       u.confidence AS confidence,
+                       coalesce(u.conflict_weight, 0.0) AS conflict_weight,
+                       coalesce(u.candidates, []) AS candidates,
+                       coalesce(u.provenance_notes, []) AS provenance_notes
+                ORDER BY (coalesce(u.conflict_weight, 0.0) + coalesce(u.confidence, 0.0)) DESC
                 LIMIT $limit
                 """,
                 **params,
             )
             return [dict(r) for r in result]
+
+    def query_unresolved_reference_queue(self, source_book: str | None = None, limit: int = 100) -> list[dict]:
+        """Alias query optimized for downstream generation/review queue."""
+        return self.query_unresolved_references(source_book=source_book, limit=limit)
 
     # =========================================================================
     # Sociolinguistic Registers (Issue #47 slice 1)
