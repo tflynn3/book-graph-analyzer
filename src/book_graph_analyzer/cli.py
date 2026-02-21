@@ -4330,6 +4330,337 @@ def bootstrap_cmd(input_path, output, neo4j, no_llm, min_frequency, verbose):
         console.print(f"\n[green]Results written to {output}[/green]")
 
 
+# ============================================================================
+# Embed Commands — Vector Store + Embedding Pipeline (Issue #11)
+# ============================================================================
+
+@main.group()
+def embed() -> None:
+    """Semantic search via Chroma vector store + sentence-transformers embeddings."""
+    pass
+
+
+@embed.command(name="build")
+@click.option("--source", type=click.Choice(["json", "neo4j"]), default="json",
+              help="Source of passages to embed")
+@click.option("--passages-file", type=click.Path(exists=True),
+              help="JSON file of passages (for --source json)")
+@click.option("--entities-file", type=click.Path(exists=True),
+              help="JSON file of entities to embed")
+@click.option("--rules-file", type=click.Path(exists=True),
+              help="JSON file of lore rules to embed")
+@click.option("--chroma-dir", default="data/chroma",
+              help="Chroma persistence directory (default: data/chroma)")
+@click.option("--analytics-db", default="data/bga_analytics.duckdb",
+              help="DuckDB analytics path (default: data/bga_analytics.duckdb)")
+@click.option("--full", is_flag=True, default=False,
+              help="Full rebuild (ignore already-embedded items)")
+@click.option("--model", default=None,
+              help="Override embedding model (default: all-MiniLM-L6-v2)")
+def embed_build(
+    source: str,
+    passages_file: str | None,
+    entities_file: str | None,
+    rules_file: str | None,
+    chroma_dir: str,
+    analytics_db: str,
+    full: bool,
+    model: str | None,
+) -> None:
+    """Build or incrementally update the semantic search index.
+    
+    Examples:
+        bga embed build --passages-file data/passages.json
+        bga embed build --passages-file data/passages.json --full
+        bga embed build --entities-file data/entities.json
+    """
+    import json as _json
+    from book_graph_analyzer.embed import (
+        VectorStore, EmbeddingPipeline, PassageAnalytics, Embedder
+    )
+
+    embedder = Embedder(model=model) if model else Embedder.from_settings()
+    store = VectorStore(persist_dir=chroma_dir)
+    analytics = PassageAnalytics(analytics_db)
+    pipeline = EmbeddingPipeline(store=store, analytics=analytics, embedder=embedder)
+    incremental = not full
+
+    results = {}
+
+    if passages_file:
+        console.print(f"[bold]Loading passages from:[/bold] {passages_file}")
+        with open(passages_file, encoding="utf-8") as f:
+            passages = _json.load(f)
+        console.print(f"  Found {len(passages)} passages")
+        with console.status("Embedding passages..."):
+            results["passages"] = pipeline.build_passages(passages, incremental=incremental)
+
+    if entities_file:
+        console.print(f"[bold]Loading entities from:[/bold] {entities_file}")
+        with open(entities_file, encoding="utf-8") as f:
+            entities = _json.load(f)
+        console.print(f"  Found {len(entities)} entities")
+        with console.status("Embedding entities..."):
+            results["entity_names"] = pipeline.build_entity_names(entities, incremental=incremental)
+
+    if rules_file:
+        console.print(f"[bold]Loading lore rules from:[/bold] {rules_file}")
+        with open(rules_file, encoding="utf-8") as f:
+            rules = _json.load(f)
+        console.print(f"  Found {len(rules)} rules")
+        with console.status("Embedding rules..."):
+            results["lore_rules"] = pipeline.build_lore_rules(rules, incremental=incremental)
+
+    if not results:
+        console.print("[yellow]Nothing to embed. Provide --passages-file, --entities-file, or --rules-file.[/yellow]")
+        return
+
+    console.print("\n[bold green]Build complete![/bold green]")
+    for col, r in results.items():
+        status_str = f"[green]{r.newly_embedded}[/green] embedded"
+        if r.already_embedded:
+            status_str += f", [dim]{r.already_embedded} skipped (incremental)[/dim]"
+        if r.errors:
+            status_str += f", [red]{r.errors} errors[/red]"
+        console.print(f"  {col}: {status_str}")
+
+    # Show store stats
+    stats = store.stats()
+    console.print(f"\n[bold]Vector store totals:[/bold]")
+    for col, count in stats.items():
+        console.print(f"  {col}: {count:,}")
+
+
+@embed.command(name="search")
+@click.option("--query", "-q", required=True, help="Natural language search query")
+@click.option("--collection", "-c",
+              type=click.Choice(["passages", "entity_names", "lore_rules", "scene_templates"]),
+              default="passages",
+              help="Collection to search (default: passages)")
+@click.option("--limit", "-n", default=5, help="Number of results (default: 5)")
+@click.option("--book", help="Filter to a specific book (passages only)")
+@click.option("--chroma-dir", default="data/chroma", help="Chroma directory")
+@click.option("--model", default=None, help="Override embedding model")
+def embed_search(
+    query: str,
+    collection: str,
+    limit: int,
+    book: str | None,
+    chroma_dir: str,
+    model: str | None,
+) -> None:
+    """Search for semantically similar content.
+    
+    Examples:
+        bga embed search -q 'grief for lost beauty' --limit 10
+        bga embed search -q 'mortality and shadow' --collection lore_rules
+        bga embed search -q 'battle on the bridge' --book 'Fellowship of the Ring'
+    """
+    from book_graph_analyzer.embed import VectorStore, SemanticSearch, Embedder
+
+    embedder = Embedder(model=model) if model else Embedder.from_settings()
+    store = VectorStore(persist_dir=chroma_dir)
+    searcher = SemanticSearch(store, embedder)
+
+    if store.count(collection) == 0:
+        console.print(f"[yellow]Collection '{collection}' is empty. Run 'bga embed build' first.[/yellow]")
+        return
+
+    console.print(f"\n[bold]Searching '{collection}' for:[/bold] {query}\n")
+    with console.status("Embedding query..."):
+        if collection == "passages":
+            results = searcher.search_passages(query, limit=limit, book=book)
+        elif collection == "entity_names":
+            results = searcher.entity_match(query, limit=limit)
+        elif collection == "lore_rules":
+            results = searcher.find_lore_rules(query, limit=limit)
+        else:
+            results = searcher.find_scene_templates(query, limit=limit)
+
+    if not results:
+        console.print("[yellow]No results found.[/yellow]")
+        return
+
+    table = Table(title=f"Top {len(results)} results from '{collection}'")
+    table.add_column("Rank", width=5, style="dim")
+    table.add_column("Similarity", width=10, justify="right")
+    table.add_column("ID", width=25, style="dim cyan")
+    table.add_column("Text / Name")
+    table.add_column("Metadata", width=30, style="dim")
+
+    for i, r in enumerate(results, 1):
+        text_preview = r.text[:80] + "..." if len(r.text) > 80 else r.text
+        meta_str = " | ".join(f"{k}={v}" for k, v in list(r.metadata.items())[:3] if v)
+        table.add_row(str(i), f"{r.similarity:.3f}", r.id[:25], text_preview, meta_str)
+
+    console.print(table)
+
+
+@embed.command(name="similar")
+@click.option("--passage-id", "-p", required=True, help="Passage ID to find similar passages for")
+@click.option("--limit", "-n", default=5, help="Number of results")
+@click.option("--chroma-dir", default="data/chroma", help="Chroma directory")
+@click.option("--model", default=None, help="Override embedding model")
+def embed_similar(
+    passage_id: str,
+    limit: int,
+    chroma_dir: str,
+    model: str | None,
+) -> None:
+    """Find passages stylistically similar to a given passage ID.
+    
+    Example:
+        bga embed similar --passage-id p_fellowship_c1_p3_s2 --limit 10
+    """
+    from book_graph_analyzer.embed import VectorStore, SemanticSearch, Embedder
+
+    embedder = Embedder(model=model) if model else Embedder.from_settings()
+    store = VectorStore(persist_dir=chroma_dir)
+    searcher = SemanticSearch(store, embedder)
+
+    if store.count("passages") == 0:
+        console.print("[yellow]Passages collection is empty. Run 'bga embed build' first.[/yellow]")
+        return
+
+    console.print(f"\n[bold]Finding passages similar to:[/bold] {passage_id}\n")
+    with console.status("Computing similarity..."):
+        results = searcher.search_similar_passage(passage_id, limit=limit)
+
+    if not results:
+        console.print(f"[yellow]Passage '{passage_id}' not found or no similar passages.[/yellow]")
+        return
+
+    table = Table(title=f"Top {len(results)} similar passages")
+    table.add_column("Rank", width=5, style="dim")
+    table.add_column("Similarity", width=10, justify="right")
+    table.add_column("Passage ID", style="cyan")
+    table.add_column("Book / Chapter", style="dim")
+    table.add_column("Text preview")
+
+    for i, r in enumerate(results, 1):
+        book = r.metadata.get("book", "")
+        chap = r.metadata.get("chapter", "")
+        loc = f"{book} / {chap}" if book else ""
+        text_preview = r.text[:60] + "..." if len(r.text) > 60 else r.text
+        table.add_row(str(i), f"{r.similarity:.3f}", r.id, loc, text_preview)
+
+    console.print(table)
+
+
+@embed.command(name="entity-match")
+@click.option("--text", "-t", required=True, help="Text to find matching canonical entities for")
+@click.option("--limit", "-n", default=3, help="Number of candidates")
+@click.option("--chroma-dir", default="data/chroma", help="Chroma directory")
+@click.option("--model", default=None, help="Override embedding model")
+def embed_entity_match(
+    text: str,
+    limit: int,
+    chroma_dir: str,
+    model: str | None,
+) -> None:
+    """Find canonical entities that match an alias or description.
+    
+    Examples:
+        bga embed entity-match --text 'the grey pilgrim'
+        bga embed entity-match --text 'the Dark Lord'
+        bga embed entity-match --text 'Mithrandir'
+    """
+    from book_graph_analyzer.embed import VectorStore, SemanticSearch, Embedder
+
+    embedder = Embedder(model=model) if model else Embedder.from_settings()
+    store = VectorStore(persist_dir=chroma_dir)
+    searcher = SemanticSearch(store, embedder)
+
+    if store.count("entity_names") == 0:
+        console.print("[yellow]entity_names collection is empty. Run 'bga embed build --entities-file ...' first.[/yellow]")
+        return
+
+    console.print(f"\n[bold]Entity match for:[/bold] '{text}'\n")
+    with console.status("Searching..."):
+        results = searcher.entity_match(text, limit=limit)
+
+    if not results:
+        console.print("[yellow]No entities found.[/yellow]")
+        return
+
+    table = Table(title="Canonical entity matches")
+    table.add_column("Rank", width=5, style="dim")
+    table.add_column("Similarity", width=10, justify="right")
+    table.add_column("Canonical Name", style="cyan")
+    table.add_column("Entity ID", style="dim")
+    table.add_column("Matched via")
+
+    for i, r in enumerate(results, 1):
+        canon = r.metadata.get("canonical_name", r.id)
+        entity_id = r.metadata.get("entity_id", r.id)
+        is_alias = r.metadata.get("is_alias", False)
+        alias_text = r.metadata.get("alias_text", "")
+        via = f"alias: {alias_text}" if is_alias and alias_text else "canonical name"
+        table.add_row(str(i), f"{r.similarity:.3f}", canon, entity_id, via)
+
+    console.print(table)
+
+    if results:
+        top = results[0]
+        console.print(f"\n  Best match: [bold cyan]{top.metadata.get('canonical_name', top.id)}[/bold cyan]  (sim={top.similarity:.2f})")
+
+
+@embed.command(name="stats")
+@click.option("--chroma-dir", default="data/chroma", help="Chroma directory")
+@click.option("--analytics-db", default="data/bga_analytics.duckdb", help="DuckDB path")
+def embed_stats(chroma_dir: str, analytics_db: str) -> None:
+    """Show vector store and corpus analytics statistics.
+    
+    Example:
+        bga embed stats
+    """
+    from book_graph_analyzer.embed import VectorStore, PassageAnalytics
+    from pathlib import Path as _Path
+
+    console.print("\n[bold]Vector Store Statistics[/bold]")
+    store = VectorStore(persist_dir=chroma_dir)
+    stats = store.stats()
+    for col, count in stats.items():
+        bar = "█" * min(count // 10, 40) if count else ""
+        console.print(f"  {col:25s} {count:6,}  {bar}")
+
+    console.print()
+
+    # DuckDB stats
+    if _Path(analytics_db).exists():
+        console.print("[bold]Corpus Analytics (DuckDB)[/bold]")
+        db = PassageAnalytics(analytics_db)
+        totals = db.total_counts()
+        console.print(f"  Passages: {totals['passages']:,}")
+        console.print(f"  Books:    {totals['books']}")
+        console.print(f"  Eras:     {totals['eras']}")
+        console.print(f"  Words:    {totals['total_words']:,}")
+        console.print(f"  Dialogue: {totals['dialogue_passages']:,}")
+
+        eras = db.era_breakdown()
+        if eras:
+            console.print("\n  [bold]Era breakdown:[/bold]")
+            for e in eras[:5]:
+                avg = e['avg_sent_len'] or 0
+                console.print(f"    {e['era']:20s} {e['count']:5} passages  avg_sent={avg}w")
+
+        style = db.style_distribution()
+        if style:
+            console.print("\n  [bold]Style distribution:[/bold]")
+            for s in style[:5]:
+                avg_s = s['avg_sentence_len'] or 0
+                passive = s['avg_passive_ratio'] or 0
+                console.print(
+                    f"    {s['book'][:30]:30s} "
+                    f"passages={s['passage_count']:4}  "
+                    f"avg_sent={avg_s}w  "
+                    f"passive={passive:.0%}"
+                )
+        db.close()
+    else:
+        console.print(f"[dim]No analytics DB at {analytics_db}. Run 'bga embed build' to populate.[/dim]")
+
+
 if __name__ == "__main__":
     main()
 
