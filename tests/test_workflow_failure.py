@@ -291,6 +291,57 @@ jobs:
     assert "Workflow Failure Remediation Report" in text
 
 
+def test_cli_workflow_post_open_failures_summary(monkeypatch, tmp_path: Path):
+    wf = tmp_path / "wf.yml"
+    wf.write_text(
+        """
+jobs:
+  a:
+    steps:
+      - run: echo hi
+        env:
+          COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_GITHUB_TOKEN }}
+""",
+        encoding="utf-8",
+    )
+
+    envf = tmp_path / ".env"
+    envf.write_text("COPILOT_GITHUB_TOKEN=abc\n", encoding="utf-8")
+
+    issues = [
+        IssueData(number=40, title="[agentics] Failed runs", body="parent", url="u40"),
+        IssueData(number=41, title="[agentics] Architecture failed", body=ISSUE_TEXT, url="u41"),
+    ]
+    monkeypatch.setattr("book_graph_analyzer.ops.list_open_issues_via_gh", lambda label, limit: issues)
+
+    captured = {"issue": None, "body": ""}
+
+    def fake_post(issue_number: int, body: str):
+        captured["issue"] = issue_number
+        captured["body"] = body
+        return True
+
+    monkeypatch.setattr("book_graph_analyzer.ops.post_issue_comment_via_gh", fake_post)
+
+    runner = CliRunner()
+    res = runner.invoke(
+        main,
+        [
+            "workflow-post-open-failures-summary",
+            "--parent-issue",
+            "40",
+            "--workflow",
+            str(wf),
+            "--env-file",
+            str(envf),
+        ],
+    )
+    assert res.exit_code == 0
+    assert captured["issue"] == 40
+    assert "Automated Failure Summary" in captured["body"]
+    assert "#41" in captured["body"]
+
+
 def test_cli_workflow_post_diagnosis(monkeypatch, tmp_path: Path):
     wf = tmp_path / "wf.yml"
     wf.write_text(
