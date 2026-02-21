@@ -9,6 +9,7 @@ from book_graph_analyzer.ops.gh_issue import (
     fetch_issue_via_gh,
     list_open_issues_via_gh,
     post_issue_comment_via_gh,
+    close_issue_via_gh,
 )
 
 
@@ -70,3 +71,19 @@ def test_post_issue_comment_via_gh_failure(monkeypatch):
 
     monkeypatch.setattr("subprocess.run", fake_run)
     assert post_issue_comment_via_gh(41, "report") is False
+
+
+def test_close_issue_via_gh_success(monkeypatch):
+    def fake_run(*args, **kwargs):
+        return SimpleNamespace(returncode=0, stdout="ok", stderr="")
+
+    monkeypatch.setattr("subprocess.run", fake_run)
+    assert close_issue_via_gh(41) is True
+
+
+def test_close_issue_via_gh_failure(monkeypatch):
+    def fake_run(*args, **kwargs):
+        return SimpleNamespace(returncode=1, stdout="", stderr="boom")
+
+    monkeypatch.setattr("subprocess.run", fake_run)
+    assert close_issue_via_gh(41) is False
