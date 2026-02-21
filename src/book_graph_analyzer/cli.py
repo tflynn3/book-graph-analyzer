@@ -4078,6 +4078,8 @@ def lore_timeline_reconcile(events_file: str, locations: str | None, output: str
 @click.argument("events_file", type=click.Path(exists=True))
 @click.option("--locations", "-l", type=click.Path(exists=True),
               help="Location graph JSON file (nodes + edges)")
+@click.option("--seed-locations", is_flag=True,
+              help="Use built-in Middle-earth location seeds instead of --locations")
 @click.option("--output", "-o", type=click.Path(), help="Output file")
 @click.option("--format", "fmt", type=click.Choice(["text", "json"]), default="text",
               help="Output format")
@@ -4086,10 +4088,15 @@ def lore_timeline_reconcile(events_file: str, locations: str | None, output: str
               help="Persist events and detected conflicts to Neo4j")
 @click.option("--causal-links", is_flag=True,
               help="Extract causal link candidates and check for paradoxes")
+@click.option("--use-llm", is_flag=True,
+              help="Use LLM-assisted causal link extraction (falls back to heuristic)")
+@click.option("--calibrate", is_flag=True,
+              help="Apply source authority confidence calibration")
 def lore_timeline_bridge(
-    events_file: str, locations: str | None, output: str | None,
-    fmt: str, source_book: str | None, write_neo4j: bool = False,
-    causal_links: bool = False,
+    events_file: str, locations: str | None, seed_locations: bool,
+    output: str | None, fmt: str, source_book: str | None,
+    write_neo4j: bool = False, causal_links: bool = False,
+    use_llm: bool = False, calibrate: bool = False,
 ) -> None:
     """Bridge extracted events through spatiotemporal normalization and reconcile.
 
@@ -4098,18 +4105,30 @@ def lore_timeline_bridge(
     extraction-vs-normalized confidence deltas.
 
     Use --causal-links to extract causal link candidates and feed them
-    into paradox detection.
+    into paradox detection. Add --use-llm for higher-quality LLM-assisted
+    extraction (falls back to heuristic if unavailable).
+
+    Use --seed-locations to load built-in Middle-earth location data for
+    travel feasibility checks.
+
+    Use --calibrate to adjust confidence scores using source authority weights.
 
     Examples:
         bga lore timeline-bridge hobbit_events.json
         bga lore timeline-bridge events.json -l locations.json --format json -o report.json
-        bga lore timeline-bridge events.json --causal-links --write-neo4j
+        bga lore timeline-bridge events.json --causal-links --use-llm --calibrate
+        bga lore timeline-bridge events.json --seed-locations --causal-links --write-neo4j
     """
     from book_graph_analyzer.lore.events import Event, EventGraph
     from book_graph_analyzer.spatiotemporal import (
         ConflictDetector, ReconciliationReport,
         LocationNode, LocationEdge, ExtractionBridge,
-        extract_causal_links_heuristic,
+        extract_causal_links,
+        calibrate_event_confidence,
+        calibrate_causal_link_confidence,
+        calibrate_conflict_confidence,
+        SourceAuthorityRegistry,
+        load_seed_location_graph,
     )
 
     # Load events from lore event format
@@ -4135,16 +4154,49 @@ def lore_timeline_bridge(
 
     console.print(f"[dim]Bridged {bridge_report.total} events through normalization[/dim]")
 
+    # Confidence calibration
+    calibration_result = None
+    if calibrate:
+        registry = SourceAuthorityRegistry.default_tolkien()
+        cal = calibrate_event_confidence(st_events, registry)
+        calibration_result = cal
+        console.print(f"[dim]Calibrated {cal.events_calibrated} events (avg authority: {cal.avg_authority_weight:.2f})[/dim]")
+
     # Extract causal links if requested
+    causal_result = None
     extracted_links = []
     if causal_links:
-        extracted_links = extract_causal_links_heuristic(st_events)
-        console.print(f"[dim]Extracted {len(extracted_links)} causal link candidates[/dim]")
+        llm_client = None
+        if use_llm:
+            try:
+                from book_graph_analyzer.llm import LLMClient
+                llm_client = LLMClient()
+                console.print("[dim]LLM client initialized for causal extraction[/dim]")
+            except Exception:
+                console.print("[yellow]Could not initialize LLM client, using heuristic fallback[/yellow]")
 
-    # Load locations if provided
+        causal_result = extract_causal_links(
+            st_events, use_llm=use_llm, llm_client=llm_client,
+        )
+        extracted_links = causal_result.links
+        console.print(
+            f"[dim]Extracted {len(extracted_links)} causal links "
+            f"(mode: {causal_result.mode.value})[/dim]"
+        )
+
+        # Calibrate causal links too
+        if calibrate and calibration_result:
+            registry = SourceAuthorityRegistry.default_tolkien()
+            link_cal = calibrate_causal_link_confidence(extracted_links, st_events, registry)
+            calibration_result.links_calibrated = link_cal.links_calibrated
+
+    # Load locations
     loc_nodes: dict[str, LocationNode] = {}
     loc_edges: list[LocationEdge] = []
-    if locations:
+    if seed_locations:
+        loc_nodes, loc_edges = load_seed_location_graph()
+        console.print(f"[dim]Loaded {len(loc_nodes)} seed locations, {len(loc_edges)} routes[/dim]")
+    elif locations:
         with open(locations, "r", encoding="utf-8") as f:
             loc_data = json.load(f)
         for n in loc_data.get("locations", loc_data.get("nodes", [])):
@@ -4161,8 +4213,16 @@ def lore_timeline_bridge(
         check_causal_paradoxes=bool(extracted_links),
         causal_links=extracted_links,
     )
+
+    # Calibrate conflict confidence
+    if calibrate and calibration_result:
+        registry = SourceAuthorityRegistry.default_tolkien()
+        conf_cal = calibrate_conflict_confidence(conflicts, st_events, registry)
+        calibration_result.conflicts_calibrated = conf_cal.conflicts_calibrated
+
     report = ReconciliationReport(
         conflicts=conflicts, events=st_events, bridge_report=bridge_report,
+        causal_result=causal_result, calibration=calibration_result,
     )
 
     # Write to Neo4j if requested

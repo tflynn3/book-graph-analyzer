@@ -7,7 +7,9 @@ from typing import TYPE_CHECKING
 from .models import ConflictType, SpatiotemporalEvent, TimelineConflict
 
 if TYPE_CHECKING:
+    from .confidence import CalibrationResult
     from .extraction_bridge import BridgeReport
+    from .llm_causal_extraction import CausalExtractionResult
 
 
 class ReconciliationReport:
@@ -18,10 +20,14 @@ class ReconciliationReport:
         conflicts: list[TimelineConflict],
         events: list[SpatiotemporalEvent] | None = None,
         bridge_report: BridgeReport | None = None,
+        causal_result: CausalExtractionResult | None = None,
+        calibration: CalibrationResult | None = None,
     ):
         self.conflicts = conflicts
         self.events = events or []
         self.bridge_report = bridge_report
+        self.causal_result = causal_result
+        self.calibration = calibration
 
     @property
     def error_count(self) -> int:
@@ -73,6 +79,29 @@ class ReconciliationReport:
                 "",
             ])
 
+        # Causal extraction mode summary
+        if self.causal_result:
+            cr = self.causal_result
+            lines.extend([
+                "--- CAUSAL EXTRACTION ---", "",
+                f"  Mode:          {cr.mode.value}",
+                f"  Events input:  {cr.event_count}",
+                f"  Links found:   {len(cr.links)}",
+                "",
+            ])
+
+        # Confidence calibration summary
+        if self.calibration:
+            cal = self.calibration
+            lines.extend([
+                "--- CONFIDENCE CALIBRATION ---", "",
+                f"  Events calibrated:   {cal.events_calibrated}",
+                f"  Links calibrated:    {cal.links_calibrated}",
+                f"  Conflicts calibrated:{cal.conflicts_calibrated}",
+                f"  Avg authority weight: {cal.avg_authority_weight:.3f}",
+                "",
+            ])
+
         if not self.conflicts:
             lines.append("No inconsistencies detected.")
             return "\n".join(lines)
@@ -107,4 +136,8 @@ class ReconciliationReport:
         }
         if self.bridge_report:
             d["bridge_report"] = self.bridge_report.to_dict()
+        if self.causal_result:
+            d["causal_extraction"] = self.causal_result.to_dict()
+        if self.calibration:
+            d["confidence_calibration"] = self.calibration.to_dict()
         return d
