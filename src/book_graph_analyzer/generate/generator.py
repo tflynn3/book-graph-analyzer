@@ -12,6 +12,7 @@ from .context import AssembledContext, ContextAssembler
 from .models import Scene, SceneScores, GenerationConfig, GenerationStatus
 from .judge import NarrativeJudge
 from .pipeline import StagedPipeline
+from .style_injector import StyleInjector
 from .voice_patcher import VoicePatcher
 
 
@@ -60,12 +61,7 @@ SCENE GOAL: {scene_goal}
 WORLD RULES TO RESPECT:
 {world_rules}
 
-Write the scene in Tolkien's style:
-- Flowing, rhythmic prose with Anglo-Saxon cadence
-- Rich nature imagery and attention to landscape
-- Formal dialogue appropriate to each character's race and status
-- Mythic, omniscient narrative voice
-- Show don't tell - let actions and dialogue reveal character
+{style_constraints}
 
 Write 400-800 words. Begin the scene directly, no preamble.'''
 
@@ -126,6 +122,7 @@ Keep the same general content and length, just fix the problems.'''
         )
         self.world_bible: Optional[WorldBible] = None
         self.voice_patcher = VoicePatcher(llm_client=self.llm)
+        self.style_injector = StyleInjector(driver=self.driver)
         self.pipeline = StagedPipeline(
             scene_generator=self,
             voice_patcher=self.voice_patcher,
@@ -320,6 +317,9 @@ Keep the same general content and length, just fix the problems.'''
         if assembled_context:
             context_text = assembled_context.to_prompt_block()
 
+        scene_type: Optional[str] = None
+        style_constraints_obj = None
+
         # 3. Generate initial scene
         if fog_of_war:
             # Fog of War: character only knows their own situation and the physical place.
@@ -336,6 +336,10 @@ Keep the same general content and length, just fix the problems.'''
                 world_rules=self.get_world_rules(),
             )
         else:
+            self.style_injector.driver = self.driver
+            scene_type = self.style_injector.classify_scene_type(scene_goal)
+            style_constraints_obj = self.style_injector.get_style_constraints(scene_type)
+            style_block = self.style_injector.build_style_block(style_constraints_obj)
             prompt = self.GENERATION_PROMPT.format(
                 setting=place_desc or place,
                 characters="\n".join(char_descriptions) or ", ".join(characters),
@@ -343,6 +347,7 @@ Keep the same general content and length, just fix the problems.'''
                 previous_context=context_text or events_text or "Beginning of story",
                 scene_goal=scene_goal,
                 world_rules=self.get_world_rules(),
+                style_constraints=style_block,
             )
         
         scene_text = self.llm.generate(prompt, temperature=self.config.temperature)
@@ -359,6 +364,12 @@ Keep the same general content and length, just fix the problems.'''
             model_used=self.config.model,
             generation_prompt=prompt,
             context_snapshot=assembled_context,
+            scene_type=scene_type,
+            style_constraints_used=(
+                style_constraints_obj.to_dict()
+                if style_constraints_obj is not None
+                else None
+            ),
         )
         
         # 4. Staged pipeline (lore enforce + optional voice patch)

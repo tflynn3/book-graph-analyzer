@@ -16,6 +16,7 @@ from .driver import NovelDriver
 from .shadow.graph import ShadowGraph
 from .pipeline import StagedPipeline
 from .voice_patcher import VoicePatcher
+from .style_injector import StyleInjector, StyleConstraints
 
 __all__ = [
     "Story",
@@ -35,4 +36,6 @@ __all__ = [
     "ShadowGraph",
     "StagedPipeline",
     "VoicePatcher",
+    "StyleInjector",
+    "StyleConstraints",
 ]
