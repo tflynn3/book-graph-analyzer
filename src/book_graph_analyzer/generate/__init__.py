@@ -10,6 +10,7 @@ from .models import Story, Chapter, Scene, GenerationConfig
 from .generator import SceneGenerator
 from .judge import NarrativeJudge
 from .writer import GenerationWriter
+from .context import ContextAssembler, AssembledContext
 
 __all__ = [
     "Story",
@@ -19,4 +20,6 @@ __all__ = [
     "SceneGenerator",
     "NarrativeJudge",
     "GenerationWriter",
+    "ContextAssembler",
+    "AssembledContext",
 ]

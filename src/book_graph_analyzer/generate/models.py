@@ -1,5 +1,7 @@
 """Data models for story generation."""
 
+from __future__ import annotations
+
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Optional
@@ -108,6 +110,7 @@ class Scene:
     generated_at: datetime = field(default_factory=datetime.now)
     model_used: str = ""
     generation_prompt: str = ""
+    context_snapshot: Optional["AssembledContext"] = None
     
     def __post_init__(self):
         if not self.word_count:
@@ -130,6 +133,9 @@ class Scene:
             "word_count": self.word_count,
             "generated_at": self.generated_at.isoformat(),
             "model_used": self.model_used,
+            "context_snapshot": (
+                self.context_snapshot.to_dict() if self.context_snapshot else None
+            ),
         }
 
 

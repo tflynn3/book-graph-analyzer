@@ -8,6 +8,7 @@ from typing import Optional
 from ..llm import LLMClient
 from ..graph.connection import get_driver
 from ..worldbible import WorldBible
+from .context import AssembledContext, ContextAssembler
 from .models import Scene, SceneScores, GenerationConfig, GenerationStatus
 from .judge import NarrativeJudge
 
@@ -111,11 +112,16 @@ ISSUES TO FIX:
 Rewrite the passage fixing these issues while maintaining Tolkien's style.
 Keep the same general content and length, just fix the problems.'''
 
-    def __init__(self, config: Optional[GenerationConfig] = None):
+    def __init__(self, config: Optional[GenerationConfig] = None, shadow_graph=None):
         self.config = config or GenerationConfig()
         self.llm = LLMClient()
         self.judge = NarrativeJudge()
         self.driver = get_driver()
+        self.shadow_graph = shadow_graph
+        self.context_assembler = ContextAssembler(
+            shadow_graph=shadow_graph,
+            neo4j_driver=self.driver,
+        )
         self.world_bible: Optional[WorldBible] = None
     
     def load_world_bible(self, path: str) -> None:
@@ -247,6 +253,10 @@ Keep the same general content and length, just fix the problems.'''
         previous_context: str = "",
         objects: list[str] = None,
         fog_of_war: bool = False,
+        assembled_context: Optional[AssembledContext] = None,
+        story_id: Optional[str] = None,
+        chapter_num: int = 0,
+        scene_num: int = 0,
     ) -> Scene:
         """Generate a scene with full pipeline.
 
@@ -286,12 +296,28 @@ Keep the same general content and length, just fix the problems.'''
                 for e in neo4j_context["recent_events"][:5]
             )
         
-        # 2. Generate initial scene
+        # 2. Assemble structured context if available
+        if not assembled_context and self.shadow_graph:
+            resolved_story_id = story_id or getattr(self.shadow_graph, "story_id", "")
+            if resolved_story_id:
+                assembled_context = self.context_assembler.assemble(
+                    story_id=resolved_story_id,
+                    characters=characters,
+                    place=place,
+                    chapter_num=chapter_num,
+                    scene_num=scene_num,
+                )
+
+        context_text = previous_context
+        if assembled_context:
+            context_text = assembled_context.to_prompt_block()
+
+        # 3. Generate initial scene
         if fog_of_war:
             # Fog of War: character only knows their own situation and the physical place.
             # No history, no events, no omniscient context — pure sensory grounding.
             character_knowledge = self._build_character_knowledge(
-                characters, previous_context
+                characters, context_text
             )
             prompt = self.FOG_OF_WAR_PROMPT.format(
                 setting=place_desc or place,
@@ -306,7 +332,7 @@ Keep the same general content and length, just fix the problems.'''
                 setting=place_desc or place,
                 characters="\n".join(char_descriptions) or ", ".join(characters),
                 objects=", ".join(objects or []) or "None specified",
-                previous_context=previous_context or events_text or "Beginning of story",
+                previous_context=context_text or events_text or "Beginning of story",
                 scene_goal=scene_goal,
                 world_rules=self.get_world_rules(),
             )
@@ -324,6 +350,7 @@ Keep the same general content and length, just fix the problems.'''
             objects=objects or [],
             model_used=self.config.model,
             generation_prompt=prompt,
+            context_snapshot=assembled_context,
         )
         
         # 4. Constitutional critique loop
@@ -339,10 +366,10 @@ Keep the same general content and length, just fix the problems.'''
             # Revise
             scene.text = self._revise_scene(scene.text, violations)
         
-        # 5. Score the scene
-        scene.scores = self._score_scene(scene, previous_context)
+        # 6. Score the scene
+        scene.scores = self._score_scene(scene, context_text)
         
-        # 6. Flag if below threshold
+        # 7. Flag if below threshold
         if scene.scores.overall < self.config.min_quality_score:
             scene.status = GenerationStatus.FLAGGED
         
