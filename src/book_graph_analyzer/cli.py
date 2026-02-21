@@ -5670,8 +5670,22 @@ def workflow_analyze_open_failures(
 
         out_path = Path(out_json)
         out_path.parent.mkdir(parents=True, exist_ok=True)
+
+        severity_counts = {"critical": 0, "high": 0, "medium": 0, "low": 0}
+        for row in csv_rows:
+            sev = row.get("severity", "low")
+            severity_counts[sev] = severity_counts.get(sev, 0) + 1
+
+        payload = {
+            "summary": {
+                "analyzed": len(csv_rows),
+                "severity_counts": severity_counts,
+            },
+            "rows": csv_rows,
+        }
+
         with open(out_path, "w", encoding="utf-8") as f:
-            json.dump(csv_rows, f, ensure_ascii=False, indent=2)
+            json.dump(payload, f, ensure_ascii=False, indent=2)
         console.print(f"[green]Wrote JSON analysis report:[/green] {out_path}")
 
     if out_md:
