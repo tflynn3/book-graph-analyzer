@@ -1216,9 +1216,93 @@ class GraphWriter:
         Returns:
             Number of relations written
         """
-        raise NotImplementedError(
-            "Genealogy batch writing not yet implemented. See Issue #47."
-        )
+        if not relations:
+            return 0
+
+        query = """
+        MERGE (a:Character {canonical_id: $source_id})
+          ON CREATE SET a.canonical_name = coalesce($source_name, $source_id)
+          ON MATCH SET a.canonical_name = coalesce(a.canonical_name, $source_name, $source_id)
+        MERGE (b:Character {canonical_id: $target_id})
+          ON CREATE SET b.canonical_name = coalesce($target_name, $target_id)
+          ON MATCH SET b.canonical_name = coalesce(b.canonical_name, $target_name, $target_id)
+        MERGE (a)-[r:GENEALOGY {relation_type: $relation_type}]->(b)
+        SET r.generation_depth = $generation_depth,
+            r.house = $house,
+            r.inheritance_traits = $inheritance_traits,
+            r.era = $era,
+            r.passage_ids = $passage_ids,
+            r.confidence = $confidence,
+            r.book = $book,
+            r.updated_at = datetime()
+        """
+
+        count = 0
+        with self.driver.session() as session:
+            for rel in relations:
+                session.run(
+                    query,
+                    source_id=rel.source_id,
+                    source_name=getattr(rel, "source_name", None),
+                    target_id=rel.target_id,
+                    target_name=getattr(rel, "target_name", None),
+                    relation_type=rel.relation_type.value if hasattr(rel.relation_type, "value") else str(rel.relation_type),
+                    generation_depth=getattr(rel, "generation_depth", None),
+                    house=getattr(rel, "house", None),
+                    inheritance_traits=list(getattr(rel, "inheritance_traits", []) or []),
+                    era=getattr(rel, "era", None),
+                    passage_ids=list(getattr(rel, "passage_ids", []) or []),
+                    confidence=float(getattr(rel, "confidence", 1.0) or 1.0),
+                    book=book,
+                )
+                count += 1
+
+        return count
+
+    def query_genealogy(
+        self,
+        character_name: str | None = None,
+        house: str | None = None,
+        depth: int = 3,
+        limit: int = 200,
+    ) -> list[dict]:
+        """Query genealogy edges by character and/or house.
+
+        Returns flattened relationship rows for CLI rendering.
+        """
+        conditions = []
+        params: dict = {"depth": depth, "limit": limit}
+
+        if character_name:
+            conditions.append(
+                "(toLower(a.canonical_name) CONTAINS toLower($character_name) OR toLower(b.canonical_name) CONTAINS toLower($character_name))"
+            )
+            params["character_name"] = character_name
+
+        if house:
+            conditions.append("toLower(coalesce(r.house,'')) CONTAINS toLower($house)")
+            params["house"] = house
+
+        where = " AND ".join(conditions) if conditions else "true"
+
+        query = f"""
+        MATCH (a:Character)-[r:GENEALOGY]->(b:Character)
+        WHERE {where}
+          AND ($depth IS NULL OR r.generation_depth IS NULL OR r.generation_depth <= $depth)
+        RETURN a.canonical_name AS source,
+               r.relation_type AS rel,
+               b.canonical_name AS target,
+               r.house AS house,
+               r.generation_depth AS generation_depth,
+               r.confidence AS confidence,
+               r.book AS book
+        ORDER BY source, rel, target
+        LIMIT $limit
+        """
+
+        with self.driver.session() as session:
+            result = session.run(query, **params)
+            return [dict(record) for record in result]
 
     def write_editorial_provenance(
         self,

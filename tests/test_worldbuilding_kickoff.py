@@ -226,12 +226,18 @@ class TestGraphWriterStubs:
         # Should return 0 for None/empty, NOT raise NotImplementedError
         assert writer.write_linguistic_lineage(None) == 0
 
-    def test_genealogy_batch_raises_not_implemented(self):
+    def test_genealogy_batch_handles_empty_list(self):
         from book_graph_analyzer.graph.writer import GraphWriter
 
-        writer = GraphWriter.__new__(GraphWriter)
-        with pytest.raises(NotImplementedError, match="Issue #47"):
-            writer.write_genealogy_batch([])
+        from unittest.mock import MagicMock
+
+        mock_driver = MagicMock()
+        mock_session = MagicMock()
+        mock_driver.session.return_value.__enter__ = MagicMock(return_value=mock_session)
+        mock_driver.session.return_value.__exit__ = MagicMock(return_value=False)
+
+        writer = GraphWriter(driver=mock_driver)
+        assert writer.write_genealogy_batch([]) == 0
 
     def test_editorial_provenance_raises_not_implemented(self):
         from book_graph_analyzer.graph.writer import GraphWriter
