@@ -3128,6 +3128,53 @@ def lore_register_init(dry_run: bool) -> None:
     console.print(f"[green]OK[/green] {count} SceneTemplate nodes written to Neo4j")
 
 
+@lore.command(name="socioreg-profile")
+@click.option("--text", "text", required=True, help="Passage text to classify")
+def lore_socioreg_profile(text: str) -> None:
+    """Classify text into a sociolinguistic register profile (Issue #47 slice 1 MVP)."""
+    from book_graph_analyzer.lore.sociolinguistic_registers import SociolinguisticRegisterClassifier
+
+    classifier = SociolinguisticRegisterClassifier()
+    profile = classifier.classify(text)
+
+    console.print("\n[bold]Sociolinguistic Register Profile[/bold]\n")
+    console.print(f"  Dominant: [cyan]{profile.dominant_register}[/cyan] ({profile.confidence:.2f})")
+    console.print(f"  Formality: {profile.formality_score:.2f}")
+    console.print(f"  Archaism: {profile.archaism_rate:.2f}")
+    console.print(f"  Contractions: {profile.contraction_rate:.2f}")
+    console.print(f"  Avg sentence length: {profile.avg_sentence_length:.1f} words")
+
+    table = Table(show_header=True, header_style="bold")
+    table.add_column("Register", style="cyan")
+    table.add_column("Score", justify="right")
+    for reg, score in list(profile.register_scores.items())[:6]:
+        table.add_row(reg, f"{score:.3f}")
+    console.print(table)
+
+
+@lore.command(name="socioreg-drift")
+@click.option("--baseline", required=True, help="Baseline passage text")
+@click.option("--current", required=True, help="Current passage text")
+def lore_socioreg_drift(baseline: str, current: str) -> None:
+    """Compare two passages and report sociolinguistic register drift."""
+    from book_graph_analyzer.lore.sociolinguistic_registers import (
+        SociolinguisticRegisterClassifier,
+        detect_register_drift,
+    )
+
+    classifier = SociolinguisticRegisterClassifier()
+    drift = detect_register_drift(classifier.classify(baseline), classifier.classify(current))
+
+    console.print("\n[bold]Sociolinguistic Register Drift[/bold]\n")
+    console.print(f"  Baseline register: [cyan]{drift.baseline_register}[/cyan]")
+    console.print(f"  Current register:  [cyan]{drift.current_register}[/cyan]")
+    console.print(f"  Register shift: {drift.register_shift:.3f}")
+    console.print(f"  Formality shift: {drift.formality_shift:+.3f}")
+    console.print(f"  Archaism shift: {drift.archaism_shift:+.3f}")
+    severity_color = "red" if drift.severity == "high" else ("yellow" if drift.severity == "medium" else "green")
+    console.print(f"  Severity: [{severity_color}]{drift.severity.upper()}[/{severity_color}]")
+
+
 @lore.command(name="arc")
 @click.option("--character", "-c", required=True,
               help="Character name (e.g. 'Frodo', 'Sam', 'Gandalf')")

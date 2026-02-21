@@ -197,6 +197,11 @@ not a new top-level package.
 
 ### Phase 3 — Deep Genealogy (Issue #47)
 
+- Slice 1 (this PR): Sociolinguistic register profile + drift MVP
+  - Rule-first classifier (`SociolinguisticRegisterClassifier`)
+  - Drift calculator (`detect_register_drift`)
+  - Graph persistence/query helpers in `GraphWriter`
+  - CLI commands: `bga lore socioreg-profile`, `bga lore socioreg-drift`
 - Implement genealogy extraction patterns
 - Build generational depth calculator
 - Family-tree context assembly for generation
@@ -250,7 +255,7 @@ not a new top-level package.
 |-------|--------|--------|-------|
 | #45 | Kickoff Slice | ✅ Complete | Models, stubs, CLI placeholders, tests |
 | #46 | Linguistic Engine v1 | ✅ Complete | `GraphWriter.write_linguistic_lineage`, JSON parser, CLI `worldbible languages`, 50 tests |
-| #47 | Deep Genealogy | 🟡 Slice 1 in progress | Genealogy parser + normalization, rule extraction MVP, `GraphWriter.write_genealogy_batch()`, `query_genealogy()`, `bga lore genealogy` functional path |
+| #47 | Deep Genealogy + Sociolinguistic Registers | 🟡 Slice 1 in progress | Genealogy slice-1 parser/normalization/rules + batch writer/query/CLI, plus sociolinguistic register profile/drift MVP with GraphWriter + CLI integration |
 | #48 | Editorial Layers | 🔲 Not started | Stub raises `NotImplementedError` |
 | #49 | Cultural Rules | 🔲 Not started | |
 | #50 | Cosmological Timeline | 🔲 Not started | |
