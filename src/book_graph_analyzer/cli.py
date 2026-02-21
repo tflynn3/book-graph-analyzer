@@ -1265,6 +1265,126 @@ def voice_quotes(results_path: str, character: str, limit: int) -> None:
     console.print(f"\n[dim]Total lines: {profile.total_lines}[/dim]")
 
 
+@voice.command(name="identify")
+@click.option("--text", "-t", required=True, help="Raw text snippet to identify speaker for")
+@click.option("--top", "-n", default=3, help="Number of top matches to return")
+def voice_identify(text: str, top: int) -> None:
+    """Identify likely speaker from a text snippet using stored VoiceProfiles.
+
+    Compares the snippet's voice metrics against all VoiceProfile nodes
+    in Neo4j and returns the top N matches with confidence scores.
+
+    Example:
+        bga voice identify --text "You shall not pass!"
+    """
+    from book_graph_analyzer.graph.voice_writer import VoiceProfileWriter
+    from book_graph_analyzer.graph.connection import check_neo4j_connection
+
+    if not check_neo4j_connection():
+        console.print("[red]Cannot connect to Neo4j.[/red]")
+        console.print("[dim]Run 'bga status' to diagnose the connection.[/dim]")
+        return
+
+    writer = VoiceProfileWriter()
+    try:
+        matches = writer.identify_speaker(text, top_n=top)
+    finally:
+        writer.close()
+
+    if not matches:
+        console.print("[yellow]No VoiceProfile nodes found in Neo4j.[/yellow]")
+        console.print("[dim]Run 'bga voice build-profiles' first.[/dim]")
+        return
+
+    console.print(f"\n[bold]Speaker Identification Results[/bold]")
+    console.print(f"[dim]Text: \"{text[:80]}{'...' if len(text) > 80 else ''}\"[/dim]\n")
+
+    # Also compute the query metrics for display
+    from book_graph_analyzer.graph.voice_writer import _extract_text_metrics
+    metrics = _extract_text_metrics(text)
+
+    for i, (character_id, confidence) in enumerate(matches, 1):
+        bar = "█" * int(confidence * 20)
+        console.print(
+            f"  {i}. [cyan]{character_id}[/cyan] "
+            f"(confidence: [bold]{confidence:.2f}[/bold])  [{bar:<20}]"
+        )
+        console.print(
+            f"     formality_score: {metrics['formality_score']:.3f} | "
+            f"archaism_rate: {metrics['archaism_rate']:.3f} | "
+            f"imperative_ratio: {metrics['imperative_ratio']:.3f}"
+        )
+    console.print()
+
+
+@voice.command(name="build-profiles")
+@click.option("--results", "-r", type=click.Path(exists=True),
+              help="JSON voice results file (from 'bga voice analyze')")
+@click.option("--min-utterances", "-m", default=10,
+              help="Minimum utterances required to build a profile (default: 10)")
+def voice_build_profiles(results: str | None, min_utterances: int) -> None:
+    """Build and persist VoiceProfile nodes in Neo4j from a voice analysis results file.
+
+    Reads character voice profiles from a JSON results file (produced by
+    'bga voice analyze') and upserts them into Neo4j as VoiceProfile nodes.
+    Only characters with >= min_utterances lines are stored.
+
+    Example:
+        bga voice build-profiles -r hobbit_voices.json
+        bga voice build-profiles -r hobbit_voices.json --min-utterances 5
+    """
+    from book_graph_analyzer.voice import VoiceAnalyzer
+    from book_graph_analyzer.graph.voice_writer import VoiceProfileWriter
+    from book_graph_analyzer.graph.connection import check_neo4j_connection
+
+    if not check_neo4j_connection():
+        console.print("[red]Cannot connect to Neo4j.[/red]")
+        console.print("[dim]Run 'bga status' to diagnose the connection.[/dim]")
+        return
+
+    if not results:
+        console.print("[red]No results file specified.[/red]")
+        console.print("[dim]Run 'bga voice analyze <path> -o results.json' first, "
+                      "then pass -r results.json here.[/dim]")
+        return
+
+    analyzer = VoiceAnalyzer()
+    result = analyzer.load_results(results)
+
+    # Filter to characters with enough utterances
+    eligible = {
+        name: profile
+        for name, profile in result.profiles.items()
+        if profile.total_lines >= min_utterances
+    }
+
+    if not eligible:
+        console.print(
+            f"[yellow]No characters with >= {min_utterances} utterances found.[/yellow]"
+        )
+        return
+
+    console.print(
+        f"[bold]Building VoiceProfiles[/bold] — {len(eligible)} characters "
+        f"(min utterances: {min_utterances})"
+    )
+
+    writer = VoiceProfileWriter()
+    stored = 0
+    try:
+        for name, profile in eligible.items():
+            writer.upsert_voice_profile(profile)
+            stored += 1
+            console.print(f"  [green]✓[/green] {name} ({profile.total_lines} utterances, "
+                          f"formality: {profile.formality_score:.3f})")
+    finally:
+        writer.close()
+
+    console.print(
+        f"\n[green]Done.[/green] Stored {stored} VoiceProfile node(s) in Neo4j."
+    )
+
+
 # ============================================================================
 # Pipeline Commands - Unified Analysis
 # ============================================================================
