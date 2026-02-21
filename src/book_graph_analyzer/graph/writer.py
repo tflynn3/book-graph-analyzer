@@ -1583,6 +1583,9 @@ class GraphWriter:
             e.location_id = $location_id, e.location_name = $location_name,
             e.description = $description, e.event_type = $event_type,
             e.source_book = $source_book, e.source_passage_id = $source_passage_id,
+            e.structural_stratum = $structural_stratum,
+            e.editorial_status = $editorial_status,
+            e.source_authority_weight = $source_authority_weight,
             e.time_era = $time_era, e.time_year_start = $time_year_start,
             e.time_year_end = $time_year_end, e.time_confidence = $time_confidence,
             e.time_raw_text = $time_raw_text
@@ -1593,6 +1596,9 @@ class GraphWriter:
             "location_name": event.location_name, "description": event.description,
             "event_type": event.event_type, "source_book": event.source_book,
             "source_passage_id": event.source_passage_id,
+            "structural_stratum": getattr(event, "structural_stratum", None),
+            "editorial_status": getattr(event, "editorial_status", None),
+            "source_authority_weight": getattr(event, "source_authority_weight", None),
             "time_era": event.time.era, "time_year_start": event.time.year_start,
             "time_year_end": event.time.year_end, "time_confidence": event.time.confidence,
             "time_raw_text": event.time.raw_text,
@@ -1902,5 +1908,48 @@ class GraphWriter:
         results = []
         with self.driver.session() as session:
             for record in session.run(query, min_conf=min_confidence, limit=limit):
+                results.append(dict(record))
+        return results
+
+    def query_divergence_hotspots(self, min_sources: int = 2, limit: int = 25) -> list[dict]:
+        """Find entity/type conflict clusters spanning multiple source books."""
+        query = """
+        MATCH (c:TimelineConflict)-[:INVOLVES]->(e:SpatiotemporalEvent)
+        WITH coalesce(c.entity_id, e.entity_id) AS entity_id,
+             c.conflict_type AS conflict_type,
+             collect(DISTINCT c.id) AS conflict_ids,
+             collect(DISTINCT coalesce(e.source_book, 'unknown')) AS source_books,
+             avg(coalesce(e.source_authority_weight, 1.0)) AS avg_authority
+        WHERE size(source_books) >= $min_sources
+        RETURN entity_id, conflict_type, conflict_ids, source_books,
+               size(conflict_ids) AS conflict_count,
+               size(source_books) AS source_count,
+               avg_authority
+        ORDER BY conflict_count DESC, avg_authority DESC
+        LIMIT $limit
+        """
+        results = []
+        with self.driver.session() as session:
+            for record in session.run(query, min_sources=min_sources, limit=limit):
+                results.append(dict(record))
+        return results
+
+    def query_source_divergence(self, source_a: str, source_b: str, limit: int = 50) -> list[dict]:
+        """Return conflicts evidenced by events from both requested sources."""
+        query = """
+        MATCH (c:TimelineConflict)-[:INVOLVES]->(e:SpatiotemporalEvent)
+        WITH c, collect(DISTINCT coalesce(e.source_book, 'unknown')) AS sources,
+             collect(DISTINCT e.id) AS events
+        WHERE $source_a IN sources AND $source_b IN sources
+        RETURN c.id AS id, c.conflict_type AS conflict_type,
+               c.severity AS severity, c.description AS description,
+               c.confidence AS confidence, c.entity_id AS entity_id,
+               sources, events
+        ORDER BY c.confidence DESC
+        LIMIT $limit
+        """
+        results = []
+        with self.driver.session() as session:
+            for record in session.run(query, source_a=source_a, source_b=source_b, limit=limit):
                 results.append(dict(record))
         return results

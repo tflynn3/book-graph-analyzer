@@ -13,6 +13,7 @@ from dataclasses import dataclass, field
 
 from ..graph.temporal import canonicalize_era
 from ..lore.events import Event
+from ..models.worldbuilding import infer_editorial_layer
 from .models import NormalizedTime, SpatiotemporalEvent
 from .normalizer import TimeNormalizer
 
@@ -179,6 +180,9 @@ class ExtractionBridge:
             era_changed = raw_era_text.lower().replace(" ", "") != norm_time.era.lower().replace(" ", "")
 
         # Build SpatiotemporalEvent
+        resolved_source = source_book or event.source_book or None
+        layer = infer_editorial_layer(resolved_source or "") if resolved_source else None
+
         st_event = SpatiotemporalEvent(
             id=f"st_{event.id}",
             entity_id=event.agent or "unknown",
@@ -187,8 +191,11 @@ class ExtractionBridge:
             time=norm_time,
             description=event.description,
             event_type="extracted",
-            source_book=source_book or event.source_book or None,
+            source_book=resolved_source,
             source_passage_id=None,
+            structural_stratum=(layer.author_period.value if layer else None),
+            editorial_status=(layer.editorial_status.value if layer else None),
+            source_authority_weight=(layer.authority_weight if layer else None),
         )
 
         return NormalizationResult(

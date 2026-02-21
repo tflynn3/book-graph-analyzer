@@ -84,6 +84,12 @@ class TestExtractionBridge:
         assert report.total == 3
         assert report.events[0].source_book == "The Hobbit"
 
+    def test_bridge_event_infers_structural_stratum(self):
+        ev = self._make_event(id="e1", year_text="TA 3019")
+        result = self.bridge.bridge_event(ev, source_book="The Silmarillion")
+        assert result.event.structural_stratum is not None
+        assert result.event.source_authority_weight is not None
+
     def test_bridge_report_summary(self):
         events = [
             self._make_event(id="e1", year_text="TA 2941", confidence=0.9),

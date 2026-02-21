@@ -20,6 +20,20 @@ from .models import (
     SpatiotemporalEvent, TimelineConflict,
 )
 from .report import ReconciliationReport
+from .confidence import SourceAuthorityRegistry
+
+
+@dataclass
+class ContradictionCluster:
+    """Authority-weighted cluster of related cross-book contradictions."""
+
+    cluster_id: str
+    entity_id: str | None
+    conflict_type: str
+    conflict_ids: list[str] = field(default_factory=list)
+    source_books: list[str] = field(default_factory=list)
+    avg_authority_weight: float = 1.0
+    recommended_resolution: str = "flag_for_human"
 
 
 @dataclass
@@ -37,6 +51,7 @@ class CorpusReconciliationResult:
     books: list[BookEvents]
     per_book_conflicts: dict[str, list[TimelineConflict]] = field(default_factory=dict)
     cross_book_conflicts: list[TimelineConflict] = field(default_factory=list)
+    contradiction_clusters: list[ContradictionCluster] = field(default_factory=list)
     all_causal_links: list[CausalLink] = field(default_factory=list)
 
     @property
@@ -66,6 +81,7 @@ class CorpusReconciliationResult:
             f"Total conflicts: {self.total_conflicts}",
             f"  Errors: {self.total_errors}",
             f"  Cross-book conflicts: {len(self.cross_book_conflicts)}",
+            f"  Contradiction clusters: {len(self.contradiction_clusters)}",
             f"Causal links extracted: {len(self.all_causal_links)}",
             "",
         ]
@@ -116,6 +132,18 @@ class CorpusReconciliationResult:
                 for book in self.books
             },
             "cross_book_conflicts": [c.to_dict() for c in self.cross_book_conflicts],
+            "contradiction_clusters": [
+                {
+                    "cluster_id": c.cluster_id,
+                    "entity_id": c.entity_id,
+                    "conflict_type": c.conflict_type,
+                    "conflict_ids": c.conflict_ids,
+                    "source_books": c.source_books,
+                    "avg_authority_weight": c.avg_authority_weight,
+                    "recommended_resolution": c.recommended_resolution,
+                }
+                for c in self.contradiction_clusters
+            ],
         }
 
 
@@ -140,6 +168,52 @@ class CorpusReconciler:
         self.edges = edges or []
         self.books: list[BookEvents] = []
         self.extract_causal = extract_causal
+        self.source_authority = SourceAuthorityRegistry.default_tolkien()
+
+    def _cluster_cross_book_conflicts(
+        self,
+        conflicts: list[TimelineConflict],
+        events: list[SpatiotemporalEvent],
+    ) -> list[ContradictionCluster]:
+        event_map = {e.id: e for e in events}
+        grouped: dict[tuple[str | None, str], list[TimelineConflict]] = {}
+        for c in conflicts:
+            key = (c.entity_id, c.conflict_type.value if hasattr(c.conflict_type, "value") else str(c.conflict_type))
+            grouped.setdefault(key, []).append(c)
+
+        clusters: list[ContradictionCluster] = []
+        for (entity_id, ctype), grouped_conflicts in grouped.items():
+            sources: set[str] = set()
+            weights: list[float] = []
+            for conflict in grouped_conflicts:
+                for eid in (conflict.event_a_id, conflict.event_b_id):
+                    if not eid:
+                        continue
+                    ev = event_map.get(eid)
+                    if not ev:
+                        continue
+                    src = ev.source_book or "unknown"
+                    sources.add(src)
+                    weights.append(self.source_authority.get(ev.source_book))
+
+            avg_weight = sum(weights) / len(weights) if weights else 1.0
+            if avg_weight >= 0.9:
+                resolution = "use_later_text"
+            elif avg_weight >= 0.75:
+                resolution = "use_most_cited"
+            else:
+                resolution = "flag_for_human"
+
+            clusters.append(ContradictionCluster(
+                cluster_id=f"cluster_{len(clusters)+1}",
+                entity_id=entity_id,
+                conflict_type=ctype,
+                conflict_ids=[c.id for c in grouped_conflicts],
+                source_books=sorted(sources),
+                avg_authority_weight=round(avg_weight, 3),
+                recommended_resolution=resolution,
+            ))
+        return clusters
 
     def add_book(
         self,
@@ -243,9 +317,12 @@ class CorpusReconciler:
 
         cross_book_only = [c for c in cross_conflicts if is_cross_book(c)]
 
+        clusters = self._cluster_cross_book_conflicts(cross_book_only, all_events)
+
         return CorpusReconciliationResult(
             books=self.books,
             per_book_conflicts=per_book_conflicts,
             cross_book_conflicts=cross_book_only,
+            contradiction_clusters=clusters,
             all_causal_links=all_causal_links,
         )

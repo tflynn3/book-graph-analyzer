@@ -6073,6 +6073,51 @@ def corpus_timeline_reconcile(
             console.print(text)
 
 
+@corpus.command(name="timeline-divergence")
+@click.option("--source-a", default="", help="Compare conflicts involving source A")
+@click.option("--source-b", default="", help="Compare conflicts involving source B")
+@click.option("--min-sources", default=2, show_default=True, help="Minimum distinct sources for hotspot clustering")
+@click.option("--limit", default=25, show_default=True, help="Max rows to return")
+def corpus_timeline_divergence(source_a: str, source_b: str, min_sources: int, limit: int) -> None:
+    """Query graph-native divergence clusters from Neo4j timeline conflicts."""
+    from book_graph_analyzer.graph.connection import check_neo4j_connection
+    from book_graph_analyzer.graph.writer import GraphWriter
+
+    if not check_neo4j_connection():
+        console.print("[red]Cannot connect to Neo4j[/red]")
+        return
+
+    writer = GraphWriter()
+    try:
+        if source_a and source_b:
+            rows = writer.query_source_divergence(source_a, source_b, limit=limit)
+            console.print(f"[bold]Source divergence ({source_a} vs {source_b})[/bold]\n")
+            if not rows:
+                console.print("[yellow]No shared conflicts found.[/yellow]")
+                return
+            for row in rows:
+                console.print(
+                    f"  - {row.get('id')} [{row.get('conflict_type')}] conf={float(row.get('confidence') or 0):.2f}\n"
+                    f"    {row.get('description', '')}\n"
+                    f"    Sources: {', '.join(row.get('sources') or [])}"
+                )
+            return
+
+        rows = writer.query_divergence_hotspots(min_sources=min_sources, limit=limit)
+        console.print("[bold]Timeline divergence hotspots[/bold]\n")
+        if not rows:
+            console.print("[yellow]No divergence hotspots found.[/yellow]")
+            return
+        for row in rows:
+            console.print(
+                f"  - entity={row.get('entity_id') or 'unknown'} type={row.get('conflict_type')} "
+                f"conflicts={row.get('conflict_count')} sources={row.get('source_count')} "
+                f"avg_authority={float(row.get('avg_authority') or 0):.2f}"
+            )
+    finally:
+        writer.close()
+
+
 @corpus.command(name="sources")
 @click.argument("corpus_name")
 @click.option("--show-authority", "-a", is_flag=True, help="Show authority weights")

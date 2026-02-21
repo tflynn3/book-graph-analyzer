@@ -30,6 +30,7 @@ def _ev(id, entity_id="char1", era="Third Age", year=None, description="", **kw)
         location_id=kw.get("location_id"), location_name=kw.get("location_name"),
         time=NormalizedTime(era=era, year_start=year, year_end=year, confidence=0.9),
         description=description,
+        source_book=kw.get("source_book"),
     )
 
 
@@ -139,6 +140,23 @@ class TestCorpusReconciler:
         ])
         result = r.reconcile()
         assert len(result.cross_book_conflicts) > 0
+        assert len(result.contradiction_clusters) > 0
+
+    def test_contradiction_cluster_has_recommendation(self):
+        r = CorpusReconciler(extract_causal=False)
+        r.add_book("book_a", "The Hobbit", [
+            _ev("a1", entity_id="gandalf", year=3018, location_id="shire",
+                location_name="Shire", description="Gandalf in the Shire", source_book="the_hobbit"),
+        ])
+        r.add_book("book_b", "The Silmarillion", [
+            _ev("b1", entity_id="gandalf", year=3018, location_id="minas_tirith",
+                location_name="Minas Tirith", description="Gandalf in Minas Tirith", source_book="the_silmarillion"),
+        ])
+        result = r.reconcile()
+        assert result.contradiction_clusters
+        cluster = result.contradiction_clusters[0]
+        assert cluster.recommended_resolution in {"use_later_text", "use_most_cited", "flag_for_human"}
+        assert cluster.avg_authority_weight > 0
 
     def test_causal_extraction_integrated(self):
         r = CorpusReconciler(extract_causal=True)
@@ -177,6 +195,7 @@ class TestCorpusReconciler:
         count = r.add_book_from_json(str(fp), "test", "Test Book")
         assert count == 1
         assert len(r.books) == 1
+        assert r.books[0].events[0].structural_stratum is None
 
 
 # ===========================================================================
@@ -261,3 +280,22 @@ class TestCLIIntegration:
         ])
         # Should fail gracefully (no books or no event files)
         assert result.exit_code == 0 or "No books" in result.output or "No event files" in result.output
+
+    def test_corpus_timeline_divergence_hotspots(self, monkeypatch):
+        from click.testing import CliRunner
+        from book_graph_analyzer.cli import main
+
+        class _W:
+            def query_divergence_hotspots(self, min_sources=2, limit=25):
+                return [{"entity_id": "gandalf", "conflict_type": "temporal_overlap", "conflict_count": 2,
+                         "source_count": 2, "avg_authority": 0.9}]
+
+            def close(self):
+                pass
+
+        monkeypatch.setattr("book_graph_analyzer.graph.connection.check_neo4j_connection", lambda: True)
+        monkeypatch.setattr("book_graph_analyzer.graph.writer.GraphWriter", lambda: _W())
+
+        result = CliRunner().invoke(main, ["corpus", "timeline-divergence"])
+        assert result.exit_code == 0
+        assert "divergence hotspots" in result.output.lower()

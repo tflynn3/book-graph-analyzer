@@ -79,6 +79,9 @@ class SpatiotemporalEvent(BaseModel):
     event_type: str = "presence"
     source_book: str | None = None
     source_passage_id: str | None = None
+    structural_stratum: str | None = None
+    editorial_status: str | None = None
+    source_authority_weight: float | None = None
 
     def to_dict(self) -> dict:
         return {
@@ -92,6 +95,9 @@ class SpatiotemporalEvent(BaseModel):
             "event_type": self.event_type,
             "source_book": self.source_book,
             "source_passage_id": self.source_passage_id,
+            "structural_stratum": self.structural_stratum,
+            "editorial_status": self.editorial_status,
+            "source_authority_weight": self.source_authority_weight,
         }
 
 

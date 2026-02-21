@@ -41,7 +41,9 @@ from .location_seeds import (
     load_seed_edges,
     load_seed_location_graph,
 )
-from .corpus_reconciler import CorpusReconciler, CorpusReconciliationResult, BookEvents
+from .corpus_reconciler import (
+    CorpusReconciler, CorpusReconciliationResult, BookEvents, ContradictionCluster,
+)
 
 __all__ = [
     "NormalizedTime",
@@ -72,4 +74,5 @@ __all__ = [
     "CorpusReconciler",
     "CorpusReconciliationResult",
     "BookEvents",
+    "ContradictionCluster",
 ]
