@@ -5104,6 +5104,7 @@ def _print_workflow_failure_analysis(analysis) -> None:
     console.print("[bold]Workflow Failure Analysis[/bold]")
     console.print(f"Run URL: {analysis.run_url or 'n/a'}")
     console.print(f"Run ID: {analysis.run_id or 'n/a'}")
+    console.print(f"Severity: [bold]{analysis.severity}[/bold]")
     console.print(f"Secret verification phrase detected: {analysis.secret_verification_failed}")
 
     table = Table(title="Required Secrets")
@@ -5252,6 +5253,7 @@ def workflow_analyze_open_failures(
             "issue_title",
             "run_id",
             "run_url",
+            "severity",
             "secret_verification_failed",
             "required_secrets",
             "present_secrets",
@@ -5279,16 +5281,17 @@ def workflow_analyze_open_failures(
         lines = [
             "# Open Workflow Failure Analysis",
             "",
-            "| Issue | Run ID | Secret Verification Failed | Missing Secrets | Diagnosis |",
-            "|---|---:|:---:|---|---|",
+            "| Issue | Run ID | Severity | Secret Verification Failed | Missing Secrets | Diagnosis |",
+            "|---|---:|---|:---:|---|---|",
         ]
         for row in csv_rows:
             issue = f"#{row['issue_number']} {row['issue_title']}"
             run_id = row.get("run_id", "") or "n/a"
+            severity = row.get("severity", "low")
             svf = row.get("secret_verification_failed", "false")
             missing = row.get("missing_secrets", "") or "none"
             diagnosis = (row.get("diagnosis", "") or "").replace("|", "\\|")
-            lines.append(f"| {issue} | {run_id} | {svf} | {missing} | {diagnosis} |")
+            lines.append(f"| {issue} | {run_id} | {severity} | {svf} | {missing} | {diagnosis} |")
         out_path.write_text("\n".join(lines) + "\n", encoding="utf-8")
         console.print(f"[green]Wrote markdown summary report:[/green] {out_path}")
 
@@ -5723,11 +5726,12 @@ def workflow_post_open_failures_summary(
     lines = [
         "## Automated Failure Summary",
         "",
-        "| Issue | Run ID | Secret Verification Failed | Missing Secrets |",
-        "|---|---:|:---:|---|",
+        "| Issue | Run ID | Severity | Secret Verification Failed | Missing Secrets |",
+        "|---|---:|---|:---:|---|",
     ]
 
     unresolved = 0
+    severity_counts = {"critical": 0, "high": 0, "medium": 0, "low": 0}
     for issue in actionable:
         analysis = analyze_failure_from_issue_text(
             issue.body,
@@ -5736,8 +5740,10 @@ def workflow_post_open_failures_summary(
         )
         if analysis.missing_secrets:
             unresolved += 1
+        severity_counts[analysis.severity] = severity_counts.get(analysis.severity, 0) + 1
         lines.append(
             f"| #{issue.number} {issue.title} | {analysis.run_id or 'n/a'} | "
+            f"{analysis.severity} | "
             f"{str(analysis.secret_verification_failed).lower()} | "
             f"{(';'.join(analysis.missing_secrets) if analysis.missing_secrets else 'none')} |"
         )
@@ -5745,6 +5751,12 @@ def workflow_post_open_failures_summary(
     lines.append("")
     lines.append(f"Open actionable failures: **{len(actionable)}**")
     lines.append(f"Unresolved (missing secrets): **{unresolved}**")
+    lines.append(
+        f"Severity breakdown — critical: **{severity_counts['critical']}**, "
+        f"high: **{severity_counts['high']}**, "
+        f"medium: **{severity_counts['medium']}**, "
+        f"low: **{severity_counts['low']}**"
+    )
 
     body = "\n".join(lines)
     ok = post_issue_comment_via_gh(parent_issue, body)

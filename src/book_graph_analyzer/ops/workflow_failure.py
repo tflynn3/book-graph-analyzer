@@ -21,6 +21,24 @@ class FailureAnalysis:
     present_secrets: list[str]
     missing_secrets: list[str]
 
+    @property
+    def severity(self) -> str:
+        """Classify failure severity for triage dashboards.
+
+        Levels:
+          - critical: explicit secret-verification failure + missing secrets
+          - high: missing secrets (without explicit phrase)
+          - medium: explicit secret-verification phrase but no missing secrets
+          - low: no secret-related indicators in current analyzer
+        """
+        if self.secret_verification_failed and self.missing_secrets:
+            return "critical"
+        if self.missing_secrets:
+            return "high"
+        if self.secret_verification_failed:
+            return "medium"
+        return "low"
+
     def to_row(self, issue_number: int, issue_title: str) -> dict[str, str]:
         """Flatten analysis for CSV/report export."""
         return {
@@ -28,6 +46,7 @@ class FailureAnalysis:
             "issue_title": issue_title,
             "run_id": str(self.run_id or ""),
             "run_url": str(self.run_url or ""),
+            "severity": self.severity,
             "secret_verification_failed": "true" if self.secret_verification_failed else "false",
             "required_secrets": ";".join(self.required_secrets),
             "present_secrets": ";".join(self.present_secrets),

@@ -63,6 +63,7 @@ jobs:
     assert analysis.run_id == "22260153462"
     assert "GH_AW_GITHUB_TOKEN" in analysis.present_secrets
     assert "COPILOT_GITHUB_TOKEN" in analysis.missing_secrets
+    assert analysis.severity == "critical"
 
 
 def test_cli_workflow_analyze_failure(tmp_path: Path):
@@ -218,17 +219,19 @@ jobs:
     assert out_csv.exists()
     csv_text = out_csv.read_text(encoding="utf-8")
     assert "issue_number" in csv_text
+    assert "severity" in csv_text
     assert "41" in csv_text
 
     assert out_json.exists()
     json_text = out_json.read_text(encoding="utf-8")
     assert "issue_number" in json_text
+    assert "severity" in json_text
     assert "41" in json_text
 
     assert out_md.exists()
     md_text = out_md.read_text(encoding="utf-8")
     assert "# Open Workflow Failure Analysis" in md_text
-    assert "| Issue | Run ID |" in md_text
+    assert "| Issue | Run ID | Severity |" in md_text
     assert "#41" in md_text
 
 
@@ -339,6 +342,8 @@ jobs:
     assert res.exit_code == 0
     assert captured["issue"] == 40
     assert "Automated Failure Summary" in captured["body"]
+    assert "Severity" in captured["body"]
+    assert "Severity breakdown" in captured["body"]
     assert "#41" in captured["body"]
 
 
