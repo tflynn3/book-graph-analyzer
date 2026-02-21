@@ -1695,6 +1695,191 @@ class GraphWriter:
                 drifts.append(delta)
         return drifts
 
+    # =========================================================================
+    # Sociolinguistic Registers (Issue #47 slice 1)
+    # =========================================================================
+
+    def write_register_profile(
+        self,
+        entity_id: str,
+        profile,
+        source_passage_id: str | None = None,
+    ) -> None:
+        """Persist the current sociolinguistic register profile for an entity."""
+        with self.driver.session() as session:
+            session.run(
+                """
+                MATCH (e {id: $entity_id})
+                MERGE (rp:RegisterProfile {entity_id: $entity_id})
+                SET rp.dominant_register = $dominant_register,
+                    rp.confidence = $confidence,
+                    rp.formality_score = $formality_score,
+                    rp.archaism_rate = $archaism_rate,
+                    rp.contraction_rate = $contraction_rate,
+                    rp.avg_sentence_length = $avg_sentence_length,
+                    rp.token_count = $token_count,
+                    rp.source_passage_id = $source_passage_id,
+                    rp.updated_at = datetime()
+                MERGE (e)-[:HAS_REGISTER_PROFILE]->(rp)
+                """,
+                entity_id=entity_id,
+                dominant_register=profile.dominant_register,
+                confidence=profile.confidence,
+                formality_score=profile.formality_score,
+                archaism_rate=profile.archaism_rate,
+                contraction_rate=profile.contraction_rate,
+                avg_sentence_length=profile.avg_sentence_length,
+                token_count=profile.token_count,
+                source_passage_id=source_passage_id,
+            )
+
+    def write_register_observation(
+        self,
+        entity_id: str,
+        profile,
+        observed_at: str,
+        source_passage_id: str | None = None,
+    ) -> None:
+        """Write a time-stamped register observation for later drift analysis."""
+        with self.driver.session() as session:
+            session.run(
+                """
+                MATCH (e {id: $entity_id})
+                CREATE (obs:RegisterObservation {
+                    id: randomUUID(),
+                    entity_id: $entity_id,
+                    observed_at: $observed_at,
+                    dominant_register: $dominant_register,
+                    confidence: $confidence,
+                    formality_score: $formality_score,
+                    archaism_rate: $archaism_rate,
+                    contraction_rate: $contraction_rate,
+                    avg_sentence_length: $avg_sentence_length,
+                    token_count: $token_count,
+                    source_passage_id: $source_passage_id,
+                    created_at: datetime()
+                })
+                MERGE (e)-[:HAS_REGISTER_OBSERVATION]->(obs)
+                """,
+                entity_id=entity_id,
+                observed_at=observed_at,
+                dominant_register=profile.dominant_register,
+                confidence=profile.confidence,
+                formality_score=profile.formality_score,
+                archaism_rate=profile.archaism_rate,
+                contraction_rate=profile.contraction_rate,
+                avg_sentence_length=profile.avg_sentence_length,
+                token_count=profile.token_count,
+                source_passage_id=source_passage_id,
+            )
+
+    def query_register_drift(
+        self,
+        entity_id: str,
+        min_delta: float = 0.2,
+        limit: int = 20,
+    ) -> list[dict]:
+        """Query consecutive register observations and calculate drift deltas."""
+        with self.driver.session() as session:
+            result = session.run(
+                """
+                MATCH (e {id: $entity_id})-[:HAS_REGISTER_OBSERVATION]->(obs:RegisterObservation)
+                RETURN obs.observed_at AS observed_at,
+                       obs.dominant_register AS dominant_register,
+                       obs.formality_score AS formality_score,
+                       obs.archaism_rate AS archaism_rate,
+                       obs.confidence AS confidence
+                ORDER BY obs.observed_at ASC
+                LIMIT $limit
+                """,
+                entity_id=entity_id,
+                limit=limit,
+            )
+            rows = [dict(r) for r in result]
+
+        drifts: list[dict] = []
+        for i in range(1, len(rows)):
+            prev = rows[i - 1]
+            cur = rows[i]
+            delta = {
+                "from": prev.get("observed_at"),
+                "to": cur.get("observed_at"),
+                "from_register": prev.get("dominant_register"),
+                "to_register": cur.get("dominant_register"),
+                "formality_shift": (cur.get("formality_score") or 0.0) - (prev.get("formality_score") or 0.0),
+                "archaism_shift": (cur.get("archaism_rate") or 0.0) - (prev.get("archaism_rate") or 0.0),
+            }
+            magnitude = max(abs(delta["formality_shift"]), abs(delta["archaism_shift"]))
+            if delta["from_register"] != delta["to_register"]:
+                magnitude = max(magnitude, 0.3)
+            if magnitude >= min_delta:
+                delta["magnitude"] = round(magnitude, 4)
+                drifts.append(delta)
+        return drifts
+
+    def query_register_observations(
+        self,
+        entity_id: str,
+        limit: int = 25,
+    ) -> list[dict]:
+        """Return recent register observations for an entity."""
+        with self.driver.session() as session:
+            result = session.run(
+                """
+                MATCH (e {id: $entity_id})-[:HAS_REGISTER_OBSERVATION]->(obs:RegisterObservation)
+                RETURN obs.observed_at AS observed_at,
+                       obs.dominant_register AS dominant_register,
+                       obs.confidence AS confidence,
+                       obs.formality_score AS formality_score,
+                       obs.archaism_rate AS archaism_rate,
+                       obs.contraction_rate AS contraction_rate,
+                       obs.source_passage_id AS source_passage_id
+                ORDER BY obs.observed_at DESC
+                LIMIT $limit
+                """,
+                entity_id=entity_id,
+                limit=limit,
+            )
+            return [dict(r) for r in result]
+
+    def query_register_drift_summary(
+        self,
+        entity_id: str,
+        min_delta: float = 0.2,
+        limit: int = 100,
+    ) -> dict:
+        """Summarize drift counts and strongest transition for reporting."""
+        drifts = self.query_register_drift(entity_id=entity_id, min_delta=min_delta, limit=limit)
+        if not drifts:
+            return {
+                "entity_id": entity_id,
+                "drift_count": 0,
+                "high": 0,
+                "medium": 0,
+                "low": 0,
+                "strongest": None,
+            }
+
+        def _severity(d: dict) -> str:
+            mag = float(d.get("magnitude") or 0.0)
+            if mag >= 0.45:
+                return "high"
+            if mag >= 0.25:
+                return "medium"
+            return "low"
+
+        counts = {"high": 0, "medium": 0, "low": 0}
+        for d in drifts:
+            counts[_severity(d)] += 1
+
+        strongest = max(drifts, key=lambda d: float(d.get("magnitude") or 0.0))
+        return {
+            "entity_id": entity_id,
+            "drift_count": len(drifts),
+            **counts,
+            "strongest": strongest,
+        }
+
     def query_event_ordering(
         self,
         event1_desc: str,

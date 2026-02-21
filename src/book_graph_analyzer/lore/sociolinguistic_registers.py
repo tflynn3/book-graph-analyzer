@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+from collections import Counter, defaultdict
 from dataclasses import dataclass
 from enum import Enum
+import json
 import re
+from typing import Callable
 
 
 class SociolinguisticRegister(str, Enum):
@@ -58,12 +61,28 @@ class RegisterDrift:
         return "low"
 
 
+@dataclass
+class CorpusRegisterProfile:
+    total_samples: int
+    dominant_distribution: dict[str, int]
+    avg_formality: float
+    avg_archaism_rate: float
+    avg_contraction_rate: float
+    per_entity_latest: dict[str, RegisterProfile]
+    strongest_drifts: list[RegisterDrift]
+
+
 class SociolinguisticRegisterClassifier:
     """MVP rule-first classifier for Tolkien sociolinguistic register."""
 
     _word_re = re.compile(r"[A-Za-z']+")
 
-    def classify(self, text: str) -> RegisterProfile:
+    def classify(
+        self,
+        text: str,
+        *,
+        model_assist: Callable[[str, RegisterProfile], RegisterProfile | None] | None = None,
+    ) -> RegisterProfile:
         text = text or ""
         words = [w.lower() for w in self._word_re.findall(text)]
         token_count = len(words)
@@ -105,7 +124,7 @@ class SociolinguisticRegisterClassifier:
         total = sum(max(0.0, s) for _, s in ranked)
         confidence = (top_score / total) if total > 0 else 0.0
 
-        return RegisterProfile(
+        base = RegisterProfile(
             dominant_register=dominant,
             confidence=round(confidence, 4),
             register_scores={k: round(v, 4) for k, v in ranked},
@@ -115,6 +134,22 @@ class SociolinguisticRegisterClassifier:
             avg_sentence_length=round(avg_sentence_length, 2),
             token_count=token_count,
         )
+
+        if model_assist is None:
+            return base
+
+        try:
+            assisted = model_assist(text, base)
+        except Exception:
+            return base
+
+        if not assisted:
+            return base
+        if assisted.dominant_register not in {r.value for r in SociolinguisticRegister}:
+            return base
+        if not (0.0 <= assisted.confidence <= 1.0):
+            return base
+        return assisted
 
 
 def detect_register_drift(baseline: RegisterProfile, current: RegisterProfile) -> RegisterDrift:
@@ -127,4 +162,61 @@ def detect_register_drift(baseline: RegisterProfile, current: RegisterProfile) -
         formality_shift=round(current.formality_score - baseline.formality_score, 4),
         archaism_shift=round(current.archaism_rate - baseline.archaism_rate, 4),
     )
+
+
+def profile_corpus_registers(
+    samples: list[dict],
+    classifier: SociolinguisticRegisterClassifier | None = None,
+) -> CorpusRegisterProfile:
+    """Build corpus-wide sociolinguistic register profile and drift summary.
+
+    Expected sample shape: {"text": str, "entity_id": str|None, "order": int|None}
+    """
+    classifier = classifier or SociolinguisticRegisterClassifier()
+    dominant_counter: Counter = Counter()
+    profiles: list[RegisterProfile] = []
+    per_entity: dict[str, list[tuple[int, RegisterProfile]]] = defaultdict(list)
+
+    for idx, sample in enumerate(samples):
+        text = str(sample.get("text", "") or "")
+        profile = classifier.classify(text)
+        profiles.append(profile)
+        dominant_counter[profile.dominant_register] += 1
+        entity_id = sample.get("entity_id")
+        if entity_id:
+            per_entity[str(entity_id)].append((int(sample.get("order", idx)), profile))
+
+    strongest_drifts: list[RegisterDrift] = []
+    latest: dict[str, RegisterProfile] = {}
+    for entity_id, rows in per_entity.items():
+        rows.sort(key=lambda p: p[0])
+        latest[entity_id] = rows[-1][1]
+        for i in range(1, len(rows)):
+            drift = detect_register_drift(rows[i - 1][1], rows[i][1])
+            strongest_drifts.append(drift)
+
+    strongest_drifts.sort(
+        key=lambda d: max(d.register_shift, abs(d.formality_shift), abs(d.archaism_shift)),
+        reverse=True,
+    )
+
+    total = len(profiles)
+    return CorpusRegisterProfile(
+        total_samples=total,
+        dominant_distribution=dict(dominant_counter),
+        avg_formality=round(sum(p.formality_score for p in profiles) / total, 4) if total else 0.0,
+        avg_archaism_rate=round(sum(p.archaism_rate for p in profiles) / total, 4) if total else 0.0,
+        avg_contraction_rate=round(sum(p.contraction_rate for p in profiles) / total, 4) if total else 0.0,
+        per_entity_latest=latest,
+        strongest_drifts=strongest_drifts[:20],
+    )
+
+
+def load_socioreg_samples_json(path: str) -> list[dict]:
+    """Load socioreg profiling samples from JSON array file."""
+    with open(path, encoding="utf-8") as f:
+        data = json.load(f)
+    if not isinstance(data, list):
+        raise ValueError("Expected JSON array of samples")
+    return [d for d in data if isinstance(d, dict)]
 
