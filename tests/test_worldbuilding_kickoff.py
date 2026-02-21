@@ -212,12 +212,19 @@ class TestGraphWriterStubs:
         assert hasattr(writer, "write_editorial_provenance")
         assert callable(writer.write_editorial_provenance)
 
-    def test_linguistic_lineage_raises_not_implemented(self):
+    def test_linguistic_lineage_implemented(self):
+        """write_linguistic_lineage is now implemented (Issue #46)."""
         from book_graph_analyzer.graph.writer import GraphWriter
+        from unittest.mock import MagicMock
 
-        writer = GraphWriter.__new__(GraphWriter)
-        with pytest.raises(NotImplementedError, match="Issue #46"):
-            writer.write_linguistic_lineage(None)
+        mock_driver = MagicMock()
+        mock_session = MagicMock()
+        mock_driver.session.return_value.__enter__ = MagicMock(return_value=mock_session)
+        mock_driver.session.return_value.__exit__ = MagicMock(return_value=False)
+        writer = GraphWriter(driver=mock_driver)
+
+        # Should return 0 for None/empty, NOT raise NotImplementedError
+        assert writer.write_linguistic_lineage(None) == 0
 
     def test_genealogy_batch_raises_not_implemented(self):
         from book_graph_analyzer.graph.writer import GraphWriter

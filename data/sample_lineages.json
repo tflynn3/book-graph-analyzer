@@ -1,0 +1,60 @@
+{
+  "lineages": [
+    {
+      "entity_id": "place_rivendell",
+      "forms": [
+        {"id": "lf_imladris", "form": "Imladris", "language": "Sindarin",
+         "gloss": "Deep dale of the cleft"},
+        {"id": "lf_rivendell", "form": "Rivendell", "language": "Common Speech",
+         "gloss": "Cloven valley"},
+        {"id": "lf_karningul", "form": "Karningul", "language": "Westron"}
+      ],
+      "derivations": [
+        {"source_form_id": "lf_rivendell", "target_form_id": "lf_imladris",
+         "derivation_type": "translation"},
+        {"source_form_id": "lf_karningul", "target_form_id": "lf_imladris",
+         "derivation_type": "adaptation"}
+      ]
+    },
+    {
+      "entity_id": "place_moria",
+      "forms": [
+        {"id": "lf_khazaddum", "form": "Khazad-dûm", "language": "Khuzdul",
+         "gloss": "Dwarrowdelf"},
+        {"id": "lf_moria", "form": "Moria", "language": "Sindarin",
+         "gloss": "Black Chasm / Black Pit"},
+        {"id": "lf_dwarrowdelf", "form": "Dwarrowdelf", "language": "Common Speech",
+         "gloss": "Dwarf-delving"}
+      ],
+      "derivations": [
+        {"source_form_id": "lf_moria", "target_form_id": "lf_khazaddum",
+         "derivation_type": "translation", "notes": "Sindarin name given by Elves"},
+        {"source_form_id": "lf_dwarrowdelf", "target_form_id": "lf_khazaddum",
+         "derivation_type": "translation"}
+      ]
+    },
+    {
+      "entity_id": "char_gandalf",
+      "forms": [
+        {"id": "lf_olorin", "form": "Olórin", "language": "Quenya",
+         "gloss": "Dream / vision"},
+        {"id": "lf_mithrandir", "form": "Mithrandir", "language": "Sindarin",
+         "gloss": "Grey Pilgrim"},
+        {"id": "lf_gandalf", "form": "Gandalf", "language": "Common Speech",
+         "gloss": "Elf of the wand"},
+        {"id": "lf_tharkun", "form": "Tharkûn", "language": "Khuzdul",
+         "gloss": "Staff-man"},
+        {"id": "lf_incanus", "form": "Incánus", "language": "Quenya",
+         "gloss": "North-spy (disputed)"}
+      ],
+      "derivations": [
+        {"source_form_id": "lf_mithrandir", "target_form_id": "lf_olorin",
+         "derivation_type": "epithet"},
+        {"source_form_id": "lf_gandalf", "target_form_id": "lf_mithrandir",
+         "derivation_type": "translation"},
+        {"source_form_id": "lf_tharkun", "target_form_id": "lf_olorin",
+         "derivation_type": "epithet"}
+      ]
+    }
+  ]
+}

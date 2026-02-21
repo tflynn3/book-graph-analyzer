@@ -450,6 +450,18 @@ Tracks etymology chains across Tolkien's invented languages.
 }]->(:LanguageForm)
 ```
 
+Additionally, entities link to their language forms:
+
+```
+(:Entity)-[:HAS_NAME]->(:LanguageForm)
+```
+
+**Status:** ✅ Implemented (v1) — `GraphWriter.write_linguistic_lineage()`, `write_linguistic_lineage_batch()`, `query_linguistic_lineage()`
+
+**Parser:** `book_graph_analyzer.worldbible.lineage` — load from JSON files
+
+**CLI:** `bga worldbible languages <file.json> [--entity ID] [--write-graph]`
+
 **Python model:** `book_graph_analyzer.models.worldbuilding.LinguisticLineage`
 
 ### Deep Genealogy (Issue #47)

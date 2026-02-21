@@ -1063,9 +1063,10 @@ class GraphWriter:
         """Write a linguistic lineage (etymology chain) to the graph.
 
         Creates LanguageForm nodes and DERIVED_FROM relationships.
+        Idempotent: uses MERGE so repeated calls are safe.
 
-        TODO(#46): Implement full Cypher for LanguageForm nodes and DERIVED_FROM edges
-        TODO(#46): Add batch variant for corpus-wide lineage import
+        Optionally links each LanguageForm to an existing entity node
+        (Character/Place/Object/Entity) via HAS_NAME if entity_id is set.
 
         Args:
             lineage: LinguisticLineage object with forms and derivations
@@ -1073,9 +1074,127 @@ class GraphWriter:
         Returns:
             Number of forms written
         """
-        raise NotImplementedError(
-            "Linguistic lineage writing not yet implemented. See Issue #46."
-        )
+        if not lineage or not lineage.forms:
+            return 0
+
+        count = 0
+
+        with self.driver.session() as session:
+            # Step 1: MERGE LanguageForm nodes
+            for form in lineage.forms:
+                session.run(
+                    """
+                    MERGE (lf:LanguageForm {id: $id})
+                    SET lf.form = $form,
+                        lf.language = $language,
+                        lf.entity_id = $entity_id,
+                        lf.gloss = $gloss,
+                        lf.phonetic = $phonetic,
+                        lf.source_passage_id = $source_passage_id
+                    """,
+                    id=form.id,
+                    form=form.form,
+                    language=form.language.value if hasattr(form.language, "value") else str(form.language),
+                    entity_id=form.entity_id,
+                    gloss=form.gloss,
+                    phonetic=form.phonetic,
+                    source_passage_id=form.source_passage_id,
+                )
+                count += 1
+
+                # Optional: link to existing entity node via HAS_NAME
+                if form.entity_id:
+                    session.run(
+                        """
+                        MATCH (e {id: $entity_id})
+                        MATCH (lf:LanguageForm {id: $form_id})
+                        MERGE (e)-[:HAS_NAME]->(lf)
+                        """,
+                        entity_id=form.entity_id,
+                        form_id=form.id,
+                    )
+
+            # Step 2: MERGE DERIVED_FROM edges
+            for deriv in lineage.derivations:
+                session.run(
+                    """
+                    MATCH (src:LanguageForm {id: $source_id})
+                    MATCH (tgt:LanguageForm {id: $target_id})
+                    MERGE (src)-[r:DERIVED_FROM]->(tgt)
+                    SET r.derivation_type = $dtype,
+                        r.notes = $notes
+                    """,
+                    source_id=deriv.source_form_id,
+                    target_id=deriv.target_form_id,
+                    dtype=deriv.derivation_type.value if hasattr(deriv.derivation_type, "value") else str(deriv.derivation_type),
+                    notes=deriv.notes,
+                )
+
+        return count
+
+    def write_linguistic_lineage_batch(
+        self,
+        lineages: list,  # list[LinguisticLineage]
+    ) -> int:
+        """Write multiple linguistic lineages in a batch.
+
+        Args:
+            lineages: List of LinguisticLineage objects
+
+        Returns:
+            Total number of forms written
+        """
+        total = 0
+        for lineage in lineages:
+            total += self.write_linguistic_lineage(lineage)
+        return total
+
+    def query_linguistic_lineage(
+        self,
+        entity_id: str | None = None,
+        language: str | None = None,
+        limit: int = 50,
+    ) -> list[dict]:
+        """Query linguistic forms and their derivation chains.
+
+        Args:
+            entity_id: Filter by entity ID
+            language: Filter by language name
+            limit: Maximum results
+
+        Returns:
+            List of dicts with form info and derivation chains
+        """
+        conditions = []
+        params: dict = {"limit": limit}
+
+        if entity_id:
+            conditions.append("lf.entity_id = $entity_id")
+            params["entity_id"] = entity_id
+
+        if language:
+            conditions.append("lf.language = $language")
+            params["language"] = language
+
+        where = " AND ".join(conditions) if conditions else "true"
+
+        query = f"""
+        MATCH (lf:LanguageForm)
+        WHERE {where}
+        OPTIONAL MATCH (lf)-[r:DERIVED_FROM]->(parent:LanguageForm)
+        RETURN lf.id as id, lf.form as form, lf.language as language,
+               lf.entity_id as entity_id, lf.gloss as gloss,
+               lf.phonetic as phonetic,
+               parent.id as derived_from_id, parent.form as derived_from_form,
+               parent.language as derived_from_language,
+               r.derivation_type as derivation_type
+        ORDER BY lf.entity_id, lf.language
+        LIMIT $limit
+        """
+
+        with self.driver.session() as session:
+            result = session.run(query, **params)
+            return [dict(record) for record in result]
 
     def write_genealogy_batch(
         self,

@@ -1,6 +1,6 @@
 # RFC: Tolkien World-Building Integration
 
-> **Status:** Accepted — Kickoff Slice  
+> **Status:** In Progress — #46 Linguistic Engine v1 complete  
 > **Milestone:** [Tolkien World-Building](https://github.com/tflynn3/book-graph-analyzer/milestone/2)  
 > **Issues:** #45–#51  
 > **Author:** BGA Core  
@@ -241,3 +241,25 @@ not a new top-level package.
 1. Should `LanguageForm` be a first-class Neo4j node or a property on existing entities? → **Decision: First-class node** (enables cross-entity etymology queries).
 2. How deep should genealogy auto-extraction go vs. manual seed data? → Deferred to Issue #47.
 3. Should editorial layers affect lore-rule confidence scores? → Yes, via `source_authority` weight (Issue #48).
+
+---
+
+## 8. Progress Log
+
+| Issue | Pillar | Status | Notes |
+|-------|--------|--------|-------|
+| #45 | Kickoff Slice | ✅ Complete | Models, stubs, CLI placeholders, tests |
+| #46 | Linguistic Engine v1 | ✅ Complete | `GraphWriter.write_linguistic_lineage`, JSON parser, CLI `worldbible languages`, 50 tests |
+| #47 | Deep Genealogy | 🔲 Not started | Stub raises `NotImplementedError` |
+| #48 | Editorial Layers | 🔲 Not started | Stub raises `NotImplementedError` |
+| #49 | Cultural Rules | 🔲 Not started | |
+| #50 | Cosmological Timeline | 🔲 Not started | |
+| #51 | Integration Testing | 🔲 Not started | |
+
+### #46 Remaining TODOs
+
+- [ ] LLM-powered lineage extraction from raw text (currently requires structured JSON input)
+- [ ] Integration with `extract.resolver` for language-aware alias matching
+- [ ] Batch-optimized Cypher (current impl uses per-lineage transactions)
+- [ ] `worldbible.extractor` integration for automatic language category extraction
+- [ ] Query helpers: "all names for entity X across languages" as a CLI subcommand

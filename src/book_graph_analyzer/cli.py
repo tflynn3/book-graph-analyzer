@@ -5172,20 +5172,65 @@ def workflow_analyze_open_failures(label: str, limit: int, workflow_path: str, e
 @worldbible.command(name="languages")
 @click.argument("bible_path", type=click.Path(exists=True))
 @click.option("--entity", "-e", help="Filter by entity ID")
-def worldbible_languages(bible_path: str, entity: str | None) -> None:
-    """Show linguistic lineage / etymology chains from world bible.
+@click.option("--write-graph", "-w", is_flag=True, help="Write lineages to Neo4j graph")
+def worldbible_languages(bible_path: str, entity: str | None, write_graph: bool) -> None:
+    """Show linguistic lineage / etymology chains from a lineage JSON file.
 
     Displays how names translate across Tolkien's invented languages.
+    Use --write-graph to persist lineages to Neo4j.
 
-    TODO(#46): Implement linguistic lineage extraction and display.
+    The input file should be a JSON file with a "lineages" array.
+    See docs/DATA_MODEL.md for the expected format.
 
     Example:
-        bga worldbible languages hobbit_bible.json
-        bga worldbible languages hobbit_bible.json -e place_rivendell
+        bga worldbible languages lineages.json
+        bga worldbible languages lineages.json -e place_rivendell
+        bga worldbible languages lineages.json --write-graph
     """
-    console.print("[yellow]Not yet implemented — see Issue #46 (Linguistic Lineage)[/yellow]")
-    console.print("[dim]This command will show etymology chains across Tolkien's languages.[/dim]")
-    console.print("[dim]e.g., Imladris (Sindarin) → Rivendell (Common Speech) → Karningul (Westron)[/dim]")
+    from book_graph_analyzer.worldbible.lineage import load_lineages_from_file
+
+    try:
+        lineages = load_lineages_from_file(bible_path)
+    except (json.JSONDecodeError, KeyError) as exc:
+        console.print(f"[red]Error parsing lineage file: {exc}[/red]")
+        raise SystemExit(1)
+
+    if not lineages:
+        console.print("[yellow]No lineages found in file.[/yellow]")
+        return
+
+    # Filter by entity if requested
+    if entity:
+        lineages = [l for l in lineages if l.entity_id == entity]
+        if not lineages:
+            console.print(f"[yellow]No lineages found for entity '{entity}'.[/yellow]")
+            return
+
+    # Display lineages
+    for lin in lineages:
+        console.print(f"\n[bold cyan]Entity:[/bold cyan] {lin.entity_id}")
+        for form in lin.forms:
+            gloss = f"  — {form.gloss}" if form.gloss else ""
+            console.print(f"  [{form.language.value}] [bold]{form.form}[/bold]{gloss}")
+        if lin.derivations:
+            console.print("  [dim]Derivations:[/dim]")
+            for d in lin.derivations:
+                console.print(f"    {d.source_form_id} →[{d.derivation_type.value}]→ {d.target_form_id}")
+
+    console.print(f"\n[green]{len(lineages)} lineage(s) loaded.[/green]")
+
+    # Write to graph if requested
+    if write_graph:
+        from book_graph_analyzer.graph.writer import GraphWriter
+
+        try:
+            writer = GraphWriter()
+            total = writer.write_linguistic_lineage_batch(lineages)
+            console.print(f"[green]Wrote {total} language forms to Neo4j.[/green]")
+            writer.close()
+        except ConnectionError as exc:
+            console.print(f"[red]Neo4j connection failed: {exc}[/red]")
+            raise SystemExit(1)
 
 
 @lore.command(name="genealogy")
