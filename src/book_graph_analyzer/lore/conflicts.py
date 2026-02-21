@@ -20,6 +20,7 @@ from ..models.lore_conflict import (
     AuthorPeriod,
 )
 from ..models.lore_rule import LoreValidationResult, LoreViolation
+from ..models.worldbuilding import infer_editorial_layer
 
 
 # ---------------------------------------------------------------------------
@@ -486,6 +487,9 @@ class ConflictDetector:
         else:
             conflict_type = ConflictType.DIRECT_CONTRADICTION
 
+        new_layer = infer_editorial_layer(source_book)
+        existing_layer = infer_editorial_layer(existing_source)
+
         return LoreConflict(
             id=conflict_id,
             summary=f"Auto-detected conflict for entity/rule: {entity_ids or rule_ids}",
@@ -497,11 +501,33 @@ class ConflictDetector:
                     statement=existing_statement,
                     source_book=existing_source,
                     author_period=existing_period,
+                    source_id=getattr(existing_layer, "source_id", None),
+                    editorial_status=(
+                        getattr(getattr(existing_layer, "editorial_status", None), "value", None)
+                        if existing_layer
+                        else None
+                    ),
+                    source_authority_weight=(
+                        float(getattr(existing_layer, "authority_weight", 1.0))
+                        if existing_layer
+                        else None
+                    ),
                 ),
                 ConflictClaim(
                     statement=new_statement,
                     source_book=source_book,
                     author_period=author_period,
+                    source_id=getattr(new_layer, "source_id", None),
+                    editorial_status=(
+                        getattr(getattr(new_layer, "editorial_status", None), "value", None)
+                        if new_layer
+                        else None
+                    ),
+                    source_authority_weight=(
+                        float(getattr(new_layer, "authority_weight", 1.0))
+                        if new_layer
+                        else None
+                    ),
                 ),
             ],
             resolution_policy=(

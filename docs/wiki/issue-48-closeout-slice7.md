@@ -19,6 +19,7 @@
 - `ExtractionBridge.bridge_event()` infers editorial layers from source book and populates metadata.
 - `ConflictDetector.detect_conflicts()` backfills conflict source metadata from involved events.
 - `GraphWriter` now persists and queries the new event/conflict source fields.
+- Non-spatiotemporal lore conflict auto-detection now enriches `ConflictClaim` source metadata (`source_id`, `editorial_status`, `source_authority_weight`) when source titles are recognized.
 - `CorpusReconciler.add_book_from_json()` now supports:
   - normalized spatiotemporal event JSON (`{"events": [...]}`)
   - raw lore-event JSON (`{"events": {...}}` and `{"events": [...]}`)
@@ -27,6 +28,9 @@
 ## Validation
 
 - New test: `tests/test_issue48_closeout_integration.py`
+- Extended tests:
+  - `tests/test_conflict_tracking.py::test_detect_new_conflict_enriches_claim_source_metadata_when_known`
+  - `tests/test_spatiotemporal_slice3.py::TestWriterConflictPersistence::test_write_single_conflict`
 - Uses real fixtures:
   - `data/output/hobbit_events.json`
   - `data/output/unfinished_tales_events.json`
@@ -34,3 +38,9 @@
   - fixture loading through corpus reconciler path
   - event ID namespacing
   - editorial/source metadata inferred and retained end-to-end
+  - non-spatiotemporal conflict-claim metadata propagation on auto-detected lore conflicts
+  - Neo4j write params include persisted timeline conflict source fields (`event_a_*` / `event_b_*`)
+
+## Readiness
+
+- Issue #48 scope is now complete and regression-covered across both spatiotemporal and lore-conflict paths.
