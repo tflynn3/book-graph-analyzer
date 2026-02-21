@@ -5730,6 +5730,9 @@ def workflow_post_open_failures_summary(
         "|---|---:|---|:---:|---|",
     ]
 
+    severity_rank = {"critical": 0, "high": 1, "medium": 2, "low": 3}
+    analyzed_rows = []
+
     unresolved = 0
     severity_counts = {"critical": 0, "high": 0, "medium": 0, "low": 0}
     for issue in actionable:
@@ -5741,6 +5744,11 @@ def workflow_post_open_failures_summary(
         if analysis.missing_secrets:
             unresolved += 1
         severity_counts[analysis.severity] = severity_counts.get(analysis.severity, 0) + 1
+        analyzed_rows.append((issue, analysis))
+
+    analyzed_rows.sort(key=lambda x: (severity_rank.get(x[1].severity, 99), x[0].number))
+
+    for issue, analysis in analyzed_rows:
         lines.append(
             f"| #{issue.number} {issue.title} | {analysis.run_id or 'n/a'} | "
             f"{analysis.severity} | "

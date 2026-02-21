@@ -313,6 +313,7 @@ jobs:
 
     issues = [
         IssueData(number=40, title="[agentics] Failed runs", body="parent", url="u40"),
+        IssueData(number=42, title="[agentics] Non-secret timeout", body="run failed due to timeout", url="u42"),
         IssueData(number=41, title="[agentics] Architecture failed", body=ISSUE_TEXT, url="u41"),
     ]
     monkeypatch.setattr("book_graph_analyzer.ops.list_open_issues_via_gh", lambda label, limit: issues)
@@ -344,7 +345,8 @@ jobs:
     assert "Automated Failure Summary" in captured["body"]
     assert "Severity" in captured["body"]
     assert "Severity breakdown" in captured["body"]
-    assert "#41" in captured["body"]
+    # critical issue (#41) should appear before low issue (#42)
+    assert captured["body"].find("#41") < captured["body"].find("#42")
 
 
 def test_cli_workflow_post_diagnosis(monkeypatch, tmp_path: Path):
