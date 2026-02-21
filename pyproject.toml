@@ -36,6 +36,11 @@ dev = [
 local-llm = [
     "ollama>=0.1",
 ]
+docs = [
+    "mkdocs>=1.6",
+    "mkdocs-material>=9.5",
+    "pymdown-extensions>=10.0",
+]
 
 [project.scripts]
 bga = "book_graph_analyzer.cli:main"
