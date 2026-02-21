@@ -268,3 +268,20 @@ not a new top-level package.
 - [ ] Batch-optimized Cypher (current impl uses per-lineage transactions)
 - [ ] `worldbible.extractor` integration for automatic language category extraction
 - [ ] Query helpers: "all names for entity X across languages" as a CLI subcommand
+
+### #50 Slice 1 (Impression-of-Depth Engine) Update
+
+Implemented in this slice:
+- Added first-class lore-depth models (`LoreArtifact`, `BrokenReference`) in `models/lore_depth.py`
+- Added extraction helper `lore.depth.extract_lore_depth(...)` for artifact-like mentions and unresolved markers
+- Added GraphWriter persistence/query helpers for lore depth nodes and unresolved-reference reporting
+- Added CLI commands under existing families:
+  - `worldbible artifacts`
+  - `lore unresolved-refs`
+- Added tests in `tests/test_issue_50_lore_depth_slice1.py`
+
+Remaining for Issue #50:
+- stronger context-aware extraction and disambiguation
+- resolver-backed candidate linking for broken references
+- richer provenance/conflict weighting across editorial layers
+- generation-time consumption of unresolved reference queues
