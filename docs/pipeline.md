@@ -89,3 +89,9 @@ Slice 6 additions:
 - report now includes source-attribution counts by `source_book`
 - LLM causal extraction auto-batches large event sets and still falls back safely
 - `bga ingest` prints inferred editorial source metadata when recognized
+
+Slice 7 closeout additions:
+- `CorpusReconciler.add_book_from_json()` now accepts both normalized spatiotemporal payloads and raw `lore events` payloads (`{"events": {...}}` and `{"events": [...]}`), bridging automatically.
+- Cross-book reconcile now namespaces imported event IDs as `<book_id>:<event_id>` to avoid accidental ID collisions across books.
+- Bridged events persist editorial/source metadata (`source_id`, `editorial_status`, `source_authority_weight`) inferred from corpus book titles.
+- Persisted `TimelineConflict` nodes now include source metadata for both involved events (`event_a_*` / `event_b_*` source fields).
