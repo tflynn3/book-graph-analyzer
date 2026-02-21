@@ -502,6 +502,17 @@ Tracks which source text and editorial period a fact comes from.
 Pre-defined sources for major Tolkien works are available in
 `book_graph_analyzer.models.worldbuilding.TOLKIEN_SOURCES`.
 
+### Spatiotemporal Engine (Issue #48)
+
+Normalized event-time representation with location graph for timeline checks.
+
+- **Python models:** `book_graph_analyzer.spatiotemporal.models` — `NormalizedTime`, `SpatiotemporalEvent`, `LocationNode`, `LocationEdge`
+- **Graph writer:** `GraphWriter.write_spatiotemporal_event()`, `write_location_graph()`, `query_conflicting_overlaps()`, `query_travel_infeasibility()`
+- **CLI:** `bga lore timeline-reconcile <events.json> [-l locations.json] [--format json]`
+- **Status:** ✅ Implemented (v1)
+
+See [Graph Schema](GRAPH_SCHEMA.md#spatiotemporal-nodes-issue-48) for node/relationship details.
+
 ---
 
 ## Schema Evolution
