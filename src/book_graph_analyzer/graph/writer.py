@@ -1560,3 +1560,98 @@ class GraphWriter:
             for record in session.run(query, eid=entity_id, speed=max_speed_per_year):
                 results.append(dict(record))
         return results
+
+    # ------------------------------------------------------------------
+    # CausalLink persistence (Slice 4 — Issue #48)
+    # ------------------------------------------------------------------
+
+    def write_causal_link(self, link) -> None:
+        """Persist a CausalLink as an edge between SpatiotemporalEvent nodes.
+
+        Creates a :CAUSES relationship with description and confidence.
+        Idempotent: uses MERGE on the (cause, effect) pair.
+        Also creates a :CausalLink node for queryability.
+        """
+        # Node for queryability
+        node_q = """
+        MERGE (cl:CausalLink {cause_event_id: $cause_id, effect_event_id: $effect_id})
+        SET cl.description = $desc, cl.confidence = $conf, cl.updated_at = datetime()
+        """
+        # Edge between events
+        edge_q = """
+        MATCH (a:SpatiotemporalEvent {id: $cause_id})
+        MATCH (b:SpatiotemporalEvent {id: $effect_id})
+        MERGE (a)-[r:CAUSES]->(b)
+        SET r.description = $desc, r.confidence = $conf
+        """
+        params = {
+            "cause_id": link.cause_event_id,
+            "effect_id": link.effect_event_id,
+            "desc": link.description,
+            "conf": link.confidence,
+        }
+        with self.driver.session() as session:
+            session.run(node_q, **params)
+            session.run(edge_q, **params)
+
+    def write_causal_links_batch(self, links: list) -> int:
+        """Write a batch of CausalLink objects. Returns count written."""
+        for link in links:
+            self.write_causal_link(link)
+        return len(links)
+
+    def query_causal_chain(self, event_id: str, direction: str = "forward", max_depth: int = 10) -> list[dict]:
+        """Query causal chain from an event.
+
+        Args:
+            event_id: Starting event ID
+            direction: 'forward' (effects) or 'backward' (causes)
+            max_depth: Maximum chain depth
+
+        Returns:
+            List of dicts with event info and chain depth
+        """
+        if direction == "forward":
+            query = f"""
+            MATCH path = (start:SpatiotemporalEvent {{id: $eid}})-[:CAUSES*1..{max_depth}]->(e:SpatiotemporalEvent)
+            RETURN e.id AS id, e.description AS description, e.entity_name AS entity_name,
+                   e.time_era AS era, e.time_year_start AS year, length(path) AS depth
+            ORDER BY depth
+            """
+        else:
+            query = f"""
+            MATCH path = (e:SpatiotemporalEvent)-[:CAUSES*1..{max_depth}]->(target:SpatiotemporalEvent {{id: $eid}})
+            RETURN e.id AS id, e.description AS description, e.entity_name AS entity_name,
+                   e.time_era AS era, e.time_year_start AS year, length(path) AS depth
+            ORDER BY depth
+            """
+        results = []
+        with self.driver.session() as session:
+            for record in session.run(query, eid=event_id):
+                results.append(dict(record))
+        return results
+
+    def query_causal_violations(self, min_confidence: float = 0.0, limit: int = 50) -> list[dict]:
+        """Find causal links where effect occurs before cause (paradoxes).
+
+        Uses the graph to find CAUSES edges where the effect event's time
+        is earlier than the cause event's time.
+        """
+        query = """
+        MATCH (cause:SpatiotemporalEvent)-[r:CAUSES]->(effect:SpatiotemporalEvent)
+        WHERE r.confidence >= $min_conf
+          AND cause.time_era = effect.time_era
+          AND effect.time_year_end IS NOT NULL AND cause.time_year_start IS NOT NULL
+          AND effect.time_year_end < cause.time_year_start
+        RETURN cause.id AS cause_id, cause.description AS cause_desc,
+               effect.id AS effect_id, effect.description AS effect_desc,
+               r.confidence AS confidence, r.description AS link_desc,
+               cause.time_era AS era
+        ORDER BY r.confidence DESC
+        LIMIT $limit
+        """
+        results = []
+        with self.driver.session() as session:
+            for record in session.run(query, min_conf=min_confidence, limit=limit):
+                results.append(dict(record))
+        return results

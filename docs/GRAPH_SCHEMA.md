@@ -141,11 +141,11 @@
 })
 ```
 
-### CausalLink (Slice 3 — Issue #48)
+### CausalLink (Slice 3+4 — Issue #48)
 ```cypher
 (:CausalLink {
   cause_event_id: string, effect_event_id: string,
-  description: string, confidence: float
+  description: string, confidence: float, updated_at: datetime
 })
 ```
 
@@ -153,6 +153,7 @@
 ```cypher
 (:Entity)-[:PARTICIPATED_IN]->(:SpatiotemporalEvent)
 (:SpatiotemporalEvent)-[:LOCATED_AT]->(:Location)
+(:SpatiotemporalEvent)-[:CAUSES {description: string, confidence: float}]->(:SpatiotemporalEvent)
 (:Location)-[:TRAVEL_ROUTE {travel_days: float, mode: string, difficulty: string}]->(:Location)
 (:TimelineConflict)-[:INVOLVES]->(:SpatiotemporalEvent)
 ```

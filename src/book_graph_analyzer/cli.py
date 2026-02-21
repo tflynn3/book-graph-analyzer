@@ -4084,9 +4084,12 @@ def lore_timeline_reconcile(events_file: str, locations: str | None, output: str
 @click.option("--source-book", "-b", default=None, help="Source book name for events")
 @click.option("--write-neo4j", is_flag=True,
               help="Persist events and detected conflicts to Neo4j")
+@click.option("--causal-links", is_flag=True,
+              help="Extract causal link candidates and check for paradoxes")
 def lore_timeline_bridge(
     events_file: str, locations: str | None, output: str | None,
     fmt: str, source_book: str | None, write_neo4j: bool = False,
+    causal_links: bool = False,
 ) -> None:
     """Bridge extracted events through spatiotemporal normalization and reconcile.
 
@@ -4094,14 +4097,19 @@ def lore_timeline_bridge(
     expressions, detects conflicts including era mismatches, and reports
     extraction-vs-normalized confidence deltas.
 
+    Use --causal-links to extract causal link candidates and feed them
+    into paradox detection.
+
     Examples:
         bga lore timeline-bridge hobbit_events.json
         bga lore timeline-bridge events.json -l locations.json --format json -o report.json
+        bga lore timeline-bridge events.json --causal-links --write-neo4j
     """
     from book_graph_analyzer.lore.events import Event, EventGraph
     from book_graph_analyzer.spatiotemporal import (
         ConflictDetector, ReconciliationReport,
         LocationNode, LocationEdge, ExtractionBridge,
+        extract_causal_links_heuristic,
     )
 
     # Load events from lore event format
@@ -4127,6 +4135,12 @@ def lore_timeline_bridge(
 
     console.print(f"[dim]Bridged {bridge_report.total} events through normalization[/dim]")
 
+    # Extract causal links if requested
+    extracted_links = []
+    if causal_links:
+        extracted_links = extract_causal_links_heuristic(st_events)
+        console.print(f"[dim]Extracted {len(extracted_links)} causal link candidates[/dim]")
+
     # Load locations if provided
     loc_nodes: dict[str, LocationNode] = {}
     loc_edges: list[LocationEdge] = []
@@ -4140,9 +4154,13 @@ def lore_timeline_bridge(
             loc_edges.append(LocationEdge(**e))
         console.print(f"[dim]Loaded {len(loc_nodes)} locations, {len(loc_edges)} routes[/dim]")
 
-    # Detect conflicts including era mismatches
+    # Detect conflicts including era mismatches and causal paradoxes
     detector = ConflictDetector(locations=loc_nodes, edges=loc_edges)
-    conflicts = detector.detect_conflicts(st_events, check_era_mismatches=True)
+    conflicts = detector.detect_conflicts(
+        st_events, check_era_mismatches=True,
+        check_causal_paradoxes=bool(extracted_links),
+        causal_links=extracted_links,
+    )
     report = ReconciliationReport(
         conflicts=conflicts, events=st_events, bridge_report=bridge_report,
     )
@@ -4158,8 +4176,11 @@ def lore_timeline_bridge(
             writer = GraphWriter()
             ev_count = writer.write_spatiotemporal_events_batch(st_events)
             cf_count = writer.write_timeline_conflicts_batch(conflicts)
+            cl_count = 0
+            if extracted_links:
+                cl_count = writer.write_causal_links_batch(extracted_links)
             writer.close()
-            console.print(f"[green]OK[/green] Wrote {ev_count} events, {cf_count} conflicts to Neo4j")
+            console.print(f"[green]OK[/green] Wrote {ev_count} events, {cf_count} conflicts, {cl_count} causal links to Neo4j")
 
     if fmt == "json":
         result = report.to_dict()
@@ -5583,6 +5604,133 @@ def lore_genealogy(character: str | None, house: str | None, depth: int) -> None
         console.print(f"[dim]Requested: ancestry of {character} (depth={depth})[/dim]")
     if house:
         console.print(f"[dim]Requested: members of {house}[/dim]")
+
+
+@corpus.command(name="timeline-reconcile")
+@click.argument("corpus_name")
+@click.option("--events-dir", "-e", type=click.Path(exists=True),
+              help="Directory with per-book event JSON files (default: data/output/)")
+@click.option("--locations", "-l", type=click.Path(exists=True),
+              help="Location graph JSON file")
+@click.option("--output", "-o", type=click.Path(), help="Output file")
+@click.option("--format", "fmt", type=click.Choice(["text", "json"]), default="text",
+              help="Output format")
+@click.option("--causal-links", is_flag=True, default=True,
+              help="Extract causal link candidates (default: on)")
+@click.option("--write-neo4j", is_flag=True,
+              help="Persist results to Neo4j")
+def corpus_timeline_reconcile(
+    corpus_name: str, events_dir: str | None, locations: str | None,
+    output: str | None, fmt: str, causal_links: bool, write_neo4j: bool,
+) -> None:
+    """Reconcile timelines across all books in a corpus.
+
+    Evaluates spatiotemporal conflicts within each book and across books.
+    Extracts causal link candidates and checks for paradoxes.
+
+    Each book needs a corresponding event JSON file (from 'bga lore events'
+    or 'bga corpus events').
+
+    Examples:
+        bga corpus timeline-reconcile tolkien_works
+        bga corpus timeline-reconcile tolkien_works -e data/events/ --format json -o report.json
+        bga corpus timeline-reconcile tolkien_works --write-neo4j
+    """
+    from book_graph_analyzer.corpus import CorpusManager
+    from book_graph_analyzer.spatiotemporal import (
+        CorpusReconciler, LocationNode, LocationEdge, SpatiotemporalEvent,
+    )
+
+    manager = CorpusManager(corpus_name)
+    books = manager.list_books()
+    if not books:
+        console.print("[yellow]No books in corpus[/yellow]")
+        return
+
+    # Load locations if provided
+    loc_nodes: dict[str, LocationNode] = {}
+    loc_edges: list[LocationEdge] = []
+    if locations:
+        with open(locations, "r", encoding="utf-8") as f:
+            loc_data = json.load(f)
+        for n in loc_data.get("locations", loc_data.get("nodes", [])):
+            node = LocationNode(**n)
+            loc_nodes[node.id] = node
+        for e in loc_data.get("edges", loc_data.get("routes", [])):
+            loc_edges.append(LocationEdge(**e))
+
+    reconciler = CorpusReconciler(
+        locations=loc_nodes, edges=loc_edges, extract_causal=causal_links,
+    )
+
+    # Find event files for each book
+    search_dir = Path(events_dir) if events_dir else Path("data/output")
+    loaded = 0
+    for book in books:
+        book_slug = book.id or book.title.lower().replace(" ", "_")
+        candidates = [
+            search_dir / f"{book_slug}_events.json",
+            search_dir / f"{corpus_name}_{book_slug}_events.json",
+            search_dir / f"{book_slug}.json",
+        ]
+        found = None
+        for c in candidates:
+            if c.exists():
+                found = c
+                break
+        if not found:
+            console.print(f"[yellow]No event file found for '{book.title}' (tried {book_slug}_events.json)[/yellow]")
+            continue
+        count = reconciler.add_book_from_json(str(found), book.id, book.title)
+        console.print(f"[dim]Loaded {count} events for '{book.title}' from {found.name}[/dim]")
+        loaded += 1
+
+    if loaded == 0:
+        console.print("[red]No event files found. Run 'bga lore events' or 'bga corpus events' first.[/red]")
+        return
+
+    console.print(f"\n[bold]Reconciling {loaded} book(s) in corpus: {corpus_name}[/bold]")
+    result = reconciler.reconcile()
+
+    # Write to Neo4j if requested
+    if write_neo4j:
+        from book_graph_analyzer.graph.writer import GraphWriter
+        from book_graph_analyzer.graph.connection import check_neo4j_connection
+
+        if not check_neo4j_connection():
+            console.print("[red]Cannot connect to Neo4j[/red]")
+        else:
+            writer = GraphWriter()
+            ev_total = 0
+            for book in result.books:
+                ev_total += writer.write_spatiotemporal_events_batch(book.events)
+            cf_total = 0
+            for conflicts in result.per_book_conflicts.values():
+                cf_total += writer.write_timeline_conflicts_batch(conflicts)
+            cf_total += writer.write_timeline_conflicts_batch(result.cross_book_conflicts)
+            cl_total = writer.write_causal_links_batch(result.all_causal_links)
+            writer.close()
+            console.print(
+                f"[green]OK[/green] Wrote {ev_total} events, {cf_total} conflicts, "
+                f"{cl_total} causal links to Neo4j"
+            )
+
+    if fmt == "json":
+        out = result.to_dict()
+        if output:
+            with open(output, "w", encoding="utf-8") as f:
+                json.dump(out, f, indent=2)
+            console.print(f"[green]OK[/green] Report saved to {output}")
+        else:
+            console.print(json.dumps(out, indent=2))
+    else:
+        text = result.summary_text()
+        if output:
+            with open(output, "w", encoding="utf-8") as f:
+                f.write(text)
+            console.print(f"[green]OK[/green] Report saved to {output}")
+        else:
+            console.print(text)
 
 
 @corpus.command(name="sources")

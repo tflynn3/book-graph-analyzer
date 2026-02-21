@@ -20,6 +20,8 @@ from .normalizer import TimeNormalizer
 from .conflict_detector import ConflictDetector
 from .report import ReconciliationReport
 from .extraction_bridge import ExtractionBridge, NormalizationResult, BridgeReport
+from .causal_extraction import extract_causal_links_heuristic
+from .corpus_reconciler import CorpusReconciler, CorpusReconciliationResult, BookEvents
 
 __all__ = [
     "NormalizedTime",
@@ -35,4 +37,8 @@ __all__ = [
     "ExtractionBridge",
     "NormalizationResult",
     "BridgeReport",
+    "extract_causal_links_heuristic",
+    "CorpusReconciler",
+    "CorpusReconciliationResult",
+    "BookEvents",
 ]
