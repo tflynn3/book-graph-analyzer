@@ -265,3 +265,39 @@ jobs:
     assert out.exists()
     text = out.read_text(encoding="utf-8")
     assert "Workflow Failure Remediation Report" in text
+
+
+def test_cli_workflow_post_diagnosis(monkeypatch, tmp_path: Path):
+    wf = tmp_path / "wf.yml"
+    wf.write_text(
+        """
+jobs:
+  a:
+    steps:
+      - run: echo hi
+        env:
+          COPILOT_GITHUB_TOKEN: ${{ secrets.COPILOT_GITHUB_TOKEN }}
+""",
+        encoding="utf-8",
+    )
+
+    monkeypatch.setattr(
+        "book_graph_analyzer.ops.fetch_issue_via_gh",
+        lambda issue_number: IssueData(number=41, title="failed", body=ISSUE_TEXT, url="u41"),
+    )
+    monkeypatch.setattr("book_graph_analyzer.ops.post_issue_comment_via_gh", lambda issue_number, body: True)
+
+    runner = CliRunner()
+    res = runner.invoke(
+        main,
+        [
+            "workflow-post-diagnosis",
+            "--issue",
+            "41",
+            "--workflow",
+            str(wf),
+        ],
+    )
+    # Missing secret -> command still aborts non-zero after posting
+    assert res.exit_code != 0
+    assert "Posted diagnosis report" in res.output

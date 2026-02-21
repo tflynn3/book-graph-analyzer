@@ -82,3 +82,20 @@ def list_open_issues_via_gh(label: str = "", limit: int = 20) -> list[IssueData]
         return out
     except Exception:
         return []
+
+
+def post_issue_comment_via_gh(issue_number: int, body: str) -> bool:
+    """Post a comment to an issue via gh CLI.
+
+    Returns True on success.
+    """
+    try:
+        proc = subprocess.run(
+            ["gh", "issue", "comment", str(issue_number), "--body", body],
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        return proc.returncode == 0
+    except Exception:
+        return False
