@@ -4977,6 +4977,61 @@ def review_seed_demo(db_path: str) -> None:
     console.print("[green]Seeded demo review items.[/green]")
 
 
+@main.command(name="workflow-check-secrets")
+@click.option(
+    "--workflow",
+    "workflow_path",
+    default=".github/workflows/architecture-posture-review.lock.yml",
+    show_default=True,
+    help="Path to workflow YAML to inspect for secrets.* references",
+)
+@click.option(
+    "--env-file",
+    default="",
+    help="Optional .env file to include when checking secret availability",
+)
+def workflow_check_secrets(workflow_path: str, env_file: str) -> None:
+    """Check whether secrets required by a workflow are present in local env.
+
+    This helps diagnose agentic workflow failures that say:
+    "Secret Verification Failed".
+    """
+    from book_graph_analyzer.ops.workflow_secrets import (
+        extract_required_secrets,
+        parse_env_file,
+        check_secrets_available,
+    )
+
+    path = Path(workflow_path)
+    if not path.exists():
+        console.print(f"[red]Workflow file not found:[/red] {path}")
+        raise click.Abort()
+
+    required = extract_required_secrets(path)
+    overrides = parse_env_file(env_file) if env_file else {}
+    present, missing = check_secrets_available(required, env_overrides=overrides)
+
+    table = Table(title=f"Workflow Secret Check: {path.name}")
+    table.add_column("Secret")
+    table.add_column("Status")
+
+    for s in present:
+        table.add_row(s, "[green]present[/green]")
+    for s in missing:
+        table.add_row(s, "[red]missing[/red]")
+
+    console.print(table)
+
+    if missing:
+        console.print(
+            "\n[yellow]Missing required secret(s).[/yellow] "
+            "Configure them in repo/org settings or provide via environment."
+        )
+        raise click.Abort()
+
+    console.print("\n[green]All required secrets found.[/green]")
+
+
 if __name__ == "__main__":
     main()
 
