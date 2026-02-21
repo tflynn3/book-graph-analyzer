@@ -5512,24 +5512,121 @@ def worldbible_languages(bible_path: str, entity: str | None, write_graph: bool)
 @click.option("--character", "-c", help="Character to show family tree for")
 @click.option("--house", "-H", help="Filter by house (e.g., 'House of Finwë')")
 @click.option("--depth", "-d", default=3, type=int, help="Generational depth to display")
-def lore_genealogy(character: str | None, house: str | None, depth: int) -> None:
-    """Show deep genealogy for a character or house.
+@click.option("--extract", "-e", type=click.Path(exists=True), help="Extract genealogy from text file")
+@click.option("--load", "-l", type=click.Path(exists=True), help="Load genealogy from JSON file")
+@click.option("--write", "-w", is_flag=True, help="Write extracted/loaded genealogy to Neo4j")
+@click.option("--book", "-b", default="", help="Book title for provenance tagging")
+def lore_genealogy(
+    character: str | None,
+    house: str | None,
+    depth: int,
+    extract: str | None,
+    load: str | None,
+    write: bool,
+    book: str,
+) -> None:
+    """Show, extract, or load genealogy for a character or house.
 
     Displays family trees with generational depth, inheritance traits,
-    and house membership.
-
-    TODO(#47): Implement genealogy extraction and tree display.
+    and house membership. Can extract from text or load from JSON.
 
     Examples:
         bga lore genealogy --character Aragorn
         bga lore genealogy --house "House of Finwë" --depth 5
+        bga lore genealogy --extract silmarillion.txt --write -b "The Silmarillion"
+        bga lore genealogy --load family_tree.json --write
     """
-    console.print("[yellow]Not yet implemented — see Issue #47 (Deep Genealogy)[/yellow]")
-    console.print("[dim]This command will show family trees with generational depth.[/dim]")
-    if character:
-        console.print(f"[dim]Requested: ancestry of {character} (depth={depth})[/dim]")
-    if house:
-        console.print(f"[dim]Requested: members of {house}[/dim]")
+    from book_graph_analyzer.worldbible.genealogy import (
+        extract_genealogy_from_text,
+        load_genealogy_from_file,
+        genealogy_to_json,
+        build_ancestor_chain,
+        build_descendant_tree,
+    )
+
+    relations: list = []
+
+    # ── Extract from text ────────────────────────────────────────────────
+    if extract:
+        console.print(f"[bold]Extracting genealogy from:[/bold] {extract}")
+        text = Path(extract).read_text(encoding="utf-8")
+        relations = extract_genealogy_from_text(text, passage_id=extract, house=house)
+        console.print(f"  Found [green]{len(relations)}[/green] relations (incl. inverses)")
+
+        if relations:
+            from rich.table import Table
+            table = Table(title="Extracted Genealogy", show_lines=False)
+            table.add_column("Source", style="cyan")
+            table.add_column("Relation", style="yellow")
+            table.add_column("Target", style="cyan")
+            table.add_column("Conf.", style="dim")
+            for r in relations[:30]:
+                table.add_row(
+                    r.source_name or r.source_id,
+                    r.relation_type.value,
+                    r.target_name or r.target_id,
+                    f"{r.confidence:.1f}",
+                )
+            if len(relations) > 30:
+                table.add_row("...", f"+{len(relations)-30} more", "...", "")
+            console.print(table)
+
+    # ── Load from JSON ───────────────────────────────────────────────────
+    elif load:
+        console.print(f"[bold]Loading genealogy from:[/bold] {load}")
+        relations = load_genealogy_from_file(load)
+        console.print(f"  Loaded [green]{len(relations)}[/green] relations")
+
+    # ── Write to Neo4j ───────────────────────────────────────────────────
+    if write and relations:
+        try:
+            from book_graph_analyzer.graph.writer import GraphWriter
+            writer = GraphWriter()
+            writer.initialize()
+            count = writer.write_genealogy_batch(relations, book=book)
+            console.print(f"  Written [green]{count}[/green] genealogy edges to Neo4j")
+            writer.close()
+        except ConnectionError as exc:
+            console.print(f"[red]Neo4j connection failed: {exc}[/red]")
+            raise SystemExit(1)
+
+    # ── Query mode (character or house) ──────────────────────────────────
+    if (character or house) and not extract and not load:
+        try:
+            from book_graph_analyzer.graph.writer import GraphWriter
+            writer = GraphWriter()
+            results = writer.query_genealogy(
+                character_name=character, house=house, depth=depth,
+            )
+            writer.close()
+
+            if not results:
+                console.print("[dim]No genealogy data found. Use --extract or --load to add data.[/dim]")
+                return
+
+            from rich.table import Table
+            table = Table(title=f"Genealogy: {character or house}", show_lines=False)
+            table.add_column("Source", style="cyan")
+            table.add_column("Relation", style="yellow")
+            table.add_column("Target", style="cyan")
+            table.add_column("House", style="magenta")
+            table.add_column("Depth", style="dim")
+            for r in results:
+                table.add_row(
+                    r.get("source", ""),
+                    r.get("rel", ""),
+                    r.get("target", ""),
+                    r.get("house", "") or "",
+                    str(r.get("generation_depth", "")) if r.get("generation_depth") else "",
+                )
+            console.print(table)
+
+        except ConnectionError as exc:
+            console.print(f"[red]Neo4j connection failed: {exc}[/red]")
+            raise SystemExit(1)
+
+    if not extract and not load and not character and not house:
+        console.print("[dim]Use --character, --house, --extract, or --load. See --help.[/dim]")
 
 
 @corpus.command(name="sources")
@@ -5595,6 +5692,67 @@ def pipeline_worldbuilding(path: str, title: str | None, pillars: tuple[str]) ->
         console.print(f"  [yellow]⏳[/yellow] {pillar.title()} — not yet implemented (Issue {issue_map[pillar]})")
 
     console.print(f"\n[dim]Each pillar will be implemented incrementally. See docs/tolkien-worldbuilding-rfc.md[/dim]")
+
+
+@main.command(name="workflow-post-open-failures-summary")
+@click.option("--parent-issue", default=40, show_default=True, type=int, help="Parent tracker issue number")
+@click.option("--label", default="agentic-workflows", show_default=True, help="Issue label to scan")
+@click.option("--limit", default=20, show_default=True, help="Max open issues to inspect")
+@click.option(
+    "--workflow",
+    "workflow_path",
+    default=".github/workflows/architecture-posture-review.lock.yml",
+    show_default=True,
+    help="Workflow YAML used by failed runs",
+)
+@click.option("--env-file", default="", help="Optional .env file for local secret checks")
+def workflow_post_open_failures_summary(
+    parent_issue: int,
+    label: str,
+    limit: int,
+    workflow_path: str,
+    env_file: str,
+) -> None:
+    """Post a markdown summary of open failure sub-issues to the parent issue."""
+    from book_graph_analyzer.ops import list_open_issues_via_gh, post_issue_comment_via_gh
+    from book_graph_analyzer.ops.workflow_failure import analyze_failure_from_issue_text
+
+    issues = list_open_issues_via_gh(label=label, limit=limit)
+    actionable = [i for i in issues if not i.title.strip().lower().startswith("[agentics] failed runs")]
+
+    lines = [
+        "## Automated Failure Summary",
+        "",
+        "| Issue | Run ID | Secret Verification Failed | Missing Secrets |",
+        "|---|---:|:---:|---|",
+    ]
+
+    unresolved = 0
+    for issue in actionable:
+        analysis = analyze_failure_from_issue_text(
+            issue.body,
+            workflow_path=workflow_path,
+            env_file=env_file or None,
+        )
+        if analysis.missing_secrets:
+            unresolved += 1
+        lines.append(
+            f"| #{issue.number} {issue.title} | {analysis.run_id or 'n/a'} | "
+            f"{str(analysis.secret_verification_failed).lower()} | "
+            f"{(';'.join(analysis.missing_secrets) if analysis.missing_secrets else 'none')} |"
+        )
+
+    lines.append("")
+    lines.append(f"Open actionable failures: **{len(actionable)}**")
+    lines.append(f"Unresolved (missing secrets): **{unresolved}**")
+
+    body = "\n".join(lines)
+    ok = post_issue_comment_via_gh(parent_issue, body)
+    if not ok:
+        console.print(f"[red]Failed to post summary to issue #{parent_issue}.[/red]")
+        raise click.Abort()
+
+    console.print(f"[green]Posted open-failures summary to issue #{parent_issue}.[/green]")
 
 
 if __name__ == "__main__":
