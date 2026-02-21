@@ -79,3 +79,40 @@ def analyze_failure_from_issue_file(
     """Load issue markdown from file and analyze it."""
     text = Path(issue_file).read_text(encoding="utf-8")
     return analyze_failure_from_issue_text(text, workflow_path=workflow_path, env_file=env_file)
+
+
+def build_remediation_report(analysis: FailureAnalysis, issue_ref: str = "") -> str:
+    """Build a markdown remediation report from failure analysis output."""
+    lines: list[str] = []
+    lines.append("# Workflow Failure Remediation Report")
+    if issue_ref:
+        lines.append("")
+        lines.append(f"Issue: {issue_ref}")
+    lines.append("")
+    lines.append(f"Run URL: {analysis.run_url or 'n/a'}")
+    lines.append(f"Run ID: {analysis.run_id or 'n/a'}")
+    lines.append("")
+    lines.append("## Diagnosis")
+    lines.append(analysis.summary)
+    lines.append("")
+    lines.append("## Required secrets")
+    if analysis.required_secrets:
+        for s in analysis.required_secrets:
+            status = "present" if s in analysis.present_secrets else "missing"
+            lines.append(f"- {s}: **{status}**")
+    else:
+        lines.append("- none detected in workflow")
+
+    lines.append("")
+    lines.append("## Suggested actions")
+    if analysis.missing_secrets:
+        lines.append("1. Add missing secrets in repository settings (Settings -> Secrets and variables -> Actions).")
+        for s in analysis.missing_secrets:
+            lines.append(f"   - {s}")
+        lines.append("2. Re-run the failed workflow after adding secrets.")
+        lines.append("3. Verify secret scope (repo/org/environment) matches workflow context.")
+    else:
+        lines.append("1. Secrets appear present. Investigate token scope/permissions and workflow logs.")
+        lines.append("2. Use `gh aw logs <run-url>` and `gh aw audit <run-id>` for deeper trace.")
+
+    return "\n".join(lines)

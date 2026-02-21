@@ -5165,6 +5165,45 @@ def workflow_analyze_open_failures(label: str, limit: int, workflow_path: str, e
         raise click.Abort()
 
 
+@main.command(name="workflow-remediation-report")
+@click.option("--issue", "issue_number", required=True, type=int, help="GitHub issue number")
+@click.option(
+    "--workflow",
+    "workflow_path",
+    default=".github/workflows/architecture-posture-review.lock.yml",
+    show_default=True,
+    help="Workflow YAML used by the failed run",
+)
+@click.option("--env-file", default="", help="Optional .env file for local secret checks")
+@click.option("--out", "out_path", default="", help="Optional output markdown path")
+def workflow_remediation_report(issue_number: int, workflow_path: str, env_file: str, out_path: str) -> None:
+    """Generate a markdown remediation report for a failed workflow issue."""
+    from book_graph_analyzer.ops import fetch_issue_via_gh
+    from book_graph_analyzer.ops.workflow_failure import (
+        analyze_failure_from_issue_text,
+        build_remediation_report,
+    )
+
+    issue = fetch_issue_via_gh(issue_number)
+    if not issue:
+        console.print(f"[red]Could not fetch issue #{issue_number} via gh CLI.[/red]")
+        raise click.Abort()
+
+    analysis = analyze_failure_from_issue_text(
+        issue.body,
+        workflow_path=workflow_path,
+        env_file=env_file or None,
+    )
+    report = build_remediation_report(analysis, issue_ref=f"#{issue.number} {issue.title}")
+
+    if out_path:
+        Path(out_path).write_text(report, encoding="utf-8")
+        console.print(f"[green]Wrote remediation report:[/green] {out_path}")
+    else:
+        console.print(report)
+
+    if analysis.missing_secrets:
+        raise click.Abort()
 # ============================================================================
 # World-Building Placeholder Commands (Issue #45 — Tolkien Kickoff)
 # ============================================================================
