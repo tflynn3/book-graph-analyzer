@@ -11,6 +11,8 @@ from ..worldbible import WorldBible
 from .context import AssembledContext, ContextAssembler
 from .models import Scene, SceneScores, GenerationConfig, GenerationStatus
 from .judge import NarrativeJudge
+from .pipeline import StagedPipeline
+from .voice_patcher import VoicePatcher
 
 
 class SceneGenerator:
@@ -123,6 +125,12 @@ Keep the same general content and length, just fix the problems.'''
             neo4j_driver=self.driver,
         )
         self.world_bible: Optional[WorldBible] = None
+        self.voice_patcher = VoicePatcher(llm_client=self.llm)
+        self.pipeline = StagedPipeline(
+            scene_generator=self,
+            voice_patcher=self.voice_patcher,
+            config=self.config,
+        )
     
     def load_world_bible(self, path: str) -> None:
         """Load world bible for constraint checking."""
@@ -353,27 +361,37 @@ Keep the same general content and length, just fix the problems.'''
             context_snapshot=assembled_context,
         )
         
-        # 4. Constitutional critique loop
-        for iteration in range(self.config.max_critique_iterations):
-            violations = self._critique_scene(scene, neo4j_context)
-            
-            if not violations:
-                break
-            
-            scene.critique_notes.extend([v["description"] for v in violations])
-            scene.revision_count += 1
-            
-            # Revise
-            scene.text = self._revise_scene(scene.text, violations)
-        
+        # 4. Staged pipeline (lore enforce + optional voice patch)
+        scene, lore_violations = self.pipeline.run(
+            scene=scene,
+            neo4j_context=neo4j_context,
+            voice_profiles={},
+        )
+
         # 6. Score the scene
-        scene.scores = self._score_scene(scene, context_text)
+        scene.scores = self._score_scene(scene, context_text, lore_violations=lore_violations)
         
         # 7. Flag if below threshold
         if scene.scores.overall < self.config.min_quality_score:
             scene.status = GenerationStatus.FLAGGED
         
         return scene
+
+    def _run_lore_enforcement(self, scene: Scene, context: dict) -> tuple[Scene, list[dict]]:
+        """Run constitutional critique loop and revisions."""
+        last_violations: list[dict] = []
+        for _ in range(self.config.max_critique_iterations):
+            violations = self._critique_scene(scene, context)
+            if not violations:
+                break
+
+            last_violations = violations
+            scene.critique_notes.extend([v["description"] for v in violations])
+            scene.revision_count += 1
+            scene.text = self._revise_scene(scene.text, violations)
+
+        scene.word_count = len(scene.text.split())
+        return scene, last_violations
     
     def _critique_scene(self, scene: Scene, context: dict) -> list[dict]:
         """Run constitutional critique on scene."""
@@ -414,13 +432,13 @@ Keep the same general content and length, just fix the problems.'''
         
         return self.llm.generate(prompt, temperature=0.7)
     
-    def _score_scene(self, scene: Scene, context: str) -> SceneScores:
+    def _score_scene(self, scene: Scene, context: str, lore_violations: Optional[list[dict]] = None) -> SceneScores:
         """Score scene on all dimensions."""
         # Get narrative + style scores from judge
         scores, critique, weaknesses = self.judge.full_evaluation(scene.text, context)
         
-        # Get lore score from critique
-        violations = self._critique_scene(scene, {})
+        # Get lore score from staged-lore pass
+        violations = lore_violations if lore_violations is not None else []
         if not violations:
             scores.lore_score = 1.0
         else:

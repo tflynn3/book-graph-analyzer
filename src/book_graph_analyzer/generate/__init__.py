@@ -14,6 +14,8 @@ from .context import ContextAssembler, AssembledContext
 from .outliner import OutlinerEngine, StoryOutline, ChapterOutline, CanonicalEvent
 from .driver import NovelDriver
 from .shadow.graph import ShadowGraph
+from .pipeline import StagedPipeline
+from .voice_patcher import VoicePatcher
 
 __all__ = [
     "Story",
@@ -31,4 +33,6 @@ __all__ = [
     "CanonicalEvent",
     "NovelDriver",
     "ShadowGraph",
+    "StagedPipeline",
+    "VoicePatcher",
 ]

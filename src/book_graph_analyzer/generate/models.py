@@ -32,6 +32,9 @@ class GenerationConfig:
     # Thresholds
     min_quality_score: float = 0.6  # Below this = flagged for review
     max_critique_iterations: int = 3
+    voice_patch_threshold: float = 0.25
+    enable_voice_patch: bool = True
+    lore_enforce_only_major: bool = True
     
     # Context
     context_window_scenes: int = 3  # How many previous scenes to include
@@ -119,6 +122,7 @@ class Scene:
     status: GenerationStatus = GenerationStatus.DRAFT
     critique_notes: list[str] = field(default_factory=list)
     revision_count: int = 0
+    pipeline_stages_run: list[str] = field(default_factory=list)
     
     # Meta
     word_count: int = 0
@@ -145,6 +149,7 @@ class Scene:
             "status": self.status.value,
             "critique_notes": self.critique_notes,
             "revision_count": self.revision_count,
+            "pipeline_stages_run": self.pipeline_stages_run,
             "word_count": self.word_count,
             "generated_at": self.generated_at.isoformat(),
             "model_used": self.model_used,
@@ -189,6 +194,7 @@ class Scene:
             status=status,
             critique_notes=list(data.get("critique_notes", [])),
             revision_count=int(data.get("revision_count", 0) or 0),
+            pipeline_stages_run=list(data.get("pipeline_stages_run", [])),
             word_count=int(data.get("word_count", 0) or 0),
             generated_at=generated_at,
             model_used=str(data.get("model_used", "")),
