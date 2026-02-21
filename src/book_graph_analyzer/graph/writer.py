@@ -1052,6 +1052,198 @@ class GraphWriter:
             result = session.run(query, **params)
             return [dict(record) for record in result]
 
+    # =========================================================================
+    # World-Building Layer Stubs (Issue #45 — Tolkien World-Building Kickoff)
+    # =========================================================================
+
+    def write_linguistic_lineage(
+        self,
+        lineage,  # LinguisticLineage
+    ) -> int:
+        """Write a linguistic lineage (etymology chain) to the graph.
+
+        Creates LanguageForm nodes and DERIVED_FROM relationships.
+        Idempotent: uses MERGE so repeated calls are safe.
+
+        Optionally links each LanguageForm to an existing entity node
+        (Character/Place/Object/Entity) via HAS_NAME if entity_id is set.
+
+        Args:
+            lineage: LinguisticLineage object with forms and derivations
+
+        Returns:
+            Number of forms written
+        """
+        if not lineage or not lineage.forms:
+            return 0
+
+        count = 0
+
+        with self.driver.session() as session:
+            # Step 1: MERGE LanguageForm nodes
+            for form in lineage.forms:
+                session.run(
+                    """
+                    MERGE (lf:LanguageForm {id: $id})
+                    SET lf.form = $form,
+                        lf.language = $language,
+                        lf.entity_id = $entity_id,
+                        lf.gloss = $gloss,
+                        lf.phonetic = $phonetic,
+                        lf.source_passage_id = $source_passage_id
+                    """,
+                    id=form.id,
+                    form=form.form,
+                    language=form.language.value if hasattr(form.language, "value") else str(form.language),
+                    entity_id=form.entity_id,
+                    gloss=form.gloss,
+                    phonetic=form.phonetic,
+                    source_passage_id=form.source_passage_id,
+                )
+                count += 1
+
+                # Optional: link to existing entity node via HAS_NAME
+                if form.entity_id:
+                    session.run(
+                        """
+                        MATCH (e {id: $entity_id})
+                        MATCH (lf:LanguageForm {id: $form_id})
+                        MERGE (e)-[:HAS_NAME]->(lf)
+                        """,
+                        entity_id=form.entity_id,
+                        form_id=form.id,
+                    )
+
+            # Step 2: MERGE DERIVED_FROM edges
+            for deriv in lineage.derivations:
+                session.run(
+                    """
+                    MATCH (src:LanguageForm {id: $source_id})
+                    MATCH (tgt:LanguageForm {id: $target_id})
+                    MERGE (src)-[r:DERIVED_FROM]->(tgt)
+                    SET r.derivation_type = $dtype,
+                        r.notes = $notes
+                    """,
+                    source_id=deriv.source_form_id,
+                    target_id=deriv.target_form_id,
+                    dtype=deriv.derivation_type.value if hasattr(deriv.derivation_type, "value") else str(deriv.derivation_type),
+                    notes=deriv.notes,
+                )
+
+        return count
+
+    def write_linguistic_lineage_batch(
+        self,
+        lineages: list,  # list[LinguisticLineage]
+    ) -> int:
+        """Write multiple linguistic lineages in a batch.
+
+        Args:
+            lineages: List of LinguisticLineage objects
+
+        Returns:
+            Total number of forms written
+        """
+        total = 0
+        for lineage in lineages:
+            total += self.write_linguistic_lineage(lineage)
+        return total
+
+    def query_linguistic_lineage(
+        self,
+        entity_id: str | None = None,
+        language: str | None = None,
+        limit: int = 50,
+    ) -> list[dict]:
+        """Query linguistic forms and their derivation chains.
+
+        Args:
+            entity_id: Filter by entity ID
+            language: Filter by language name
+            limit: Maximum results
+
+        Returns:
+            List of dicts with form info and derivation chains
+        """
+        conditions = []
+        params: dict = {"limit": limit}
+
+        if entity_id:
+            conditions.append("lf.entity_id = $entity_id")
+            params["entity_id"] = entity_id
+
+        if language:
+            conditions.append("lf.language = $language")
+            params["language"] = language
+
+        where = " AND ".join(conditions) if conditions else "true"
+
+        query = f"""
+        MATCH (lf:LanguageForm)
+        WHERE {where}
+        OPTIONAL MATCH (lf)-[r:DERIVED_FROM]->(parent:LanguageForm)
+        RETURN lf.id as id, lf.form as form, lf.language as language,
+               lf.entity_id as entity_id, lf.gloss as gloss,
+               lf.phonetic as phonetic,
+               parent.id as derived_from_id, parent.form as derived_from_form,
+               parent.language as derived_from_language,
+               r.derivation_type as derivation_type
+        ORDER BY lf.entity_id, lf.language
+        LIMIT $limit
+        """
+
+        with self.driver.session() as session:
+            result = session.run(query, **params)
+            return [dict(record) for record in result]
+
+    def write_genealogy_batch(
+        self,
+        relations: list,  # list[GenealogyRelation]
+        book: str = "",
+    ) -> int:
+        """Write genealogy relationships with generational metadata.
+
+        Creates typed family edges (PARENT_OF, ANCESTOR_OF, etc.) with
+        generation_depth, house, and inheritance_traits properties.
+
+        TODO(#47): Implement Cypher for genealogy edges with depth/house metadata
+        TODO(#47): Add inverse-relation auto-creation (PARENT_OF ↔ CHILD_OF)
+
+        Args:
+            relations: List of GenealogyRelation objects
+            book: Source book for provenance
+
+        Returns:
+            Number of relations written
+        """
+        raise NotImplementedError(
+            "Genealogy batch writing not yet implemented. See Issue #47."
+        )
+
+    def write_editorial_provenance(
+        self,
+        entity_id: str,
+        source,  # EditorialLayer
+        confidence: float = 1.0,
+        page_ref: str | None = None,
+    ) -> None:
+        """Link an entity to its editorial source via ATTESTED_IN relationship.
+
+        Creates a (:Source) node if needed and an ATTESTED_IN edge.
+
+        TODO(#48): Implement Source node creation and ATTESTED_IN edge
+        TODO(#48): Add batch variant for corpus-wide provenance tagging
+
+        Args:
+            entity_id: ID of the entity being attested
+            source: EditorialLayer describing the source text
+            confidence: How confidently this entity appears in this source
+            page_ref: Optional page/chapter reference
+        """
+        raise NotImplementedError(
+            "Editorial provenance writing not yet implemented. See Issue #48."
+        )
+
     def query_event_ordering(
         self,
         event1_desc: str,

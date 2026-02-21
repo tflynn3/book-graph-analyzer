@@ -5204,8 +5204,6 @@ def workflow_remediation_report(issue_number: int, workflow_path: str, env_file:
 
     if analysis.missing_secrets:
         raise click.Abort()
-
-
 # ============================================================================
 # World-Building Placeholder Commands (Issue #45 — Tolkien Kickoff)
 # ============================================================================
