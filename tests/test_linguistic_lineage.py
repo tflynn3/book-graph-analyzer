@@ -372,15 +372,14 @@ class TestBackwardCompat:
         ]:
             assert hasattr(GraphWriter, method), f"Missing: {method}"
 
-    def test_other_stubs_still_raise(self):
-        """genealogy and editorial stubs should still raise NotImplementedError."""
+    def test_other_stubs_state(self):
+        """genealogy stays TODO; editorial provenance now no-ops for None source."""
         from book_graph_analyzer.graph.writer import GraphWriter
 
         writer = GraphWriter.__new__(GraphWriter)
         with pytest.raises(NotImplementedError, match="Issue #47"):
             writer.write_genealogy_batch([])
-        with pytest.raises(NotImplementedError, match="Issue #48"):
-            writer.write_editorial_provenance("x", None)
+        writer.write_editorial_provenance("x", None)
 
     def test_existing_kickoff_test_not_implemented_updated(self):
         """The old test expected NotImplementedError for linguistic lineage.

@@ -58,12 +58,21 @@ def ingest(path: str, title: str | None) -> None:
 
     from book_graph_analyzer.ingest.loader import load_book
     from book_graph_analyzer.ingest.splitter import split_into_passages
+    from book_graph_analyzer.models.worldbuilding import infer_editorial_layer
 
     file_path = Path(path)
     book_title = title or file_path.stem.replace("_", " ").replace("-", " ").title()
 
     console.print(f"[bold]Ingesting:[/bold] {book_title}")
-    console.print(f"[dim]Source: {file_path}[/dim]\n")
+    console.print(f"[dim]Source: {file_path}[/dim]")
+    source_layer = infer_editorial_layer(book_title) or infer_editorial_layer(str(file_path))
+    if source_layer:
+        console.print(
+            f"[dim]Editorial source: {source_layer.source_title} "
+            f"[{source_layer.editorial_status.value}, authority={source_layer.authority_weight:.0%}]"
+            "[/dim]"
+        )
+    console.print()
 
     # Load the book
     with console.status("Loading book..."):
@@ -5797,22 +5806,32 @@ def corpus_timeline_reconcile(
 @click.argument("corpus_name")
 @click.option("--show-authority", "-a", is_flag=True, help="Show authority weights")
 def corpus_sources(corpus_name: str, show_authority: bool) -> None:
-    """Show editorial source layers for a corpus.
+    """Show editorial source layers for a corpus."""
+    from book_graph_analyzer.models.worldbuilding import TOLKIEN_SOURCES, infer_editorial_layer
 
-    Displays which source texts have been ingested and their editorial
-    provenance (published, draft, notes, etc.).
+    corpus_dir = Path("data") / "corpora" / corpus_name
+    candidates: list[str] = []
+    if corpus_dir.exists():
+        candidates.extend(str(p) for p in corpus_dir.rglob("*.txt"))
+        candidates.extend(str(p) for p in corpus_dir.rglob("*.epub"))
 
-    TODO(#48): Implement editorial layer tracking in ingest pipeline.
+    inferred = []
+    for item in candidates:
+        layer = infer_editorial_layer(item)
+        if layer:
+            inferred.append((Path(item).name, layer))
 
-    Example:
-        bga corpus sources tolkien_works
-        bga corpus sources tolkien_works --show-authority
-    """
-    console.print("[yellow]Not yet implemented — see Issue #48 (Editorial Layers)[/yellow]")
-    console.print("[dim]This command will show editorial provenance for each source text.[/dim]")
+    if inferred:
+        console.print(f"[bold]Corpus sources ({len(inferred)} matched):[/bold]")
+        for file_name, src in sorted(inferred, key=lambda x: x[0].lower()):
+            weight = f" (authority: {src.authority_weight:.0%})" if show_authority else ""
+            console.print(
+                f"  {file_name} -> [{src.editorial_status.value}] "
+                f"{src.source_title} ({src.publication_year}){weight}"
+            )
+    else:
+        console.print("[yellow]No local corpus files matched known editorial layers.[/yellow]")
 
-    # Show the pre-defined source registry as a preview
-    from book_graph_analyzer.models.worldbuilding import TOLKIEN_SOURCES
     console.print(f"\n[bold]Known Tolkien Sources ({len(TOLKIEN_SOURCES)}):[/bold]")
     for src in TOLKIEN_SOURCES:
         weight = f"  (authority: {src.authority_weight:.0%})" if show_authority else ""

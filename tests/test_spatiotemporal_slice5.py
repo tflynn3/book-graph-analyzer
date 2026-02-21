@@ -154,6 +154,24 @@ class TestLLMCausalExtraction:
         links = _parse_llm_response(resp, {"e1", "e2"})
         assert len(links) == 1
 
+    def test_llm_batch_mode_for_large_event_sets(self):
+        class BatchLLM:
+            def __init__(self):
+                self.calls = 0
+
+            def generate(self, prompt):
+                self.calls += 1
+                if "\"id\": \"e1\"" in prompt:
+                    return json.dumps([{"cause_event_id": "e1", "effect_event_id": "e2", "confidence": 0.8}])
+                return json.dumps([{"cause_event_id": "e5", "effect_event_id": "e6", "confidence": 0.75}])
+
+        events = [_ev(f"e{i}", year=i, description=f"event {i}") for i in range(1, 7)]
+        llm = BatchLLM()
+        result = extract_causal_links(events, use_llm=True, llm_client=llm, llm_batch_size=4)
+        assert result.mode == ExtractionMode.LLM
+        assert llm.calls == 2
+        assert len(result.links) == 2
+
 
 # ===========================================================================
 # 2. Confidence Calibration
@@ -312,6 +330,18 @@ class TestReportIntegration:
         d = report.to_dict()
         assert "causal_extraction" not in d
         assert "confidence_calibration" not in d
+
+    def test_report_includes_source_attribution(self):
+        events = [
+            _ev("e1", year=1, source_book="The Hobbit"),
+            _ev("e2", year=2, source_book="The Hobbit"),
+            _ev("e3", year=3, source_book="Unfinished Tales"),
+        ]
+        report = ReconciliationReport(conflicts=[], events=events)
+        text = report.to_text()
+        assert "SOURCE ATTRIBUTION" in text
+        d = report.to_dict()
+        assert d["source_attribution"]["The Hobbit"] == 2
 
 
 # ===========================================================================

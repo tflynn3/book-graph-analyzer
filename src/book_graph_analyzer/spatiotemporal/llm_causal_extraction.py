@@ -150,6 +150,7 @@ def extract_causal_links(
     use_llm: bool = False,
     llm_client: object | None = None,
     min_confidence: float = 0.4,
+    llm_batch_size: int = 40,
 ) -> CausalExtractionResult:
     """Extract causal links with optional LLM assistance.
 
@@ -159,6 +160,7 @@ def extract_causal_links(
         llm_client: An LLMClient instance (from book_graph_analyzer.llm).
             Must have a .generate(prompt) method returning a string.
         min_confidence: Minimum confidence threshold for heuristic path.
+        llm_batch_size: Max events per LLM call (for large corpora).
 
     Returns:
         CausalExtractionResult with links and extraction mode metadata.
@@ -168,20 +170,34 @@ def extract_causal_links(
 
     if use_llm and llm_client is not None:
         try:
-            prompt = _LLM_CAUSAL_PROMPT.format(
-                events_json=_format_events_for_prompt(events),
-            )
-            response = llm_client.generate(prompt)  # type: ignore[union-attr]
-            valid_ids = {e.id for e in events}
-            links = _parse_llm_response(response, valid_ids)
-            if links:
+            batch_size = max(1, int(llm_batch_size))
+            all_links: list[CausalLink] = []
+            seen: set[tuple[str, str]] = set()
+
+            for i in range(0, len(events), batch_size):
+                batch = events[i:i + batch_size]
+                prompt = _LLM_CAUSAL_PROMPT.format(
+                    events_json=_format_events_for_prompt(batch),
+                )
+                response = llm_client.generate(prompt)  # type: ignore[union-attr]
+                valid_ids = {e.id for e in batch}
+                links = _parse_llm_response(response, valid_ids)
+                for link in links:
+                    pair = (link.cause_event_id, link.effect_event_id)
+                    if pair in seen:
+                        continue
+                    seen.add(pair)
+                    all_links.append(link)
+
+            if all_links:
+                all_links.sort(key=lambda l: -l.confidence)
                 logger.info(
                     "LLM causal extraction: %d links from %d events",
-                    len(links), len(events),
+                    len(all_links), len(events),
                 )
-                return CausalExtractionResult(links, ExtractionMode.LLM, len(events))
-            else:
-                logger.warning("LLM returned no valid links, falling back to heuristic")
+                return CausalExtractionResult(all_links, ExtractionMode.LLM, len(events))
+
+            logger.warning("LLM returned no valid links, falling back to heuristic")
         except Exception:
             logger.warning("LLM causal extraction failed, falling back to heuristic", exc_info=True)
 

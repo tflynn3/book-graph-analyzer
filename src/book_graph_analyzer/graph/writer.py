@@ -1230,19 +1230,62 @@ class GraphWriter:
         """Link an entity to its editorial source via ATTESTED_IN relationship.
 
         Creates a (:Source) node if needed and an ATTESTED_IN edge.
-
-        TODO(#48): Implement Source node creation and ATTESTED_IN edge
-        TODO(#48): Add batch variant for corpus-wide provenance tagging
-
-        Args:
-            entity_id: ID of the entity being attested
-            source: EditorialLayer describing the source text
-            confidence: How confidently this entity appears in this source
-            page_ref: Optional page/chapter reference
         """
-        raise NotImplementedError(
-            "Editorial provenance writing not yet implemented. See Issue #48."
-        )
+        if not entity_id or source is None:
+            return
+
+        source_props = {
+            "source_id": getattr(source, "source_id", None),
+            "source_title": getattr(source, "source_title", None),
+            "editorial_status": getattr(getattr(source, "editorial_status", None), "value", None)
+            or str(getattr(source, "editorial_status", ""))
+            or None,
+            "author_period": getattr(getattr(source, "author_period", None), "value", None)
+            or str(getattr(source, "author_period", ""))
+            or None,
+            "publication_year": getattr(source, "publication_year", None),
+            "editor": getattr(source, "editor", None),
+            "volume": getattr(source, "volume", None),
+            "authority_weight": float(getattr(source, "authority_weight", 1.0) or 1.0),
+            "notes": getattr(source, "notes", None),
+        }
+
+        source_id = source_props["source_id"] or source_props["source_title"]
+        if not source_id:
+            return
+
+        query = """
+        MATCH (e {id: $entity_id})
+        MERGE (s:Source {id: $source_id})
+        SET s.source_title = $source_title,
+            s.editorial_status = $editorial_status,
+            s.author_period = $author_period,
+            s.publication_year = $publication_year,
+            s.editor = $editor,
+            s.volume = $volume,
+            s.authority_weight = $authority_weight,
+            s.notes = $notes
+        MERGE (e)-[r:ATTESTED_IN]->(s)
+        SET r.confidence = $confidence,
+            r.page_ref = $page_ref
+        """
+
+        with self.driver.session() as session:
+            session.run(
+                query,
+                entity_id=entity_id,
+                source_id=source_id,
+                source_title=source_props["source_title"],
+                editorial_status=source_props["editorial_status"],
+                author_period=source_props["author_period"],
+                publication_year=source_props["publication_year"],
+                editor=source_props["editor"],
+                volume=source_props["volume"],
+                authority_weight=source_props["authority_weight"],
+                notes=source_props["notes"],
+                confidence=max(0.0, min(1.0, float(confidence))),
+                page_ref=page_ref,
+            )
 
     def query_event_ordering(
         self,

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
+from collections import Counter
 
 from .models import ConflictType, SpatiotemporalEvent, TimelineConflict
 
@@ -51,6 +52,11 @@ class ReconciliationReport:
     def causal_paradox_count(self) -> int:
         return sum(1 for c in self.conflicts if c.conflict_type == ConflictType.CAUSAL_PARADOX)
 
+    @property
+    def source_counts(self) -> dict[str, int]:
+        counter = Counter((e.source_book or "unknown") for e in self.events)
+        return dict(sorted(counter.items(), key=lambda kv: (-kv[1], kv[0])))
+
     def to_text(self) -> str:
         lines = [
             "=" * 60, "  TIMELINE RECONCILIATION REPORT", "=" * 60, "",
@@ -64,6 +70,12 @@ class ReconciliationReport:
         if self.causal_paradox_count:
             lines.append(f"  Causal paradoxes: {self.causal_paradox_count}")
         lines.append("")
+
+        if self.events:
+            lines.extend(["--- SOURCE ATTRIBUTION ---", ""])
+            for source, count in self.source_counts.items():
+                lines.append(f"  {source}: {count} event(s)")
+            lines.append("")
 
         # Confidence bridge summary
         if self.bridge_report and self.bridge_report.total > 0:
@@ -132,6 +144,7 @@ class ReconciliationReport:
             "warnings": self.warning_count,
             "era_mismatches": self.era_mismatch_count,
             "causal_paradoxes": self.causal_paradox_count,
+            "source_attribution": self.source_counts,
             "conflicts": [c.to_dict() for c in self.conflicts],
         }
         if self.bridge_report:

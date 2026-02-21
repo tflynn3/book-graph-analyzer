@@ -44,7 +44,7 @@ bga corpus sources tolkien_works --show-authority
 |--------|-----------|-------|--------|
 | Linguistic Lineage | `worldbible languages` | #46 | 🔲 Stub |
 | Deep Genealogy | `lore genealogy` | #47 | 🔲 Stub |
-| Editorial Layers | `corpus sources` | #48 | 🔲 Stub |
+| Editorial Layers | `corpus sources` | #48 | 🟨 Partial (source inference + authority display) |
 | Cultural Rules | `worldbible cultures --rules` | #49 | 🔲 Planned |
 | Spatiotemporal Engine | `lore timeline-reconcile`, `lore timeline-bridge` | #48 | ✅ v2 (era mismatch + extraction bridge) |
 | Cosmological Timeline | `lore timeline --cosmological` | #50 | 🔲 Planned |
@@ -84,3 +84,8 @@ normalizes temporal expressions through the spatiotemporal normalizer, detects
 conflicts including era mismatches, and reports extraction-vs-normalized
 confidence deltas. This surfaces cases where the extraction was overconfident
 or where normalization boosted confidence.
+
+Slice 6 additions:
+- report now includes source-attribution counts by `source_book`
+- LLM causal extraction auto-batches large event sets and still falls back safely
+- `bga ingest` prints inferred editorial source metadata when recognized

@@ -122,6 +122,20 @@ class TestWorldBuildingModels:
         assert "The Hobbit" in titles
         assert "The Silmarillion" in titles
 
+    def test_find_editorial_layer_by_titleish_name(self):
+        from book_graph_analyzer.models.worldbuilding import find_editorial_layer
+
+        layer = find_editorial_layer("the_hobbit")
+        assert layer is not None
+        assert layer.source_id == "src_hobbit"
+
+    def test_infer_editorial_layer_from_filename(self):
+        from book_graph_analyzer.models.worldbuilding import infer_editorial_layer
+
+        layer = infer_editorial_layer("data/texts/the_return_king.txt")
+        assert layer is not None
+        assert layer.source_id == "src_return_king"
+
     def test_tolkien_language_enum_completeness(self):
         from book_graph_analyzer.models.worldbuilding import TolkienLanguage
 
@@ -233,12 +247,29 @@ class TestGraphWriterStubs:
         with pytest.raises(NotImplementedError, match="Issue #47"):
             writer.write_genealogy_batch([])
 
-    def test_editorial_provenance_raises_not_implemented(self):
+    def test_editorial_provenance_is_noop_without_source(self):
         from book_graph_analyzer.graph.writer import GraphWriter
 
         writer = GraphWriter.__new__(GraphWriter)
-        with pytest.raises(NotImplementedError, match="Issue #48"):
-            writer.write_editorial_provenance("entity_1", None)
+        # Should no-op gracefully (not raise)
+        writer.write_editorial_provenance("entity_1", None)
+
+    def test_editorial_provenance_writes_source_relationship(self):
+        from unittest.mock import MagicMock
+        from book_graph_analyzer.graph.writer import GraphWriter
+        from book_graph_analyzer.models.worldbuilding import TOLKIEN_SOURCES
+
+        mock_driver = MagicMock()
+        mock_session = MagicMock()
+        mock_driver.session.return_value.__enter__ = MagicMock(return_value=mock_session)
+        mock_driver.session.return_value.__exit__ = MagicMock(return_value=False)
+        writer = GraphWriter(driver=mock_driver)
+
+        writer.write_editorial_provenance("entity_1", TOLKIEN_SOURCES[0], confidence=0.8)
+        assert mock_session.run.called
+        _, kwargs = mock_session.run.call_args
+        assert kwargs["entity_id"] == "entity_1"
+        assert kwargs["source_id"] == TOLKIEN_SOURCES[0].source_id
 
     def test_existing_methods_still_exist(self):
         """Verify existing GraphWriter methods are not broken."""
