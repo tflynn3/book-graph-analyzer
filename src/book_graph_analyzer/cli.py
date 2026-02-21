@@ -4151,6 +4151,61 @@ def generate_scene(
         console.print(f"\n[green]OK[/green] Written to Neo4j: {stats}")
 
 
+@generate.command(name="outline")
+@click.option("--character", "character", required=True, help="Primary character for the interpolation")
+@click.option("--from", "point_a", required=True, help="Anchor A hint (e.g., 'arrives in Nevrast')")
+@click.option("--to", "point_b", required=True, help="Anchor B hint (e.g., 'reaches Gondolin')")
+@click.option("--chapters", default=10, type=int, show_default=True, help="Number of chapter beats")
+@click.option("--world-bible", "world_bible", type=click.Path(exists=True), help="World bible JSON for hard constraints")
+@click.option("--output", "output", type=click.Path(), help="Output JSON file path")
+def generate_outline(
+    character: str,
+    point_a: str,
+    point_b: str,
+    chapters: int,
+    world_bible: str | None,
+    output: str | None,
+) -> None:
+    """Generate a chapter outline between two canonical anchor events.
+
+    Example:
+        bga generate outline --character Tuor --from "arrives in Nevrast" --to "reaches Gondolin" --chapters 10
+    """
+    from book_graph_analyzer.generate import OutlinerEngine
+
+    engine = OutlinerEngine()
+    if world_bible:
+        engine.load_world_bible(world_bible)
+        console.print(f"[dim]Loaded world bible: {world_bible}[/dim]")
+
+    with console.status("Finding canonical anchor points..."):
+        anchor_a, anchor_b = engine.find_anchor_points(character, point_a, point_b)
+
+    console.print("[bold]Anchor points[/bold]")
+    console.print(f"  A: {anchor_a.description} ({anchor_a.era or 'Unknown'} {anchor_a.year or ''})")
+    console.print(f"  B: {anchor_b.description} ({anchor_b.era or 'Unknown'} {anchor_b.year or ''})")
+
+    with console.status("Generating story outline..."):
+        outline = engine.generate_story_outline(
+            anchor_a=anchor_a,
+            anchor_b=anchor_b,
+            num_chapters=chapters,
+            character=character,
+        )
+
+    if not output:
+        slug = character.lower().replace(" ", "_")
+        output = str(Path("data") / "output" / f"outline_{slug}_{outline.id}.json")
+
+    output_path = Path(output)
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    with open(output_path, "w", encoding="utf-8") as f:
+        json.dump(outline.to_dict(), f, indent=2, ensure_ascii=False)
+
+    console.print(f"\n[green]OK[/green] Outline saved to {output_path}")
+    console.print(f"[bold]Chapters generated:[/bold] {len(outline.chapters)}")
+
+
 @generate.command(name="init-schema")
 def generate_init_schema() -> None:
     """Initialize Neo4j schema for generated content."""

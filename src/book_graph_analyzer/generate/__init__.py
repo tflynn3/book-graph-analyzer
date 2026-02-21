@@ -11,6 +11,7 @@ from .generator import SceneGenerator
 from .judge import NarrativeJudge
 from .writer import GenerationWriter
 from .context import ContextAssembler, AssembledContext
+from .outliner import OutlinerEngine, StoryOutline, ChapterOutline, CanonicalEvent
 
 __all__ = [
     "Story",
@@ -22,4 +23,8 @@ __all__ = [
     "GenerationWriter",
     "ContextAssembler",
     "AssembledContext",
+    "OutlinerEngine",
+    "StoryOutline",
+    "ChapterOutline",
+    "CanonicalEvent",
 ]

@@ -24,11 +24,13 @@ from .resolver import EntityResolver, ResolvedEntity
 VERB_TO_RELATIONSHIP: dict[str, RelationshipType] = {
     # Speech
     "say": RelationshipType.SPOKE_TO,
+    "said": RelationshipType.SPOKE_TO,
     "ask": RelationshipType.SPOKE_TO,
     "tell": RelationshipType.SPOKE_TO,
     "answer": RelationshipType.SPOKE_TO,
     "reply": RelationshipType.SPOKE_TO,
     "speak": RelationshipType.SPOKE_WITH,
+    "spoke": RelationshipType.SPOKE_WITH,
     "talk": RelationshipType.SPOKE_WITH,
     "call": RelationshipType.SPOKE_TO,
     "cry": RelationshipType.SPOKE_TO,
@@ -37,7 +39,9 @@ VERB_TO_RELATIONSHIP: dict[str, RelationshipType] = {
 
     # Movement
     "go": RelationshipType.TRAVELED_TO,
+    "went": RelationshipType.TRAVELED_TO,
     "travel": RelationshipType.TRAVELED_TO,
+    "traveled": RelationshipType.TRAVELED_TO,
     "come": RelationshipType.TRAVELED_TO,
     "arrive": RelationshipType.TRAVELED_TO,
     "reach": RelationshipType.TRAVELED_TO,
@@ -50,8 +54,10 @@ VERB_TO_RELATIONSHIP: dict[str, RelationshipType] = {
 
     # Combat
     "fight": RelationshipType.FOUGHT,
+    "fought": RelationshipType.FOUGHT,
     "attack": RelationshipType.FOUGHT_AGAINST,
     "kill": RelationshipType.KILLED,
+    "killed": RelationshipType.KILLED,
     "slay": RelationshipType.KILLED,
     "defeat": RelationshipType.FOUGHT_AGAINST,
     "capture": RelationshipType.CAPTURED,
@@ -59,8 +65,10 @@ VERB_TO_RELATIONSHIP: dict[str, RelationshipType] = {
 
     # Objects
     "give": RelationshipType.GAVE,
+    "gave": RelationshipType.GAVE,
     "receive": RelationshipType.RECEIVED,
     "take": RelationshipType.POSSESSES,
+    "took": RelationshipType.POSSESSES,
     "find": RelationshipType.FOUND,
     "lose": RelationshipType.LOST,
     "steal": RelationshipType.STOLE,
@@ -71,14 +79,17 @@ VERB_TO_RELATIONSHIP: dict[str, RelationshipType] = {
 
     # Social
     "meet": RelationshipType.MET,
+    "met": RelationshipType.MET,
     "join": RelationshipType.ALLIED_WITH,
     "help": RelationshipType.HELPED,
+    "helped": RelationshipType.HELPED,
     "serve": RelationshipType.SERVES,
     "lead": RelationshipType.LEADS,
     "betray": RelationshipType.BETRAYED,
 
     # Location
     "live": RelationshipType.LIVES_IN,
+    "lived": RelationshipType.LIVES_IN,
     "dwell": RelationshipType.LIVES_IN,
     "visit": RelationshipType.VISITED,
     "rule": RelationshipType.RULES,
