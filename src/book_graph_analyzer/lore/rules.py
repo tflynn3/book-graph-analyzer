@@ -372,6 +372,25 @@ class LoreRuleRegistry:
             if r.scope_era is None or r.scope_era == era
         ]
 
+    def by_linguistic_scope(self, linguistic: "LinguisticContext") -> list[LoreRule]:
+        """Return rules applicable given a linguistic context.
+
+        Rules with a scope_entity_type that matches entities present in the
+        linguistic context are included, along with universal rules.
+        This is the integration hook for linguistic-aware rule filtering.
+        """
+        if not linguistic or not linguistic.entity_languages:
+            return self.all()
+        known_entities = set(linguistic.entity_languages.keys())
+        return [
+            r for r in self._rules.values()
+            if r.scope_entity_type is None
+            or any(
+                r.scope_entity_type.lower() in (linguistic.entity_languages.get(eid, []) + [eid])
+                for eid in known_entities
+            )
+        ]
+
     @classmethod
     def from_tolkien_defaults(cls) -> "LoreRuleRegistry":
         """Create a registry pre-loaded with all Tolkien lore rules."""
@@ -388,6 +407,37 @@ class LoreRuleRegistry:
 # ---------------------------------------------------------------------------
 
 @dataclass
+class LinguisticContext:
+    """Linguistic metadata available for lore validation scoping.
+
+    Provides language/register information so rules can check whether a
+    name is being used in the correct linguistic register (e.g. a Quenya
+    name used in a Sindarin-speaking context).
+
+    This is the integration hook between the linguistic engine (#46)
+    and the lore-rules validation system.
+    """
+    entity_languages: dict[str, list[str]] = None  # entity_id -> [languages]
+    entity_forms: dict[str, list[str]] = None       # entity_id -> [name forms]
+    dominant_language: str | None = None              # scene's dominant language
+
+    def __post_init__(self):
+        if self.entity_languages is None:
+            self.entity_languages = {}
+        if self.entity_forms is None:
+            self.entity_forms = {}
+
+    def entity_has_language(self, entity_id: str, language: str) -> bool:
+        """Check if an entity has a form in the given language."""
+        langs = self.entity_languages.get(entity_id, [])
+        return any(language.lower() in l.lower() for l in langs)
+
+    def forms_for_entity(self, entity_id: str) -> list[str]:
+        """Return all known name forms for an entity."""
+        return self.entity_forms.get(entity_id, [])
+
+
+@dataclass
 class SceneContext:
     """A simplified scene context for pure-Python lore validation.
 
@@ -401,6 +451,7 @@ class SceneContext:
     object_names: list[str]
     event_types: list[str]            # e.g. ['death', 'travel', 'combat']
     story_era: str | None = None
+    linguistic: LinguisticContext | None = None  # linguistic metadata for rule scoping
 
 
 class LoreRuleValidator:

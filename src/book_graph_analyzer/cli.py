@@ -5288,6 +5288,76 @@ def worldbible_languages(bible_path: str | None, entity: str | None, write_graph
             raise SystemExit(1)
 
 
+@worldbible.command(name="entity-names")
+@click.argument("entity_id")
+def worldbible_entity_names(entity_id: str) -> None:
+    """Show all known names/forms for an entity across languages (from Neo4j).
+
+    Queries the graph for all LanguageForm nodes linked to the given entity.
+
+    Examples:
+        bga worldbible entity-names place_rivendell
+        bga worldbible entity-names char_gandalf
+    """
+    from book_graph_analyzer.graph.writer import GraphWriter
+
+    try:
+        writer = GraphWriter()
+        names = writer.query_entity_names(entity_id)
+        writer.close()
+    except ConnectionError as exc:
+        console.print(f"[red]Neo4j connection failed: {exc}[/red]")
+        raise SystemExit(1)
+
+    if not names:
+        console.print(f"[yellow]No names found for entity '{entity_id}'.[/yellow]")
+        console.print("[dim]Ensure linguistic lineages have been written with 'bga worldbible languages -w'[/dim]")
+        return
+
+    console.print(f"\n[bold cyan]Names for entity:[/bold cyan] {entity_id}\n")
+    for n in names:
+        gloss = f"  — {n['gloss']}" if n.get("gloss") else ""
+        phonetic = f"  /{n['phonetic']}/" if n.get("phonetic") else ""
+        console.print(f"  [{n['language']}] [bold]{n['form']}[/bold]{gloss}{phonetic}")
+    console.print(f"\n[green]{len(names)} form(s) found.[/green]")
+
+
+@worldbible.command(name="lineage-chain")
+@click.argument("form_id")
+@click.option("--depth", "-d", default=10, type=int, help="Maximum derivation chain depth")
+def worldbible_lineage_chain(form_id: str, depth: int) -> None:
+    """Trace the etymological derivation chain for a LanguageForm (from Neo4j).
+
+    Shows the full DERIVED_FROM chain starting from the given form.
+
+    Examples:
+        bga worldbible lineage-chain lf_abc123
+    """
+    from book_graph_analyzer.graph.writer import GraphWriter
+
+    try:
+        writer = GraphWriter()
+        chain = writer.query_lineage_chain(form_id, max_depth=depth)
+        writer.close()
+    except ConnectionError as exc:
+        console.print(f"[red]Neo4j connection failed: {exc}[/red]")
+        raise SystemExit(1)
+
+    if not chain:
+        console.print(f"[yellow]No derivation chain found for '{form_id}'.[/yellow]")
+        console.print("[dim]The form may not have DERIVED_FROM edges, or the ID may be wrong.[/dim]")
+        return
+
+    console.print(f"\n[bold cyan]Derivation chain for:[/bold cyan] {form_id}\n")
+    for step in chain:
+        console.print(
+            f"  {step['source_form']} [{step['source_language']}] "
+            f"—[{step['derivation_type'] or '?'}]→ "
+            f"{step['target_form']} [{step['target_language']}]"
+        )
+    console.print(f"\n[green]{len(chain)} derivation step(s).[/green]")
+
+
 @lore.command(name="genealogy")
 @click.option("--character", "-c", help="Character to show family tree for")
 @click.option("--house", "-H", help="Filter by house (e.g., 'House of Finwë')")

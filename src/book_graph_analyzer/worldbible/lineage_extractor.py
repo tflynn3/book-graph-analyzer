@@ -94,6 +94,61 @@ _PATTERNS: list[tuple[str, re.Pattern[str], str]] = [
         ),
         "translation",
     ),
+    # "X, which is Y in Sindarin" / "X, which the Elves call Y"
+    (
+        "which_is",
+        re.compile(
+            r"(?P<form1>[A-ZÀ-Ž][\w''\-]+)"
+            r",?\s+which\s+(?:(?:is|was)\s+(?:the\s+)?|the\s+\w+\s+call(?:ed)?\s+)"
+            r"(?P<form2>[A-ZÀ-Ž][\w''\- ]+?)"
+            r"(?:\s+in\s+(?:the\s+)?(?P<lang2>[A-ZÀ-Ž][\w\s]+?))?(?=[,;.\)]|$)",
+            re.IGNORECASE | re.MULTILINE,
+        ),
+        "translation",
+    ),
+    # "in Sindarin X, in Quenya Y" / "X in Sindarin or Y in Quenya"
+    (
+        "in_lang_or",
+        re.compile(
+            r"(?P<form1>[A-ZÀ-Ž][\w''\-]+)\s+in\s+(?:the\s+)?(?P<lang1>[A-ZÀ-Ž][\w\s]+?)"
+            r"(?:\s*(?:,|or|and)\s*)"
+            r"(?P<form2>[A-ZÀ-Ž][\w''\-]+)\s+in\s+(?:the\s+)?(?P<lang2>[A-ZÀ-Ž][\w\s]+?)(?=[,;.\)]|$)",
+            re.IGNORECASE | re.MULTILINE,
+        ),
+        "translation",
+    ),
+    # "the Elvish/Quenya/Sindarin form of X"
+    (
+        "the_lang_form",
+        re.compile(
+            r"the\s+(?P<lang>[A-ZÀ-Ž][\w]+)\s+(?:form|version|rendering)\s+"
+            r"(?:of\s+)?(?P<form>[A-ZÀ-Ž][\w''\-]+)",
+            re.IGNORECASE | re.MULTILINE,
+        ),
+        "translation",
+    ),
+    # "X derives from Y" / "X is derived from Y"
+    (
+        "derives_from",
+        re.compile(
+            r"(?P<form>[A-ZÀ-Ž][\w''\-]+)\s+(?:is\s+)?derived?\s+from\s+"
+            r"(?:(?:the\s+)?(?P<lang>[A-ZÀ-Ž][\w\s]+?)\s+)?"
+            r"(?P<form2>[A-ZÀ-Ž][\w''\-]+)",
+            re.IGNORECASE | re.MULTILINE,
+        ),
+        "adaptation",
+    ),
+    # "X, literally 'Y'"
+    (
+        "literally",
+        re.compile(
+            r"(?P<form>[A-ZÀ-Ž][\w''\-]+)"
+            r",?\s+(?:literally|lit\.)\s+['\"](?P<gloss>[^'\"]+)['\"]"
+            r"(?:\s+in\s+(?:the\s+)?(?P<lang>[A-ZÀ-Ž][\w\s]+?))?",
+            re.IGNORECASE | re.MULTILINE,
+        ),
+        "translation",
+    ),
 ]
 
 

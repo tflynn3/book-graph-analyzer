@@ -1,6 +1,6 @@
 # RFC: Tolkien World-Building Integration
 
-> **Status:** In Progress — #46 Linguistic Engine v1 + raw-text extraction complete  
+> **Status:** In Progress — #46 Linguistic Engine v1 **complete** (query helpers, expanded patterns, lore-rules hook)  
 > **Milestone:** [Tolkien World-Building](https://github.com/tflynn3/book-graph-analyzer/milestone/2)  
 > **Issues:** #45–#51  
 > **Author:** BGA Core  
@@ -249,17 +249,23 @@ not a new top-level package.
 | Issue | Pillar | Status | Notes |
 |-------|--------|--------|-------|
 | #45 | Kickoff Slice | ✅ Complete | Models, stubs, CLI placeholders, tests |
-| #46 | Linguistic Engine v1 | ✅ Complete | `GraphWriter.write_linguistic_lineage`, JSON parser, CLI `worldbible languages`, 50 tests |
+| #46 | Linguistic Engine v1 | ✅ Complete | `GraphWriter.write/query_linguistic_lineage`, `query_entity_names`, `query_lineage_chain`, 11 regex patterns, `LinguisticContext` lore-rules hook, CLI `worldbible languages/entity-names/lineage-chain`, 57 tests |
 | #47 | Deep Genealogy | 🔲 Not started | Stub raises `NotImplementedError` |
 | #48 | Editorial Layers | 🔲 Not started | Stub raises `NotImplementedError` |
 | #49 | Cultural Rules | 🔲 Not started | |
 | #50 | Cosmological Timeline | 🔲 Not started | |
 | #51 | Integration Testing | 🔲 Not started | |
 
-### #46 Remaining TODOs
+### #46 Status: Complete
 
-- [ ] LLM-powered lineage extraction from raw text (currently requires structured JSON input)
-- [ ] Integration with `extract.resolver` for language-aware alias matching
+All core deliverables shipped:
+- [x] LLM-powered lineage extraction (with fallback)
+- [x] Integration with `extract.resolver` for language-aware alias matching
+- [x] 11 regex patterns for diverse etymology phrasing
+- [x] Query helpers: `query_entity_names`, `query_lineage_chain` + CLI commands
+- [x] `LinguisticContext` hook for lore-rules scoping
+- [x] 57 tests across 3 test files
+
+Future nice-to-haves (not blocking):
 - [ ] Batch-optimized Cypher (current impl uses per-lineage transactions)
 - [ ] `worldbible.extractor` integration for automatic language category extraction
-- [ ] Query helpers: "all names for entity X across languages" as a CLI subcommand

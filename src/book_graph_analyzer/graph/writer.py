@@ -1196,6 +1196,63 @@ class GraphWriter:
             result = session.run(query, **params)
             return [dict(record) for record in result]
 
+    def query_entity_names(
+        self,
+        entity_id: str,
+    ) -> list[dict]:
+        """Return all LanguageForm names/forms for a given entity.
+
+        Args:
+            entity_id: The entity ID to look up names for.
+
+        Returns:
+            List of dicts with form, language, gloss for each name.
+        """
+        query = """
+        MATCH (lf:LanguageForm)
+        WHERE lf.entity_id = $entity_id
+        RETURN lf.id as id, lf.form as form, lf.language as language,
+               lf.gloss as gloss, lf.phonetic as phonetic
+        ORDER BY lf.language
+        """
+        with self.driver.session() as session:
+            result = session.run(query, entity_id=entity_id)
+            return [dict(record) for record in result]
+
+    def query_lineage_chain(
+        self,
+        form_id: str,
+        max_depth: int = 10,
+    ) -> list[dict]:
+        """Return the full derivation chain for a given LanguageForm.
+
+        Walks DERIVED_FROM edges up to max_depth hops, returning each
+        step in the etymology chain.
+
+        Args:
+            form_id: The LanguageForm id to trace from.
+            max_depth: Maximum derivation hops to follow.
+
+        Returns:
+            List of dicts representing each link in the chain.
+        """
+        query = """
+        MATCH path = (start:LanguageForm {id: $form_id})-[:DERIVED_FROM*1..$max_depth]->(ancestor:LanguageForm)
+        WITH nodes(path) as chain, relationships(path) as rels
+        UNWIND range(0, size(rels)-1) as i
+        WITH chain[i] as src, chain[i+1] as tgt, rels[i] as r
+        RETURN src.id as source_id, src.form as source_form, src.language as source_language,
+               tgt.id as target_id, tgt.form as target_form, tgt.language as target_language,
+               r.derivation_type as derivation_type, r.notes as notes
+        """
+        # Neo4j doesn't support parameterised path lengths, so we inject it safely
+        safe_depth = min(int(max_depth), 50)
+        actual_query = query.replace("$max_depth", str(safe_depth))
+
+        with self.driver.session() as session:
+            result = session.run(actual_query, form_id=form_id)
+            return [dict(record) for record in result]
+
     def write_genealogy_batch(
         self,
         relations: list,  # list[GenealogyRelation]
