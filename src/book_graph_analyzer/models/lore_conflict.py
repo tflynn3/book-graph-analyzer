@@ -70,6 +70,9 @@ class ConflictClaim:
     author_period: str                        # AuthorPeriod value
     confidence: float = 1.0
     source_passage_id: Optional[str] = None   # Passage node ID if available
+    source_id: Optional[str] = None
+    editorial_status: Optional[str] = None
+    source_authority_weight: Optional[float] = None
 
     def to_dict(self) -> dict:
         d = {
@@ -80,6 +83,12 @@ class ConflictClaim:
         }
         if self.source_passage_id:
             d["source_passage_id"] = self.source_passage_id
+        if self.source_id:
+            d["source_id"] = self.source_id
+        if self.editorial_status:
+            d["editorial_status"] = self.editorial_status
+        if self.source_authority_weight is not None:
+            d["source_authority_weight"] = self.source_authority_weight
         return d
 
     @classmethod
@@ -90,6 +99,13 @@ class ConflictClaim:
             author_period=d.get("author_period", AuthorPeriod.MIDDLE),
             confidence=float(d.get("confidence", 1.0)),
             source_passage_id=d.get("source_passage_id"),
+            source_id=d.get("source_id"),
+            editorial_status=d.get("editorial_status"),
+            source_authority_weight=(
+                float(d["source_authority_weight"])
+                if d.get("source_authority_weight") is not None
+                else None
+            ),
         )
 
     def period_order(self) -> int:

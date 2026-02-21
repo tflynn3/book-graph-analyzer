@@ -1,5 +1,7 @@
 # Issue #49 Slice 1 — Genealogy MVP Progress
 
+> Follow-up: see `docs/wiki/issue-49-slice2-genealogy-closeout.md` for closeout enhancements.
+
 This slice delivers a functional genealogy pipeline under `bga lore genealogy`:
 
 - Added `worldbible.genealogy` module:

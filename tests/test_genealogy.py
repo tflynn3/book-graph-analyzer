@@ -5,8 +5,10 @@ from click.testing import CliRunner
 
 from book_graph_analyzer.models.worldbuilding import GenealogyRelationType
 from book_graph_analyzer.worldbible.genealogy import (
+    build_ancestor_chain,
     extract_genealogy_from_text,
     genealogy_to_json,
+    infer_generation_depths,
     load_genealogy_from_file,
     normalize_relation_type,
 )
@@ -27,6 +29,59 @@ def test_extract_genealogy_rules_adds_inverse_relations():
     assert ("Arathorn", "Aragorn", "PARENT_OF") in rel_types
     assert ("Elrond", "Arwen", "PARENT_OF") in rel_types
     assert ("Arwen", "Elrond", "CHILD_OF") in rel_types
+
+
+def test_extract_genealogy_infers_house_from_context():
+    text = "Aragorn son of Arathorn of the House of Isildur."
+    relations = extract_genealogy_from_text(text, passage_id="p1")
+    assert relations
+    assert any(r.house == "House of Isildur" for r in relations)
+
+
+def test_extract_genealogy_infers_generation_depth_for_direct_edges():
+    relations = extract_genealogy_from_text("Thingol father of Luthien.")
+    assert relations
+    assert all(r.generation_depth == 1 for r in relations)
+
+
+def test_infer_generation_depths_for_ancestor_relation_via_traversal():
+    from book_graph_analyzer.models.worldbuilding import GenealogyRelation
+
+    rels = [
+        GenealogyRelation(
+            source_id="char_a",
+            source_name="A",
+            target_id="char_b",
+            target_name="B",
+            relation_type=GenealogyRelationType.PARENT_OF,
+        ),
+        GenealogyRelation(
+            source_id="char_b",
+            source_name="B",
+            target_id="char_c",
+            target_name="C",
+            relation_type=GenealogyRelationType.PARENT_OF,
+        ),
+        GenealogyRelation(
+            source_id="char_a",
+            source_name="A",
+            target_id="char_c",
+            target_name="C",
+            relation_type=GenealogyRelationType.ANCESTOR_OF,
+        ),
+    ]
+
+    out = infer_generation_depths(rels)
+    anc = next(r for r in out if r.relation_type == GenealogyRelationType.ANCESTOR_OF)
+    assert anc.generation_depth == 2
+
+
+def test_build_ancestor_chain_traverses_multiple_generations():
+    relations = extract_genealogy_from_text("Elros son of Earendil. Aragorn son of Arathorn. Arathorn son of Arador.")
+    chain = build_ancestor_chain(relations, character_id="char_aragorn", depth=3)
+    names = {(r.source_name, r.target_name) for r in chain}
+    assert ("Aragorn", "Arathorn") in names
+    assert ("Arathorn", "Arador") in names
 
 
 def test_genealogy_json_roundtrip(tmp_path):

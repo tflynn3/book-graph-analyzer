@@ -7,6 +7,7 @@ from book_graph_analyzer.lore.sociolinguistic_registers import (
     SociolinguisticRegister,
     SociolinguisticRegisterClassifier,
     detect_register_drift,
+    profile_corpus_registers,
 )
 
 
@@ -29,6 +30,29 @@ def test_drift_detection_reports_shift():
     assert drift.baseline_register != ""
     assert drift.current_register != ""
     assert drift.severity in {"low", "medium", "high"}
+
+
+def test_model_assist_fallback_is_safe():
+    classifier = SociolinguisticRegisterClassifier()
+    base = classifier.classify("By sacred oath we march.")
+
+    def bad_assist(_text, _base):
+        raise RuntimeError("boom")
+
+    assisted = classifier.classify("By sacred oath we march.", model_assist=bad_assist)
+    assert assisted.dominant_register == base.dominant_register
+
+
+def test_profile_corpus_registers_builds_distribution_and_drifts():
+    report = profile_corpus_registers([
+        {"entity_id": "char_frodo", "order": 1, "text": "We shared bread and ale by the fire."},
+        {"entity_id": "char_frodo", "order": 2, "text": "By sacred oath we march beneath the banner."},
+        {"entity_id": "char_sam", "order": 1, "text": "Home and garden are worth the road."},
+    ])
+    assert report.total_samples == 3
+    assert sum(report.dominant_distribution.values()) == 3
+    assert "char_frodo" in report.per_entity_latest
+    assert isinstance(report.strongest_drifts, list)
 
 
 class TestGraphWriterSocioreg:
@@ -73,6 +97,29 @@ class TestGraphWriterSocioreg:
         assert len(rows) == 1
         assert rows[0]["magnitude"] >= 0.1
 
+    def test_query_drift_summary(self):
+        writer, session = self._make_writer()
+        session.run.return_value = [
+            {
+                "observed_at": "TA 3018",
+                "dominant_register": "folk",
+                "formality_score": 0.1,
+                "archaism_rate": 0.01,
+                "confidence": 0.6,
+            },
+            {
+                "observed_at": "TA 3019",
+                "dominant_register": "ritual",
+                "formality_score": 0.7,
+                "archaism_rate": 0.12,
+                "confidence": 0.8,
+            },
+        ]
+        summary = writer.query_register_drift_summary("char_aragorn", min_delta=0.1)
+        assert summary["entity_id"] == "char_aragorn"
+        assert summary["drift_count"] == 1
+        assert summary["strongest"] is not None
+
 
 def test_cli_commands_registered_and_run():
     from book_graph_analyzer.cli import main
@@ -96,3 +143,18 @@ def test_cli_commands_registered_and_run():
     )
     assert result_drift.exit_code == 0
     assert "Sociolinguistic Register Drift" in result_drift.output
+
+    result_profile_json = runner.invoke(main, ["lore", "socioreg-profile", "--text", "By oath and rite", "--json"])
+    assert result_profile_json.exit_code == 0
+    assert '"dominant_register"' in result_profile_json.output
+
+    with runner.isolated_filesystem():
+        import json
+        with open("samples.json", "w", encoding="utf-8") as f:
+            json.dump([
+                {"entity_id": "char_frodo", "order": 1, "text": "bread and ale"},
+                {"entity_id": "char_frodo", "order": 2, "text": "sacred oath and banner"},
+            ], f)
+        result_corpus = runner.invoke(main, ["lore", "socioreg-corpus", "--input", "samples.json"])
+        assert result_corpus.exit_code == 0
+        assert "Corpus Socioreg Profile" in result_corpus.output

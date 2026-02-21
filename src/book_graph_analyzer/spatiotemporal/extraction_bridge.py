@@ -165,13 +165,24 @@ class ExtractionBridge:
             era_display = _era_display_name(raw_era_text)
 
         # Normalize time
+        parsed_year: int | None = None
+        if isinstance(event.year, int):
+            parsed_year = event.year
+        elif isinstance(event.year, str):
+            try:
+                parsed_year = int(event.year)
+            except ValueError:
+                parsed_year = None
+
         if event.year_text:
             norm_time = self.normalizer.normalize(event.year_text)
+        elif parsed_year is None and event.year is not None:
+            norm_time = self.normalizer.normalize(str(event.year))
         else:
             norm_time = self.normalizer.normalize_event_time(
                 raw_text=event.year_text,
                 era=era_display,
-                year=event.year,
+                year=parsed_year,
             )
 
         # Check if era changed during normalization
@@ -179,10 +190,10 @@ class ExtractionBridge:
         if raw_era_text and norm_time.era:
             era_changed = raw_era_text.lower().replace(" ", "") != norm_time.era.lower().replace(" ", "")
 
-        # Build SpatiotemporalEvent
-        resolved_source = source_book or event.source_book or None
-        layer = infer_editorial_layer(resolved_source or "") if resolved_source else None
+        source_name = source_book or event.source_book or None
+        layer = infer_editorial_layer(source_name) if source_name else None
 
+        # Build SpatiotemporalEvent
         st_event = SpatiotemporalEvent(
             id=f"st_{event.id}",
             entity_id=event.agent or "unknown",
@@ -191,11 +202,12 @@ class ExtractionBridge:
             time=norm_time,
             description=event.description,
             event_type="extracted",
-            source_book=resolved_source,
+            source_book=source_name,
             source_passage_id=None,
-            structural_stratum=(layer.author_period.value if layer else None),
-            editorial_status=(layer.editorial_status.value if layer else None),
-            source_authority_weight=(layer.authority_weight if layer else None),
+            source_id=getattr(layer, "source_id", None),
+            structural_stratum=getattr(getattr(layer, "author_period", None), "value", None),
+            editorial_status=getattr(getattr(layer, "editorial_status", None), "value", None),
+            source_authority_weight=float(getattr(layer, "authority_weight", 1.0)) if layer else None,
         )
 
         return NormalizationResult(

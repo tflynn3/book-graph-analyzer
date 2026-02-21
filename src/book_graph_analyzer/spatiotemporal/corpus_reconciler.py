@@ -15,6 +15,7 @@ from pathlib import Path
 
 from .causal_extraction import extract_causal_links_heuristic
 from .conflict_detector import ConflictDetector
+from .extraction_bridge import ExtractionBridge
 from .models import (
     CausalLink, ConflictType, LocationEdge, LocationNode,
     SpatiotemporalEvent, TimelineConflict,
@@ -232,18 +233,48 @@ class CorpusReconciler:
         self.books.append(book)
 
     def add_book_from_json(self, json_path: str | Path, book_id: str, book_title: str) -> int:
-        """Load events from a JSON file and add to reconciler. Returns event count."""
+        """Load events from a JSON file and add to reconciler. Returns event count.
+
+        Supports both:
+        - spatiotemporal event payloads (list[SpatiotemporalEvent-like dict])
+        - lore/events payloads ({"events": {id: {...}}} or {"events": [...]})
+        """
         path = Path(json_path)
         with open(path, "r", encoding="utf-8") as f:
             raw = json.load(f)
+
+        raw_events = raw
         if isinstance(raw, dict) and "events" in raw:
             raw_events = raw["events"]
-        elif isinstance(raw, list):
-            raw_events = raw
-        else:
+
+        if isinstance(raw_events, dict):
+            raw_events = list(raw_events.values())
+        if not isinstance(raw_events, list):
             raw_events = []
 
-        events = [SpatiotemporalEvent(**e) for e in raw_events]
+        events: list[SpatiotemporalEvent] = []
+        bridge = ExtractionBridge()
+        for item in raw_events:
+            if not isinstance(item, dict):
+                continue
+            if "entity_id" in item and "time" in item:
+                ev = SpatiotemporalEvent(**item)
+                if not ev.source_book:
+                    ev.source_book = book_title
+                if ":" not in ev.id:
+                    ev.id = f"{book_id}:{ev.id}"
+                events.append(ev)
+                continue
+
+            # Fallback: treat as lore.events.Event-like payload and bridge it.
+            from ..lore.events import Event
+
+            lore_event = Event.from_dict(item)
+            bridged = bridge.bridge_event(lore_event, source_book=book_title).event
+            if ":" not in bridged.id:
+                bridged.id = f"{book_id}:{bridged.id}"
+            events.append(bridged)
+
         self.add_book(book_id, book_title, events)
         return len(events)
 

@@ -79,6 +79,7 @@ class SpatiotemporalEvent(BaseModel):
     event_type: str = "presence"
     source_book: str | None = None
     source_passage_id: str | None = None
+    source_id: str | None = None
     structural_stratum: str | None = None
     editorial_status: str | None = None
     source_authority_weight: float | None = None
@@ -95,6 +96,7 @@ class SpatiotemporalEvent(BaseModel):
             "event_type": self.event_type,
             "source_book": self.source_book,
             "source_passage_id": self.source_passage_id,
+            "source_id": self.source_id,
             "structural_stratum": self.structural_stratum,
             "editorial_status": self.editorial_status,
             "source_authority_weight": self.source_authority_weight,
@@ -156,6 +158,10 @@ class TimelineConflict(BaseModel):
     entity_id: str | None = None
     suggestion: str | None = None
     confidence: float = 0.5
+    event_a_source_book: str | None = None
+    event_b_source_book: str | None = None
+    event_a_source_authority_weight: float | None = None
+    event_b_source_authority_weight: float | None = None
 
     def to_dict(self) -> dict:
         return {
@@ -168,4 +174,8 @@ class TimelineConflict(BaseModel):
             "entity_id": self.entity_id,
             "suggestion": self.suggestion,
             "confidence": self.confidence,
+            "event_a_source_book": self.event_a_source_book,
+            "event_b_source_book": self.event_b_source_book,
+            "event_a_source_authority_weight": self.event_a_source_authority_weight,
+            "event_b_source_authority_weight": self.event_b_source_authority_weight,
         }

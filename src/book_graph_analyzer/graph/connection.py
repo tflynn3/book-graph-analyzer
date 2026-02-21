@@ -45,11 +45,13 @@ def init_schema() -> None:
     constraints = [
         # Unique constraints
         "CREATE CONSTRAINT char_id IF NOT EXISTS FOR (c:Character) REQUIRE c.id IS UNIQUE",
+        "CREATE CONSTRAINT char_canonical_id IF NOT EXISTS FOR (c:Character) REQUIRE c.canonical_id IS UNIQUE",
         "CREATE CONSTRAINT place_id IF NOT EXISTS FOR (p:Place) REQUIRE p.id IS UNIQUE",
         "CREATE CONSTRAINT object_id IF NOT EXISTS FOR (o:Object) REQUIRE o.id IS UNIQUE",
         "CREATE CONSTRAINT event_id IF NOT EXISTS FOR (e:Event) REQUIRE e.id IS UNIQUE",
         "CREATE CONSTRAINT passage_id IF NOT EXISTS FOR (p:Passage) REQUIRE p.id IS UNIQUE",
         "CREATE CONSTRAINT concept_id IF NOT EXISTS FOR (c:Concept) REQUIRE c.id IS UNIQUE",
+        "CREATE CONSTRAINT source_id IF NOT EXISTS FOR (s:Source) REQUIRE s.id IS UNIQUE",
         # Era nodes
         "CREATE CONSTRAINT era_name IF NOT EXISTS FOR (e:Era) REQUIRE e.name IS UNIQUE",
     ]
@@ -57,14 +59,20 @@ def init_schema() -> None:
     indexes = [
         # Name indexes for lookup
         "CREATE INDEX char_name IF NOT EXISTS FOR (c:Character) ON (c.canonical_name)",
+        "CREATE INDEX char_canonical_id_lookup IF NOT EXISTS FOR (c:Character) ON (c.canonical_id)",
         "CREATE INDEX place_name IF NOT EXISTS FOR (p:Place) ON (p.canonical_name)",
         "CREATE INDEX object_name IF NOT EXISTS FOR (o:Object) ON (o.canonical_name)",
+        # Genealogy-focused lookup indexes
+        "CREATE INDEX genealogy_house IF NOT EXISTS FOR ()-[r:GENEALOGY]-() ON (r.house)",
+        "CREATE INDEX genealogy_relation_type IF NOT EXISTS FOR ()-[r:GENEALOGY]-() ON (r.relation_type)",
+        "CREATE INDEX genealogy_generation_depth IF NOT EXISTS FOR ()-[r:GENEALOGY]-() ON (r.generation_depth)",
         # Era ordering index
         "CREATE INDEX era_order IF NOT EXISTS FOR (e:Era) ON (e.era_order)",
         # Temporal validity indexes on relationships would go here if Neo4j supported it
         # For now we rely on property filters in Cypher
         # Passage location index
         "CREATE INDEX passage_loc IF NOT EXISTS FOR (p:Passage) ON (p.book, p.chapter_num, p.sentence_num)",
+        "CREATE INDEX passage_source_layer IF NOT EXISTS FOR (p:Passage) ON (p.source_id, p.source_stratum)",
     ]
 
     with driver.session() as session:

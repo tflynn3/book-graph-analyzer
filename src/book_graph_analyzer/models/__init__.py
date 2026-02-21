@@ -7,6 +7,14 @@ from book_graph_analyzer.models.worldbuilding import (
     GenealogyRelation,
     LanguageForm,
     LinguisticLineage,
+    SourceStratum,
+)
+from book_graph_analyzer.models.lore_depth import (
+    BrokenReference,
+    LoreArtifact,
+    LoreArtifactType,
+    LoreDepthExtractionResult,
+    ReferenceCandidate,
 )
 
 __all__ = [
@@ -21,4 +29,10 @@ __all__ = [
     "GenealogyRelation",
     "LanguageForm",
     "LinguisticLineage",
+    "SourceStratum",
+    "LoreArtifactType",
+    "LoreArtifact",
+    "BrokenReference",
+    "LoreDepthExtractionResult",
+    "ReferenceCandidate",
 ]
