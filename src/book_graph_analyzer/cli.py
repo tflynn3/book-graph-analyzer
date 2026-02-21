@@ -2489,6 +2489,209 @@ def lore_validate(text_file: str, bible: str, corpus: str | None, output: str | 
         console.print(f"\n[green]OK[/green] Results saved to {output}")
 
 
+@lore.command(name="weight")
+@click.option("--passage-id", "-p", default=None,
+              help="Passage ID to fetch from Neo4j and score.")
+@click.option("--text", "-t", default=None,
+              help="Raw text to score directly (no Neo4j needed).")
+@click.option("--era-refs", default=0, type=int,
+              help="Number of era references in the passage (for --text mode).")
+@click.option("--temporal-depth-years", default=None, type=float,
+              help="Temporal depth in years (for --text mode).")
+@click.option("--entity-count", default=0, type=int,
+              help="Number of named entities (for --text mode).")
+@click.option("--is-dialogue", is_flag=True, default=False,
+              help="Treat passage as dialogue.")
+@click.option("--suggestions", "-s", default=3, type=int,
+              help="Number of improvement suggestions to show (default: 3).")
+@click.option("--themes", is_flag=True, default=False,
+              help="List detected Tolkien themes.")
+def lore_weight(
+    passage_id: str | None,
+    text: str | None,
+    era_refs: int,
+    temporal_depth_years: float | None,
+    entity_count: int,
+    is_dialogue: bool,
+    suggestions: int,
+    themes: bool,
+) -> None:
+    """Compute NarrativeWeight breakdown for a passage.
+
+    Analyse why a passage is (or isn't) compelling using the NarrativeWeight
+    composite metric. Shows scores for all 14 components and improvement suggestions.
+
+    Examples:
+        bga lore weight --text "Gandalf spoke of the Elder Days..."
+        bga lore weight --passage-id p_001 --suggestions 5
+        bga lore weight --text "Bilbo found a ring" --is-dialogue --themes
+    """
+    from book_graph_analyzer.lore.narrative_weight import NarrativeWeightComputer
+    from book_graph_analyzer.models.narrative_weight import TOLKIEN_THEMES
+
+    computer = NarrativeWeightComputer()
+
+    if not passage_id and not text:
+        console.print("[red]Provide --passage-id or --text.[/red]")
+        return
+
+    if text:
+        # Direct text scoring (no Neo4j needed)
+        weight = computer.compute_from_text(
+            text=text,
+            era_ref_count=era_refs,
+            temporal_depth_years=temporal_depth_years,
+            entity_count=entity_count,
+            is_dialogue=is_dialogue,
+        )
+        label = "inline text"
+    else:
+        # Fetch from Neo4j
+        from book_graph_analyzer.graph.connection import get_driver, check_neo4j_connection
+        from book_graph_analyzer.models.passage import Passage
+
+        if not check_neo4j_connection():
+            console.print("[red]Cannot connect to Neo4j. Use --text for offline scoring.[/red]")
+            return
+
+        driver = get_driver()
+        with driver.session() as session:
+            result = session.run("MATCH (p:Passage {id: $id}) RETURN p", id=passage_id)
+            row = result.single()
+            if not row:
+                console.print(f"[red]Passage '{passage_id}' not found in Neo4j.[/red]")
+                driver.close()
+                return
+            node = dict(row["p"])
+
+        driver.close()
+
+        # Reconstruct enough of a Passage to compute weight
+        passage = Passage(
+            id=node.get("id", passage_id),
+            text=node.get("text", ""),
+            book=node.get("book", ""),
+            chapter=node.get("chapter", ""),
+            chapter_num=node.get("chapter_num", 0),
+            paragraph_num=node.get("paragraph_num", 0),
+            sentence_num=node.get("sentence_num", 0),
+            char_offset=node.get("char_offset", 0),
+            story_era=node.get("story_era"),
+            story_year=node.get("story_year"),
+            temporal_depth_era=node.get("temporal_depth_era"),
+            temporal_depth_years_back=node.get("temporal_depth_years_back"),
+            era_reference_count=node.get("era_reference_count", 0),
+            is_dialogue=node.get("is_dialogue", False),
+            speaker_ids=node.get("speaker_ids") or [],
+        )
+        weight = computer.compute_from_passage(passage)
+        label = passage_id
+
+    # Display
+    console.print(f"\n[bold]NarrativeWeight Analysis[/bold] — {label}\n")
+    console.print(weight.summary(label))
+
+    # Themes
+    if themes:
+        source = text or ""
+        if not source and passage_id:
+            # Already have node text from above if we fetched from Neo4j
+            try:
+                source = passage.text  # type: ignore[name-defined]
+            except NameError:
+                source = ""
+        detected = computer.detect_themes(source)
+        if detected:
+            console.print(f"\n[bold]Detected Tolkien Themes ({len(detected)}):[/bold]")
+            for theme in detected:
+                ts = "[yellow]★[/yellow]" if theme.tolkien_specific else "  "
+                console.print(f"  {ts} [cyan]{theme.name}[/cyan]")
+                console.print(f"     {theme.description[:100]}...")
+        else:
+            console.print("\n[dim]No themes detected in this passage.[/dim]")
+
+    console.print(f"\n[bold]Overall Score:[/bold] [green]{weight.overall:.3f}[/green] / 1.000")
+
+
+@lore.command(name="themes")
+def lore_themes() -> None:
+    """List all Tolkien themes in the NarrativeWeight taxonomy.
+
+    Example:
+        bga lore themes
+    """
+    from book_graph_analyzer.models.narrative_weight import TOLKIEN_THEMES
+
+    console.print(f"\n[bold]Tolkien Theme Taxonomy ({len(TOLKIEN_THEMES)} themes)[/bold]\n")
+
+    table = Table(show_header=True, header_style="bold")
+    table.add_column("ID", style="cyan", width=30)
+    table.add_column("Name", width=30)
+    table.add_column("Tolkien-specific", width=16)
+    table.add_column("Description")
+
+    for theme in TOLKIEN_THEMES:
+        ts = "[yellow]★ Yes[/yellow]" if theme.tolkien_specific else "No"
+        table.add_row(
+            theme.id,
+            theme.name,
+            ts,
+            theme.description[:80] + "..." if len(theme.description) > 80 else theme.description,
+        )
+    console.print(table)
+
+
+@lore.command(name="top-passages")
+@click.option("--limit", "-n", default=20, help="Number of top passages to return")
+@click.option("--min-score", default=0.0, type=float, help="Minimum overall score")
+def lore_top_passages(limit: int, min_score: float) -> None:
+    """Show top passages by NarrativeWeight overall score from Neo4j.
+
+    Requires passages to have NarrativeWeight computed first
+    (run 'bga lore weight --passage-id ...' for individual passages).
+
+    Example:
+        bga lore top-passages -n 10
+        bga lore top-passages --min-score 0.5
+    """
+    from book_graph_analyzer.lore.narrative_weight import NarrativeWeightNeo4jWriter
+    from book_graph_analyzer.graph.connection import check_neo4j_connection
+
+    if not check_neo4j_connection():
+        console.print("[red]Cannot connect to Neo4j.[/red]")
+        return
+
+    writer = NarrativeWeightNeo4jWriter()
+    results = writer.query_top_passages(limit=limit, min_overall=min_score)
+    writer.close()
+
+    if not results:
+        console.print("[yellow]No scored passages found. Score passages first with 'bga lore weight'.[/yellow]")
+        return
+
+    console.print(f"\n[bold]Top {len(results)} Passages by NarrativeWeight[/bold]\n")
+
+    table = Table(show_header=True, header_style="bold")
+    table.add_column("ID", style="dim", width=22)
+    table.add_column("Score", justify="right", width=7)
+    table.add_column("Story-era", style="cyan", width=14)
+    table.add_column("Depth era", style="magenta", width=14)
+    table.add_column("Text snippet")
+
+    for r in results:
+        snippet = (r.get("text") or "")[:60]
+        if len(r.get("text") or "") > 60:
+            snippet += "..."
+        table.add_row(
+            r.get("id") or "-",
+            f"{r.get('overall', 0):.3f}",
+            r.get("story_era") or "-",
+            r.get("depth_era") or "-",
+            snippet,
+        )
+    console.print(table)
+
+
 @lore.command(name="query-passages")
 @click.option("--temporal-depth", "-d", default=None,
               help="Minimum temporal depth era (e.g. 'First Age'). "
