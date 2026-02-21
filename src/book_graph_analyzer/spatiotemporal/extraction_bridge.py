@@ -205,6 +205,7 @@ class ExtractionBridge:
             source_book=source_name,
             source_passage_id=None,
             source_id=getattr(layer, "source_id", None),
+            structural_stratum=getattr(getattr(layer, "author_period", None), "value", None),
             editorial_status=getattr(getattr(layer, "editorial_status", None), "value", None),
             source_authority_weight=float(getattr(layer, "authority_weight", 1.0)) if layer else None,
         )

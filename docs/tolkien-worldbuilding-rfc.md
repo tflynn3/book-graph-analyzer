@@ -1,6 +1,6 @@
 # RFC: Tolkien World-Building Integration
 
-> **Status:** In Progress - #46 Linguistic Engine v1 complete, #48 Spatiotemporal Engine v5 (LLM causal extraction, confidence calibration, location seeding) complete  
+> **Status:** In Progress - #46 Linguistic Engine v1 complete, #48 Spatiotemporal Engine v5 (LLM causal extraction, confidence calibration, location seeding) complete; #51 Editorial Meta-Layer slice 2 MVP (authority-weighted contradiction clusters + divergence querying) landed  
 > **Milestone:** [Tolkien World-Building](https://github.com/tflynn3/book-graph-analyzer/milestone/2)
 > **Issues:** #45-#51
 > **Author:** BGA Core

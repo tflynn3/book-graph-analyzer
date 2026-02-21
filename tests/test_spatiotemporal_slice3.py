@@ -303,6 +303,28 @@ class TestWriterConflictPersistence:
         results = writer.query_recent_critical_conflicts()
         assert results == []
 
+    def test_query_divergence_hotspots_builds_cypher(self):
+        from book_graph_analyzer.graph.writer import GraphWriter
+        driver = FakeDriver()
+        writer = GraphWriter(driver=driver)
+        results = writer.query_divergence_hotspots(min_sources=2)
+        all_queries = []
+        for s in driver.sessions:
+            all_queries.extend(s.queries)
+        assert any("source_books" in q and "TimelineConflict" in q for q, _ in all_queries)
+        assert results == []
+
+    def test_query_source_divergence_builds_cypher(self):
+        from book_graph_analyzer.graph.writer import GraphWriter
+        driver = FakeDriver()
+        writer = GraphWriter(driver=driver)
+        results = writer.query_source_divergence("the_hobbit", "the_silmarillion")
+        all_queries = []
+        for s in driver.sessions:
+            all_queries.extend(s.queries)
+        assert any("$source_a IN sources" in q for q, _ in all_queries)
+        assert results == []
+
 
 # ===========================================================================
 # 5) CLI tests
