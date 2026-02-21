@@ -224,6 +224,8 @@ jobs:
 
     assert out_json.exists()
     json_text = out_json.read_text(encoding="utf-8")
+    assert "summary" in json_text
+    assert "severity_counts" in json_text
     assert "issue_number" in json_text
     assert "severity" in json_text
     assert "41" in json_text
