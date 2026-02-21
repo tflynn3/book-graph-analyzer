@@ -5032,6 +5032,24 @@ def workflow_check_secrets(workflow_path: str, env_file: str) -> None:
     console.print("\n[green]All required secrets found.[/green]")
 
 
+def _print_workflow_failure_analysis(analysis) -> None:
+    console.print("[bold]Workflow Failure Analysis[/bold]")
+    console.print(f"Run URL: {analysis.run_url or 'n/a'}")
+    console.print(f"Run ID: {analysis.run_id or 'n/a'}")
+    console.print(f"Secret verification phrase detected: {analysis.secret_verification_failed}")
+
+    table = Table(title="Required Secrets")
+    table.add_column("Secret")
+    table.add_column("Status")
+    for s in analysis.present_secrets:
+        table.add_row(s, "[green]present[/green]")
+    for s in analysis.missing_secrets:
+        table.add_row(s, "[red]missing[/red]")
+    console.print(table)
+
+    console.print(f"\n[bold]Diagnosis:[/bold] {analysis.summary}")
+
+
 @main.command(name="workflow-analyze-failure")
 @click.option("--issue-file", required=True, type=click.Path(exists=True), help="Path to saved issue body markdown/text")
 @click.option(
@@ -5054,22 +5072,42 @@ def workflow_analyze_failure(issue_file: str, workflow_path: str, env_file: str)
         workflow_path=workflow_path,
         env_file=env_file or None,
     )
+    _print_workflow_failure_analysis(analysis)
 
-    console.print("[bold]Workflow Failure Analysis[/bold]")
-    console.print(f"Run URL: {analysis.run_url or 'n/a'}")
-    console.print(f"Run ID: {analysis.run_id or 'n/a'}")
-    console.print(f"Secret verification phrase detected: {analysis.secret_verification_failed}")
+    if analysis.missing_secrets:
+        raise click.Abort()
 
-    table = Table(title="Required Secrets")
-    table.add_column("Secret")
-    table.add_column("Status")
-    for s in analysis.present_secrets:
-        table.add_row(s, "[green]present[/green]")
-    for s in analysis.missing_secrets:
-        table.add_row(s, "[red]missing[/red]")
-    console.print(table)
 
-    console.print(f"\n[bold]Diagnosis:[/bold] {analysis.summary}")
+@main.command(name="workflow-analyze-failure-issue")
+@click.option("--issue", "issue_number", required=True, type=int, help="GitHub issue number (e.g. 41)")
+@click.option(
+    "--workflow",
+    "workflow_path",
+    default=".github/workflows/architecture-posture-review.lock.yml",
+    show_default=True,
+    help="Workflow YAML used by the failed run",
+)
+@click.option("--env-file", default="", help="Optional .env file for local secret checks")
+def workflow_analyze_failure_issue(issue_number: int, workflow_path: str, env_file: str) -> None:
+    """Analyze a failed-workflow issue directly via `gh issue view`.
+
+    This avoids manually saving issue body to a file.
+    """
+    from book_graph_analyzer.ops import fetch_issue_via_gh
+    from book_graph_analyzer.ops.workflow_failure import analyze_failure_from_issue_text
+
+    issue = fetch_issue_via_gh(issue_number)
+    if not issue:
+        console.print(f"[red]Could not fetch issue #{issue_number} via gh CLI.[/red]")
+        raise click.Abort()
+
+    console.print(f"Issue #{issue.number}: {issue.title}")
+    analysis = analyze_failure_from_issue_text(
+        issue.body,
+        workflow_path=workflow_path,
+        env_file=env_file or None,
+    )
+    _print_workflow_failure_analysis(analysis)
 
     if analysis.missing_secrets:
         raise click.Abort()
