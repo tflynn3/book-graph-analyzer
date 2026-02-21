@@ -5165,6 +5165,163 @@ def workflow_analyze_open_failures(label: str, limit: int, workflow_path: str, e
         raise click.Abort()
 
 
+# ============================================================================
+# World-Building Placeholder Commands (Issue #45 — Tolkien Kickoff)
+# ============================================================================
+
+@worldbible.command(name="languages")
+@click.argument("bible_path", type=click.Path(exists=True))
+@click.option("--entity", "-e", help="Filter by entity ID")
+@click.option("--write-graph", "-w", is_flag=True, help="Write lineages to Neo4j graph")
+def worldbible_languages(bible_path: str, entity: str | None, write_graph: bool) -> None:
+    """Show linguistic lineage / etymology chains from a lineage JSON file.
+
+    Displays how names translate across Tolkien's invented languages.
+    Use --write-graph to persist lineages to Neo4j.
+
+    The input file should be a JSON file with a "lineages" array.
+    See docs/DATA_MODEL.md for the expected format.
+
+    Example:
+        bga worldbible languages lineages.json
+        bga worldbible languages lineages.json -e place_rivendell
+        bga worldbible languages lineages.json --write-graph
+    """
+    from book_graph_analyzer.worldbible.lineage import load_lineages_from_file
+
+    try:
+        lineages = load_lineages_from_file(bible_path)
+    except (json.JSONDecodeError, KeyError) as exc:
+        console.print(f"[red]Error parsing lineage file: {exc}[/red]")
+        raise SystemExit(1)
+
+    if not lineages:
+        console.print("[yellow]No lineages found in file.[/yellow]")
+        return
+
+    # Filter by entity if requested
+    if entity:
+        lineages = [l for l in lineages if l.entity_id == entity]
+        if not lineages:
+            console.print(f"[yellow]No lineages found for entity '{entity}'.[/yellow]")
+            return
+
+    # Display lineages
+    for lin in lineages:
+        console.print(f"\n[bold cyan]Entity:[/bold cyan] {lin.entity_id}")
+        for form in lin.forms:
+            gloss = f"  — {form.gloss}" if form.gloss else ""
+            console.print(f"  [{form.language.value}] [bold]{form.form}[/bold]{gloss}")
+        if lin.derivations:
+            console.print("  [dim]Derivations:[/dim]")
+            for d in lin.derivations:
+                console.print(f"    {d.source_form_id} →[{d.derivation_type.value}]→ {d.target_form_id}")
+
+    console.print(f"\n[green]{len(lineages)} lineage(s) loaded.[/green]")
+
+    # Write to graph if requested
+    if write_graph:
+        from book_graph_analyzer.graph.writer import GraphWriter
+
+        try:
+            writer = GraphWriter()
+            total = writer.write_linguistic_lineage_batch(lineages)
+            console.print(f"[green]Wrote {total} language forms to Neo4j.[/green]")
+            writer.close()
+        except ConnectionError as exc:
+            console.print(f"[red]Neo4j connection failed: {exc}[/red]")
+            raise SystemExit(1)
+
+
+@lore.command(name="genealogy")
+@click.option("--character", "-c", help="Character to show family tree for")
+@click.option("--house", "-H", help="Filter by house (e.g., 'House of Finwë')")
+@click.option("--depth", "-d", default=3, type=int, help="Generational depth to display")
+def lore_genealogy(character: str | None, house: str | None, depth: int) -> None:
+    """Show deep genealogy for a character or house.
+
+    Displays family trees with generational depth, inheritance traits,
+    and house membership.
+
+    TODO(#47): Implement genealogy extraction and tree display.
+
+    Examples:
+        bga lore genealogy --character Aragorn
+        bga lore genealogy --house "House of Finwë" --depth 5
+    """
+    console.print("[yellow]Not yet implemented — see Issue #47 (Deep Genealogy)[/yellow]")
+    console.print("[dim]This command will show family trees with generational depth.[/dim]")
+    if character:
+        console.print(f"[dim]Requested: ancestry of {character} (depth={depth})[/dim]")
+    if house:
+        console.print(f"[dim]Requested: members of {house}[/dim]")
+
+
+@corpus.command(name="sources")
+@click.argument("corpus_name")
+@click.option("--show-authority", "-a", is_flag=True, help="Show authority weights")
+def corpus_sources(corpus_name: str, show_authority: bool) -> None:
+    """Show editorial source layers for a corpus.
+
+    Displays which source texts have been ingested and their editorial
+    provenance (published, draft, notes, etc.).
+
+    TODO(#48): Implement editorial layer tracking in ingest pipeline.
+
+    Example:
+        bga corpus sources tolkien_works
+        bga corpus sources tolkien_works --show-authority
+    """
+    console.print("[yellow]Not yet implemented — see Issue #48 (Editorial Layers)[/yellow]")
+    console.print("[dim]This command will show editorial provenance for each source text.[/dim]")
+
+    # Show the pre-defined source registry as a preview
+    from book_graph_analyzer.models.worldbuilding import TOLKIEN_SOURCES
+    console.print(f"\n[bold]Known Tolkien Sources ({len(TOLKIEN_SOURCES)}):[/bold]")
+    for src in TOLKIEN_SOURCES:
+        weight = f"  (authority: {src.authority_weight:.0%})" if show_authority else ""
+        console.print(f"  [{src.editorial_status.value}] {src.source_title} ({src.publication_year}){weight}")
+
+
+@pipeline.command(name="worldbuilding")
+@click.argument("path", type=click.Path(exists=True))
+@click.option("--title", "-t", help="Book title")
+@click.option("--pillars", "-p", multiple=True,
+              type=click.Choice(["linguistic", "genealogy", "editorial", "cultural", "cosmological"]),
+              help="Which world-building pillars to run (default: all)")
+def pipeline_worldbuilding(path: str, title: str | None, pillars: tuple[str]) -> None:
+    """Run world-building analysis pipeline on a text.
+
+    Extends the standard pipeline with Tolkien-specific world-building
+    extraction: linguistic lineage, genealogy, editorial layers,
+    cultural rules, and cosmological timeline.
+
+    TODO(#45): Implement as pillars become available (#46–#50).
+
+    Example:
+        bga pipeline worldbuilding the_silmarillion.txt -t "The Silmarillion"
+        bga pipeline worldbuilding lotr.txt --pillars linguistic --pillars genealogy
+    """
+    selected = list(pillars) if pillars else ["linguistic", "genealogy", "editorial", "cultural", "cosmological"]
+
+    console.print(f"[bold]World-Building Pipeline[/bold]")
+    console.print(f"  Source: {path}")
+    console.print(f"  Pillars: {', '.join(selected)}")
+    console.print()
+
+    for pillar in selected:
+        issue_map = {
+            "linguistic": "#46",
+            "genealogy": "#47",
+            "editorial": "#48",
+            "cultural": "#49",
+            "cosmological": "#50",
+        }
+        console.print(f"  [yellow]⏳[/yellow] {pillar.title()} — not yet implemented (Issue {issue_map[pillar]})")
+
+    console.print(f"\n[dim]Each pillar will be implemented incrementally. See docs/tolkien-worldbuilding-rfc.md[/dim]")
+
+
 if __name__ == "__main__":
     main()
 
