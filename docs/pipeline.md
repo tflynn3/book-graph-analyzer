@@ -43,11 +43,11 @@ bga corpus sources tolkien_works --show-authority
 | Pillar | CLI Group | Issue | Status |
 |--------|-----------|-------|--------|
 | Linguistic Lineage | `worldbible languages` | #46 | ✅ v1 |
-| Deep Genealogy | `lore genealogy` | #47 | 🟡 MVP slice |
-| Editorial Layers | `corpus sources` | #48/#51 | ✅ + 🟨 (source inference + authority propagation complete; strata/provenance + MVP divergence added) |
-| Cultural Rules | `worldbible cultures --rules` | #49 | 🔲 Planned |
+| Sociolinguistic Registers | `lore socioreg-profile`, `lore socioreg-drift`, `lore socioreg-corpus` | #47 | 🟡 closeout evidence added |
+| Genealogical Layer | `lore genealogy` | #49 | 🟡 closeout evidence added |
+| Impression-of-Depth | `worldbible artifacts`, `lore unresolved-refs` | #50 | 🟡 closeout evidence added |
+| Editorial Meta-Layer | `corpus sources`, `corpus timeline-divergence` | #51 | 🟡 closeout evidence added |
 | Spatiotemporal Engine | `lore timeline-reconcile`, `lore timeline-bridge` | #48 | ✅ v2 (era mismatch + extraction bridge) |
-| Cosmological Timeline | `lore timeline --cosmological` | #50 | 🔲 Planned |
 
 ### Integration with Standard Pipeline
 

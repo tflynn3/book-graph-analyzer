@@ -121,3 +121,30 @@ def test_lore_genealogy_extract_cli(tmp_path):
     result = CliRunner().invoke(main, ["lore", "genealogy", "--extract", str(f)])
     assert result.exit_code == 0
     assert "Found" in result.output
+
+
+def test_lore_genealogy_query_cli_shows_inheritance_traits(monkeypatch):
+    from book_graph_analyzer import cli as cli_module
+
+    class _MockWriter:
+        def query_genealogy(self, **kwargs):
+            return [
+                {
+                    "source": "Aragorn",
+                    "rel": "DESCENDANT_OF",
+                    "target": "Elendil",
+                    "house": "House of Elendil",
+                    "generation_depth": 39,
+                    "inheritance_traits": ["kingship", "foresight"],
+                }
+            ]
+
+        def close(self):
+            return None
+
+    monkeypatch.setattr("book_graph_analyzer.graph.connection.check_neo4j_connection", lambda: True)
+    monkeypatch.setattr("book_graph_analyzer.graph.writer.GraphWriter", _MockWriter)
+
+    result = CliRunner().invoke(cli_module.main, ["lore", "genealogy", "--character", "Aragorn"])
+    assert result.exit_code == 0
+    assert "kingship" in result.output

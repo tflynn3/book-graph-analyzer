@@ -256,11 +256,11 @@ not a new top-level package.
 |-------|--------|--------|-------|
 | #45 | Kickoff Slice | ✅ Complete | Models, stubs, CLI placeholders, tests |
 | #46 | Linguistic Engine v1 | ✅ Complete | `GraphWriter.write_linguistic_lineage`, JSON parser, CLI `worldbible languages`, 50 tests |
-| #47 | Deep Genealogy + Sociolinguistic Registers | 🟡 Closeout slice in progress | Genealogy closeout (entity/depth/house inference + graph support) plus socioreg closeout work: safer model fallback, corpus-wide profiling/drift summaries, and richer CLI/query ergonomics. |
-| #48/#51 | Editorial Layers / Meta-Layer | 🟨 In progress | Source strata model + passage provenance tags + MVP divergence detector + layer-aware graph/CLI reporting |
-| #49 | Cultural Rules | 🔲 Not started | |
-| #50 | Cosmological Timeline | 🟡 Slice 2 in progress | Lore-depth extraction + unresolved ref queue + resolver candidate linking |
-| #51 | Integration Testing | 🔲 Not started | |
+| #47 | Sociolinguistic Registers | 🟡 Open (closeout evidence added) | Rule-first + fallback classifier, corpus profiling/drift, graph/query + CLI paths merged; acceptance fixture now demonstrates >=4 families and per-entity drift (`tests/test_milestone_47_49_50_51_acceptance.py`). |
+| #48 | Spatiotemporal / timeline anchoring | ✅ Complete | Core timeline reconciliation and extraction bridge landed; metadata propagation + graph persistence in place. |
+| #49 | Genealogical Layer | 🟡 Open (closeout evidence added) | Extraction + depth/house inference + graph integration merged; acceptance fixture demonstrates multi-generational reconstruction and trait-rationale output persistence. |
+| #50 | Impression-of-Depth Engine | 🟡 Open (closeout evidence added) | Artifact + unresolved-reference extraction, candidate linking, graph/query + CLI merged; acceptance fixture demonstrates lore entities and unresolved-context reporting. |
+| #51 | Editorial Meta-Layer | 🟡 Open (closeout evidence added) | Source strata/provenance and divergence reporting merged; acceptance fixture demonstrates >=3 layers plus layer-specific factual/style divergence reporting. |
 
 ### #46 Remaining TODOs
 
