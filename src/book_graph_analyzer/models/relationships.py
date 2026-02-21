@@ -92,6 +92,12 @@ class ExtractedRelationship(BaseModel):
     confidence: float = 1.0
     extraction_method: str = "llm"  # llm, dependency, pattern
 
+    # Temporal validity — when does this relationship hold?
+    era_start: str | None = None      # e.g. 'Third Age'
+    era_end: str | None = None        # None = ongoing / unknown
+    year_start: int | None = None     # year within era_start
+    year_end: int | None = None       # year within era_end
+
     def to_triple(self) -> str:
         """Return a human-readable triple."""
         subj = self.subject_id or self.subject_text
@@ -110,6 +116,12 @@ class RelationshipTriple(BaseModel):
     properties: dict = Field(default_factory=dict)
     passage_ids: list[str] = Field(default_factory=list)
     mention_count: int = 1
+
+    # Temporal validity
+    era_start: str | None = None
+    era_end: str | None = None
+    year_start: int | None = None
+    year_end: int | None = None
 
     def merge_with(self, other: "RelationshipTriple") -> "RelationshipTriple":
         """Merge with another triple of the same type."""
