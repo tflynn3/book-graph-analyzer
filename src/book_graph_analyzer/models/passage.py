@@ -26,6 +26,12 @@ class Passage(BaseModel):
     # -----------------------------------------------------------------------
     author_period: Optional[str] = None  # 'early' | 'middle' | 'late' (AuthorPeriod)
     source_compilation: Optional[str] = None  # e.g. 'Unfinished Tales', 'HoME Vol. 5'
+    source_id: Optional[str] = None  # e.g. 'src_silmarillion_1977'
+    source_title: Optional[str] = None
+    source_stratum: Optional[str] = None  # core_text | appendix | gloss | annotation
+    source_authority_weight: Optional[float] = None
+    provenance_tags: List[str] = Field(default_factory=list)  # arbitrary layer tags
+    factual_claims: dict[str, str] = Field(default_factory=dict)  # normalized claim-key -> value
 
     # -----------------------------------------------------------------------
     # Story-time frame (when this passage *occurs* in the narrative)

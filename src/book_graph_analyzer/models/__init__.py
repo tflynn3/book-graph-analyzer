@@ -7,6 +7,7 @@ from book_graph_analyzer.models.worldbuilding import (
     GenealogyRelation,
     LanguageForm,
     LinguisticLineage,
+    SourceStratum,
 )
 
 __all__ = [
@@ -21,4 +22,5 @@ __all__ = [
     "GenealogyRelation",
     "LanguageForm",
     "LinguisticLineage",
+    "SourceStratum",
 ]

@@ -365,6 +365,11 @@ class GraphWriter:
         chapter_num: int,
         paragraph_num: int,
         sentence_num: int,
+        source_id: str | None = None,
+        source_title: str | None = None,
+        source_stratum: str | None = None,
+        source_authority_weight: float | None = None,
+        provenance_tags: list[str] | None = None,
     ) -> None:
         """Write a passage node to the graph.
 
@@ -384,6 +389,11 @@ class GraphWriter:
             p.chapter_num = $chapter_num,
             p.paragraph_num = $paragraph_num,
             p.sentence_num = $sentence_num
+        SET p.source_id = coalesce($source_id, p.source_id),
+            p.source_title = coalesce($source_title, p.source_title),
+            p.source_stratum = coalesce($source_stratum, p.source_stratum),
+            p.source_authority_weight = coalesce($source_authority_weight, p.source_authority_weight),
+            p.provenance_tags = coalesce($provenance_tags, p.provenance_tags)
         """
 
         with self.driver.session() as session:
@@ -395,7 +405,58 @@ class GraphWriter:
                 chapter_num=chapter_num,
                 paragraph_num=paragraph_num,
                 sentence_num=sentence_num,
+                source_id=source_id,
+                source_title=source_title,
+                source_stratum=source_stratum,
+                source_authority_weight=source_authority_weight,
+                provenance_tags=provenance_tags,
             )
+
+    def write_passage_provenance(
+        self,
+        passage_id: str,
+        source_id: str,
+        source_title: str,
+        source_stratum: str = "core_text",
+        authority_weight: float = 1.0,
+        confidence: float = 1.0,
+    ) -> None:
+        """Attach a Passage to a Source and stratum metadata for layer-aware queries."""
+        query = """
+        MATCH (p:Passage {id: $passage_id})
+        MERGE (s:Source {id: $source_id})
+        SET s.source_title = $source_title,
+            s.authority_weight = $authority_weight
+        MERGE (p)-[r:ATTESTED_IN]->(s)
+        SET r.source_stratum = $source_stratum,
+            r.confidence = $confidence
+        """
+        with self.driver.session() as session:
+            session.run(
+                query,
+                passage_id=passage_id,
+                source_id=source_id,
+                source_title=source_title,
+                source_stratum=source_stratum,
+                authority_weight=authority_weight,
+                confidence=max(0.0, min(1.0, float(confidence))),
+            )
+
+    def query_layer_report(self, source_id: str | None = None, limit: int = 200) -> list[dict]:
+        """Summarize passages by source and stratum for reporting."""
+        query = """
+        MATCH (p:Passage)
+        WHERE $source_id IS NULL OR p.source_id = $source_id
+        RETURN coalesce(p.source_id, p.book) AS source,
+               coalesce(p.source_stratum, 'core_text') AS stratum,
+               count(*) AS passage_count,
+               avg(coalesce(p.source_authority_weight, 1.0)) AS avg_authority
+        ORDER BY source, stratum
+        LIMIT $limit
+        """
+        with self.driver.session() as session:
+            result = session.run(query, source_id=source_id, limit=limit)
+            return [dict(r) for r in result]
 
     def link_entity_to_passage(
         self,
@@ -494,6 +555,11 @@ class GraphWriter:
                     chapter_num=result.passage.chapter_num,
                     paragraph_num=result.passage.paragraph_num,
                     sentence_num=result.passage.sentence_num,
+                    source_id=getattr(result.passage, "source_id", None),
+                    source_title=getattr(result.passage, "source_title", None),
+                    source_stratum=getattr(result.passage, "source_stratum", None),
+                    source_authority_weight=getattr(result.passage, "source_authority_weight", None),
+                    provenance_tags=getattr(result.passage, "provenance_tags", None),
                 )
                 stats["passages_written"] += 1
 
