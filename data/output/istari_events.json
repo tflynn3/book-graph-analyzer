@@ -1,0 +1,846 @@
+{
+  "events": {
+    "event_1": {
+      "id": "event_1",
+      "description": "The fullest account of the Istari was written",
+      "agent": "Unknown",
+      "action": "wrote",
+      "patient": "the fullest account of the Istari",
+      "era": null,
+      "year": 1954,
+      "year_text": null,
+      "source_text": "",
+      "confidence": 0.8
+    },
+    "event_2": {
+      "id": "event_2",
+      "description": "The Istari first appeared in Middle-earth",
+      "agent": "The Istari",
+      "action": "appeared",
+      "patient": "Middle-earth",
+      "era": "unknown",
+      "year": 1000,
+      "year_text": null,
+      "source_text": "",
+      "confidence": 0.8
+    },
+    "event_3": {
+      "id": "event_3",
+      "description": "The Istari began to contest the growth of the Shadow",
+      "agent": "The Istari",
+      "action": "contested",
+      "patient": "the growth of the Shadow",
+      "era": "unknown",
+      "year": null,
+      "year_text": null,
+      "source_text": "",
+      "confidence": 0.8
+    },
+    "event_4": {
+      "id": "event_4",
+      "description": "Men grew to fear the Istari",
+      "agent": "Men",
+      "action": "feared",
+      "patient": "the Istari",
+      "era": "unknown",
+      "year": null,
+      "year_text": null,
+      "source_text": "",
+      "confidence": 0.8
+    },
+    "event_5": {
+      "id": "event_5",
+      "description": "The Valar sent the Istari to Middle-earth",
+      "agent": "The Valar",
+      "action": "sent",
+      "patient": "the Istari",
+      "era": "unknown",
+      "year": null,
+      "year_text": null,
+      "source_text": "",
+      "confidence": 0.8
+    },
+    "event_6": {
+      "id": "event_6",
+      "description": "The Istari landed upon the western shores of Middle-earth",
+      "agent": "The Istari",
+      "action": "landed",
+      "patient": "the western shores of Middle-earth",
+      "era": "unknown",
+      "year": null,
+      "year_text": null,
+      "source_text": "",
+      "confidence": 0.8
+    },
+    "event_7": {
+      "id": "event_7",
+      "description": "Cirdan saw the landings of the Istari",
+      "agent": "Cirdan",
+      "action": "saw",
+      "patient": "the landings of the Istari",
+      "era": "unknown",
+      "year": null,
+      "year_text": null,
+      "source_text": "",
+      "confidence": 0.8
+    },
+    "event_8": {
+      "id": "event_8",
+      "description": "The shadow of Sauron began to grow and take shape again",
+      "agent": "Sauron",
+      "action": "grew",
+      "patient": "the shadow",
+      "era": "unknown",
+      "year": null,
+      "year_text": null,
+      "source_text": "",
+      "confidence": 0.8
+    },
+    "c1_event1": {
+      "id": "c1_event1",
+      "description": "Valar created the Order of the Istari",
+      "agent": "Valar",
+      "action": "created",
+      "patient": "the Order of the Istari",
+      "era": null,
+      "year": null,
+      "year_text": null,
+      "source_text": "",
+      "confidence": 0.8
+    },
+    "c1_event2": {
+      "id": "c1_event2",
+      "description": "First Istari arrived in Middle-earth",
+      "agent": "First Istari",
+      "action": "arrived",
+      "patient": "Middle-earth",
+      "era": null,
+      "year": null,
+      "year_text": null,
+      "source_text": "",
+      "confidence": 0.8
+    },
+    "c1_event3": {
+      "id": "c1_event3",
+      "description": "Cirdan gave Narya to the Grey Messenger",
+      "agent": "Cirdan",
+      "action": "gave",
+      "patient": "Narya",
+      "era": null,
+      "year": null,
+      "year_text": null,
+      "source_text": "",
+      "confidence": 0.8
+    },
+    "c1_event4": {
+      "id": "c1_event4",
+      "description": "White Messenger became aware of Narya",
+      "agent": "White Messenger",
+      "action": "became aware",
+      "patient": "Narya",
+      "era": null,
+      "year": null,
+      "year_text": null,
+      "source_text": "",
+      "confidence": 0.8
+    },
+    "c1_event5": {
+      "id": "c1_event5",
+      "description": "White Messenger begrudged the Grey Messenger",
+      "agent": "White Messenger",
+      "action": "begrudged",
+      "patient": "Grey Messenger",
+      "era": null,
+      "year": null,
+      "year_text": null,
+      "source_text": "",
+      "confidence": 0.8
+    },
+    "c1_event6": {
+      "id": "c1_event6",
+      "description": "White Messenger became known as Saruman",
+      "agent": "White Messenger",
+      "action": "became known",
+      "patient": "Saruman",
+      "era": null,
+      "year": null,
+      "year_text": null,
+      "source_text": "",
+      "confidence": 0.8
+    },
+    "c1_event7": {
+      "id": "c1_event7",
+      "description": "Blue Wizards passed into the East",
+      "agent": "Blue Wizards",
+      "action": "passed",
+      "patient": "the East",
+      "era": null,
+      "year": null,
+      "year_text": null,
+      "source_text": "",
+      "confidence": 0.8
+    },
+    "c2_event1": {
+      "id": "c2_event1",
+      "description": "Istari were sent to Middle-earth",
+      "agent": "Valar",
+      "action": "sent",
+      "patient": "Istari",
+      "era": null,
+      "year": null,
+      "year_text": null,
+      "source_text": "",
+      "confidence": 0.8
+    },
+    "c2_event2": {
+      "id": "c2_event2",
+      "description": "Radagast became enamoured of beasts and birds",
+      "agent": "Radagast",
+      "action": "became enamoured",
+      "patient": "beasts and birds",
+      "era": null,
+      "year": null,
+      "year_text": null,
+      "source_text": "",
+      "confidence": 0.8
+    },
+    "c2_event3": {
+      "id": "c2_event3",
+      "description": "Radagast forsook Elves and Men",
+      "agent": "Radagast",
+      "action": "forsook",
+      "patient": "Elves and Men",
+      "era": null,
+      "year": null,
+      "year_text": null,
+      "source_text": "",
+      "confidence": 0.8
+    },
+    "c2_event4": {
+      "id": "c2_event4",
+      "description": "Saruman fell from his high errand",
+      "agent": "Saruman",
+      "action": "fell",
+      "patient": "his high errand",
+      "era": null,
+      "year": null,
+      "year_text": null,
+      "source_text": "",
+      "confidence": 0.8
+    },
+    "c2_event5": {
+      "id": "c2_event5",
+      "description": "Saruman was ensnared by Sauron",
+      "agent": "Sauron",
+      "action": "ensnared",
+      "patient": "Saruman",
+      "era": null,
+      "year": null,
+      "year_text": null,
+      "source_text": "",
+      "confidence": 0.8
+    },
+    "c2_event6": {
+      "id": "c2_event6",
+      "description": "Gandalf remained faithful to his mission",
+      "agent": "Gandalf",
+      "action": "remained faithful",
+      "patient": "his mission",
+      "era": null,
+      "year": null,
+      "year_text": null,
+      "source_text": "",
+      "confidence": 0.8
+    },
+    "c2_event7": {
+      "id": "c2_event7",
+      "description": "Gandalf befriended all folk in times of need",
+      "agent": "Gandalf",
+      "action": "befriended",
+      "patient": "all folk",
+      "era": null,
+      "year": null,
+      "year_text": null,
+      "source_text": "",
+      "confidence": 0.8
+    },
+    "c2_event8": {
+      "id": "c2_event8",
+      "description": "Gandalf opposed Sauron",
+      "agent": "Gandalf",
+      "action": "opposed",
+      "patient": "Sauron",
+      "era": null,
+      "year": null,
+      "year_text": null,
+      "source_text": "",
+      "confidence": 0.8
+    },
+    "c3_1": {
+      "id": "c3_1",
+      "description": "Sauron rose again",
+      "agent": "Sauron",
+      "action": "rose",
+      "patient": null,
+      "era": "unknown",
+      "year": null,
+      "year_text": null,
+      "source_text": "",
+      "confidence": 0.8
+    },
+    "c3_2": {
+      "id": "c3_2",
+      "description": "The Istari arrived in Middle-earth",
+      "agent": "The Istari",
+      "action": "arrived",
+      "patient": "Middle-earth",
+      "era": "unknown",
+      "year": null,
+      "year_text": null,
+      "source_text": "",
+      "confidence": 0.8
+    },
+    "c3_3": {
+      "id": "c3_3",
+      "description": "Gandalf received the Red Ring from Cirdan",
+      "agent": "Cirdan",
+      "action": "gave",
+      "patient": "the Red Ring",
+      "era": "unknown",
+      "year": null,
+      "year_text": null,
+      "source_text": "",
+      "confidence": 0.8
+    },
+    "c3_4": {
+      "id": "c3_4",
+      "description": "Saruman was cast down and humbled",
+      "agent": "an oppressed slave",
+      "action": "cast down",
+      "patient": "Saruman",
+      "era": "unknown",
+      "year": null,
+      "year_text": null,
+      "source_text": "",
+      "confidence": 0.8
+    },
+    "c3_5": {
+      "id": "c3_5",
+      "description": "Saruman perished",
+      "agent": "an oppressed slave",
+      "action": "perished",
+      "patient": "Saruman",
+      "era": "unknown",
+      "year": null,
+      "year_text": null,
+      "source_text": "",
+      "confidence": 0.8
+    },
+    "c3_6": {
+      "id": "c3_6",
+      "description": "Gandalf was slain",
+      "agent": null,
+      "action": "slain",
+      "patient": "Gandalf",
+      "era": "unknown",
+      "year": null,
+      "year_text": null,
+      "source_text": "",
+      "confidence": 0.8
+    },
+    "c3_7": {
+      "id": "c3_7",
+      "description": "Gandalf was sent back from death",
+      "agent": "the Valar",
+      "action": "sent back",
+      "patient": "Gandalf",
+      "era": "unknown",
+      "year": null,
+      "year_text": null,
+      "source_text": "",
+      "confidence": 0.8
+    },
+    "c3_8": {
+      "id": "c3_8",
+      "description": "Gandalf departed over the Sea",
+      "agent": "Gandalf",
+      "action": "departed",
+      "patient": null,
+      "era": "unknown",
+      "year": null,
+      "year_text": null,
+      "source_text": "",
+      "confidence": 0.8
+    },
+    "c3_9": {
+      "id": "c3_9",
+      "description": "The Shadow of Sauron was removed",
+      "agent": "Gandalf",
+      "action": "removed",
+      "patient": "the Shadow of Sauron",
+      "era": "unknown",
+      "year": null,
+      "year_text": null,
+      "source_text": "",
+      "confidence": 0.8
+    },
+    "c4_event1": {
+      "id": "c4_event1",
+      "description": "Council of the Valar",
+      "agent": "Manwe",
+      "action": "summoned",
+      "patient": "council of the Valar",
+      "era": null,
+      "year": null,
+      "year_text": null,
+      "source_text": "",
+      "confidence": 0.8
+    },
+    "c4_event2": {
+      "id": "c4_event2",
+      "description": "Curumo and Alatar volunteer",
+      "agent": "Curumo and Alatar",
+      "action": "came forward",
+      "patient": "as emissaries to Middle-earth",
+      "era": null,
+      "year": null,
+      "year_text": null,
+      "source_text": "",
+      "confidence": 0.8
+    },
+    "c4_event3": {
+      "id": "c4_event3",
+      "description": "Manwe asks Olorin to join",
+      "agent": "Manwe",
+      "action": "asked",
+      "patient": "Olorin to join as the third messenger",
+      "era": null,
+      "year": null,
+      "year_text": null,
+      "source_text": "",
+      "confidence": 0.8
+    },
+    "c4_event4": {
+      "id": "c4_event4",
+      "description": "Olorin declines",
+      "agent": "Olorin",
+      "action": "declared",
+      "patient": "he was too weak for the task",
+      "era": null,
+      "year": null,
+      "year_text": null,
+      "source_text": "",
+      "confidence": 0.8
+    },
+    "c4_event5": {
+      "id": "c4_event5",
+      "description": "Manwe commands Olorin",
+      "agent": "Manwe",
+      "action": "commanded",
+      "patient": "Olorin to go as the third messenger",
+      "era": null,
+      "year": null,
+      "year_text": null,
+      "source_text": "",
+      "confidence": 0.8
+    },
+    "c4_event6": {
+      "id": "c4_event6",
+      "description": "Curunir arrives in Middle-earth",
+      "agent": "Curunir",
+      "action": "came",
+      "patient": "to Middle-earth",
+      "era": null,
+      "year": null,
+      "year_text": null,
+      "source_text": "",
+      "confidence": 0.8
+    },
+    "c4_event7": {
+      "id": "c4_event7",
+      "description": "Mithrandir and Radagast arrive in Middle-earth",
+      "agent": "Mithrandir and Radagast",
+      "action": "came",
+      "patient": "to Middle-earth",
+      "era": null,
+      "year": null,
+      "year_text": null,
+      "source_text": "",
+      "confidence": 0.8
+    },
+    "c4_event8": {
+      "id": "c4_event8",
+      "description": "Other Istari go into the East",
+      "agent": "Other Istari",
+      "action": "went",
+      "patient": "into the East of Middle-earth",
+      "era": null,
+      "year": null,
+      "year_text": null,
+      "source_text": "",
+      "confidence": 0.8
+    },
+    "c4_event9": {
+      "id": "c4_event9",
+      "description": "Saruman becomes jealous of Gandalf",
+      "agent": "Saruman",
+      "action": "became",
+      "patient": "jealous of Gandalf",
+      "era": null,
+      "year": null,
+      "year_text": null,
+      "source_text": "",
+      "confidence": 0.8
+    },
+    "c5_event1": {
+      "id": "c5_event1",
+      "description": "Manwe commands Olorin to go",
+      "agent": "Manwe",
+      "action": "commands",
+      "patient": "Olorin",
+      "era": null,
+      "year": null,
+      "year_text": null,
+      "source_text": "",
+      "confidence": 0.8
+    },
+    "c5_event2": {
+      "id": "c5_event2",
+      "description": "Varda objects to Olorin going as the third",
+      "agent": "Varda",
+      "action": "objects",
+      "patient": "Olorin going as the third",
+      "era": null,
+      "year": null,
+      "year_text": null,
+      "source_text": "",
+      "confidence": 0.8
+    },
+    "c5_event3": {
+      "id": "c5_event3",
+      "description": "Curumo remembers Varda's objection",
+      "agent": "Curumo",
+      "action": "remembers",
+      "patient": "Varda's objection",
+      "era": null,
+      "year": null,
+      "year_text": null,
+      "source_text": "",
+      "confidence": 0.8
+    },
+    "c5_event4": {
+      "id": "c5_event4",
+      "description": "Yavanna begs Curumo to take Aiwendil",
+      "agent": "Yavanna",
+      "action": "begs",
+      "patient": "Curumo to take Aiwendil",
+      "era": null,
+      "year": null,
+      "year_text": null,
+      "source_text": "",
+      "confidence": 0.8
+    },
+    "c5_event5": {
+      "id": "c5_event5",
+      "description": "Curumo takes Aiwendil",
+      "agent": "Curumo",
+      "action": "takes",
+      "patient": "Aiwendil",
+      "era": null,
+      "year": null,
+      "year_text": null,
+      "source_text": "",
+      "confidence": 0.8
+    },
+    "c5_event6": {
+      "id": "c5_event6",
+      "description": "Alatar takes Pallando as a friend",
+      "agent": "Alatar",
+      "action": "takes",
+      "patient": "Pallando",
+      "era": null,
+      "year": null,
+      "year_text": null,
+      "source_text": "",
+      "confidence": 0.8
+    },
+    "c5_event7": {
+      "id": "c5_event7",
+      "description": "Istari are chosen by Valar for their innate characteristics",
+      "agent": "Valar",
+      "action": "choose",
+      "patient": "Istari",
+      "era": null,
+      "year": null,
+      "year_text": null,
+      "source_text": "",
+      "confidence": 0.8
+    },
+    "c5_event8": {
+      "id": "c5_event8",
+      "description": "Sauron is of the Maiar of Aule",
+      "agent": null,
+      "action": "is",
+      "patient": "Sauron",
+      "era": null,
+      "year": null,
+      "year_text": null,
+      "source_text": "",
+      "confidence": 0.8
+    }
+  },
+  "relations": [
+    {
+      "event1_id": "event_2",
+      "relation": "before",
+      "event2_id": "event_3",
+      "confidence": 0.7
+    },
+    {
+      "event1_id": "event_8",
+      "relation": "before",
+      "event2_id": "event_3",
+      "confidence": 0.7
+    },
+    {
+      "event1_id": "event_8",
+      "relation": "caused",
+      "event2_id": "event_3",
+      "confidence": 0.7
+    },
+    {
+      "event1_id": "event_5",
+      "relation": "before",
+      "event2_id": "event_2",
+      "confidence": 0.7
+    },
+    {
+      "event1_id": "event_5",
+      "relation": "caused",
+      "event2_id": "event_2",
+      "confidence": 0.7
+    },
+    {
+      "event1_id": "event_2",
+      "relation": "before",
+      "event2_id": "event_6",
+      "confidence": 0.7
+    },
+    {
+      "event1_id": "event_6",
+      "relation": "before",
+      "event2_id": "event_7",
+      "confidence": 0.7
+    },
+    {
+      "event1_id": "event_3",
+      "relation": "before",
+      "event2_id": "event_4",
+      "confidence": 0.7
+    },
+    {
+      "event1_id": "event_3",
+      "relation": "caused",
+      "event2_id": "event_4",
+      "confidence": 0.7
+    },
+    {
+      "event1_id": "c1_event1",
+      "relation": "before",
+      "event2_id": "c1_event2",
+      "confidence": 0.7
+    },
+    {
+      "event1_id": "c1_event2",
+      "relation": "before",
+      "event2_id": "c1_event3",
+      "confidence": 0.7
+    },
+    {
+      "event1_id": "c1_event3",
+      "relation": "before",
+      "event2_id": "c1_event4",
+      "confidence": 0.7
+    },
+    {
+      "event1_id": "c1_event4",
+      "relation": "caused",
+      "event2_id": "c1_event5",
+      "confidence": 0.7
+    },
+    {
+      "event1_id": "c1_event5",
+      "relation": "before",
+      "event2_id": "c1_event6",
+      "confidence": 0.7
+    },
+    {
+      "event1_id": "c1_event2",
+      "relation": "before",
+      "event2_id": "c1_event7",
+      "confidence": 0.7
+    },
+    {
+      "event1_id": "c2_event1",
+      "relation": "before",
+      "event2_id": "c2_event2",
+      "confidence": 0.7
+    },
+    {
+      "event1_id": "c2_event1",
+      "relation": "before",
+      "event2_id": "c2_event4",
+      "confidence": 0.7
+    },
+    {
+      "event1_id": "c2_event1",
+      "relation": "before",
+      "event2_id": "c2_event6",
+      "confidence": 0.7
+    },
+    {
+      "event1_id": "c2_event4",
+      "relation": "caused",
+      "event2_id": "c2_event5",
+      "confidence": 0.7
+    },
+    {
+      "event1_id": "c2_event6",
+      "relation": "caused",
+      "event2_id": "c2_event7",
+      "confidence": 0.7
+    },
+    {
+      "event1_id": "c2_event6",
+      "relation": "caused",
+      "event2_id": "c2_event8",
+      "confidence": 0.7
+    },
+    {
+      "event1_id": "c3_1",
+      "relation": "before",
+      "event2_id": "c3_2",
+      "confidence": 0.7
+    },
+    {
+      "event1_id": "c3_2",
+      "relation": "before",
+      "event2_id": "c3_3",
+      "confidence": 0.7
+    },
+    {
+      "event1_id": "c3_1",
+      "relation": "before",
+      "event2_id": "c3_9",
+      "confidence": 0.7
+    },
+    {
+      "event1_id": "c3_6",
+      "relation": "before",
+      "event2_id": "c3_7",
+      "confidence": 0.7
+    },
+    {
+      "event1_id": "c3_6",
+      "relation": "causes",
+      "event2_id": "c3_7",
+      "confidence": 0.7
+    },
+    {
+      "event1_id": "c3_9",
+      "relation": "before",
+      "event2_id": "c3_8",
+      "confidence": 0.7
+    },
+    {
+      "event1_id": "c4_event1",
+      "relation": "before",
+      "event2_id": "c4_event2",
+      "confidence": 0.7
+    },
+    {
+      "event1_id": "c4_event2",
+      "relation": "before",
+      "event2_id": "c4_event3",
+      "confidence": 0.7
+    },
+    {
+      "event1_id": "c4_event3",
+      "relation": "before",
+      "event2_id": "c4_event4",
+      "confidence": 0.7
+    },
+    {
+      "event1_id": "c4_event4",
+      "relation": "before",
+      "event2_id": "c4_event5",
+      "confidence": 0.7
+    },
+    {
+      "event1_id": "c4_event5",
+      "relation": "before",
+      "event2_id": "c4_event6",
+      "confidence": 0.7
+    },
+    {
+      "event1_id": "c4_event6",
+      "relation": "before",
+      "event2_id": "c4_event7",
+      "confidence": 0.7
+    },
+    {
+      "event1_id": "c4_event6",
+      "relation": "before",
+      "event2_id": "c4_event8",
+      "confidence": 0.7
+    },
+    {
+      "event1_id": "c4_event7",
+      "relation": "cause",
+      "event2_id": "c4_event9",
+      "confidence": 0.7
+    },
+    {
+      "event1_id": "c5_event1",
+      "relation": "before",
+      "event2_id": "c5_event2",
+      "confidence": 0.7
+    },
+    {
+      "event1_id": "c5_event2",
+      "relation": "before",
+      "event2_id": "c5_event3",
+      "confidence": 0.7
+    },
+    {
+      "event1_id": "c5_event4",
+      "relation": "before",
+      "event2_id": "c5_event5",
+      "confidence": 0.7
+    },
+    {
+      "event1_id": "c5_event7",
+      "relation": "causes",
+      "event2_id": "c5_event1",
+      "confidence": 0.7
+    },
+    {
+      "event1_id": "c5_event7",
+      "relation": "causes",
+      "event2_id": "c5_event5",
+      "confidence": 0.7
+    },
+    {
+      "event1_id": "c5_event7",
+      "relation": "causes",
+      "event2_id": "c5_event6",
+      "confidence": 0.7
+    },
+    {
+      "event1_id": "c5_event8",
+      "relation": "explains",
+      "event2_id": "c5_event7",
+      "confidence": 0.7
+    }
+  ]
+}

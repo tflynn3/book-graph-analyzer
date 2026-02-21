@@ -2489,6 +2489,143 @@ def lore_validate(text_file: str, bible: str, corpus: str | None, output: str | 
         console.print(f"\n[green]OK[/green] Results saved to {output}")
 
 
+@lore.command(name="query-passages")
+@click.option("--temporal-depth", "-d", default=None,
+              help="Minimum temporal depth era (e.g. 'First Age'). "
+                   "Returns passages that reference this era or earlier.")
+@click.option("--story-era", "-s", default=None,
+              help="Filter by story-time era (when the scene occurs).")
+@click.option("--limit", "-n", default=20, help="Maximum results (default: 20)")
+@click.option("--show-refs", is_flag=True, help="Show REFERENCES_ERA edges per passage")
+@click.option("--show-zoom", is_flag=True, help="Show temporal zoom score")
+def lore_query_passages(
+    temporal_depth: str | None,
+    story_era: str | None,
+    limit: int,
+    show_refs: bool,
+    show_zoom: bool,
+) -> None:
+    """Query passages by temporal depth or story-time era.
+
+    Examples:
+        bga lore query-passages --temporal-depth 'First Age'
+        bga lore query-passages --temporal-depth 'Before Time' --show-refs
+        bga lore query-passages --story-era 'Third Age' -n 10
+        bga lore query-passages --temporal-depth 'Second Age' --show-zoom
+    """
+    from book_graph_analyzer.graph.passage_writer import PassageTemporalWriter
+    from book_graph_analyzer.graph.connection import check_neo4j_connection
+    from book_graph_analyzer.graph.temporal import canonicalize_era, era_to_order
+
+    if not check_neo4j_connection():
+        console.print("[red]Error:[/red] Cannot connect to Neo4j")
+        return
+
+    if not temporal_depth and not story_era:
+        console.print("[yellow]Provide --temporal-depth or --story-era (or both).[/yellow]")
+        return
+
+    writer = PassageTemporalWriter()
+
+    if temporal_depth:
+        depth_canonical = canonicalize_era(temporal_depth) or temporal_depth
+        console.print(
+            f"[bold]Passages with temporal depth ≤ {depth_canonical}[/bold] "
+            f"(era order ≤ {era_to_order(depth_canonical)})\n"
+        )
+        results = writer.query_passages_by_temporal_depth(
+            min_era=depth_canonical,
+            limit=limit,
+            include_references=show_refs,
+        )
+    else:
+        # story-era only — query directly
+        era_canonical = canonicalize_era(story_era) or story_era
+        console.print(f"[bold]Passages set in story-era: {era_canonical}[/bold]\n")
+
+        from book_graph_analyzer.graph.connection import get_driver
+        from book_graph_analyzer.models.era_reference import TemporalZoomResult
+
+        driver = get_driver()
+        results = []
+        corpus_avg = writer.compute_corpus_avg_depth()
+
+        with driver.session() as session:
+            rows = session.run(
+                "MATCH (p:Passage {story_era: $era}) RETURN p LIMIT $limit",
+                era=era_canonical, limit=limit,
+            )
+            for row in rows:
+                node = dict(row["p"])
+                depth_years = node.get("temporal_depth_years_back")
+                zoom = None
+                if depth_years is not None and corpus_avg and corpus_avg > 0:
+                    zoom = depth_years / corpus_avg
+                results.append(TemporalZoomResult(
+                    passage_id=node.get("id", ""),
+                    passage_text=node.get("text", ""),
+                    story_era=node.get("story_era"),
+                    story_year=node.get("story_year"),
+                    temporal_depth_era=node.get("temporal_depth_era"),
+                    temporal_depth_years_back=depth_years,
+                    era_reference_count=node.get("era_reference_count", 0),
+                    temporal_zoom=zoom,
+                ))
+        driver.close()
+
+    if not results:
+        console.print("[yellow]No passages found matching criteria.[/yellow]")
+        writer.close()
+        return
+
+    table = Table(show_header=True, header_style="bold")
+    table.add_column("Passage ID", style="dim", width=22)
+    table.add_column("Story-time", style="cyan", width=18)
+    table.add_column("Depth (oldest ref)", style="magenta", width=18)
+    table.add_column("Era refs", justify="right", width=8)
+    if show_zoom:
+        table.add_column("Zoom", justify="right", width=7)
+    table.add_column("Text snippet")
+
+    for r in results:
+        story_time = r.story_era or "-"
+        if r.story_year:
+            story_time += f" {r.story_year}"
+
+        depth = r.temporal_depth_era or "-"
+        if r.temporal_depth_years_back is not None:
+            depth += f" (~{r.temporal_depth_years_back:,.0f}y)"
+
+        snippet = r.passage_text[:60] + "..." if len(r.passage_text) > 60 else r.passage_text
+
+        row_data = [
+            r.passage_id,
+            story_time,
+            depth,
+            str(r.era_reference_count),
+        ]
+        if show_zoom:
+            zoom_str = f"{r.temporal_zoom:.2f}x" if r.temporal_zoom is not None else "-"
+            row_data.append(zoom_str)
+        row_data.append(snippet)
+
+        table.add_row(*row_data)
+
+    console.print(table)
+    console.print(f"\n[dim]{len(results)} passage(s) returned[/dim]")
+
+    if show_refs and results:
+        console.print("\n[bold]Era References:[/bold]")
+        for r in results:
+            if r.references:
+                console.print(f"\n  [cyan]{r.passage_id}[/cyan]")
+                for ref in r.references:
+                    yb = f" (~{ref.years_before_story_time:,.0f}y back)" if ref.years_before_story_time else ""
+                    console.print(f"    [{ref.reference_type}] {ref.era}{yb}")
+
+    writer.close()
+
+
 @lore.command(name="interactive")
 @click.option("--bible", "-b", type=click.Path(exists=True), help="World bible file")
 @click.option("--corpus", "-c", help="Corpus name for entity lookup")
