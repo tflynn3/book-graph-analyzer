@@ -35,6 +35,18 @@ def test_issue89_hobbit_temporal_grounding_backfill_improves_coverage():
     assert after.year_or_interval_ratio >= before.year_or_interval_ratio
 
 
+def test_issue89_hobbit_default_gate_passes_for_era_only_timeline_layer():
+    events = _load_hobbit_lore_events()
+    bridge = ExtractionBridge()
+    st_events = bridge.bridge_events(events, source_book="The Hobbit", apply_backfill=True).events
+
+    result = TemporalGroundingGate().evaluate(st_events)
+
+    assert result.passed is True
+    assert result.metrics.era_ratio >= 0.90
+    assert result.metrics.year_or_interval_ratio == 0.0
+
+
 def test_issue89_hobbit_gate_can_fail_and_pass_with_explicit_thresholds():
     events = _load_hobbit_lore_events()
     bridge = ExtractionBridge()

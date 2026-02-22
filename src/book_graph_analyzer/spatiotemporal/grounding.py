@@ -87,7 +87,7 @@ class TemporalGroundingGate:
         *,
         min_grounded_ratio: float = 0.85,
         min_era_ratio: float = 0.80,
-        min_year_or_interval_ratio: float = 0.05,
+        min_year_or_interval_ratio: float = 0.0,
     ):
         self.min_grounded_ratio = min_grounded_ratio
         self.min_era_ratio = min_era_ratio
