@@ -71,7 +71,7 @@ def test_cli_artifacts_accepts_slice2_flags(tmp_path):
     runner = CliRunner()
     result = runner.invoke(
         main,
-        ["worldbible", "artifacts", str(text_path), "--context-window", "60", "--no-link-candidates"],
+        ["worldbible", "artifacts", str(text_path), "--context-window", "60", "--no-link-candidates", "--no-quality-gate"],
     )
 
     assert result.exit_code == 0
