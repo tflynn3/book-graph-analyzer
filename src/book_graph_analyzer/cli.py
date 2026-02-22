@@ -6631,6 +6631,7 @@ def corpus_sources(
                         "missing_count": validation.missing_count,
                         "missing_ratio": round(validation.missing_ratio, 4),
                         "invalid_authority_count": validation.invalid_authority_count,
+                        "inconsistent_count": validation.inconsistent_count,
                         "max_missing_ratio": validation.max_missing_ratio,
                         "min_authority_weight": validation.min_authority_weight,
                         "is_valid": validation.is_valid,

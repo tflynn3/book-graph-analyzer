@@ -98,7 +98,9 @@ def validate_editorial_provenance(
             if source_id != inferred.source_id.strip().lower():
                 inconsistent += 1
                 continue
-            if source_title != inferred.source_title.strip().lower():
+            # source_title is optional in Passage metadata; only enforce consistency
+            # when it is explicitly provided.
+            if source_title and source_title != inferred.source_title.strip().lower():
                 inconsistent += 1
                 continue
             if source_stratum != str(getattr(inferred.default_stratum, "value", "core_text")).strip().lower():
