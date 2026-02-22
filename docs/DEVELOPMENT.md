@@ -164,6 +164,8 @@ BGA_NEO4J_URI=bolt://localhost:7687
 BGA_NEO4J_USER=neo4j
 BGA_NEO4J_PASSWORD=bookgraph123
 BGA_OLLAMA_MODEL=llama3.1:8b
+# Optional provider override: ollama | huggingface | openai
+BGA_LLM_PROVIDER=ollama
 ```
 
 See `config.py` for all available settings.
@@ -263,6 +265,24 @@ ollama list
 ```
 
 The application will auto-detect Ollama at `http://localhost:11434`.
+
+### OpenAI provider (for faster API-backed event extraction)
+
+Set these in `.env`:
+
+```env
+BGA_LLM_PROVIDER=openai
+BGA_OPENAI_API_KEY=sk-...
+
+# Optional
+BGA_OPENAI_MODEL=gpt-4o-mini
+BGA_OPENAI_BASE_URL=https://api.openai.com/v1
+```
+
+Notes:
+- Expect provider rate limits (RPM/TPM). The client retries transient `429`/`5xx` automatically with exponential backoff.
+- Event extraction is chunked; failed chunks are skipped with warnings so long runs continue.
+- API usage is billable by tokens. Start with smaller models and smaller chunk sizes while tuning quality/cost.
 
 ---
 

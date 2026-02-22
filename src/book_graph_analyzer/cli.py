@@ -1958,6 +1958,7 @@ def corpus_events(corpus_name: str, output: str | None, neo4j: bool, chunk_size:
     from book_graph_analyzer.corpus import CorpusManager
     from book_graph_analyzer.lore import EventExtractor, EventGraph, Event, EventRelation
     from book_graph_analyzer.ingest.loader import load_book
+    from book_graph_analyzer.llm import LLMClient
     
     manager = CorpusManager(corpus_name)
     books = manager.get_processed_books()
@@ -1991,6 +1992,8 @@ def corpus_events(corpus_name: str, output: str | None, neo4j: bool, chunk_size:
     processed_books = 0
     
     console.print(f"[bold]Extracting events from {corpus_name}[/bold]")
+    llm = LLMClient()
+    console.print(f"[dim]LLM provider: {llm.provider} | model: {llm.model}[/dim]")
     console.print(f"Books to process: {total_books}")
     
     for book in books:
@@ -2406,11 +2409,15 @@ def lore_events(path: str, output: str, neo4j: bool, chunk_size: int, no_llm: bo
     """
     from book_graph_analyzer.lore import EventExtractor
     from book_graph_analyzer.ingest.loader import load_book
+    from book_graph_analyzer.llm import LLMClient
     
     file_path = Path(path)
     book_name = file_path.stem.replace("_", " ").replace("-", " ").title()
     
     console.print(f"[bold]Extracting events from:[/bold] {file_path.name}")
+    if not no_llm:
+        llm = LLMClient()
+        console.print(f"[dim]LLM provider: {llm.provider} | model: {llm.model}[/dim]")
     
     with console.status("Loading text..."):
         text = load_book(file_path)

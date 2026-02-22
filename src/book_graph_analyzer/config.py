@@ -28,7 +28,13 @@ class Settings(BaseSettings):
     # Hugging Face Inference API
     hf_api_key: str = Field(default="")
     hf_model: str = Field(default="meta-llama/Llama-3.1-70B-Instruct")
-    llm_provider: str = Field(default="ollama", description="ollama or huggingface")
+
+    # OpenAI API
+    openai_api_key: str = Field(default="")
+    openai_model: str = Field(default="gpt-4o-mini")
+    openai_base_url: str = Field(default="https://api.openai.com/v1")
+
+    llm_provider: str = Field(default="ollama", description="ollama, huggingface, or openai")
 
     # Paths
     data_dir: Path = Field(default=Path("data"))
