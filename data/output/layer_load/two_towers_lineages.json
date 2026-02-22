@@ -1,0 +1,328 @@
+{
+  "lineages": [
+    {
+      "entity_id": "char_gandalf",
+      "forms": [
+        {
+          "id": "lf:char_gandalf:gandalf",
+          "form": "Gandalf",
+          "language": "Common Speech",
+          "entity_id": "char_gandalf",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "two_towers"
+        },
+        {
+          "id": "lf:char_gandalf:the-white",
+          "form": "The White",
+          "language": "Sindarin",
+          "entity_id": "char_gandalf",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "two_towers"
+        },
+        {
+          "id": "lf:char_gandalf:gandalf-the-white",
+          "form": "Gandalf The White",
+          "language": "Sindarin",
+          "entity_id": "char_gandalf",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "two_towers"
+        }
+      ],
+      "derivations": [
+        {
+          "source_form_id": "lf:char_gandalf:gandalf",
+          "target_form_id": "lf:char_gandalf:the-white",
+          "derivation_type": "translation",
+          "notes": null
+        },
+        {
+          "source_form_id": "lf:char_gandalf:gandalf",
+          "target_form_id": "lf:char_gandalf:gandalf-the-white",
+          "derivation_type": "adaptation",
+          "notes": null
+        }
+      ]
+    },
+    {
+      "entity_id": "char_frodo_baggins",
+      "forms": [
+        {
+          "id": "lf:char_frodo_baggins:frodo",
+          "form": "Frodo",
+          "language": "Common Speech",
+          "entity_id": "char_frodo_baggins",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "two_towers"
+        },
+        {
+          "id": "lf:char_frodo_baggins:ring-bearer",
+          "form": "Ring-Bearer",
+          "language": "Quenya",
+          "entity_id": "char_frodo_baggins",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "two_towers"
+        },
+        {
+          "id": "lf:char_frodo_baggins:the-ring-bearer",
+          "form": "The Ring-Bearer",
+          "language": "Sindarin",
+          "entity_id": "char_frodo_baggins",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "two_towers"
+        }
+      ],
+      "derivations": [
+        {
+          "source_form_id": "lf:char_frodo_baggins:frodo",
+          "target_form_id": "lf:char_frodo_baggins:ring-bearer",
+          "derivation_type": "translation",
+          "notes": null
+        },
+        {
+          "source_form_id": "lf:char_frodo_baggins:frodo",
+          "target_form_id": "lf:char_frodo_baggins:the-ring-bearer",
+          "derivation_type": "adaptation",
+          "notes": null
+        }
+      ]
+    },
+    {
+      "entity_id": "char_samwise_gamgee",
+      "forms": [
+        {
+          "id": "lf:char_samwise_gamgee:sam",
+          "form": "Sam",
+          "language": "Common Speech",
+          "entity_id": "char_samwise_gamgee",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "two_towers"
+        },
+        {
+          "id": "lf:char_samwise_gamgee:samwise",
+          "form": "Samwise",
+          "language": "Quenya",
+          "entity_id": "char_samwise_gamgee",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "two_towers"
+        }
+      ],
+      "derivations": [
+        {
+          "source_form_id": "lf:char_samwise_gamgee:sam",
+          "target_form_id": "lf:char_samwise_gamgee:samwise",
+          "derivation_type": "translation",
+          "notes": null
+        }
+      ]
+    },
+    {
+      "entity_id": "char_aragorn",
+      "forms": [
+        {
+          "id": "lf:char_aragorn:aragorn",
+          "form": "Aragorn",
+          "language": "Common Speech",
+          "entity_id": "char_aragorn",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "two_towers"
+        },
+        {
+          "id": "lf:char_aragorn:strider",
+          "form": "Strider",
+          "language": "Quenya",
+          "entity_id": "char_aragorn",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "two_towers"
+        }
+      ],
+      "derivations": [
+        {
+          "source_form_id": "lf:char_aragorn:aragorn",
+          "target_form_id": "lf:char_aragorn:strider",
+          "derivation_type": "translation",
+          "notes": null
+        }
+      ]
+    },
+    {
+      "entity_id": "char_pippin",
+      "forms": [
+        {
+          "id": "lf:char_pippin:pippin",
+          "form": "Pippin",
+          "language": "Common Speech",
+          "entity_id": "char_pippin",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "two_towers"
+        },
+        {
+          "id": "lf:char_pippin:peregrin",
+          "form": "Peregrin",
+          "language": "Quenya",
+          "entity_id": "char_pippin",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "two_towers"
+        },
+        {
+          "id": "lf:char_pippin:peregrin-took",
+          "form": "Peregrin Took",
+          "language": "Quenya",
+          "entity_id": "char_pippin",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "two_towers"
+        }
+      ],
+      "derivations": [
+        {
+          "source_form_id": "lf:char_pippin:pippin",
+          "target_form_id": "lf:char_pippin:peregrin",
+          "derivation_type": "translation",
+          "notes": null
+        },
+        {
+          "source_form_id": "lf:char_pippin:pippin",
+          "target_form_id": "lf:char_pippin:peregrin-took",
+          "derivation_type": "adaptation",
+          "notes": null
+        }
+      ]
+    },
+    {
+      "entity_id": "char_saruman",
+      "forms": [
+        {
+          "id": "lf:char_saruman:saruman",
+          "form": "Saruman",
+          "language": "Common Speech",
+          "entity_id": "char_saruman",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "two_towers"
+        },
+        {
+          "id": "lf:char_saruman:the-white",
+          "form": "The White",
+          "language": "Sindarin",
+          "entity_id": "char_saruman",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "two_towers"
+        }
+      ],
+      "derivations": [
+        {
+          "source_form_id": "lf:char_saruman:saruman",
+          "target_form_id": "lf:char_saruman:the-white",
+          "derivation_type": "translation",
+          "notes": null
+        }
+      ]
+    },
+    {
+      "entity_id": "char_gollum",
+      "forms": [
+        {
+          "id": "lf:char_gollum:gollum",
+          "form": "Gollum",
+          "language": "Common Speech",
+          "entity_id": "char_gollum",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "two_towers"
+        },
+        {
+          "id": "lf:char_gollum:the-creature",
+          "form": "The Creature",
+          "language": "Sindarin",
+          "entity_id": "char_gollum",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "two_towers"
+        }
+      ],
+      "derivations": [
+        {
+          "source_form_id": "lf:char_gollum:gollum",
+          "target_form_id": "lf:char_gollum:the-creature",
+          "derivation_type": "translation",
+          "notes": null
+        }
+      ]
+    },
+    {
+      "entity_id": "char_treebeard",
+      "forms": [
+        {
+          "id": "lf:char_treebeard:treebeard",
+          "form": "Treebeard",
+          "language": "Common Speech",
+          "entity_id": "char_treebeard",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "two_towers"
+        },
+        {
+          "id": "lf:char_treebeard:fangorn",
+          "form": "Fangorn",
+          "language": "Quenya",
+          "entity_id": "char_treebeard",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "two_towers"
+        }
+      ],
+      "derivations": [
+        {
+          "source_form_id": "lf:char_treebeard:treebeard",
+          "target_form_id": "lf:char_treebeard:fangorn",
+          "derivation_type": "translation",
+          "notes": null
+        }
+      ]
+    },
+    {
+      "entity_id": "char_theoden",
+      "forms": [
+        {
+          "id": "lf:char_theoden:theoden",
+          "form": "Theoden",
+          "language": "Common Speech",
+          "entity_id": "char_theoden",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "two_towers"
+        },
+        {
+          "id": "lf:char_theoden:lord-of-the-mark",
+          "form": "Lord Of The Mark",
+          "language": "Sindarin",
+          "entity_id": "char_theoden",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "two_towers"
+        }
+      ],
+      "derivations": [
+        {
+          "source_form_id": "lf:char_theoden:theoden",
+          "target_form_id": "lf:char_theoden:lord-of-the-mark",
+          "derivation_type": "translation",
+          "notes": null
+        }
+      ]
+    }
+  ]
+}

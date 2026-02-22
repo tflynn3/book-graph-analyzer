@@ -1,0 +1,388 @@
+{
+  "lineages": [
+    {
+      "entity_id": "char_frodo_baggins",
+      "forms": [
+        {
+          "id": "lf:char_frodo_baggins:frodo",
+          "form": "Frodo",
+          "language": "Common Speech",
+          "entity_id": "char_frodo_baggins",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "return_of_king"
+        },
+        {
+          "id": "lf:char_frodo_baggins:halfling",
+          "form": "Halfling",
+          "language": "Quenya",
+          "entity_id": "char_frodo_baggins",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "return_of_king"
+        },
+        {
+          "id": "lf:char_frodo_baggins:the-ring-bearer",
+          "form": "The Ring-Bearer",
+          "language": "Sindarin",
+          "entity_id": "char_frodo_baggins",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "return_of_king"
+        }
+      ],
+      "derivations": [
+        {
+          "source_form_id": "lf:char_frodo_baggins:frodo",
+          "target_form_id": "lf:char_frodo_baggins:halfling",
+          "derivation_type": "translation",
+          "notes": null
+        },
+        {
+          "source_form_id": "lf:char_frodo_baggins:frodo",
+          "target_form_id": "lf:char_frodo_baggins:the-ring-bearer",
+          "derivation_type": "adaptation",
+          "notes": null
+        }
+      ]
+    },
+    {
+      "entity_id": "char_gandalf",
+      "forms": [
+        {
+          "id": "lf:char_gandalf:gandalf",
+          "form": "Gandalf",
+          "language": "Common Speech",
+          "entity_id": "char_gandalf",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "return_of_king"
+        },
+        {
+          "id": "lf:char_gandalf:the-grey",
+          "form": "The Grey",
+          "language": "Sindarin",
+          "entity_id": "char_gandalf",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "return_of_king"
+        },
+        {
+          "id": "lf:char_gandalf:the-white",
+          "form": "The White",
+          "language": "Sindarin",
+          "entity_id": "char_gandalf",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "return_of_king"
+        }
+      ],
+      "derivations": [
+        {
+          "source_form_id": "lf:char_gandalf:gandalf",
+          "target_form_id": "lf:char_gandalf:the-grey",
+          "derivation_type": "translation",
+          "notes": null
+        },
+        {
+          "source_form_id": "lf:char_gandalf:gandalf",
+          "target_form_id": "lf:char_gandalf:the-white",
+          "derivation_type": "adaptation",
+          "notes": null
+        }
+      ]
+    },
+    {
+      "entity_id": "char_aragorn",
+      "forms": [
+        {
+          "id": "lf:char_aragorn:aragorn",
+          "form": "Aragorn",
+          "language": "Common Speech",
+          "entity_id": "char_aragorn",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "return_of_king"
+        },
+        {
+          "id": "lf:char_aragorn:elessar",
+          "form": "Elessar",
+          "language": "Quenya",
+          "entity_id": "char_aragorn",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "return_of_king"
+        },
+        {
+          "id": "lf:char_aragorn:king-elessar",
+          "form": "King Elessar",
+          "language": "Quenya",
+          "entity_id": "char_aragorn",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "return_of_king"
+        }
+      ],
+      "derivations": [
+        {
+          "source_form_id": "lf:char_aragorn:aragorn",
+          "target_form_id": "lf:char_aragorn:elessar",
+          "derivation_type": "translation",
+          "notes": null
+        },
+        {
+          "source_form_id": "lf:char_aragorn:aragorn",
+          "target_form_id": "lf:char_aragorn:king-elessar",
+          "derivation_type": "adaptation",
+          "notes": null
+        }
+      ]
+    },
+    {
+      "entity_id": "char_pippin",
+      "forms": [
+        {
+          "id": "lf:char_pippin:pippin",
+          "form": "Pippin",
+          "language": "Common Speech",
+          "entity_id": "char_pippin",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "return_of_king"
+        },
+        {
+          "id": "lf:char_pippin:peregrin",
+          "form": "Peregrin",
+          "language": "Quenya",
+          "entity_id": "char_pippin",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "return_of_king"
+        }
+      ],
+      "derivations": [
+        {
+          "source_form_id": "lf:char_pippin:pippin",
+          "target_form_id": "lf:char_pippin:peregrin",
+          "derivation_type": "translation",
+          "notes": null
+        }
+      ]
+    },
+    {
+      "entity_id": "char_denethor",
+      "forms": [
+        {
+          "id": "lf:char_denethor:denethor",
+          "form": "Denethor",
+          "language": "Common Speech",
+          "entity_id": "char_denethor",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "return_of_king"
+        },
+        {
+          "id": "lf:char_denethor:the-steward",
+          "form": "The Steward",
+          "language": "Sindarin",
+          "entity_id": "char_denethor",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "return_of_king"
+        },
+        {
+          "id": "lf:char_denethor:lord-denethor",
+          "form": "Lord Denethor",
+          "language": "Sindarin",
+          "entity_id": "char_denethor",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "return_of_king"
+        }
+      ],
+      "derivations": [
+        {
+          "source_form_id": "lf:char_denethor:denethor",
+          "target_form_id": "lf:char_denethor:the-steward",
+          "derivation_type": "translation",
+          "notes": null
+        },
+        {
+          "source_form_id": "lf:char_denethor:denethor",
+          "target_form_id": "lf:char_denethor:lord-denethor",
+          "derivation_type": "adaptation",
+          "notes": null
+        }
+      ]
+    },
+    {
+      "entity_id": "char_sauron",
+      "forms": [
+        {
+          "id": "lf:char_sauron:the-enemy",
+          "form": "The Enemy",
+          "language": "Common Speech",
+          "entity_id": "char_sauron",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "return_of_king"
+        },
+        {
+          "id": "lf:char_sauron:sauron",
+          "form": "Sauron",
+          "language": "Quenya",
+          "entity_id": "char_sauron",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "return_of_king"
+        },
+        {
+          "id": "lf:char_sauron:the-dark-lord",
+          "form": "The Dark Lord",
+          "language": "Sindarin",
+          "entity_id": "char_sauron",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "return_of_king"
+        }
+      ],
+      "derivations": [
+        {
+          "source_form_id": "lf:char_sauron:the-enemy",
+          "target_form_id": "lf:char_sauron:sauron",
+          "derivation_type": "translation",
+          "notes": null
+        },
+        {
+          "source_form_id": "lf:char_sauron:the-enemy",
+          "target_form_id": "lf:char_sauron:the-dark-lord",
+          "derivation_type": "adaptation",
+          "notes": null
+        }
+      ]
+    },
+    {
+      "entity_id": "char_merry",
+      "forms": [
+        {
+          "id": "lf:char_merry:merry",
+          "form": "Merry",
+          "language": "Common Speech",
+          "entity_id": "char_merry",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "return_of_king"
+        },
+        {
+          "id": "lf:char_merry:meriadoc",
+          "form": "Meriadoc",
+          "language": "Quenya",
+          "entity_id": "char_merry",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "return_of_king"
+        }
+      ],
+      "derivations": [
+        {
+          "source_form_id": "lf:char_merry:merry",
+          "target_form_id": "lf:char_merry:meriadoc",
+          "derivation_type": "translation",
+          "notes": null
+        }
+      ]
+    },
+    {
+      "entity_id": "char_morgoth",
+      "forms": [
+        {
+          "id": "lf:char_morgoth:the-enemy",
+          "form": "The Enemy",
+          "language": "Common Speech",
+          "entity_id": "char_morgoth",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "return_of_king"
+        },
+        {
+          "id": "lf:char_morgoth:the-dark-lord",
+          "form": "The Dark Lord",
+          "language": "Sindarin",
+          "entity_id": "char_morgoth",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "return_of_king"
+        },
+        {
+          "id": "lf:char_morgoth:morgoth",
+          "form": "Morgoth",
+          "language": "Sindarin",
+          "entity_id": "char_morgoth",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "return_of_king"
+        }
+      ],
+      "derivations": [
+        {
+          "source_form_id": "lf:char_morgoth:the-enemy",
+          "target_form_id": "lf:char_morgoth:the-dark-lord",
+          "derivation_type": "translation",
+          "notes": null
+        },
+        {
+          "source_form_id": "lf:char_morgoth:the-enemy",
+          "target_form_id": "lf:char_morgoth:morgoth",
+          "derivation_type": "adaptation",
+          "notes": null
+        }
+      ]
+    },
+    {
+      "entity_id": "obj_one_ring",
+      "forms": [
+        {
+          "id": "lf:obj_one_ring:the-ring",
+          "form": "The Ring",
+          "language": "Common Speech",
+          "entity_id": "obj_one_ring",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "return_of_king"
+        },
+        {
+          "id": "lf:obj_one_ring:the-one-ring",
+          "form": "The One Ring",
+          "language": "Sindarin",
+          "entity_id": "obj_one_ring",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "return_of_king"
+        },
+        {
+          "id": "lf:obj_one_ring:ring-of-power",
+          "form": "Ring Of Power",
+          "language": "Quenya",
+          "entity_id": "obj_one_ring",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "return_of_king"
+        }
+      ],
+      "derivations": [
+        {
+          "source_form_id": "lf:obj_one_ring:the-ring",
+          "target_form_id": "lf:obj_one_ring:the-one-ring",
+          "derivation_type": "translation",
+          "notes": null
+        },
+        {
+          "source_form_id": "lf:obj_one_ring:the-ring",
+          "target_form_id": "lf:obj_one_ring:ring-of-power",
+          "derivation_type": "adaptation",
+          "notes": null
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,373 @@
+{
+  "lineages": [
+    {
+      "entity_id": "char_morgoth",
+      "forms": [
+        {
+          "id": "lf:char_morgoth:morgoth",
+          "form": "Morgoth",
+          "language": "Common Speech",
+          "entity_id": "char_morgoth",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "silmarillion"
+        },
+        {
+          "id": "lf:char_morgoth:melkor",
+          "form": "Melkor",
+          "language": "Quenya",
+          "entity_id": "char_morgoth",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "silmarillion"
+        },
+        {
+          "id": "lf:char_morgoth:the-dark-lord",
+          "form": "The Dark Lord",
+          "language": "Sindarin",
+          "entity_id": "char_morgoth",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "silmarillion"
+        }
+      ],
+      "derivations": [
+        {
+          "source_form_id": "lf:char_morgoth:morgoth",
+          "target_form_id": "lf:char_morgoth:melkor",
+          "derivation_type": "translation",
+          "notes": null
+        },
+        {
+          "source_form_id": "lf:char_morgoth:morgoth",
+          "target_form_id": "lf:char_morgoth:the-dark-lord",
+          "derivation_type": "adaptation",
+          "notes": null
+        }
+      ]
+    },
+    {
+      "entity_id": "char_sauron",
+      "forms": [
+        {
+          "id": "lf:char_sauron:sauron",
+          "form": "Sauron",
+          "language": "Common Speech",
+          "entity_id": "char_sauron",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "silmarillion"
+        },
+        {
+          "id": "lf:char_sauron:lord-of-the-rings",
+          "form": "Lord Of The Rings",
+          "language": "Sindarin",
+          "entity_id": "char_sauron",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "silmarillion"
+        },
+        {
+          "id": "lf:char_sauron:the-dark-lord",
+          "form": "The Dark Lord",
+          "language": "Sindarin",
+          "entity_id": "char_sauron",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "silmarillion"
+        }
+      ],
+      "derivations": [
+        {
+          "source_form_id": "lf:char_sauron:sauron",
+          "target_form_id": "lf:char_sauron:lord-of-the-rings",
+          "derivation_type": "translation",
+          "notes": null
+        },
+        {
+          "source_form_id": "lf:char_sauron:sauron",
+          "target_form_id": "lf:char_sauron:the-dark-lord",
+          "derivation_type": "adaptation",
+          "notes": null
+        }
+      ]
+    },
+    {
+      "entity_id": "place_valinor",
+      "forms": [
+        {
+          "id": "lf:place_valinor:valinor",
+          "form": "Valinor",
+          "language": "Common Speech",
+          "entity_id": "place_valinor",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "silmarillion"
+        },
+        {
+          "id": "lf:place_valinor:aman",
+          "form": "Aman",
+          "language": "Quenya",
+          "entity_id": "place_valinor",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "silmarillion"
+        },
+        {
+          "id": "lf:place_valinor:the-blessed-realm",
+          "form": "The Blessed Realm",
+          "language": "Sindarin",
+          "entity_id": "place_valinor",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "silmarillion"
+        }
+      ],
+      "derivations": [
+        {
+          "source_form_id": "lf:place_valinor:valinor",
+          "target_form_id": "lf:place_valinor:aman",
+          "derivation_type": "translation",
+          "notes": null
+        },
+        {
+          "source_form_id": "lf:place_valinor:valinor",
+          "target_form_id": "lf:place_valinor:the-blessed-realm",
+          "derivation_type": "adaptation",
+          "notes": null
+        }
+      ]
+    },
+    {
+      "entity_id": "obj_silmarils",
+      "forms": [
+        {
+          "id": "lf:obj_silmarils:silmarils",
+          "form": "Silmarils",
+          "language": "Common Speech",
+          "entity_id": "obj_silmarils",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "silmarillion"
+        },
+        {
+          "id": "lf:obj_silmarils:the-silmarils",
+          "form": "The Silmarils",
+          "language": "Sindarin",
+          "entity_id": "obj_silmarils",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "silmarillion"
+        }
+      ],
+      "derivations": [
+        {
+          "source_form_id": "lf:obj_silmarils:silmarils",
+          "target_form_id": "lf:obj_silmarils:the-silmarils",
+          "derivation_type": "translation",
+          "notes": null
+        }
+      ]
+    },
+    {
+      "entity_id": "char_gandalf",
+      "forms": [
+        {
+          "id": "lf:char_gandalf:the-white",
+          "form": "The White",
+          "language": "Common Speech",
+          "entity_id": "char_gandalf",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "silmarillion"
+        },
+        {
+          "id": "lf:char_gandalf:mithrandir",
+          "form": "Mithrandir",
+          "language": "Sindarin",
+          "entity_id": "char_gandalf",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "silmarillion"
+        },
+        {
+          "id": "lf:char_gandalf:the-grey",
+          "form": "The Grey",
+          "language": "Sindarin",
+          "entity_id": "char_gandalf",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "silmarillion"
+        }
+      ],
+      "derivations": [
+        {
+          "source_form_id": "lf:char_gandalf:the-white",
+          "target_form_id": "lf:char_gandalf:mithrandir",
+          "derivation_type": "translation",
+          "notes": null
+        },
+        {
+          "source_form_id": "lf:char_gandalf:the-white",
+          "target_form_id": "lf:char_gandalf:the-grey",
+          "derivation_type": "adaptation",
+          "notes": null
+        }
+      ]
+    },
+    {
+      "entity_id": "obj_one_ring",
+      "forms": [
+        {
+          "id": "lf:obj_one_ring:the-ring",
+          "form": "The Ring",
+          "language": "Common Speech",
+          "entity_id": "obj_one_ring",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "silmarillion"
+        },
+        {
+          "id": "lf:obj_one_ring:the-one-ring",
+          "form": "The One Ring",
+          "language": "Sindarin",
+          "entity_id": "obj_one_ring",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "silmarillion"
+        },
+        {
+          "id": "lf:obj_one_ring:the-ruling-ring",
+          "form": "The Ruling Ring",
+          "language": "Sindarin",
+          "entity_id": "obj_one_ring",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "silmarillion"
+        }
+      ],
+      "derivations": [
+        {
+          "source_form_id": "lf:obj_one_ring:the-ring",
+          "target_form_id": "lf:obj_one_ring:the-one-ring",
+          "derivation_type": "translation",
+          "notes": null
+        },
+        {
+          "source_form_id": "lf:obj_one_ring:the-ring",
+          "target_form_id": "lf:obj_one_ring:the-ruling-ring",
+          "derivation_type": "adaptation",
+          "notes": null
+        }
+      ]
+    },
+    {
+      "entity_id": "char_saruman",
+      "forms": [
+        {
+          "id": "lf:char_saruman:the-white",
+          "form": "The White",
+          "language": "Common Speech",
+          "entity_id": "char_saruman",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "silmarillion"
+        },
+        {
+          "id": "lf:char_saruman:saruman",
+          "form": "Saruman",
+          "language": "Quenya",
+          "entity_id": "char_saruman",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "silmarillion"
+        }
+      ],
+      "derivations": [
+        {
+          "source_form_id": "lf:char_saruman:the-white",
+          "target_form_id": "lf:char_saruman:saruman",
+          "derivation_type": "translation",
+          "notes": null
+        }
+      ]
+    },
+    {
+      "entity_id": "char_elrond",
+      "forms": [
+        {
+          "id": "lf:char_elrond:elrond",
+          "form": "Elrond",
+          "language": "Common Speech",
+          "entity_id": "char_elrond",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "silmarillion"
+        },
+        {
+          "id": "lf:char_elrond:master-elrond",
+          "form": "Master Elrond",
+          "language": "Sindarin",
+          "entity_id": "char_elrond",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "silmarillion"
+        }
+      ],
+      "derivations": [
+        {
+          "source_form_id": "lf:char_elrond:elrond",
+          "target_form_id": "lf:char_elrond:master-elrond",
+          "derivation_type": "translation",
+          "notes": null
+        }
+      ]
+    },
+    {
+      "entity_id": "place_grey_havens",
+      "forms": [
+        {
+          "id": "lf:place_grey_havens:the-havens",
+          "form": "The Havens",
+          "language": "Common Speech",
+          "entity_id": "place_grey_havens",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "silmarillion"
+        },
+        {
+          "id": "lf:place_grey_havens:mithlond",
+          "form": "Mithlond",
+          "language": "Sindarin",
+          "entity_id": "place_grey_havens",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "silmarillion"
+        },
+        {
+          "id": "lf:place_grey_havens:grey-havens",
+          "form": "Grey Havens",
+          "language": "Quenya",
+          "entity_id": "place_grey_havens",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "silmarillion"
+        }
+      ],
+      "derivations": [
+        {
+          "source_form_id": "lf:place_grey_havens:the-havens",
+          "target_form_id": "lf:place_grey_havens:mithlond",
+          "derivation_type": "translation",
+          "notes": null
+        },
+        {
+          "source_form_id": "lf:place_grey_havens:the-havens",
+          "target_form_id": "lf:place_grey_havens:grey-havens",
+          "derivation_type": "adaptation",
+          "notes": null
+        }
+      ]
+    }
+  ]
+}

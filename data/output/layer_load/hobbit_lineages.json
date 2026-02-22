@@ -1,0 +1,282 @@
+{
+  "lineages": [
+    {
+      "entity_id": "char_bilbo_baggins",
+      "forms": [
+        {
+          "id": "lf:char_bilbo_baggins:bilbo",
+          "form": "Bilbo",
+          "language": "Common Speech",
+          "entity_id": "char_bilbo_baggins",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "hobbit"
+        },
+        {
+          "id": "lf:char_bilbo_baggins:bilbo-baggins",
+          "form": "Bilbo Baggins",
+          "language": "Quenya",
+          "entity_id": "char_bilbo_baggins",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "hobbit"
+        },
+        {
+          "id": "lf:char_bilbo_baggins:mr-baggins",
+          "form": "Mr Baggins",
+          "language": "Quenya",
+          "entity_id": "char_bilbo_baggins",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "hobbit"
+        }
+      ],
+      "derivations": [
+        {
+          "source_form_id": "lf:char_bilbo_baggins:bilbo",
+          "target_form_id": "lf:char_bilbo_baggins:bilbo-baggins",
+          "derivation_type": "translation",
+          "notes": null
+        },
+        {
+          "source_form_id": "lf:char_bilbo_baggins:bilbo",
+          "target_form_id": "lf:char_bilbo_baggins:mr-baggins",
+          "derivation_type": "adaptation",
+          "notes": null
+        }
+      ]
+    },
+    {
+      "entity_id": "char_gandalf",
+      "forms": [
+        {
+          "id": "lf:char_gandalf:gandalf",
+          "form": "Gandalf",
+          "language": "Common Speech",
+          "entity_id": "char_gandalf",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "hobbit"
+        },
+        {
+          "id": "lf:char_gandalf:the-white",
+          "form": "The White",
+          "language": "Sindarin",
+          "entity_id": "char_gandalf",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "hobbit"
+        }
+      ],
+      "derivations": [
+        {
+          "source_form_id": "lf:char_gandalf:gandalf",
+          "target_form_id": "lf:char_gandalf:the-white",
+          "derivation_type": "translation",
+          "notes": null
+        }
+      ]
+    },
+    {
+      "entity_id": "char_thorin_oakenshield",
+      "forms": [
+        {
+          "id": "lf:char_thorin_oakenshield:thorin",
+          "form": "Thorin",
+          "language": "Common Speech",
+          "entity_id": "char_thorin_oakenshield",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "hobbit"
+        },
+        {
+          "id": "lf:char_thorin_oakenshield:king-under-the-mountain",
+          "form": "King Under The Mountain",
+          "language": "Sindarin",
+          "entity_id": "char_thorin_oakenshield",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "hobbit"
+        },
+        {
+          "id": "lf:char_thorin_oakenshield:thorin-oakenshield",
+          "form": "Thorin Oakenshield",
+          "language": "Sindarin",
+          "entity_id": "char_thorin_oakenshield",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "hobbit"
+        }
+      ],
+      "derivations": [
+        {
+          "source_form_id": "lf:char_thorin_oakenshield:thorin",
+          "target_form_id": "lf:char_thorin_oakenshield:king-under-the-mountain",
+          "derivation_type": "translation",
+          "notes": null
+        },
+        {
+          "source_form_id": "lf:char_thorin_oakenshield:thorin",
+          "target_form_id": "lf:char_thorin_oakenshield:thorin-oakenshield",
+          "derivation_type": "adaptation",
+          "notes": null
+        }
+      ]
+    },
+    {
+      "entity_id": "char_smaug",
+      "forms": [
+        {
+          "id": "lf:char_smaug:smaug",
+          "form": "Smaug",
+          "language": "Common Speech",
+          "entity_id": "char_smaug",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "hobbit"
+        },
+        {
+          "id": "lf:char_smaug:the-dragon",
+          "form": "The Dragon",
+          "language": "Sindarin",
+          "entity_id": "char_smaug",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "hobbit"
+        }
+      ],
+      "derivations": [
+        {
+          "source_form_id": "lf:char_smaug:smaug",
+          "target_form_id": "lf:char_smaug:the-dragon",
+          "derivation_type": "translation",
+          "notes": null
+        }
+      ]
+    },
+    {
+      "entity_id": "char_bard",
+      "forms": [
+        {
+          "id": "lf:char_bard:bard",
+          "form": "Bard",
+          "language": "Common Speech",
+          "entity_id": "char_bard",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "hobbit"
+        },
+        {
+          "id": "lf:char_bard:king-bard",
+          "form": "King Bard",
+          "language": "Quenya",
+          "entity_id": "char_bard",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "hobbit"
+        }
+      ],
+      "derivations": [
+        {
+          "source_form_id": "lf:char_bard:bard",
+          "target_form_id": "lf:char_bard:king-bard",
+          "derivation_type": "translation",
+          "notes": null
+        }
+      ]
+    },
+    {
+      "entity_id": "place_erebor",
+      "forms": [
+        {
+          "id": "lf:place_erebor:the-mountain",
+          "form": "The Mountain",
+          "language": "Common Speech",
+          "entity_id": "place_erebor",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "hobbit"
+        },
+        {
+          "id": "lf:place_erebor:the-lonely-mountain",
+          "form": "The Lonely Mountain",
+          "language": "Sindarin",
+          "entity_id": "place_erebor",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "hobbit"
+        }
+      ],
+      "derivations": [
+        {
+          "source_form_id": "lf:place_erebor:the-mountain",
+          "target_form_id": "lf:place_erebor:the-lonely-mountain",
+          "derivation_type": "translation",
+          "notes": null
+        }
+      ]
+    },
+    {
+      "entity_id": "obj_arkenstone",
+      "forms": [
+        {
+          "id": "lf:obj_arkenstone:arkenstone",
+          "form": "Arkenstone",
+          "language": "Common Speech",
+          "entity_id": "obj_arkenstone",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "hobbit"
+        },
+        {
+          "id": "lf:obj_arkenstone:the-arkenstone",
+          "form": "The Arkenstone",
+          "language": "Sindarin",
+          "entity_id": "obj_arkenstone",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "hobbit"
+        }
+      ],
+      "derivations": [
+        {
+          "source_form_id": "lf:obj_arkenstone:arkenstone",
+          "target_form_id": "lf:obj_arkenstone:the-arkenstone",
+          "derivation_type": "translation",
+          "notes": null
+        }
+      ]
+    },
+    {
+      "entity_id": "place_lake_town",
+      "forms": [
+        {
+          "id": "lf:place_lake_town:lake-town",
+          "form": "Lake-Town",
+          "language": "Common Speech",
+          "entity_id": "place_lake_town",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "hobbit"
+        },
+        {
+          "id": "lf:place_lake_town:esgaroth",
+          "form": "Esgaroth",
+          "language": "Sindarin",
+          "entity_id": "place_lake_town",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "hobbit"
+        }
+      ],
+      "derivations": [
+        {
+          "source_form_id": "lf:place_lake_town:lake-town",
+          "target_form_id": "lf:place_lake_town:esgaroth",
+          "derivation_type": "translation",
+          "notes": null
+        }
+      ]
+    }
+  ]
+}

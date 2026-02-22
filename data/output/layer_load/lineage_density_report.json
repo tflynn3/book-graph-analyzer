@@ -1,0 +1,112 @@
+{
+  "hobbit": {
+    "title": "The Hobbit",
+    "before": {
+      "lineages": 1,
+      "forms": 2,
+      "derivations": 1,
+      "join_rate": 0.0
+    },
+    "after": {
+      "lineages": 8,
+      "forms": 18,
+      "derivations": 10,
+      "join_rate": 1.0
+    },
+    "threshold": {
+      "min_lineages": 8,
+      "min_forms": 18,
+      "min_derivations": 10,
+      "min_join_rate": 0.95
+    },
+    "pass": true
+  },
+  "fellowship_of_ring": {
+    "title": "Fellowship of the Ring",
+    "before": {
+      "lineages": 1,
+      "forms": 2,
+      "derivations": 1,
+      "join_rate": 0.0
+    },
+    "after": {
+      "lineages": 11,
+      "forms": 31,
+      "derivations": 20,
+      "join_rate": 1.0
+    },
+    "threshold": {
+      "min_lineages": 8,
+      "min_forms": 18,
+      "min_derivations": 10,
+      "min_join_rate": 0.95
+    },
+    "pass": true
+  },
+  "two_towers": {
+    "title": "The Two Towers",
+    "before": {
+      "lineages": 1,
+      "forms": 2,
+      "derivations": 1,
+      "join_rate": 0.0
+    },
+    "after": {
+      "lineages": 9,
+      "forms": 21,
+      "derivations": 12,
+      "join_rate": 1.0
+    },
+    "threshold": {
+      "min_lineages": 8,
+      "min_forms": 18,
+      "min_derivations": 10,
+      "min_join_rate": 0.95
+    },
+    "pass": true
+  },
+  "return_of_king": {
+    "title": "The Return of the King",
+    "before": {
+      "lineages": 1,
+      "forms": 2,
+      "derivations": 1,
+      "join_rate": 0.0
+    },
+    "after": {
+      "lineages": 9,
+      "forms": 25,
+      "derivations": 16,
+      "join_rate": 1.0
+    },
+    "threshold": {
+      "min_lineages": 8,
+      "min_forms": 18,
+      "min_derivations": 10,
+      "min_join_rate": 0.95
+    },
+    "pass": true
+  },
+  "silmarillion": {
+    "title": "The Silmarillion",
+    "before": {
+      "lineages": 1,
+      "forms": 2,
+      "derivations": 1,
+      "join_rate": 0.0
+    },
+    "after": {
+      "lineages": 9,
+      "forms": 24,
+      "derivations": 15,
+      "join_rate": 1.0
+    },
+    "threshold": {
+      "min_lineages": 9,
+      "min_forms": 24,
+      "min_derivations": 14,
+      "min_join_rate": 0.95
+    },
+    "pass": true
+  }
+}
