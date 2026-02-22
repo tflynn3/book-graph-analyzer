@@ -1947,7 +1947,9 @@ def corpus_compare(corpus_name: str) -> None:
 @click.option("--skip-processed", is_flag=True, help="Skip books already in events file")
 @click.option("--resilient/--no-resilient", default=False, show_default=True, help="Enable resilient chunk extraction with ledger/resume")
 @click.option("--checkpoint-dir", type=click.Path(), default="data/checkpoints", show_default=True, help="Directory for resilient checkpoint/ledger files")
-def corpus_events(corpus_name: str, output: str | None, neo4j: bool, chunk_size: int, skip_processed: bool, resilient: bool, checkpoint_dir: str) -> None:
+@click.option("--parallel-workers", default=1, show_default=True, type=int, help="Parallel chunk extraction workers (1 disables parallel mode)")
+@click.option("--max-inflight", default=None, type=int, help="Maximum chunks in-flight when parallel workers > 1")
+def corpus_events(corpus_name: str, output: str | None, neo4j: bool, chunk_size: int, skip_processed: bool, resilient: bool, checkpoint_dir: str, parallel_workers: int, max_inflight: int | None) -> None:
     """Extract events from all books in corpus with cross-book linking.
     
     Creates a unified event graph with temporal ordering across books.
@@ -2042,6 +2044,8 @@ def corpus_events(corpus_name: str, output: str | None, neo4j: bool, chunk_size:
                     chunk_size=chunk_size,
                     checkpoint_file=checkpoint_file,
                     resilient=resilient,
+                    parallel_workers=max(1, parallel_workers),
+                    max_inflight=max_inflight,
                 )
             else:
                 book_graph = extractor.extract_from_text(text, source_book=book.title)
@@ -2407,7 +2411,9 @@ def lore_check(claim: str, bible: str | None, corpus: str | None, timeline: str 
 @click.option("--no-llm", is_flag=True, help="Use pattern matching instead of LLM")
 @click.option("--checkpoint", "-c", type=click.Path(), help="Checkpoint file for resume support")
 @click.option("--resilient/--no-resilient", default=False, show_default=True, help="Enable resilient chunk extraction with ledger + fallback retries")
-def lore_events(path: str, output: str, neo4j: bool, chunk_size: int, no_llm: bool, checkpoint: str, resilient: bool) -> None:
+@click.option("--parallel-workers", default=1, show_default=True, type=int, help="Parallel chunk extraction workers (1 disables parallel mode)")
+@click.option("--max-inflight", default=None, type=int, help="Maximum chunks in-flight when parallel workers > 1")
+def lore_events(path: str, output: str, neo4j: bool, chunk_size: int, no_llm: bool, checkpoint: str, resilient: bool, parallel_workers: int, max_inflight: int | None) -> None:
     """Extract events from a text file.
     
     Identifies key events with participants and temporal ordering.
@@ -2460,6 +2466,8 @@ def lore_events(path: str, output: str, neo4j: bool, chunk_size: int, no_llm: bo
                 chunk_size=chunk_size,
                 checkpoint_file=checkpoint,
                 resilient=resilient,
+                parallel_workers=max(1, parallel_workers),
+                max_inflight=max_inflight,
             )
         else:
             graph = extractor.extract_from_text(text, source_book=book_name)
