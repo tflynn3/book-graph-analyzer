@@ -1945,7 +1945,9 @@ def corpus_compare(corpus_name: str) -> None:
 @click.option("--neo4j", is_flag=True, help="Also write to Neo4j")
 @click.option("--chunk-size", default=3000, help="Characters per chunk (default: 3000)")
 @click.option("--skip-processed", is_flag=True, help="Skip books already in events file")
-def corpus_events(corpus_name: str, output: str | None, neo4j: bool, chunk_size: int, skip_processed: bool) -> None:
+@click.option("--resilient/--no-resilient", default=False, show_default=True, help="Enable resilient chunk extraction with ledger/resume")
+@click.option("--checkpoint-dir", type=click.Path(), default="data/checkpoints", show_default=True, help="Directory for resilient checkpoint/ledger files")
+def corpus_events(corpus_name: str, output: str | None, neo4j: bool, chunk_size: int, skip_processed: bool, resilient: bool, checkpoint_dir: str) -> None:
     """Extract events from all books in corpus with cross-book linking.
     
     Creates a unified event graph with temporal ordering across books.
@@ -2030,7 +2032,17 @@ def corpus_events(corpus_name: str, output: str | None, neo4j: bool, chunk_size:
             
             # Extract events
             if len(text) > chunk_size * 2:
-                book_graph = extractor.extract_from_book(text, source_book=book.title, chunk_size=chunk_size)
+                checkpoint_file = None
+                if resilient:
+                    slug = re.sub(r"[^a-z0-9]+", "_", book.title.lower()).strip("_")
+                    checkpoint_file = str(Path(checkpoint_dir) / f"corpus_events_{corpus_name}_{slug}.checkpoint.json")
+                book_graph = extractor.extract_from_book(
+                    text,
+                    source_book=book.title,
+                    chunk_size=chunk_size,
+                    checkpoint_file=checkpoint_file,
+                    resilient=resilient,
+                )
             else:
                 book_graph = extractor.extract_from_text(text, source_book=book.title)
         
@@ -2394,7 +2406,8 @@ def lore_check(claim: str, bible: str | None, corpus: str | None, timeline: str 
 @click.option("--chunk-size", default=3000, help="Characters per chunk (default: 3000)")
 @click.option("--no-llm", is_flag=True, help="Use pattern matching instead of LLM")
 @click.option("--checkpoint", "-c", type=click.Path(), help="Checkpoint file for resume support")
-def lore_events(path: str, output: str, neo4j: bool, chunk_size: int, no_llm: bool, checkpoint: str) -> None:
+@click.option("--resilient/--no-resilient", default=False, show_default=True, help="Enable resilient chunk extraction with ledger + fallback retries")
+def lore_events(path: str, output: str, neo4j: bool, chunk_size: int, no_llm: bool, checkpoint: str, resilient: bool) -> None:
     """Extract events from a text file.
     
     Identifies key events with participants and temporal ordering.
@@ -2446,9 +2459,19 @@ def lore_events(path: str, output: str, neo4j: bool, chunk_size: int, no_llm: bo
                 source_book=book_name, 
                 chunk_size=chunk_size,
                 checkpoint_file=checkpoint,
+                resilient=resilient,
             )
         else:
             graph = extractor.extract_from_text(text, source_book=book_name)
+
+    if resilient and checkpoint:
+        summary = extractor.get_resilient_summary(checkpoint)
+        if summary:
+            console.print(
+                "[dim]Resilient summary: "
+                f"ok={summary.get('ok', 0)} | retried={summary.get('retried', 0)} | "
+                f"fallback_success={summary.get('fallback_success', 0)} | failed={summary.get('failed', 0)}[/dim]"
+            )
     
     # Summary
     console.print(f"\n[bold]Events extracted:[/bold]")
