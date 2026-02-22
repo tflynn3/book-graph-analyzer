@@ -1585,6 +1585,12 @@ class GraphWriter:
         source_passage_id: str | None = None,
     ) -> None:
         """Persist the current sociolinguistic register profile for an entity."""
+        from ..lore.sociolinguistic_registers import ground_character_entity_id
+
+        entity_id = ground_character_entity_id(entity_id)
+        if not entity_id:
+            raise ValueError("Register profiles require a canonical character entity id")
+
         with self.driver.session() as session:
             session.run(
                 """
@@ -1620,6 +1626,12 @@ class GraphWriter:
         source_passage_id: str | None = None,
     ) -> None:
         """Write a time-stamped register observation for later drift analysis."""
+        from ..lore.sociolinguistic_registers import ground_character_entity_id
+
+        entity_id = ground_character_entity_id(entity_id)
+        if not entity_id:
+            raise ValueError("Register observations require a canonical character entity id")
+
         with self.driver.session() as session:
             session.run(
                 """
@@ -1659,6 +1671,12 @@ class GraphWriter:
         limit: int = 20,
     ) -> list[dict]:
         """Query consecutive register observations and calculate drift deltas."""
+        from ..lore.sociolinguistic_registers import ground_character_entity_id
+
+        entity_id = ground_character_entity_id(entity_id)
+        if not entity_id:
+            return []
+
         with self.driver.session() as session:
             result = session.run(
                 """
@@ -1707,6 +1725,12 @@ class GraphWriter:
         source_passage_id: str | None = None,
     ) -> None:
         """Persist the current sociolinguistic register profile for an entity."""
+        from ..lore.sociolinguistic_registers import ground_character_entity_id
+
+        entity_id = ground_character_entity_id(entity_id)
+        if not entity_id:
+            raise ValueError("Register profiles require a canonical character entity id")
+
         with self.driver.session() as session:
             session.run(
                 """
@@ -1742,6 +1766,12 @@ class GraphWriter:
         source_passage_id: str | None = None,
     ) -> None:
         """Write a time-stamped register observation for later drift analysis."""
+        from ..lore.sociolinguistic_registers import ground_character_entity_id
+
+        entity_id = ground_character_entity_id(entity_id)
+        if not entity_id:
+            raise ValueError("Register observations require a canonical character entity id")
+
         with self.driver.session() as session:
             session.run(
                 """
@@ -1781,6 +1811,12 @@ class GraphWriter:
         limit: int = 20,
     ) -> list[dict]:
         """Query consecutive register observations and calculate drift deltas."""
+        from ..lore.sociolinguistic_registers import ground_character_entity_id
+
+        entity_id = ground_character_entity_id(entity_id)
+        if not entity_id:
+            return []
+
         with self.driver.session() as session:
             result = session.run(
                 """
@@ -1824,6 +1860,12 @@ class GraphWriter:
         limit: int = 25,
     ) -> list[dict]:
         """Return recent register observations for an entity."""
+        from ..lore.sociolinguistic_registers import ground_character_entity_id
+
+        entity_id = ground_character_entity_id(entity_id)
+        if not entity_id:
+            return []
+
         with self.driver.session() as session:
             result = session.run(
                 """
@@ -1850,6 +1892,19 @@ class GraphWriter:
         limit: int = 100,
     ) -> dict:
         """Summarize drift counts and strongest transition for reporting."""
+        from ..lore.sociolinguistic_registers import ground_character_entity_id
+
+        entity_id = ground_character_entity_id(entity_id)
+        if not entity_id:
+            return {
+                "entity_id": None,
+                "drift_count": 0,
+                "high": 0,
+                "medium": 0,
+                "low": 0,
+                "strongest": None,
+            }
+
         drifts = self.query_register_drift(entity_id=entity_id, min_delta=min_delta, limit=limit)
         if not drifts:
             return {
