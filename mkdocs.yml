@@ -67,3 +67,4 @@ nav:
   - Project:
       - Contributing: contributing.md
       - Legacy Design Docs: legacy-docs.md
+      - Refresh From Scratch Runbook: wiki/refresh-from-scratch.md
