@@ -92,6 +92,7 @@ def ground_character_entity_id(entity_id: str | None) -> str | None:
         return None
 
     raw = raw.replace("-", "_")
+    raw = re.sub(r"^character[:_]+", "char_", raw)
     known_non_character_prefixes = (
         "place_",
         "obj_",

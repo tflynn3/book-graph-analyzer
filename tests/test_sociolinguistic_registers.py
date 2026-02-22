@@ -60,6 +60,8 @@ def test_profile_corpus_registers_builds_distribution_and_drifts():
 def test_ground_character_entity_id_enforces_character_only():
     assert ground_character_entity_id("char_Aragorn") == "char_aragorn"
     assert ground_character_entity_id("Aragorn") == "char_aragorn"
+    assert ground_character_entity_id("character:Aragorn") == "char_aragorn"
+    assert ground_character_entity_id("character_Aragorn") == "char_aragorn"
     assert ground_character_entity_id("place_bree") is None
 
 
