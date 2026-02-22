@@ -19,7 +19,7 @@ Then use `bga worldbible --help` and `bga generate --help` for generation workfl
     deep-lore layers. Each pillar is being implemented incrementally.
     See the [World-Building RFC](tolkien-worldbuilding-rfc.md) for the full design.
 
-### Available Commands (Placeholder)
+### Available Commands
 
 ```bash
 # Run all world-building pillars on a text
@@ -27,6 +27,9 @@ bga pipeline worldbuilding the_silmarillion.txt -t "The Silmarillion"
 
 # Run specific pillars only
 bga pipeline worldbuilding lotr.txt --pillars linguistic --pillars genealogy
+
+# Persist genealogy artifact from canonical world-building pipeline
+bga pipeline worldbuilding data/texts/the_hobbit.txt --pillars genealogy -o data/output
 
 # Linguistic lineage (etymology chains)
 bga worldbible languages hobbit_bible.json
@@ -44,7 +47,7 @@ bga corpus sources tolkien_works --show-authority
 |--------|-----------|-------|--------|
 | Linguistic Lineage | `worldbible languages` | #46 | ✅ v1 |
 | Sociolinguistic Registers | `lore socioreg-profile`, `lore socioreg-drift`, `lore socioreg-corpus` | #47 | 🟡 closeout evidence added |
-| Genealogical Layer | `lore genealogy` | #49 | 🟡 closeout evidence added |
+| Genealogical Layer | `pipeline worldbuilding --pillars genealogy`, `lore genealogy` | #49 | ✅ canonical pipeline stage active |
 | Impression-of-Depth | `worldbible artifacts`, `lore unresolved-refs` | #50 | 🟡 closeout evidence added |
 | Editorial Meta-Layer | `corpus sources`, `corpus timeline-divergence` | #51 | 🟡 closeout evidence added |
 | Spatiotemporal Engine | `lore timeline-reconcile`, `lore timeline-bridge` | #48 | ✅ v2 (era mismatch + extraction bridge) |
