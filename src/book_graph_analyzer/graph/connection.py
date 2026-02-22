@@ -48,7 +48,7 @@ def init_schema() -> None:
         "CREATE CONSTRAINT char_canonical_id IF NOT EXISTS FOR (c:Character) REQUIRE c.canonical_id IS UNIQUE",
         "CREATE CONSTRAINT place_id IF NOT EXISTS FOR (p:Place) REQUIRE p.id IS UNIQUE",
         "CREATE CONSTRAINT object_id IF NOT EXISTS FOR (o:Object) REQUIRE o.id IS UNIQUE",
-        "CREATE CONSTRAINT event_id IF NOT EXISTS FOR (e:Event) REQUIRE e.id IS UNIQUE",
+        "CREATE CONSTRAINT event_id_book IF NOT EXISTS FOR (e:Event) REQUIRE (e.id, e.source_book) IS UNIQUE",
         "CREATE CONSTRAINT passage_id IF NOT EXISTS FOR (p:Passage) REQUIRE p.id IS UNIQUE",
         "CREATE CONSTRAINT concept_id IF NOT EXISTS FOR (c:Concept) REQUIRE c.id IS UNIQUE",
         "CREATE CONSTRAINT source_id IF NOT EXISTS FOR (s:Source) REQUIRE s.id IS UNIQUE",
