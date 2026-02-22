@@ -3,57 +3,163 @@
     {
       "entity_id": "place_rivendell",
       "forms": [
-        {"id": "lf_imladris", "form": "Imladris", "language": "Sindarin",
-         "gloss": "Deep dale of the cleft"},
-        {"id": "lf_rivendell", "form": "Rivendell", "language": "Common Speech",
-         "gloss": "Cloven valley"},
-        {"id": "lf_karningul", "form": "Karningul", "language": "Westron"}
+        {
+          "id": "lf:place_rivendell:imladris",
+          "form": "Imladris",
+          "language": "Sindarin",
+          "entity_id": "place_rivendell",
+          "gloss": "Deep dale of the cleft",
+          "phonetic": null,
+          "source_passage_id": null
+        },
+        {
+          "id": "lf:place_rivendell:rivendell",
+          "form": "Rivendell",
+          "language": "Common Speech",
+          "entity_id": "place_rivendell",
+          "gloss": "Cloven valley",
+          "phonetic": null,
+          "source_passage_id": null
+        },
+        {
+          "id": "lf:place_rivendell:karningul",
+          "form": "Karningul",
+          "language": "Westron",
+          "entity_id": "place_rivendell",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": null
+        }
       ],
       "derivations": [
-        {"source_form_id": "lf_rivendell", "target_form_id": "lf_imladris",
-         "derivation_type": "translation"},
-        {"source_form_id": "lf_karningul", "target_form_id": "lf_imladris",
-         "derivation_type": "adaptation"}
+        {
+          "source_form_id": "lf:place_rivendell:rivendell",
+          "target_form_id": "lf:place_rivendell:imladris",
+          "derivation_type": "translation",
+          "notes": null
+        },
+        {
+          "source_form_id": "lf:place_rivendell:karningul",
+          "target_form_id": "lf:place_rivendell:imladris",
+          "derivation_type": "adaptation",
+          "notes": null
+        }
       ]
     },
     {
       "entity_id": "place_moria",
       "forms": [
-        {"id": "lf_khazaddum", "form": "Khazad-dûm", "language": "Khuzdul",
-         "gloss": "Dwarrowdelf"},
-        {"id": "lf_moria", "form": "Moria", "language": "Sindarin",
-         "gloss": "Black Chasm / Black Pit"},
-        {"id": "lf_dwarrowdelf", "form": "Dwarrowdelf", "language": "Common Speech",
-         "gloss": "Dwarf-delving"}
+        {
+          "id": "lf:place_moria:khazad-d-m",
+          "form": "Khazad-d\u00fbm",
+          "language": "Khuzdul",
+          "entity_id": "place_moria",
+          "gloss": "Dwarrowdelf",
+          "phonetic": null,
+          "source_passage_id": null
+        },
+        {
+          "id": "lf:place_moria:moria",
+          "form": "Moria",
+          "language": "Sindarin",
+          "entity_id": "place_moria",
+          "gloss": "Black Chasm / Black Pit",
+          "phonetic": null,
+          "source_passage_id": null
+        },
+        {
+          "id": "lf:place_moria:dwarrowdelf",
+          "form": "Dwarrowdelf",
+          "language": "Common Speech",
+          "entity_id": "place_moria",
+          "gloss": "Dwarf-delving",
+          "phonetic": null,
+          "source_passage_id": null
+        }
       ],
       "derivations": [
-        {"source_form_id": "lf_moria", "target_form_id": "lf_khazaddum",
-         "derivation_type": "translation", "notes": "Sindarin name given by Elves"},
-        {"source_form_id": "lf_dwarrowdelf", "target_form_id": "lf_khazaddum",
-         "derivation_type": "translation"}
+        {
+          "source_form_id": "lf:place_moria:moria",
+          "target_form_id": "lf:place_moria:khazad-d-m",
+          "derivation_type": "translation",
+          "notes": "Sindarin name given by Elves"
+        },
+        {
+          "source_form_id": "lf:place_moria:dwarrowdelf",
+          "target_form_id": "lf:place_moria:khazad-d-m",
+          "derivation_type": "translation",
+          "notes": null
+        }
       ]
     },
     {
       "entity_id": "char_gandalf",
       "forms": [
-        {"id": "lf_olorin", "form": "Olórin", "language": "Quenya",
-         "gloss": "Dream / vision"},
-        {"id": "lf_mithrandir", "form": "Mithrandir", "language": "Sindarin",
-         "gloss": "Grey Pilgrim"},
-        {"id": "lf_gandalf", "form": "Gandalf", "language": "Common Speech",
-         "gloss": "Elf of the wand"},
-        {"id": "lf_tharkun", "form": "Tharkûn", "language": "Khuzdul",
-         "gloss": "Staff-man"},
-        {"id": "lf_incanus", "form": "Incánus", "language": "Quenya",
-         "gloss": "North-spy (disputed)"}
+        {
+          "id": "lf:char_gandalf:ol-rin",
+          "form": "Ol\u00f3rin",
+          "language": "Quenya",
+          "entity_id": "char_gandalf",
+          "gloss": "Dream / vision",
+          "phonetic": null,
+          "source_passage_id": null
+        },
+        {
+          "id": "lf:char_gandalf:mithrandir",
+          "form": "Mithrandir",
+          "language": "Sindarin",
+          "entity_id": "char_gandalf",
+          "gloss": "Grey Pilgrim",
+          "phonetic": null,
+          "source_passage_id": null
+        },
+        {
+          "id": "lf:char_gandalf:gandalf",
+          "form": "Gandalf",
+          "language": "Common Speech",
+          "entity_id": "char_gandalf",
+          "gloss": "Elf of the wand",
+          "phonetic": null,
+          "source_passage_id": null
+        },
+        {
+          "id": "lf:char_gandalf:thark-n",
+          "form": "Thark\u00fbn",
+          "language": "Khuzdul",
+          "entity_id": "char_gandalf",
+          "gloss": "Staff-man",
+          "phonetic": null,
+          "source_passage_id": null
+        },
+        {
+          "id": "lf:char_gandalf:inc-nus",
+          "form": "Inc\u00e1nus",
+          "language": "Quenya",
+          "entity_id": "char_gandalf",
+          "gloss": "North-spy (disputed)",
+          "phonetic": null,
+          "source_passage_id": null
+        }
       ],
       "derivations": [
-        {"source_form_id": "lf_mithrandir", "target_form_id": "lf_olorin",
-         "derivation_type": "epithet"},
-        {"source_form_id": "lf_gandalf", "target_form_id": "lf_mithrandir",
-         "derivation_type": "translation"},
-        {"source_form_id": "lf_tharkun", "target_form_id": "lf_olorin",
-         "derivation_type": "epithet"}
+        {
+          "source_form_id": "lf:char_gandalf:mithrandir",
+          "target_form_id": "lf:char_gandalf:ol-rin",
+          "derivation_type": "epithet",
+          "notes": null
+        },
+        {
+          "source_form_id": "lf:char_gandalf:gandalf",
+          "target_form_id": "lf:char_gandalf:mithrandir",
+          "derivation_type": "translation",
+          "notes": null
+        },
+        {
+          "source_form_id": "lf:char_gandalf:thark-n",
+          "target_form_id": "lf:char_gandalf:ol-rin",
+          "derivation_type": "epithet",
+          "notes": null
+        }
       ]
     }
   ]

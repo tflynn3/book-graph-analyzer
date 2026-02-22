@@ -92,6 +92,24 @@ def ground_character_entity_id(entity_id: str | None) -> str | None:
         return None
 
     raw = raw.replace("-", "_")
+    topical_non_character_labels = {
+        "narration",
+        "narrator",
+        "setting",
+        "scene",
+        "chapter",
+        "passage",
+        "lore",
+        "history",
+        "culture",
+        "cultures",
+        "theme",
+        "voice",
+        "register",
+        "dialogue",
+        "description",
+        "exposition",
+    }
     known_non_character_prefixes = (
         "place_",
         "obj_",
@@ -106,10 +124,14 @@ def ground_character_entity_id(entity_id: str | None) -> str | None:
 
     if raw.startswith("char_"):
         tail = re.sub(r"[^a-z0-9_]+", "_", raw[5:]).strip("_")
-        return f"char_{tail}" if tail else None
+        if not tail or tail in topical_non_character_labels:
+            return None
+        return f"char_{tail}"
 
     # Treat plain canonical names/ids as characters and normalize.
     tail = re.sub(r"[^a-z0-9_]+", "_", raw).strip("_")
+    if not tail or tail in topical_non_character_labels:
+        return None
     return f"char_{tail}" if tail else None
 
 

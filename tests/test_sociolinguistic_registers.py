@@ -61,6 +61,8 @@ def test_ground_character_entity_id_enforces_character_only():
     assert ground_character_entity_id("char_Aragorn") == "char_aragorn"
     assert ground_character_entity_id("Aragorn") == "char_aragorn"
     assert ground_character_entity_id("place_bree") is None
+    assert ground_character_entity_id("narration") is None
+    assert ground_character_entity_id("char_register") is None
 
 
 def test_profile_corpus_registers_filters_non_characters_and_sets_quality_gate():

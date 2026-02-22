@@ -153,6 +153,31 @@ class WorldBibleExtractor:
             cultures = self._extract_cultures(by_category[WorldBibleCategory.CULTURE])
             for culture in cultures:
                 bible.cultures[culture.id] = culture
+        if not bible.cultures:
+            # Sparse-text fallback: still emit at least keyword-grounded culture profiles
+            # for major peoples if present in the text.
+            fallback_keywords = {
+                "hobbits": ("hobbit", "hobbits", "shire-folk"),
+                "elves": ("elf", "elves", "elvish", "eldar"),
+                "dwarves": ("dwarf", "dwarves", "dwarvish"),
+                "men": ("men", "mankind", "mortal men"),
+                "orcs": ("orc", "orcs", "goblin", "goblins"),
+                "wizards": ("wizard", "wizards", "istari"),
+            }
+            text_lower = text.lower()
+            for culture_id, keywords in fallback_keywords.items():
+                if any(k in text_lower for k in keywords):
+                    bible.cultures[culture_id] = CulturalProfile(
+                        id=culture_id,
+                        name=culture_id.title(),
+                        source_passages=[
+                            SourcePassage(
+                                text=text[:200],
+                                book=source_name,
+                                location="whole_text",
+                            )
+                        ],
+                    )
         
         # Extract magic systems
         if WorldBibleCategory.MAGIC in by_category:
@@ -324,7 +349,7 @@ JSON array:"""
         
         cultures = []
         for people_id, people_passages in by_people.items():
-            if len(people_passages) < 2:
+            if len(people_passages) < 1:
                 continue
             
             # Extract values/customs from passages

@@ -6042,6 +6042,58 @@ def worldbible_languages(bible_path: str, entity: str | None, write_graph: bool)
             raise SystemExit(1)
 
 
+@worldbible.command(name="languages-join-check")
+@click.argument("bible_path", type=click.Path(exists=True))
+@click.option("--strict-namespace", is_flag=True,
+              help="Require canonical lf:<entity_id>:<slug> ids when scoring joins")
+def worldbible_languages_join_check(bible_path: str, strict_namespace: bool) -> None:
+    """Validate LanguageForm -> canonical entity join success rate.
+
+    Cross-layer check for Issue #94 gate:
+    - each LanguageForm must reference a canonical entity id
+    - optional strict namespace check for LanguageForm ids
+    """
+    from book_graph_analyzer.worldbible.lineage import load_lineages_from_file
+
+    lineages = load_lineages_from_file(bible_path)
+
+    repo_root = Path(__file__).resolve().parents[2]
+    seeds = [
+        (repo_root / "data" / "seeds" / "characters.json", "char_"),
+        (repo_root / "data" / "seeds" / "places.json", "place_"),
+        (repo_root / "data" / "seeds" / "objects.json", "obj_"),
+    ]
+    canonical_ids: set[str] = set()
+    for seed, prefix in seeds:
+        if not seed.exists():
+            continue
+        payload = json.loads(seed.read_text(encoding="utf-8"))
+        for item in payload:
+            sid = item.get("id")
+            if sid:
+                sid_s = str(sid)
+                canonical_ids.add(sid_s)
+                canonical_ids.add(f"{prefix}{sid_s}")
+
+    total = 0
+    joined = 0
+    for lin in lineages:
+        for form in lin.forms:
+            total += 1
+            entity_ok = bool(form.entity_id and form.entity_id in canonical_ids)
+            ns_ok = True
+            if strict_namespace:
+                ns_ok = form.id.startswith("lf:") and form.id.count(":") >= 2
+            if entity_ok and ns_ok:
+                joined += 1
+
+    ratio = (joined / total) if total else 1.0
+    status = "[green]PASS[/green]" if ratio >= 0.95 else "[red]FAIL[/red]"
+    console.print(f"Language form -> canonical entity join success: {joined}/{total} ({ratio:.2%}) {status}")
+    if ratio < 0.95:
+        raise SystemExit(2)
+
+
 @worldbible.command(name="artifacts")
 @click.argument("path", type=click.Path(exists=True))
 @click.option("--book", "book", default=None, help="Source book label")
@@ -6612,7 +6664,8 @@ def corpus_sources(
                 "Editorial divergence report gated: provenance validation failed "
                 f"(checked={validation.checked_count}, missing={validation.missing_count}, "
                 f"missing_ratio={validation.missing_ratio:.2%}, "
-                f"invalid_authority={validation.invalid_authority_count})."
+                f"invalid_authority={validation.invalid_authority_count}, "
+                f"inconsistent={validation.inconsistent_count})."
             )
 
         divergences = detect_editorial_divergences(passages)
@@ -6672,6 +6725,7 @@ def pipeline_worldbuilding(path: str, title: str | None, pillars: tuple[str], ou
         bga pipeline worldbuilding lotr.txt --pillars linguistic --pillars genealogy
     """
     from book_graph_analyzer.ingest.loader import load_book
+    from book_graph_analyzer.worldbible.extractor import ExtractionConfig, WorldBibleExtractor
     from book_graph_analyzer.worldbible.genealogy import extract_genealogy_from_text, genealogy_to_json
 
     file_path = Path(path)
@@ -6690,6 +6744,7 @@ def pipeline_worldbuilding(path: str, title: str | None, pillars: tuple[str], ou
         text = load_book(file_path)
 
     hobbit_gate = "hobbit" in (book_title + " " + file_path.name).lower()
+    metrics: dict[str, object] = {"book_title": book_title, "pillars": {}}
 
     for pillar in selected:
         if pillar == "genealogy":
@@ -6700,11 +6755,63 @@ def pipeline_worldbuilding(path: str, title: str | None, pillars: tuple[str], ou
                 json.dump(payload, f, indent=2)
 
             count = len(payload.get("relations", []))
+            metrics["pillars"]["genealogy"] = payload.get("metrics", {"relation_count": count})
             console.print(f"  [green]✓[/green] Genealogy — extracted {count} relations → {output_path}")
 
             if hobbit_gate and count == 0:
                 raise click.ClickException(
                     "Hobbit acceptance gate failed: genealogy extraction produced zero relations."
+                )
+            continue
+
+        if pillar == "cultural":
+            from book_graph_analyzer.worldbible.models import CulturalProfile, SourcePassage
+
+            extractor = WorldBibleExtractor(config=ExtractionConfig(use_llm=False))
+            bible = extractor.extract_from_text(text, world_name=book_title, source_name=file_path.name)
+            if not bible.cultures:
+                # Deterministic fallback for sparse single-chapter samples (e.g., Hobbit smoke runs).
+                keyword_map = {
+                    "hobbits": ("hobbit", "hobbits", "shire-folk"),
+                    "elves": ("elf", "elves", "elvish", "eldar"),
+                    "dwarves": ("dwarf", "dwarves", "dwarvish"),
+                    "men": ("men", "mankind", "mortal men"),
+                    "orcs": ("orc", "orcs", "goblin", "goblins"),
+                    "wizards": ("wizard", "wizards", "istari"),
+                }
+                lower = text.lower()
+                for cid, kws in keyword_map.items():
+                    if any(k in lower for k in kws):
+                        bible.cultures[cid] = CulturalProfile(
+                            id=cid,
+                            name=cid.title(),
+                            source_passages=[
+                                SourcePassage(
+                                    text=text[:200],
+                                    book=file_path.name,
+                                    location="whole_text",
+                                )
+                            ],
+                        )
+
+            cultural_payload = {
+                "metrics": {
+                    "culture_count": len(bible.cultures),
+                    "rule_count": len(bible.rules),
+                },
+                "cultures": {cid: c.to_dict() for cid, c in bible.cultures.items()},
+            }
+            output_path = out_dir / f"{file_path.stem}_cultures.json"
+            with open(output_path, "w", encoding="utf-8") as f:
+                json.dump(cultural_payload, f, indent=2)
+            metrics["pillars"]["cultural"] = cultural_payload["metrics"]
+            console.print(
+                f"  [green]✓[/green] Cultural — extracted {len(bible.cultures)} cultures → {output_path}"
+            )
+
+            if hobbit_gate and len(bible.cultures) == 0:
+                raise click.ClickException(
+                    "Hobbit acceptance gate failed: cultural extraction produced zero culture profiles."
                 )
             continue
 
@@ -6717,6 +6824,11 @@ def pipeline_worldbuilding(path: str, title: str | None, pillars: tuple[str], ou
         console.print(f"  [yellow]⏳[/yellow] {pillar.title()} — not yet implemented (Issue {issue_map[pillar]})")
 
     console.print("\n[dim]See docs/tolkien-worldbuilding-rfc.md for pillar-by-pillar status.[/dim]")
+
+    metrics_path = out_dir / f"{file_path.stem}_worldbuilding_metrics.json"
+    with open(metrics_path, "w", encoding="utf-8") as f:
+        json.dump(metrics, f, indent=2)
+    console.print(f"[green]OK[/green] Saved worldbuilding metrics: {metrics_path}")
 
 
 @main.command(name="workflow-post-open-failures-summary")

@@ -32,6 +32,7 @@ See Issue #46.
 from __future__ import annotations
 
 import json
+import re
 from pathlib import Path
 from typing import Any
 
@@ -42,6 +43,24 @@ from book_graph_analyzer.models.worldbuilding import (
     LinguisticLineage,
     TolkienLanguage,
 )
+
+
+_NON_ALNUM = re.compile(r"[^a-z0-9]+")
+
+
+def _slug(text: str) -> str:
+    s = _NON_ALNUM.sub("-", text.strip().lower()).strip("-")
+    return s or "form"
+
+
+def canonical_language_form_id(entity_id: str, form_text: str, legacy_id: str | None = None) -> str:
+    """Canonical LanguageForm ID namespace used by Hobbit acceptance fixtures.
+
+    Format: ``lf:<entity_id>:<form-slug>``
+    """
+    if legacy_id and legacy_id.startswith("lf:") and legacy_id.count(":") >= 2:
+        return legacy_id
+    return f"lf:{entity_id}:{_slug(form_text)}"
 
 
 def _resolve_language(raw: str) -> TolkienLanguage:
@@ -96,13 +115,24 @@ def parse_lineage(data: dict[str, Any]) -> LinguisticLineage:
     """
     forms = [parse_language_form(f) for f in data.get("forms", [])]
 
-    # Auto-populate entity_id on forms if not set
     entity_id = data["entity_id"]
+    id_map: dict[str, str] = {}
+
+    # Auto-populate entity_id on forms if not set + normalize ids to canonical namespace.
     for form in forms:
+        old_id = form.id
         if form.entity_id is None:
             form.entity_id = entity_id
+        if old_id and old_id.startswith("lf:"):
+            form.id = old_id
+        else:
+            form.id = canonical_language_form_id(form.entity_id or entity_id, form.form, legacy_id=old_id)
+        id_map[old_id] = form.id
 
     derivations = [parse_derivation(d) for d in data.get("derivations", [])]
+    for deriv in derivations:
+        deriv.source_form_id = id_map.get(deriv.source_form_id, deriv.source_form_id)
+        deriv.target_form_id = id_map.get(deriv.target_form_id, deriv.target_form_id)
 
     return LinguisticLineage(
         entity_id=entity_id,
