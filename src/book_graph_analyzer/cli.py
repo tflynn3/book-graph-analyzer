@@ -6507,37 +6507,64 @@ def corpus_sources(corpus_name: str, show_authority: bool, tag_strata: bool, rep
 @click.option("--pillars", "-p", multiple=True,
               type=click.Choice(["linguistic", "genealogy", "editorial", "cultural", "cosmological"]),
               help="Which world-building pillars to run (default: all)")
-def pipeline_worldbuilding(path: str, title: str | None, pillars: tuple[str]) -> None:
+@click.option("--output-dir", "-o", type=click.Path(), help="Output directory for pillar artifacts")
+def pipeline_worldbuilding(path: str, title: str | None, pillars: tuple[str], output_dir: str | None) -> None:
     """Run world-building analysis pipeline on a text.
 
     Extends the standard pipeline with Tolkien-specific world-building
     extraction: linguistic lineage, genealogy, editorial layers,
     cultural rules, and cosmological timeline.
 
-    TODO(#45): Implement as pillars become available (#46–#50).
-
     Example:
         bga pipeline worldbuilding the_silmarillion.txt -t "The Silmarillion"
         bga pipeline worldbuilding lotr.txt --pillars linguistic --pillars genealogy
     """
+    from book_graph_analyzer.ingest.loader import load_book
+    from book_graph_analyzer.worldbible.genealogy import extract_genealogy_from_text, genealogy_to_json
+
+    file_path = Path(path)
+    book_title = title or file_path.stem.replace("_", " ").replace("-", " ").title()
     selected = list(pillars) if pillars else ["linguistic", "genealogy", "editorial", "cultural", "cosmological"]
+    out_dir = Path(output_dir) if output_dir else Path("data/output")
+    out_dir.mkdir(parents=True, exist_ok=True)
 
     console.print(f"[bold]World-Building Pipeline[/bold]")
     console.print(f"  Source: {path}")
+    console.print(f"  Title: {book_title}")
     console.print(f"  Pillars: {', '.join(selected)}")
     console.print()
 
+    with console.status("Loading text..."):
+        text = load_book(file_path)
+
+    hobbit_gate = "hobbit" in (book_title + " " + file_path.name).lower()
+
     for pillar in selected:
+        if pillar == "genealogy":
+            relations = extract_genealogy_from_text(text, passage_id=str(file_path))
+            payload = genealogy_to_json(relations)
+            output_path = out_dir / f"{file_path.stem}_genealogy.json"
+            with open(output_path, "w", encoding="utf-8") as f:
+                json.dump(payload, f, indent=2)
+
+            count = len(payload.get("relations", []))
+            console.print(f"  [green]✓[/green] Genealogy — extracted {count} relations → {output_path}")
+
+            if hobbit_gate and count == 0:
+                raise click.ClickException(
+                    "Hobbit acceptance gate failed: genealogy extraction produced zero relations."
+                )
+            continue
+
         issue_map = {
             "linguistic": "#46",
-            "genealogy": "#47",
-            "editorial": "#48",
-            "cultural": "#49",
-            "cosmological": "#50",
+            "editorial": "#51",
+            "cultural": "#50",
+            "cosmological": "#48",
         }
         console.print(f"  [yellow]⏳[/yellow] {pillar.title()} — not yet implemented (Issue {issue_map[pillar]})")
 
-    console.print(f"\n[dim]Each pillar will be implemented incrementally. See docs/tolkien-worldbuilding-rfc.md[/dim]")
+    console.print("\n[dim]See docs/tolkien-worldbuilding-rfc.md for pillar-by-pillar status.[/dim]")
 
 
 @main.command(name="workflow-post-open-failures-summary")
