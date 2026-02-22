@@ -7,6 +7,7 @@ from collections import defaultdict
 from statistics import mean
 
 from ..models.passage import Passage
+from ..models.worldbuilding import infer_editorial_layer
 
 
 @dataclass
@@ -28,6 +29,7 @@ class ProvenanceValidationResult:
     checked_count: int = 0
     missing_count: int = 0
     invalid_authority_count: int = 0
+    inconsistent_count: int = 0
     max_missing_ratio: float = 0.05
     min_authority_weight: float = 0.0
 
@@ -42,6 +44,7 @@ class ProvenanceValidationResult:
         return (
             self.missing_ratio <= self.max_missing_ratio
             and self.invalid_authority_count == 0
+            and self.inconsistent_count == 0
         )
 
 
@@ -110,6 +113,7 @@ def validate_editorial_provenance(
     checked = 0
     missing = 0
     invalid_authority = 0
+    inconsistent = 0
 
     for p in passages:
         if not (p.factual_claims or {}):
@@ -129,10 +133,30 @@ def validate_editorial_provenance(
         if w < min_authority_weight or w < 0.0 or w > 1.0:
             invalid_authority += 1
 
+        inferred = (
+            infer_editorial_layer(str(p.source_id or ""))
+            or infer_editorial_layer(str(p.source_title or ""))
+            or infer_editorial_layer(str(p.book or ""))
+        )
+        if inferred:
+            source_id = str(p.source_id or "").strip().lower()
+            source_title = str(p.source_title or "").strip().lower()
+            source_stratum = str(p.source_stratum or "").strip().lower()
+            if source_id != inferred.source_id.strip().lower():
+                inconsistent += 1
+                continue
+            if source_title != inferred.source_title.strip().lower():
+                inconsistent += 1
+                continue
+            if source_stratum != str(getattr(inferred.default_stratum, "value", "core_text")).strip().lower():
+                inconsistent += 1
+                continue
+
     return ProvenanceValidationResult(
         checked_count=checked,
         missing_count=missing,
         invalid_authority_count=invalid_authority,
+        inconsistent_count=inconsistent,
         max_missing_ratio=max_missing_ratio,
         min_authority_weight=min_authority_weight,
     )
