@@ -5672,14 +5672,25 @@ def workflow_analyze_open_failures(
         out_path.parent.mkdir(parents=True, exist_ok=True)
 
         severity_counts = {"critical": 0, "high": 0, "medium": 0, "low": 0}
+        unresolved_by_severity = {"critical": 0, "high": 0, "medium": 0, "low": 0}
+        unresolved_total = 0
+
         for row in csv_rows:
             sev = row.get("severity", "low")
             severity_counts[sev] = severity_counts.get(sev, 0) + 1
 
+            missing = row.get("missing_secrets", "")
+            has_missing = bool(missing and str(missing).strip() and str(missing).strip().lower() != "none")
+            if has_missing:
+                unresolved_total += 1
+                unresolved_by_severity[sev] = unresolved_by_severity.get(sev, 0) + 1
+
         payload = {
             "summary": {
                 "analyzed": len(csv_rows),
+                "unresolved": unresolved_total,
                 "severity_counts": severity_counts,
+                "unresolved_by_severity": unresolved_by_severity,
             },
             "rows": csv_rows,
         }
