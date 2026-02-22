@@ -5642,6 +5642,22 @@ def workflow_analyze_open_failures(
         console.print("[yellow]No actionable failure issues found after filtering.[/yellow]")
         return
 
+    # Print aggregate summary for terminal triage
+    sev_counts = {"critical": 0, "high": 0, "medium": 0, "low": 0}
+    unresolved = 0
+    for row in csv_rows:
+        sev = row.get("severity", "low")
+        sev_counts[sev] = sev_counts.get(sev, 0) + 1
+        missing = row.get("missing_secrets", "")
+        if missing and str(missing).strip().lower() != "none":
+            unresolved += 1
+    console.print(
+        "\n[bold]Batch summary:[/bold] "
+        f"analyzed={analyzed}, unresolved={unresolved}, "
+        f"critical={sev_counts['critical']}, high={sev_counts['high']}, "
+        f"medium={sev_counts['medium']}, low={sev_counts['low']}"
+    )
+
     if out_csv:
         import csv
 
