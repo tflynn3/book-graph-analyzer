@@ -1,0 +1,58 @@
+{
+  "global": {
+    "books_processed": 5,
+    "passages_written": 400,
+    "passage_provenance_links": 400,
+    "character_nodes_ensured": 699,
+    "register_profiles_written": 310,
+    "register_observations_written": 699,
+    "editorial_links_written": 310
+  },
+  "per_book": {
+    "The Fellowship of the Ring": {
+      "events": 80,
+      "characters": 62,
+      "profiles": 62,
+      "observations": 120,
+      "editorial_links": 62,
+      "passages": 80,
+      "passage_attested": 80
+    },
+    "The Hobbit": {
+      "events": 80,
+      "characters": 73,
+      "profiles": 73,
+      "observations": 141,
+      "editorial_links": 73,
+      "passages": 80,
+      "passage_attested": 80
+    },
+    "The Return of the King": {
+      "events": 80,
+      "characters": 57,
+      "profiles": 57,
+      "observations": 144,
+      "editorial_links": 57,
+      "passages": 80,
+      "passage_attested": 80
+    },
+    "The Silmarillion": {
+      "events": 80,
+      "characters": 60,
+      "profiles": 60,
+      "observations": 135,
+      "editorial_links": 60,
+      "passages": 80,
+      "passage_attested": 80
+    },
+    "Twotowers": {
+      "events": 80,
+      "characters": 58,
+      "profiles": 58,
+      "observations": 159,
+      "editorial_links": 58,
+      "passages": 80,
+      "passage_attested": 80
+    }
+  }
+}

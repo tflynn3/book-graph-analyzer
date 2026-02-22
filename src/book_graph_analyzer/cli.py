@@ -6706,6 +6706,51 @@ def corpus_sources(
         console.print(f"[green]OK[/green] Saved divergence artifact: {out_path}")
 
 
+@corpus.command(name="materialize-register-editorial")
+@click.option("--events-dir", default="data/output", show_default=True, type=click.Path(exists=True),
+              help="Directory containing *_events.json artifacts")
+@click.option("--books", default="", help="Comma-separated subset of book slugs (e.g. hobbit,fellowship)")
+@click.option("--report", default="data/output/register_editorial_materialization_report.json", show_default=True,
+              type=click.Path(), help="Output report path")
+@click.option("--max-events-per-book", default=120, show_default=True, type=int,
+              help="Cap events consumed per book to keep runs bounded")
+def corpus_materialize_register_editorial(events_dir: str, books: str, report: str, max_events_per_book: int) -> None:
+    """Materialize sociolinguistic register + editorial provenance layers from event artifacts."""
+    from book_graph_analyzer.graph.connection import check_neo4j_connection
+    from book_graph_analyzer.graph.writer import GraphWriter
+    from book_graph_analyzer.ingest.register_editorial_materializer import materialize_from_event_artifacts
+
+    if not check_neo4j_connection():
+        raise click.ClickException("Neo4j is required for register/editorial materialization")
+
+    selected = {b.strip().lower() for b in books.split(",") if b.strip()} if books else set()
+    event_paths = sorted(Path(events_dir).glob("*_events.json"))
+    if selected:
+        event_paths = [p for p in event_paths if p.stem.replace("_events", "").lower() in selected]
+
+    if not event_paths:
+        raise click.ClickException("No event artifacts found to materialize")
+
+    writer = GraphWriter()
+    try:
+        result = materialize_from_event_artifacts(writer, event_paths, max_events_per_book=max_events_per_book)
+    finally:
+        writer.close()
+
+    out_path = Path(report)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out_path.write_text(json.dumps(result, indent=2), encoding="utf-8")
+
+    global_stats = result.get("global", {})
+    console.print("[bold green]Register/editorial materialization complete[/bold green]")
+    console.print(f"  Books: {global_stats.get('books_processed', 0)}")
+    console.print(f"  Profiles: {global_stats.get('register_profiles_written', 0)}")
+    console.print(f"  Observations: {global_stats.get('register_observations_written', 0)}")
+    console.print(f"  Editorial links: {global_stats.get('editorial_links_written', 0)}")
+    console.print(f"  Passage attestations: {global_stats.get('passage_provenance_links', 0)}")
+    console.print(f"  Report: {out_path}")
+
+
 @pipeline.command(name="worldbuilding")
 @click.argument("path", type=click.Path(exists=True))
 @click.option("--title", "-t", help="Book title")
