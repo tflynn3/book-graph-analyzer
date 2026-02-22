@@ -34,6 +34,25 @@ _EXPECTED_TYPE_RE = re.compile(
     re.IGNORECASE,
 )
 
+_LEADING_ARTICLE_RE = re.compile(r"^\s*(the|a|an)\s+", re.IGNORECASE)
+
+_HOBBIT_ALIAS_CANDIDATES: dict[str, str] = {
+    "bilbo": "char_bilbo_baggins",
+    "bilbo baggins": "char_bilbo_baggins",
+    "gandalf": "char_gandalf",
+    "thorin": "char_thorin_oakenshield",
+    "thorin oakenshield": "char_thorin_oakenshield",
+    "smaug": "char_smaug",
+    "gollum": "char_gollum",
+    "bard": "char_bard",
+    "the arkenstone": "obj_arkenstone",
+    "arkenstone": "obj_arkenstone",
+    "shire": "place_shire",
+    "rivendell": "place_rivendell",
+    "mirkwood": "place_mirkwood",
+    "lonely mountain": "place_lonely_mountain",
+}
+
 
 @dataclass
 class _Ctx:
@@ -64,6 +83,12 @@ def _infer_expected_type(mention: str, context: str) -> str:
     if token in {"lord", "lady", "king", "queen"}:
         return "character"
     return "artifact"
+
+
+def _normalize_mention_for_matching(mention: str) -> str:
+    lowered = mention.strip().lower()
+    no_article = _LEADING_ARTICLE_RE.sub("", lowered)
+    return re.sub(r"\s+", " ", no_article).strip()
 
 
 def _fallback_llm_broken_refs(text: str, llm_client: Any) -> list[tuple[str, float, str]]:
@@ -211,10 +236,13 @@ def link_broken_reference_candidates(
         mention = ref.mention_text.strip()
         if not mention:
             continue
+        mention_norm = _normalize_mention_for_matching(mention)
 
         candidates: list[ReferenceCandidate] = []
 
         resolved_id, conf = d.resolve(mention, era=era, book=book)
+        if not resolved_id and mention_norm and mention_norm != mention.lower():
+            resolved_id, conf = d.resolve(mention_norm, era=era, book=book)
         if resolved_id:
             candidates.append(
                 ReferenceCandidate(
@@ -228,7 +256,16 @@ def link_broken_reference_candidates(
         mention_l = mention.lower()
         fuzzy_hits: list[tuple[str, str, float]] = []
         for surface, entry in d._entries.items():  # internal access for scoring candidates
-            score = fuzz.ratio(mention_l, surface)
+            score = max(
+                fuzz.ratio(mention_l, surface),
+                fuzz.token_set_ratio(mention_l, surface),
+            )
+            if mention_norm:
+                score = max(
+                    score,
+                    fuzz.ratio(mention_norm, surface),
+                    fuzz.token_set_ratio(mention_norm, surface),
+                )
             if score < 75:
                 continue
             fuzzy_hits.append((surface, str(entry.get("default", "")), score / 100.0))
@@ -247,6 +284,19 @@ def link_broken_reference_candidates(
             )
             if len(candidates) >= max_candidates:
                 break
+
+        book_l = (book or ref.source_book or "").lower()
+        if "hobbit" in book_l:
+            alias_id = _HOBBIT_ALIAS_CANDIDATES.get(mention_l) or _HOBBIT_ALIAS_CANDIDATES.get(mention_norm)
+            if alias_id and not any(c.canonical_id == alias_id for c in candidates):
+                candidates.append(
+                    ReferenceCandidate(
+                        canonical_id=alias_id,
+                        surface=mention,
+                        confidence=0.82,
+                        source="resolver:alias_hobbit",
+                    )
+                )
 
         ref.candidates = candidates
         if not ref.resolved_entity_id and candidates:

@@ -59,3 +59,26 @@ def test_cli_worldbible_artifacts_fails_when_quality_gate_fails(tmp_path):
 
     assert result.exit_code == 2
     assert "Quality gate:" in result.output
+
+
+def test_hobbit_alias_linking_improves_candidate_coverage_for_gate():
+    from book_graph_analyzer.lore.depth import (
+        evaluate_unresolved_quality_gates,
+        extract_lore_depth,
+        link_broken_reference_candidates,
+    )
+
+    text = "[[Bilbo]] found [[Arkenstone]] while hunting [[Smaug]]."
+    out = extract_lore_depth(text, source_book="The Hobbit", passage_id="p93-hobbit")
+    linked = link_broken_reference_candidates(out.broken_references, book="The Hobbit")
+
+    report = evaluate_unresolved_quality_gates(
+        linked,
+        min_context_coverage=1.0,
+        min_candidate_coverage=1.0,
+    )
+
+    assert report["passed"] is True
+    assert report["summary"]["total_unresolved"] == 3
+    assert report["summary"]["candidate_coverage"] == 1.0
+    assert all(ref.candidates for ref in linked)
