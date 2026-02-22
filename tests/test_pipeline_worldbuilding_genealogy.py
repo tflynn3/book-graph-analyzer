@@ -62,6 +62,31 @@ def test_pipeline_worldbuilding_hobbit_gate_produces_non_zero_genealogy(tmp_path
     assert payload["metrics"]["relation_count"] > 0
 
 
+def test_pipeline_worldbuilding_genealogy_includes_threshold_status(tmp_path):
+    text_file = tmp_path / "twotowers.txt"
+    text_file.write_text("Aragorn son of Arathorn.", encoding="utf-8")
+
+    out_dir = tmp_path / "out"
+    result = CliRunner().invoke(
+        main,
+        [
+            "pipeline",
+            "worldbuilding",
+            str(text_file),
+            "--title",
+            "The Two Towers",
+            "--pillars",
+            "genealogy",
+            "--output-dir",
+            str(out_dir),
+        ],
+    )
+
+    assert result.exit_code == 0, result.output
+    assert "threshold" in result.output.lower()
+    assert "FAIL" in result.output
+
+
 def test_pipeline_worldbuilding_cultural_pillar_outputs_metrics(tmp_path):
     hobbit_text = tmp_path / "the_hobbit.txt"
     hobbit_text.write_text(

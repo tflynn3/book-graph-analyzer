@@ -247,7 +247,56 @@ _RULES: list[tuple[re.Pattern[str], GenealogyRelationType, float]] = [
     # Appositive form common in Hobbit prose: "Bilbo, son of Bungo Baggins, ..."
     (re.compile(rf"\b{_NAME}\s*,\s*son of\s+{_NAME}\b"), GenealogyRelationType.CHILD_OF, 0.92),
     (re.compile(rf"\b{_NAME}\s*,\s*daughter of\s+{_NAME}\b"), GenealogyRelationType.CHILD_OF, 0.92),
+    (re.compile(rf"\b{_NAME}\s*,\s*the son of\s+{_NAME}\b"), GenealogyRelationType.CHILD_OF, 0.92),
+    (re.compile(rf"\b{_NAME}\s*,\s*the daughter of\s+{_NAME}\b"), GenealogyRelationType.CHILD_OF, 0.92),
+    (re.compile(rf"\b{_NAME}\s+was\s+the son of\s+{_NAME}\b"), GenealogyRelationType.CHILD_OF, 0.9),
+    (re.compile(rf"\b{_NAME}\s+was\s+the daughter of\s+{_NAME}\b"), GenealogyRelationType.CHILD_OF, 0.9),
+    (re.compile(rf"\b{_NAME}\s+grandson of\s+{_NAME}\b"), GenealogyRelationType.DESCENDANT_OF, 0.86),
+    (re.compile(rf"\b{_NAME}\s+granddaughter of\s+{_NAME}\b"), GenealogyRelationType.DESCENDANT_OF, 0.86),
+    (re.compile(rf"\b{_NAME}\s+heir of\s+{_NAME}\b"), GenealogyRelationType.DESCENDANT_OF, 0.78),
 ]
+
+
+_KINSHIP_CUES = re.compile(
+    r"\b(son of|daughter of|child of|father of|mother of|brother of|sister of|"
+    r"married|wed|wedded|grandson of|granddaughter of|heir of|line of|descended from)\b",
+    re.I,
+)
+
+
+def _safe_llm_genealogy_fallback(
+    text: str,
+    passage_id: str | None,
+    house: str | None,
+    llm_client: Any | None,
+) -> list[GenealogyRelation]:
+    if llm_client is None:
+        return []
+
+    prompt = (
+        "Extract genealogy relations from this passage as strict JSON. Return ONLY JSON array with objects "
+        "{source_name,target_name,relation_type}. relation_type must be one of: "
+        "PARENT_OF,CHILD_OF,SIBLING_OF,SPOUSE_OF,ANCESTOR_OF,DESCENDANT_OF. "
+        "Ignore uncertain guesses.\n\n"
+        f"Passage:\n{text}"
+    )
+    out: list[GenealogyRelation] = []
+    try:
+        raw = llm_client.generate(prompt)
+        payload = json.loads(raw)
+        if isinstance(payload, dict):
+            payload = payload.get("relations", [])
+        for item in payload if isinstance(payload, list) else []:
+            rel_type = normalize_relation_type(str(item.get("relation_type", "")))
+            source_name = _normalize_person_name(str(item.get("source_name", "")).strip())
+            target_name = _normalize_person_name(str(item.get("target_name", "")).strip())
+            if not source_name or not target_name or source_name == target_name:
+                continue
+            rel = _make_relation(source_name, target_name, rel_type, house, passage_id, 0.6)
+            _add_with_inverse(out, rel)
+    except Exception:
+        return []
+    return out
 
 
 def extract_genealogy_from_text(
@@ -255,6 +304,7 @@ def extract_genealogy_from_text(
     passage_id: str | None = None,
     house: str | None = None,
     llm_client: Any | None = None,
+    min_relations_for_fallback: int = 2,
 ) -> list[GenealogyRelation]:
     """Extract family relations from free text.
 
@@ -274,33 +324,11 @@ def extract_genealogy_from_text(
             rel = _make_relation(source_name, target_name, relation_type, inferred_house, passage_id, confidence)
             _add_with_inverse(relations, rel)
 
-    if relations or llm_client is None:
-        return infer_generation_depths(_dedupe_relations(relations))
+    deduped = _dedupe_relations(relations)
+    if llm_client is not None and _KINSHIP_CUES.search(text) and len(deduped) < min_relations_for_fallback:
+        deduped.extend(_safe_llm_genealogy_fallback(text, passage_id, house, llm_client))
 
-    # Optional fallback: extremely defensive JSON contract.
-    prompt = (
-        "Extract genealogy relations from this passage as JSON array with objects "
-        "{source_name,target_name,relation_type}. relation_type must be one of: "
-        "PARENT_OF,CHILD_OF,SIBLING_OF,SPOUSE_OF,ANCESTOR_OF,DESCENDANT_OF.\n\n"
-        f"Passage:\n{text}"
-    )
-    try:
-        raw = llm_client.generate(prompt)
-        payload = json.loads(raw)
-        if isinstance(payload, dict):
-            payload = payload.get("relations", [])
-        for item in payload if isinstance(payload, list) else []:
-            rel_type = normalize_relation_type(str(item.get("relation_type", "")))
-            source_name = str(item.get("source_name", "")).strip()
-            target_name = str(item.get("target_name", "")).strip()
-            if not source_name or not target_name or source_name == target_name:
-                continue
-            rel = _make_relation(source_name, target_name, rel_type, house, passage_id, 0.6)
-            _add_with_inverse(relations, rel)
-    except Exception:
-        pass
-
-    return infer_generation_depths(_dedupe_relations(relations))
+    return infer_generation_depths(_dedupe_relations(deduped))
 
 
 def _dedupe_relations(relations: list[GenealogyRelation]) -> list[GenealogyRelation]:
