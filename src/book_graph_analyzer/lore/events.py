@@ -7,6 +7,7 @@ Extracts structured events from text:
 """
 
 import json
+import logging
 import re
 from dataclasses import dataclass, field
 from typing import Optional
@@ -14,6 +15,9 @@ from collections import defaultdict
 
 from ..llm import LLMClient
 from .temporal import Era
+
+
+logger = logging.getLogger(__name__)
 
 
 @dataclass
@@ -398,6 +402,27 @@ class EventExtractor:
             return " ".join(str(v) for v in val if v)
         return str(val)
 
+    @staticmethod
+    def _stable_id_token(val) -> str:
+        """Normalize potentially-structured IDs to stable string tokens.
+
+        LLM payloads occasionally return relation refs as list/object instead of plain
+        strings. This normalizes those values so they can be safely used for dict
+        lookups and relation IDs.
+        """
+        if val is None:
+            return ""
+        if isinstance(val, str):
+            return val.strip()
+        if isinstance(val, (int, float, bool)):
+            return str(val)
+        if isinstance(val, (list, dict)):
+            try:
+                return json.dumps(val, ensure_ascii=False, sort_keys=True, separators=(",", ":"))
+            except (TypeError, ValueError):
+                return str(val)
+        return str(val)
+
     def _normalize_event_key(self, event: Event) -> str:
         """Create a normalized key for deduplication."""
         parts = []
@@ -596,10 +621,14 @@ JSON:"""
         if response:
             data = llm.extract_json(response)
             if data and isinstance(data, dict):
+                dropped_events = 0
+                dropped_relations = 0
+
                 for i, e in enumerate(data.get("events", [])):
                     if isinstance(e, dict) and "description" in e:
                         # Create unique ID incorporating chunk index
                         base_id = e.get("id", f"event_{i}")
+                        base_id = self._stable_id_token(base_id) or f"event_{i}"
                         event_id = f"c{chunk_index}_{base_id}" if chunk_index > 0 else base_id
                         era = None
                         if e.get("era"):
@@ -616,25 +645,44 @@ JSON:"""
                             source_book=source_book,
                             confidence=0.8,
                         ))
+                    else:
+                        dropped_events += 1
                 
                 # Build ID map for relations (LLM returns original IDs, we need our prefixed ones)
                 id_map = {}
                 for i, e in enumerate(data.get("events", [])):
                     if isinstance(e, dict):
                         original_id = e.get("id", f"event_{i}")
+                        original_id = self._stable_id_token(original_id) or f"event_{i}"
                         prefixed_id = f"c{chunk_index}_{original_id}" if chunk_index > 0 else original_id
                         id_map[original_id] = prefixed_id
                 
                 for r in data.get("relations", []):
                     if isinstance(r, dict) and "event1" in r and "event2" in r:
-                        e1_id = id_map.get(r["event1"], r["event1"])
-                        e2_id = id_map.get(r["event2"], r["event2"])
+                        e1_raw = self._stable_id_token(r.get("event1"))
+                        e2_raw = self._stable_id_token(r.get("event2"))
+                        if not e1_raw or not e2_raw:
+                            dropped_relations += 1
+                            continue
+                        e1_id = id_map.get(e1_raw, e1_raw)
+                        e2_id = id_map.get(e2_raw, e2_raw)
                         relations.append(EventRelation(
                             event1_id=e1_id,
                             relation=r.get("relation", "before"),
                             event2_id=e2_id,
                             confidence=0.7,
                         ))
+                    else:
+                        dropped_relations += 1
+
+                if dropped_events or dropped_relations:
+                    logger.warning(
+                        "Dropped malformed LLM payload rows in event extraction: "
+                        "events=%d relations=%d (chunk=%d)",
+                        dropped_events,
+                        dropped_relations,
+                        chunk_index,
+                    )
         
         return events, relations
     
