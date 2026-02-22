@@ -66,5 +66,6 @@ nav:
       - Glossary: glossary.md
   - Project:
       - Contributing: contributing.md
+      - Merge-ready Checklist: wiki/merge-ready-checklist.md
       - Legacy Design Docs: legacy-docs.md
       - Refresh From Scratch Runbook: wiki/refresh-from-scratch.md
