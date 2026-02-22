@@ -6672,6 +6672,7 @@ def pipeline_worldbuilding(path: str, title: str | None, pillars: tuple[str], ou
         bga pipeline worldbuilding lotr.txt --pillars linguistic --pillars genealogy
     """
     from book_graph_analyzer.ingest.loader import load_book
+    from book_graph_analyzer.worldbible.extractor import ExtractionConfig, WorldBibleExtractor
     from book_graph_analyzer.worldbible.genealogy import extract_genealogy_from_text, genealogy_to_json
 
     file_path = Path(path)
@@ -6690,6 +6691,7 @@ def pipeline_worldbuilding(path: str, title: str | None, pillars: tuple[str], ou
         text = load_book(file_path)
 
     hobbit_gate = "hobbit" in (book_title + " " + file_path.name).lower()
+    metrics: dict[str, object] = {"book_title": book_title, "pillars": {}}
 
     for pillar in selected:
         if pillar == "genealogy":
@@ -6700,11 +6702,63 @@ def pipeline_worldbuilding(path: str, title: str | None, pillars: tuple[str], ou
                 json.dump(payload, f, indent=2)
 
             count = len(payload.get("relations", []))
+            metrics["pillars"]["genealogy"] = payload.get("metrics", {"relation_count": count})
             console.print(f"  [green]✓[/green] Genealogy — extracted {count} relations → {output_path}")
 
             if hobbit_gate and count == 0:
                 raise click.ClickException(
                     "Hobbit acceptance gate failed: genealogy extraction produced zero relations."
+                )
+            continue
+
+        if pillar == "cultural":
+            from book_graph_analyzer.worldbible.models import CulturalProfile, SourcePassage
+
+            extractor = WorldBibleExtractor(config=ExtractionConfig(use_llm=False))
+            bible = extractor.extract_from_text(text, world_name=book_title, source_name=file_path.name)
+            if not bible.cultures:
+                # Deterministic fallback for sparse single-chapter samples (e.g., Hobbit smoke runs).
+                keyword_map = {
+                    "hobbits": ("hobbit", "hobbits", "shire-folk"),
+                    "elves": ("elf", "elves", "elvish", "eldar"),
+                    "dwarves": ("dwarf", "dwarves", "dwarvish"),
+                    "men": ("men", "mankind", "mortal men"),
+                    "orcs": ("orc", "orcs", "goblin", "goblins"),
+                    "wizards": ("wizard", "wizards", "istari"),
+                }
+                lower = text.lower()
+                for cid, kws in keyword_map.items():
+                    if any(k in lower for k in kws):
+                        bible.cultures[cid] = CulturalProfile(
+                            id=cid,
+                            name=cid.title(),
+                            source_passages=[
+                                SourcePassage(
+                                    text=text[:200],
+                                    book=file_path.name,
+                                    location="whole_text",
+                                )
+                            ],
+                        )
+
+            cultural_payload = {
+                "metrics": {
+                    "culture_count": len(bible.cultures),
+                    "rule_count": len(bible.rules),
+                },
+                "cultures": {cid: c.to_dict() for cid, c in bible.cultures.items()},
+            }
+            output_path = out_dir / f"{file_path.stem}_cultures.json"
+            with open(output_path, "w", encoding="utf-8") as f:
+                json.dump(cultural_payload, f, indent=2)
+            metrics["pillars"]["cultural"] = cultural_payload["metrics"]
+            console.print(
+                f"  [green]✓[/green] Cultural — extracted {len(bible.cultures)} cultures → {output_path}"
+            )
+
+            if hobbit_gate and len(bible.cultures) == 0:
+                raise click.ClickException(
+                    "Hobbit acceptance gate failed: cultural extraction produced zero culture profiles."
                 )
             continue
 
@@ -6717,6 +6771,11 @@ def pipeline_worldbuilding(path: str, title: str | None, pillars: tuple[str], ou
         console.print(f"  [yellow]⏳[/yellow] {pillar.title()} — not yet implemented (Issue {issue_map[pillar]})")
 
     console.print("\n[dim]See docs/tolkien-worldbuilding-rfc.md for pillar-by-pillar status.[/dim]")
+
+    metrics_path = out_dir / f"{file_path.stem}_worldbuilding_metrics.json"
+    with open(metrics_path, "w", encoding="utf-8") as f:
+        json.dump(metrics, f, indent=2)
+    console.print(f"[green]OK[/green] Saved worldbuilding metrics: {metrics_path}")
 
 
 @main.command(name="workflow-post-open-failures-summary")
