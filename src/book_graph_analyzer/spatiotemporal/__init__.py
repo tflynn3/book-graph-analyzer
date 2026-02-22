@@ -44,6 +44,14 @@ from .location_seeds import (
 from .corpus_reconciler import (
     CorpusReconciler, CorpusReconciliationResult, BookEvents, ContradictionCluster,
 )
+from .grounding import (
+    METRICS_VERSION,
+    TemporalGroundingGate,
+    TemporalGroundingGateResult,
+    TemporalGroundingMetrics,
+    compute_temporal_grounding_metrics,
+    backfill_temporal_grounding,
+)
 
 __all__ = [
     "NormalizedTime",
@@ -75,4 +83,10 @@ __all__ = [
     "CorpusReconciliationResult",
     "BookEvents",
     "ContradictionCluster",
+    "METRICS_VERSION",
+    "TemporalGroundingGate",
+    "TemporalGroundingGateResult",
+    "TemporalGroundingMetrics",
+    "compute_temporal_grounding_metrics",
+    "backfill_temporal_grounding",
 ]

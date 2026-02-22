@@ -16,6 +16,11 @@ from ..lore.events import Event
 from ..models.worldbuilding import infer_editorial_layer
 from .models import NormalizedTime, SpatiotemporalEvent
 from .normalizer import TimeNormalizer
+from .grounding import (
+    METRICS_VERSION,
+    backfill_temporal_grounding,
+    compute_temporal_grounding_metrics,
+)
 
 
 def _era_display_name(era_val: str) -> str:
@@ -131,13 +136,24 @@ class BridgeReport:
         return "\n".join(lines)
 
     def to_dict(self) -> dict:
+        events = self.events
+        by_book: dict[str, list[SpatiotemporalEvent]] = {}
+        for ev in events:
+            by_book.setdefault(ev.source_book or "unknown", []).append(ev)
+
         return {
+            "metrics_version": METRICS_VERSION,
             "total": self.total,
             "aligned": self.aligned_count,
             "overconfident": self.overconfident_count,
             "boosted": self.boosted_count,
             "era_changed": self.era_changed_count,
             "avg_confidence_delta": self.avg_confidence_delta,
+            "temporal_grounding": compute_temporal_grounding_metrics(events).to_dict(),
+            "temporal_grounding_by_book": {
+                book: compute_temporal_grounding_metrics(book_events).to_dict()
+                for book, book_events in by_book.items()
+            },
             "results": [r.to_dict() for r in self.results],
         }
 
@@ -223,10 +239,14 @@ class ExtractionBridge:
         self,
         events: list[Event],
         source_book: str | None = None,
+        apply_backfill: bool = True,
     ) -> BridgeReport:
         """Convert a batch of extracted Events."""
         report = BridgeReport()
         for event in events:
             result = self.bridge_event(event, source_book=source_book)
             report.results.append(result)
+
+        if apply_backfill:
+            backfill_temporal_grounding(report.events)
         return report

@@ -4292,11 +4292,23 @@ def lore_timeline_reconcile(events_file: str, locations: str | None, output: str
               help="Use LLM-assisted causal link extraction (falls back to heuristic)")
 @click.option("--calibrate", is_flag=True,
               help="Apply source authority confidence calibration")
+@click.option("--enforce-grounding-gate", is_flag=True,
+              help="Fail if temporal grounding coverage is below thresholds")
+@click.option("--min-grounded-ratio", default=0.85, show_default=True, type=float,
+              help="Min ratio of events with era or year/interval")
+@click.option("--min-era-ratio", default=0.80, show_default=True, type=float,
+              help="Min ratio of events with canonical era")
+@click.option("--min-year-ratio", default=0.05, show_default=True, type=float,
+              help="Min ratio of events with year/interval")
 def lore_timeline_bridge(
     events_file: str, locations: str | None, seed_locations: bool,
     output: str | None, fmt: str, source_book: str | None,
     write_neo4j: bool = False, causal_links: bool = False,
     use_llm: bool = False, calibrate: bool = False,
+    enforce_grounding_gate: bool = False,
+    min_grounded_ratio: float = 0.85,
+    min_era_ratio: float = 0.80,
+    min_year_ratio: float = 0.05,
 ) -> None:
     """Bridge extracted events through spatiotemporal normalization and reconcile.
 
@@ -4324,6 +4336,7 @@ def lore_timeline_bridge(
         ConflictDetector, ReconciliationReport,
         LocationNode, LocationEdge, ExtractionBridge,
         extract_causal_links,
+        TemporalGroundingGate,
         calibrate_event_confidence,
         calibrate_causal_link_confidence,
         calibrate_conflict_confidence,
@@ -4466,6 +4479,21 @@ def lore_timeline_bridge(
             console.print(f"\n[bold yellow]{report.summary_line()}[/bold yellow]")
     else:
         console.print(f"\n[bold green]{report.summary_line()}[/bold green]")
+
+    if enforce_grounding_gate:
+        gate = TemporalGroundingGate(
+            min_grounded_ratio=min_grounded_ratio,
+            min_era_ratio=min_era_ratio,
+            min_year_or_interval_ratio=min_year_ratio,
+        )
+        gate_result = gate.evaluate(st_events)
+        if gate_result.passed:
+            console.print("[bold green]Temporal grounding gate: PASS[/bold green]")
+        else:
+            console.print("[bold red]Temporal grounding gate: FAIL[/bold red]")
+            for failure in gate_result.failures:
+                console.print(f"  - {failure}")
+            raise SystemExit(2)
 
 
 @lore.command(name="timeline-conflicts")
@@ -6264,9 +6292,16 @@ def lore_genealogy(
               help="Extract causal link candidates (default: on)")
 @click.option("--write-neo4j", is_flag=True,
               help="Persist results to Neo4j")
+@click.option("--enforce-grounding-gate", is_flag=True,
+              help="Fail if temporal grounding coverage is below thresholds")
+@click.option("--min-grounded-ratio", default=0.85, show_default=True, type=float)
+@click.option("--min-era-ratio", default=0.80, show_default=True, type=float)
+@click.option("--min-year-ratio", default=0.05, show_default=True, type=float)
 def corpus_timeline_reconcile(
     corpus_name: str, events_dir: str | None, locations: str | None,
     output: str | None, fmt: str, causal_links: bool, write_neo4j: bool,
+    enforce_grounding_gate: bool, min_grounded_ratio: float,
+    min_era_ratio: float, min_year_ratio: float,
 ) -> None:
     """Reconcile timelines across all books in a corpus.
 
@@ -6284,6 +6319,7 @@ def corpus_timeline_reconcile(
     from book_graph_analyzer.corpus import CorpusManager
     from book_graph_analyzer.spatiotemporal import (
         CorpusReconciler, LocationNode, LocationEdge, SpatiotemporalEvent,
+        TemporalGroundingGate,
     )
 
     manager = CorpusManager(corpus_name)
@@ -6378,6 +6414,22 @@ def corpus_timeline_reconcile(
             console.print(f"[green]OK[/green] Report saved to {output}")
         else:
             console.print(text)
+
+    if enforce_grounding_gate:
+        gate = TemporalGroundingGate(
+            min_grounded_ratio=min_grounded_ratio,
+            min_era_ratio=min_era_ratio,
+            min_year_or_interval_ratio=min_year_ratio,
+        )
+        all_events = [e for b in result.books for e in b.events]
+        gate_result = gate.evaluate(all_events)
+        if gate_result.passed:
+            console.print("[bold green]Temporal grounding gate: PASS[/bold green]")
+        else:
+            console.print("[bold red]Temporal grounding gate: FAIL[/bold red]")
+            for failure in gate_result.failures:
+                console.print(f"  - {failure}")
+            raise SystemExit(2)
 
 
 @corpus.command(name="timeline-divergence")

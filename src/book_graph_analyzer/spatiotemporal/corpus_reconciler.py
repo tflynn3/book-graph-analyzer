@@ -22,6 +22,7 @@ from .models import (
 )
 from .report import ReconciliationReport
 from .confidence import SourceAuthorityRegistry
+from .grounding import compute_temporal_grounding_metrics
 
 
 @dataclass
@@ -115,6 +116,9 @@ class CorpusReconciliationResult:
         return {
             "books_analyzed": len(self.books),
             "total_events": self.total_events,
+            "temporal_grounding": compute_temporal_grounding_metrics(
+                [e for b in self.books for e in b.events]
+            ).to_dict(),
             "total_conflicts": self.total_conflicts,
             "total_errors": self.total_errors,
             "cross_book_conflict_count": len(self.cross_book_conflicts),
@@ -123,6 +127,7 @@ class CorpusReconciliationResult:
                 book.book_id: {
                     "title": book.book_title,
                     "event_count": len(book.events),
+                    "temporal_grounding": compute_temporal_grounding_metrics(book.events).to_dict(),
                     "conflicts": [c.to_dict() for c in self.per_book_conflicts.get(book.book_id, [])],
                     "causal_links": [
                         {"cause": l.cause_event_id, "effect": l.effect_event_id,
