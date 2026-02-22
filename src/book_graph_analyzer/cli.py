@@ -6042,6 +6042,58 @@ def worldbible_languages(bible_path: str, entity: str | None, write_graph: bool)
             raise SystemExit(1)
 
 
+@worldbible.command(name="languages-join-check")
+@click.argument("bible_path", type=click.Path(exists=True))
+@click.option("--strict-namespace", is_flag=True,
+              help="Require canonical lf:<entity_id>:<slug> ids when scoring joins")
+def worldbible_languages_join_check(bible_path: str, strict_namespace: bool) -> None:
+    """Validate LanguageForm -> canonical entity join success rate.
+
+    Cross-layer check for Issue #94 gate:
+    - each LanguageForm must reference a canonical entity id
+    - optional strict namespace check for LanguageForm ids
+    """
+    from book_graph_analyzer.worldbible.lineage import load_lineages_from_file
+
+    lineages = load_lineages_from_file(bible_path)
+
+    repo_root = Path(__file__).resolve().parents[2]
+    seeds = [
+        (repo_root / "data" / "seeds" / "characters.json", "char_"),
+        (repo_root / "data" / "seeds" / "places.json", "place_"),
+        (repo_root / "data" / "seeds" / "objects.json", "obj_"),
+    ]
+    canonical_ids: set[str] = set()
+    for seed, prefix in seeds:
+        if not seed.exists():
+            continue
+        payload = json.loads(seed.read_text(encoding="utf-8"))
+        for item in payload:
+            sid = item.get("id")
+            if sid:
+                sid_s = str(sid)
+                canonical_ids.add(sid_s)
+                canonical_ids.add(f"{prefix}{sid_s}")
+
+    total = 0
+    joined = 0
+    for lin in lineages:
+        for form in lin.forms:
+            total += 1
+            entity_ok = bool(form.entity_id and form.entity_id in canonical_ids)
+            ns_ok = True
+            if strict_namespace:
+                ns_ok = form.id.startswith("lf:") and form.id.count(":") >= 2
+            if entity_ok and ns_ok:
+                joined += 1
+
+    ratio = (joined / total) if total else 1.0
+    status = "[green]PASS[/green]" if ratio >= 0.95 else "[red]FAIL[/red]"
+    console.print(f"Language form -> canonical entity join success: {joined}/{total} ({ratio:.2%}) {status}")
+    if ratio < 0.95:
+        raise SystemExit(2)
+
+
 @worldbible.command(name="artifacts")
 @click.argument("path", type=click.Path(exists=True))
 @click.option("--book", "book", default=None, help="Source book label")

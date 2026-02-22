@@ -83,6 +83,9 @@ class TestLineageParser:
         assert len(lin.derivations) == 1
         # entity_id auto-populated on forms
         assert lin.forms[0].entity_id == "place_rivendell"
+        # ids normalized to canonical namespace
+        assert lin.forms[0].id.startswith("lf:place_rivendell:")
+        assert lin.derivations[0].source_form_id.startswith("lf:place_rivendell:")
 
     def test_load_lineages_from_file(self):
         from book_graph_analyzer.worldbible.lineage import load_lineages_from_file
@@ -342,6 +345,31 @@ class TestCLILanguages:
         runner = CliRunner()
         result = runner.invoke(main, ["worldbible", "--help"])
         assert "languages" in result.output
+
+    def test_languages_join_check_command_registered(self):
+        from click.testing import CliRunner
+        from book_graph_analyzer.cli import main
+
+        runner = CliRunner()
+        result = runner.invoke(main, ["worldbible", "--help"])
+        assert "languages-join-check" in result.output
+
+    def test_languages_join_check_strict_namespace_passes(self, tmp_path):
+        from click.testing import CliRunner
+        from book_graph_analyzer.cli import main
+
+        lineage_file = tmp_path / "lineages.json"
+        lineage_file.write_text(json.dumps({
+            "lineages": [{
+                "entity_id": "place_rivendell",
+                "forms": [{"id": "lf_old", "form": "Imladris", "language": "Sindarin"}],
+            }]
+        }))
+
+        runner = CliRunner()
+        result = runner.invoke(main, ["worldbible", "languages-join-check", str(lineage_file), "--strict-namespace"])
+        assert result.exit_code == 0
+        assert "join success" in result.output.lower()
 
 
 # ============================================================================

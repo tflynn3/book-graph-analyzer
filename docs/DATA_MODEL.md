@@ -454,6 +454,15 @@ Additionally, entities link to their language forms:
 
 ```
 (:Entity)-[:HAS_NAME]->(:LanguageForm)
+
+### Linguistic namespace contract (Issue #94)
+
+- `LanguageForm.id` MUST use canonical namespace: `lf:<entity_id>:<form-slug>`
+  - Example: `lf:char_gandalf:mithrandir`
+  - Example: `lf:place_rivendell:imladris`
+- `LanguageForm.entity_id` MUST be a canonical entity ID present in seeds/graph (`char_*`, `place_*`, `obj_*`).
+- `LanguageDerivation.source_form_id` / `target_form_id` MUST reference canonical `LanguageForm.id` values.
+- Gate metric: language-form → canonical-entity join success rate should remain >=95% (`bga worldbible languages-join-check --strict-namespace`).
 ```
 
 **Status:** ✅ Implemented (v1) — `GraphWriter.write_linguistic_lineage()`, `write_linguistic_lineage_batch()`, `query_linguistic_lineage()`
