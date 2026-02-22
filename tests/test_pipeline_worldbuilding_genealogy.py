@@ -33,7 +33,34 @@ def test_pipeline_worldbuilding_runs_genealogy_stage_and_writes_artifact(tmp_pat
     assert len(payload.get("relations", [])) > 0
 
 
-def test_pipeline_worldbuilding_hobbit_gate_requires_non_zero_genealogy(tmp_path):
+def test_pipeline_worldbuilding_hobbit_gate_requires_non_population_genealogy(tmp_path):
+    hobbit_text = tmp_path / "the_hobbit.txt"
+    hobbit_text.write_text(
+        "Hobbits are a quiet folk and live in the Shire.",
+        encoding="utf-8",
+    )
+
+    out_dir = tmp_path / "out"
+    result = CliRunner().invoke(
+        main,
+        [
+            "pipeline",
+            "worldbuilding",
+            str(hobbit_text),
+            "--title",
+            "The Hobbit",
+            "--pillars",
+            "genealogy",
+            "--output-dir",
+            str(out_dir),
+        ],
+    )
+
+    assert result.exit_code != 0
+    assert "Hobbit acceptance gate failed" in result.output
+
+
+def test_pipeline_worldbuilding_hobbit_gate_accepts_non_population_genealogy(tmp_path):
     hobbit_text = tmp_path / "the_hobbit.txt"
     hobbit_text.write_text(
         "Bilbo, son of Bungo Baggins, lived in the Shire.",
@@ -56,5 +83,4 @@ def test_pipeline_worldbuilding_hobbit_gate_requires_non_zero_genealogy(tmp_path
         ],
     )
 
-    assert result.exit_code != 0
-    assert "Hobbit acceptance gate failed" in result.output
+    assert result.exit_code == 0, result.output

@@ -233,16 +233,23 @@ def infer_generation_depths(relations: list[GenealogyRelation]) -> list[Genealog
     return relations
 
 
+_NAME = r"[A-Z][a-z]+(?:[-'][A-Z]?[a-z]+)*(?: [A-Z][a-z]+(?:[-'][A-Z]?[a-z]+)*)*"
+
+
 _RULES: list[tuple[re.Pattern[str], GenealogyRelationType, float]] = [
-    (re.compile(r"\b([A-Z][a-z]+(?: [A-Z][a-z]+)*)\s+son of\s+([A-Z][a-z]+(?: [A-Z][a-z]+)*)\b"), GenealogyRelationType.CHILD_OF, 0.9),
-    (re.compile(r"\b([A-Z][a-z]+(?: [A-Z][a-z]+)*)\s+daughter of\s+([A-Z][a-z]+(?: [A-Z][a-z]+)*)\b"), GenealogyRelationType.CHILD_OF, 0.9),
-    (re.compile(r"\b([A-Z][a-z]+(?: [A-Z][a-z]+)*)\s+child of\s+([A-Z][a-z]+(?: [A-Z][a-z]+)*)\b"), GenealogyRelationType.CHILD_OF, 0.85),
-    (re.compile(r"\b([A-Z][a-z]+(?: [A-Z][a-z]+)*)\s+father of\s+([A-Z][a-z]+(?: [A-Z][a-z]+)*)\b"), GenealogyRelationType.PARENT_OF, 0.9),
-    (re.compile(r"\b([A-Z][a-z]+(?: [A-Z][a-z]+)*)\s+mother of\s+([A-Z][a-z]+(?: [A-Z][a-z]+)*)\b"), GenealogyRelationType.PARENT_OF, 0.9),
-    (re.compile(r"\b([A-Z][a-z]+(?: [A-Z][a-z]+)*)\s+brother of\s+([A-Z][a-z]+(?: [A-Z][a-z]+)*)\b"), GenealogyRelationType.SIBLING_OF, 0.8),
-    (re.compile(r"\b([A-Z][a-z]+(?: [A-Z][a-z]+)*)\s+sister of\s+([A-Z][a-z]+(?: [A-Z][a-z]+)*)\b"), GenealogyRelationType.SIBLING_OF, 0.8),
-    (re.compile(r"\b([A-Z][a-z]+(?: [A-Z][a-z]+)*)\s+wed\s+([A-Z][a-z]+(?: [A-Z][a-z]+)*)\b"), GenealogyRelationType.SPOUSE_OF, 0.75),
-    (re.compile(r"\b([A-Z][a-z]+(?: [A-Z][a-z]+)*)\s+married\s+([A-Z][a-z]+(?: [A-Z][a-z]+)*)\b"), GenealogyRelationType.SPOUSE_OF, 0.8),
+    (re.compile(rf"\b({_NAME})\s+son of\s+({_NAME})\b"), GenealogyRelationType.CHILD_OF, 0.9),
+    (re.compile(rf"\b({_NAME})\s+daughter of\s+({_NAME})\b"), GenealogyRelationType.CHILD_OF, 0.9),
+    (re.compile(rf"\b({_NAME})\s+child of\s+({_NAME})\b"), GenealogyRelationType.CHILD_OF, 0.85),
+    (re.compile(rf"\b({_NAME}),\s*(?:the\s+)?son of\s+({_NAME})\b"), GenealogyRelationType.CHILD_OF, 0.9),
+    (re.compile(rf"\b({_NAME}),\s*(?:the\s+)?daughter of\s+({_NAME})\b"), GenealogyRelationType.CHILD_OF, 0.9),
+    (re.compile(rf"\b({_NAME})'s\s+father\s+(?:was\s+)?({_NAME})\b"), GenealogyRelationType.CHILD_OF, 0.8),
+    (re.compile(rf"\b({_NAME})'s\s+mother\s+(?:was\s+)?({_NAME})\b"), GenealogyRelationType.CHILD_OF, 0.8),
+    (re.compile(rf"\b({_NAME})\s+father of\s+({_NAME})\b"), GenealogyRelationType.PARENT_OF, 0.9),
+    (re.compile(rf"\b({_NAME})\s+mother of\s+({_NAME})\b"), GenealogyRelationType.PARENT_OF, 0.9),
+    (re.compile(rf"\b({_NAME})\s+brother of\s+({_NAME})\b"), GenealogyRelationType.SIBLING_OF, 0.8),
+    (re.compile(rf"\b({_NAME})\s+sister of\s+({_NAME})\b"), GenealogyRelationType.SIBLING_OF, 0.8),
+    (re.compile(rf"\b({_NAME})\s+wed\s+({_NAME})\b"), GenealogyRelationType.SPOUSE_OF, 0.75),
+    (re.compile(rf"\b({_NAME})\s+married\s+({_NAME})\b"), GenealogyRelationType.SPOUSE_OF, 0.8),
 ]
 
 
