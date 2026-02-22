@@ -82,3 +82,24 @@ def test_hobbit_alias_linking_improves_candidate_coverage_for_gate():
     assert report["summary"]["total_unresolved"] == 3
     assert report["summary"]["candidate_coverage"] == 1.0
     assert all(ref.candidates for ref in linked)
+
+
+def test_linked_candidates_are_sorted_by_confidence_descending():
+    from book_graph_analyzer.lore.depth import extract_lore_depth, link_broken_reference_candidates
+
+    out = extract_lore_depth("[[Bilbo Baggins]]", source_book="The Hobbit", passage_id="p93-sort")
+    linked = link_broken_reference_candidates(out.broken_references, book="The Hobbit", max_candidates=3)
+
+    assert linked
+    confs = [c.confidence for c in linked[0].candidates]
+    assert confs == sorted(confs, reverse=True)
+
+
+def test_hobbit_alias_linking_respects_max_candidates_limit():
+    from book_graph_analyzer.lore.depth import extract_lore_depth, link_broken_reference_candidates
+
+    out = extract_lore_depth("[[Bilbo]]", source_book="The Hobbit", passage_id="p93-max")
+    linked = link_broken_reference_candidates(out.broken_references, book="The Hobbit", max_candidates=1)
+
+    assert linked
+    assert len(linked[0].candidates) <= 1

@@ -288,7 +288,11 @@ def link_broken_reference_candidates(
         book_l = (book or ref.source_book or "").lower()
         if "hobbit" in book_l:
             alias_id = _HOBBIT_ALIAS_CANDIDATES.get(mention_l) or _HOBBIT_ALIAS_CANDIDATES.get(mention_norm)
-            if alias_id and not any(c.canonical_id == alias_id for c in candidates):
+            if (
+                alias_id
+                and len(candidates) < max_candidates
+                and not any(c.canonical_id == alias_id for c in candidates)
+            ):
                 candidates.append(
                     ReferenceCandidate(
                         canonical_id=alias_id,
@@ -297,6 +301,10 @@ def link_broken_reference_candidates(
                         source="resolver:alias_hobbit",
                     )
                 )
+
+        # Keep downstream audit buckets deterministic by ranking strongest
+        # candidates first regardless of source type (exact/fuzzy/alias).
+        candidates.sort(key=lambda c: c.confidence, reverse=True)
 
         ref.candidates = candidates
         if not ref.resolved_entity_id and candidates:
