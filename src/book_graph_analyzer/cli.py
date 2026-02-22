@@ -6430,11 +6430,25 @@ def corpus_timeline_divergence(source_a: str, source_b: str, min_sources: int, l
 @click.option("--show-authority", "-a", is_flag=True, help="Show authority weights")
 @click.option("--tag-strata", is_flag=True, help="Apply inferred source/stratum metadata to corpus passage JSON files")
 @click.option("--report-divergence", is_flag=True, help="Run basic cross-strata divergence report from tagged passage JSON")
-def corpus_sources(corpus_name: str, show_authority: bool, tag_strata: bool, report_divergence: bool) -> None:
+@click.option("--max-missing-provenance-ratio", default=0.05, show_default=True, type=float,
+              help="Fail divergence reporting if claim-bearing passages exceed this missing provenance ratio")
+@click.option("--min-authority", default=0.0, show_default=True, type=float,
+              help="Minimum allowed source authority weight for claim-bearing passages")
+def corpus_sources(
+    corpus_name: str,
+    show_authority: bool,
+    tag_strata: bool,
+    report_divergence: bool,
+    max_missing_provenance_ratio: float,
+    min_authority: float,
+) -> None:
     """Show editorial source layers for a corpus."""
     from book_graph_analyzer.models.worldbuilding import TOLKIEN_SOURCES, infer_editorial_layer
     from book_graph_analyzer.models.passage import Passage
-    from book_graph_analyzer.worldbible.editorial import detect_editorial_divergences
+    from book_graph_analyzer.worldbible.editorial import (
+        detect_editorial_divergences,
+        validate_editorial_provenance,
+    )
 
     corpus_dir = Path("data") / "corpora" / corpus_name
     candidates: list[str] = []
@@ -6495,10 +6509,56 @@ def corpus_sources(corpus_name: str, show_authority: bool, tag_strata: bool, rep
                 passages.append(Passage(**row))
             except Exception:
                 continue
+
+        validation = validate_editorial_provenance(
+            passages,
+            max_missing_ratio=max_missing_provenance_ratio,
+            min_authority_weight=min_authority,
+        )
+        if not validation.is_valid:
+            raise click.ClickException(
+                "Editorial divergence report gated: provenance validation failed "
+                f"(checked={validation.checked_count}, missing={validation.missing_count}, "
+                f"missing_ratio={validation.missing_ratio:.2%}, "
+                f"invalid_authority={validation.invalid_authority_count})."
+            )
+
         divergences = detect_editorial_divergences(passages)
         console.print(f"\n[bold]Editorial divergence signals:[/bold] {len(divergences)}")
         for d in divergences[:15]:
             console.print(f"  [{d.kind}] {d.signal} (conf={d.confidence:.2f}, passages={len(d.involved_passage_ids)})")
+
+        out_path = Path("data") / "output" / f"{corpus_name}_editorial_divergence_report.json"
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(out_path, "w", encoding="utf-8") as f:
+            json.dump(
+                {
+                    "provenance_validation": {
+                        "checked_count": validation.checked_count,
+                        "missing_count": validation.missing_count,
+                        "missing_ratio": round(validation.missing_ratio, 4),
+                        "invalid_authority_count": validation.invalid_authority_count,
+                        "max_missing_ratio": validation.max_missing_ratio,
+                        "min_authority_weight": validation.min_authority_weight,
+                        "is_valid": validation.is_valid,
+                    },
+                    "divergence_count": len(divergences),
+                    "divergences": [
+                        {
+                            "kind": d.kind,
+                            "signal": d.signal,
+                            "key": d.key,
+                            "involved_passage_ids": d.involved_passage_ids,
+                            "involved_sources": d.involved_sources,
+                            "confidence": d.confidence,
+                        }
+                        for d in divergences
+                    ],
+                },
+                f,
+                indent=2,
+            )
+        console.print(f"[green]OK[/green] Saved divergence artifact: {out_path}")
 
 
 @pipeline.command(name="worldbuilding")

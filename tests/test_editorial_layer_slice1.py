@@ -2,7 +2,12 @@ from __future__ import annotations
 
 from book_graph_analyzer.models.passage import Passage
 from book_graph_analyzer.models.worldbuilding import EditorialLayer, EditorialStatus, AuthorPeriod, SourceStratum
-from book_graph_analyzer.worldbible.editorial import detect_editorial_divergences
+from click.testing import CliRunner
+import json
+from book_graph_analyzer.worldbible.editorial import (
+    detect_editorial_divergences,
+    validate_editorial_provenance,
+)
 
 
 def _p(**overrides) -> Passage:
@@ -65,3 +70,62 @@ def test_detect_editorial_divergences_factual_and_style():
     kinds = {d.kind for d in out}
     assert "factual" in kinds
     assert "style" in kinds
+
+
+def test_validate_editorial_provenance_fails_when_required_fields_missing():
+    p = _p(
+        id="p1",
+        factual_claims={"balrog_wings": "literal"},
+        source_id=None,
+        source_stratum=None,
+        source_authority_weight=None,
+        provenance_tags=[],
+    )
+    result = validate_editorial_provenance([p], max_missing_ratio=0.0)
+    assert result.checked_count == 1
+    assert result.missing_count == 1
+    assert result.is_valid is False
+
+
+def test_validate_editorial_provenance_respects_authority_threshold():
+    p = _p(
+        id="p1",
+        factual_claims={"balrog_wings": "literal"},
+        source_id="src_x",
+        source_stratum="annotation",
+        source_authority_weight=0.4,
+        provenance_tags=["annotation"],
+    )
+    result = validate_editorial_provenance([p], min_authority_weight=0.5)
+    assert result.invalid_authority_count == 1
+    assert result.is_valid is False
+
+
+def test_corpus_sources_report_divergence_gated_on_missing_provenance():
+    from book_graph_analyzer.cli import main
+
+    runner = CliRunner()
+    with runner.isolated_filesystem():
+        corpus_dir = "data/corpora/hobbit"
+        import os
+        os.makedirs(corpus_dir, exist_ok=True)
+        with open(f"{corpus_dir}/passages.json", "w", encoding="utf-8") as f:
+            json.dump([
+                {
+                    "id": "p1",
+                    "text": "test",
+                    "book": "The Hobbit",
+                    "chapter": "1",
+                    "chapter_num": 1,
+                    "paragraph_num": 1,
+                    "sentence_num": 1,
+                    "char_offset": 0,
+                    "factual_claims": {"x": "y"},
+                }
+            ], f)
+
+        result = runner.invoke(main, [
+            "corpus", "sources", "hobbit", "--report-divergence", "--max-missing-provenance-ratio", "0",
+        ])
+        assert result.exit_code != 0
+        assert "gated" in result.output.lower()

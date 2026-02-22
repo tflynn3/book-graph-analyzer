@@ -21,6 +21,76 @@ class EditorialDivergence:
     confidence: float = 0.0
 
 
+@dataclass
+class ProvenanceValidationResult:
+    """Validation summary for editorial provenance completeness."""
+
+    checked_count: int = 0
+    missing_count: int = 0
+    invalid_authority_count: int = 0
+    max_missing_ratio: float = 0.05
+    min_authority_weight: float = 0.0
+
+    @property
+    def missing_ratio(self) -> float:
+        if self.checked_count == 0:
+            return 0.0
+        return self.missing_count / self.checked_count
+
+    @property
+    def is_valid(self) -> bool:
+        return (
+            self.missing_ratio <= self.max_missing_ratio
+            and self.invalid_authority_count == 0
+        )
+
+
+def validate_editorial_provenance(
+    passages: list[Passage],
+    *,
+    max_missing_ratio: float = 0.05,
+    min_authority_weight: float = 0.0,
+) -> ProvenanceValidationResult:
+    """Validate provenance invariants for passages carrying factual claims.
+
+    Required fields for claim-bearing passages:
+    - source_id
+    - source_stratum
+    - source_authority_weight (0..1 and >= min_authority_weight)
+    - provenance_tags (non-empty)
+    """
+
+    checked = 0
+    missing = 0
+    invalid_authority = 0
+
+    for p in passages:
+        if not (p.factual_claims or {}):
+            continue
+        checked += 1
+        has_required = bool(
+            p.source_id
+            and p.source_stratum
+            and p.provenance_tags
+            and p.source_authority_weight is not None
+        )
+        if not has_required:
+            missing += 1
+            continue
+
+        w = float(p.source_authority_weight)
+        if w < min_authority_weight or w < 0.0 or w > 1.0:
+            invalid_authority += 1
+
+    return ProvenanceValidationResult(
+        checked_count=checked,
+        missing_count=missing,
+        invalid_authority_count=invalid_authority,
+        max_missing_ratio=max_missing_ratio,
+        min_authority_weight=min_authority_weight,
+    )
+
+
 def detect_editorial_divergences(passages: list[Passage]) -> list[EditorialDivergence]:
     """Detect lightweight cross-strata divergence signals.
 
