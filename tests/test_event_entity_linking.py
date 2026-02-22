@@ -20,6 +20,7 @@ class _FakeResult:
 class _Node:
     id: str
     labels: set[str]
+    canonical_id: str
     canonical_name: str
     aliases: list[str]
 
@@ -47,6 +48,7 @@ class _FakeSession:
             event_id = kwargs["event_id"]
             labels = set(kwargs["labels"])
             candidates = [c.lower() for c in kwargs["candidates"]]
+            candidate_ids = [c.lower() for c in kwargs.get("candidate_ids", [])]
             role = kwargs["role"]
             rel_type = query.split("MERGE (n)-[r:")[1].split("]->(e)")[0]
 
@@ -55,12 +57,15 @@ class _FakeSession:
             for node in self.state["nodes"]:
                 if not (node.labels & labels):
                     continue
+                cid = node.canonical_id.lower()
                 cname = node.canonical_name.lower()
                 aliases = [a.lower() for a in node.aliases]
                 for cand in candidates:
                     if not cand:
                         continue
                     matched = (
+                        cid in candidate_ids
+                        or
                         cname == cand
                         or cand in aliases
                         or cand in cname
@@ -69,7 +74,7 @@ class _FakeSession:
                     )
                     if not matched:
                         continue
-                    score = 100 if (cname == cand or cand in aliases) else 70
+                    score = 110 if cid in candidate_ids else (100 if (cname == cand or cand in aliases) else 70)
                     if score > best_score:
                         best = node
                         best_score = score
@@ -89,9 +94,9 @@ class _FakeDriver:
             "events": set(),
             "rels": set(),
             "nodes": [
-                _Node(id="char_bilbo", labels={"Character"}, canonical_name="Bilbo", aliases=["Bilbo Baggins"]),
-                _Node(id="obj_ring", labels={"Object"}, canonical_name="The One Ring", aliases=["the ring", "ring"]),
-                _Node(id="place_riv", labels={"Place"}, canonical_name="Rivendell", aliases=[]),
+                _Node(id="char_bilbo", labels={"Character"}, canonical_id="char_bilbo", canonical_name="Bilbo", aliases=["Bilbo Baggins"]),
+                _Node(id="obj_ring", labels={"Object"}, canonical_id="obj_ring", canonical_name="The One Ring", aliases=["the ring", "ring"]),
+                _Node(id="place_riv", labels={"Place"}, canonical_id="place_riv", canonical_name="Rivendell", aliases=[]),
             ],
         }
 
@@ -144,3 +149,22 @@ def test_event_entity_linking_idempotent_on_rerun(monkeypatch):
 
     assert first_rel_count > 0
     assert second_rel_count == first_rel_count
+
+
+def test_event_entity_linking_supports_canonical_id_mentions(monkeypatch):
+    writer = GraphWriter(driver=_FakeDriver())
+    monkeypatch.setattr(writer, "initialize", lambda: None)
+
+    g = EventGraph()
+    g.add_event(
+        Event(
+            id="hobbit:e3",
+            description="Bilbo keeps possession",
+            agent="char_bilbo",
+            action="kept",
+            patient="obj_ring",
+        )
+    )
+
+    stats = writer.write_event_graph(g, book="The Hobbit", link_entities=True)
+    assert stats["entity_links"] >= 2

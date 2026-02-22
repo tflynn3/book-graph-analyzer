@@ -2463,6 +2463,7 @@ class GraphWriter:
         Returns 1 when a link exists after MERGE, else 0.
         """
         candidates = self._expand_candidate_strings(raw_value)
+        candidate_ids = [c for c in candidates if re.match(r"^(char|place|obj)_[a-z0-9_\-]+$", c)]
         if not candidates:
             return 0
 
@@ -2474,9 +2475,12 @@ class GraphWriter:
         WHERE any(lbl IN $labels WHERE lbl IN labels(n))
         WITH e, n, cand,
              toLower(coalesce(n.canonical_name, n.name, '')) AS cname,
+             toLower(coalesce(n.canonical_id, n.id, '')) AS cid,
              [a IN coalesce(n.aliases, []) | toLower(a)] AS aliases
-        WHERE cname <> ''
+        WHERE (cname <> '' OR cid <> '')
           AND (
+            cid IN $candidate_ids
+            OR
             cname = cand
             OR cand IN aliases
             OR cname CONTAINS cand
@@ -2485,6 +2489,7 @@ class GraphWriter:
           )
         WITH e, n, cand,
              CASE
+               WHEN cid IN $candidate_ids THEN 110
                WHEN cname = cand OR cand IN aliases THEN 100
                WHEN any(a IN aliases WHERE a = cand) THEN 95
                WHEN cname CONTAINS cand OR cand CONTAINS cname THEN 70
@@ -2503,6 +2508,7 @@ class GraphWriter:
                 query,
                 event_id=event_id,
                 candidates=candidates,
+                candidate_ids=candidate_ids,
                 labels=labels,
                 role=role,
             ).single()

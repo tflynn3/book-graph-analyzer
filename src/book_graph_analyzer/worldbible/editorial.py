@@ -45,6 +45,53 @@ class ProvenanceValidationResult:
         )
 
 
+@dataclass
+class EventProvenanceCoverageResult:
+    """Coverage summary for event-level provenance metadata."""
+
+    checked_count: int = 0
+    missing_count: int = 0
+    max_missing_ratio: float = 0.05
+
+    @property
+    def missing_ratio(self) -> float:
+        if self.checked_count == 0:
+            return 0.0
+        return self.missing_count / self.checked_count
+
+    @property
+    def is_valid(self) -> bool:
+        return self.missing_ratio <= self.max_missing_ratio
+
+
+def validate_event_provenance_coverage(
+    events: list[object],
+    *,
+    max_missing_ratio: float = 0.05,
+) -> EventProvenanceCoverageResult:
+    """Validate minimal provenance coverage on event-like objects.
+
+    Required event provenance fields:
+    - source_book
+    - source_passage_id
+    """
+
+    checked = 0
+    missing = 0
+    for ev in events:
+        checked += 1
+        source_book = getattr(ev, "source_book", None)
+        source_passage_id = getattr(ev, "source_passage_id", None)
+        if not (source_book and source_passage_id):
+            missing += 1
+
+    return EventProvenanceCoverageResult(
+        checked_count=checked,
+        missing_count=missing,
+        max_missing_ratio=max_missing_ratio,
+    )
+
+
 def validate_editorial_provenance(
     passages: list[Passage],
     *,

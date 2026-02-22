@@ -38,6 +38,7 @@ def test_issue89_hobbit_temporal_grounding_backfill_improves_coverage():
 def test_issue89_hobbit_gate_can_fail_and_pass_with_explicit_thresholds():
     events = _load_hobbit_lore_events()
     bridge = ExtractionBridge()
+    st_events_no_backfill = bridge.bridge_events(events, source_book="The Hobbit", apply_backfill=False).events
     st_events = bridge.bridge_events(events, source_book="The Hobbit", apply_backfill=True).events
 
     strict_gate = TemporalGroundingGate(
@@ -53,7 +54,9 @@ def test_issue89_hobbit_gate_can_fail_and_pass_with_explicit_thresholds():
 
     strict_result = strict_gate.evaluate(st_events)
     permissive_result = permissive_gate.evaluate(st_events)
+    strict_result_no_backfill = strict_gate.evaluate(st_events_no_backfill)
 
-    assert strict_result.passed is False
+    assert strict_result_no_backfill.passed is False
+    assert strict_result.passed is True
     assert permissive_result.passed is True
     assert permissive_result.metrics.to_dict()["metrics_version"] == "temporal-grounding-v1"
