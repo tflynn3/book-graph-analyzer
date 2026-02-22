@@ -16,11 +16,11 @@ from book_graph_analyzer.worldbible.genealogy import (
 
 def test_issue_47_acceptance_register_families_and_character_drift():
     samples = [
-        {"entity_id": "galadriel", "order": 1, "text": "By vow and rite, thou shalt keep the hallowed oath."},
-        {"entity_id": "galadriel", "order": 2, "text": "I keep record and annal in the lore-halls."},
-        {"entity_id": "eomer", "order": 1, "text": "Raise shield and banner, captain, and march at dawn."},
-        {"entity_id": "sam", "order": 1, "text": "We'll get bread and ale and head home by supper."},
-        {"entity_id": "elrond", "order": 1, "text": "The lord of the house guards lineage and honor."},
+        {"entity_id": "char_galadriel", "order": 1, "text": "By vow and rite, thou shalt keep the hallowed oath."},
+        {"entity_id": "char_galadriel", "order": 2, "text": "I keep record and annal in the lore-halls."},
+        {"entity_id": "char_eomer", "order": 1, "text": "Raise shield and banner, captain, and march at dawn."},
+        {"entity_id": "char_sam", "order": 1, "text": "We'll get bread and ale and head home by supper."},
+        {"entity_id": "char_elrond", "order": 1, "text": "The lord of the house guards lineage and honor."},
     ]
 
     out = profile_corpus_registers(samples, classifier=SociolinguisticRegisterClassifier())
@@ -29,7 +29,7 @@ def test_issue_47_acceptance_register_families_and_character_drift():
     assert len(out.dominant_distribution) >= 4
 
     # Acceptance: per-character profile + chapter/order drift signal.
-    assert "galadriel" in out.per_entity_latest
+    assert "char_galadriel" in out.per_entity_latest
     assert any(d.current_register != d.baseline_register for d in out.strongest_drifts)
 
 

@@ -3292,6 +3292,7 @@ def lore_socioreg_corpus(input_path: str, top_drifts: int, as_json: bool) -> Non
             "avg_formality": report.avg_formality,
             "avg_archaism_rate": report.avg_archaism_rate,
             "avg_contraction_rate": report.avg_contraction_rate,
+            "quality_gate": report.quality_gate,
             "top_drifts": [
                 {
                     "baseline_register": d.baseline_register,
@@ -3311,6 +3312,9 @@ def lore_socioreg_corpus(input_path: str, top_drifts: int, as_json: bool) -> Non
     console.print(f"  Avg formality: {report.avg_formality:.3f}")
     console.print(f"  Avg archaism rate: {report.avg_archaism_rate:.3f}")
     console.print(f"  Avg contraction rate: {report.avg_contraction_rate:.3f}")
+    gate = report.quality_gate
+    gate_color = "green" if gate.get("passed") else "red"
+    console.print(f"  Quality gate: [{gate_color}]{'PASS' if gate.get('passed') else 'FAIL'}[/{gate_color}] (character-only grounded samples)")
 
     table = Table(show_header=True, header_style="bold")
     table.add_column("Register", style="cyan")
