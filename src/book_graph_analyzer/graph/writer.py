@@ -1383,6 +1383,30 @@ class GraphWriter:
             result = session.run(query, **params)
             return [dict(record) for record in result]
 
+    def ensure_character_node(self, entity_id: str, canonical_name: str | None = None) -> None:
+        """Ensure a minimal Character node exists for downstream layer materialization."""
+        if not entity_id:
+            return
+        name = (canonical_name or entity_id.replace("char_", "").replace("_", " ")).strip()
+        aliases = [name] if name else []
+        with self.driver.session() as session:
+            session.run(
+                """
+                MERGE (c:Character {canonical_id: $entity_id})
+                ON CREATE SET c.id = $entity_id,
+                              c.canonical_name = $name,
+                              c.aliases = $aliases,
+                              c.created_at = datetime()
+                SET c.updated_at = datetime(),
+                    c.id = coalesce(c.id, $entity_id),
+                    c.canonical_name = coalesce(c.canonical_name, $name),
+                    c.aliases = CASE WHEN size(coalesce(c.aliases, [])) = 0 THEN $aliases ELSE c.aliases END
+                """,
+                entity_id=entity_id,
+                name=name,
+                aliases=aliases,
+            )
+
     def write_editorial_provenance(
         self,
         entity_id: str,
