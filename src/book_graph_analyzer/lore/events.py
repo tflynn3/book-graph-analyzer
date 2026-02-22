@@ -394,10 +394,6 @@ class EventExtractor:
                 if checkpoint_file:
                     self._save_checkpoint(checkpoint_file, i + 1, total_chunks, all_events, all_relations)
         
-        # Clear checkpoint on completion
-        if checkpoint_file:
-            self._clear_checkpoint(checkpoint_file)
-        
         # Add all events to graph
         for event in all_events:
             graph.add_event(event)
@@ -421,6 +417,15 @@ class EventExtractor:
         
         return graph
 
+    def finalize_checkpoint(self, checkpoint_file: str) -> None:
+        """Clear checkpoint + resilient artifacts after durable finalization.
+
+        This must only be called *after* durable outputs are persisted
+        (JSON output and optional Neo4j write).
+        """
+        self._clear_checkpoint(checkpoint_file)
+        self._clear_resilient_artifacts(checkpoint_file)
+
     def get_resilient_summary(self, checkpoint_file: str) -> dict:
         ledger_path = Path(checkpoint_file).with_suffix(Path(checkpoint_file).suffix + ".ledger.json")
         try:
@@ -428,6 +433,20 @@ class EventExtractor:
             return data.get("metrics", {})
         except (FileNotFoundError, json.JSONDecodeError):
             return {}
+
+    def graph_from_checkpoint_payload(self, events_payload: list[dict], relations_payload: list[dict]) -> EventGraph:
+        """Build an EventGraph from checkpoint payload data."""
+        graph = EventGraph()
+        all_events = [Event(**e) for e in events_payload]
+        all_relations = [EventRelation(**r) for r in relations_payload]
+
+        for event in all_events:
+            graph.add_event(event)
+        for rel in all_relations:
+            if rel.event1_id in graph.events and rel.event2_id in graph.events:
+                graph.add_relation(rel)
+        self._infer_temporal_ordering(graph)
+        return graph
 
     def _run_resilient_chunks(
         self,
@@ -570,6 +589,24 @@ class EventExtractor:
             print(f"  Checkpoint cleared: {checkpoint_file}", flush=True)
         except OSError:
             pass
+
+    def _clear_resilient_artifacts(self, checkpoint_file: str) -> None:
+        """Remove resilient ledger and payload artifacts when finalization succeeds."""
+        base = Path(checkpoint_file)
+        ledger_file = base.with_suffix(base.suffix + ".ledger.json")
+        payload_dir = base.with_suffix(base.suffix + ".payloads")
+
+        try:
+            ledger_file.unlink(missing_ok=True)
+        except OSError:
+            pass
+
+        if payload_dir.exists() and payload_dir.is_dir():
+            import shutil
+            try:
+                shutil.rmtree(payload_dir)
+            except OSError:
+                pass
     
     def _infer_temporal_ordering(self, graph: EventGraph) -> None:
         """Infer ordering relationships from year/era data."""

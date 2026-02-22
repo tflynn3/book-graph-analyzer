@@ -2497,6 +2497,20 @@ def lore_events(path: str, output: str, neo4j: bool, chunk_size: int, no_llm: bo
             e2_name = e2.description if e2 else rel.event2_id
             console.print(f"  - {e1_name} --{rel.relation}--> {e2_name}")
     
+    # Resilient safety: never overwrite durable output with an empty graph when
+    # checkpoint data exists from a previous successful chunk run.
+    if resilient and checkpoint and not graph.events:
+        checkpoint_data = extractor._load_checkpoint(checkpoint)
+        if checkpoint_data:
+            cp_events = checkpoint_data.get("events", [])
+            cp_relations = checkpoint_data.get("relations", [])
+            if cp_events:
+                console.print(
+                    "[yellow]Recovered non-empty graph from checkpoint after empty in-memory result; "
+                    "preserving durable data.[/yellow]"
+                )
+                graph = extractor.graph_from_checkpoint_payload(cp_events, cp_relations)
+
     # Save to JSON
     output_path = Path(output)
     with open(output_path, 'w', encoding='utf-8') as f:
@@ -2505,6 +2519,7 @@ def lore_events(path: str, output: str, neo4j: bool, chunk_size: int, no_llm: bo
     console.print(f"\n[green]OK[/green] Events saved to {output_path}")
     
     # Write to Neo4j if requested
+    neo4j_write_succeeded = not neo4j
     if neo4j:
         from book_graph_analyzer.graph.writer import GraphWriter
         from book_graph_analyzer.graph.connection import check_neo4j_connection
@@ -2516,17 +2531,23 @@ def lore_events(path: str, output: str, neo4j: bool, chunk_size: int, no_llm: bo
         console.print("\n[bold]Writing to Neo4j...[/bold]")
         
         writer = GraphWriter()
-        stats = writer.write_event_graph(
-            graph,
-            book=book_name,
-            link_entities=True,
-        )
-        writer.close()
+        try:
+            stats = writer.write_event_graph(
+                graph,
+                book=book_name,
+                link_entities=True,
+            )
+            neo4j_write_succeeded = True
+        finally:
+            writer.close()
         
         console.print(f"  Events written: {stats['events_written']}")
         console.print(f"  Relations written: {stats['relations_written']}")
         console.print(f"  Entity links created: {stats['entity_links']}")
         console.print(f"[green]OK[/green] Events written to Neo4j")
+
+    if checkpoint and (not neo4j or neo4j_write_succeeded):
+        extractor.finalize_checkpoint(checkpoint)
 
 
 @lore.command(name="query-events")
