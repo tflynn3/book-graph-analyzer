@@ -9,11 +9,17 @@ Extracts structured events from text:
 import json
 import logging
 import re
+from pathlib import Path
 from dataclasses import dataclass, field
 from typing import Optional
 from collections import defaultdict
 
 from ..llm import LLMClient
+from ..extract.resilient_chunk_runner import (
+    ResilientChunkRunner,
+    ChunkAttemptResult,
+    ChunkStatus,
+)
 from .temporal import Era
 
 
@@ -302,6 +308,8 @@ class EventExtractor:
         chunk_size: int = 3000,
         overlap: int = 200,
         checkpoint_file: Optional[str] = None,
+        resilient: bool = False,
+        fallback_model: Optional[str] = None,
     ) -> EventGraph:
         """Extract events from a full book using chunked processing.
         
@@ -348,32 +356,43 @@ class EventExtractor:
                 self._seen_events = set(checkpoint.get("seen_keys", []))
                 print(f"  Resuming from checkpoint: chunk {start_chunk}/{total_chunks} ({len(all_events)} events)", flush=True)
         
-        for i, chunk in enumerate(chunks):
+        if resilient and checkpoint_file and self.use_llm:
+            self._run_resilient_chunks(
+                chunks=chunks,
+                source_book=source_book,
+                checkpoint_file=checkpoint_file,
+                all_events=all_events,
+                all_relations=all_relations,
+                fallback_model=fallback_model,
+                total_chunks=total_chunks,
+            )
+        else:
+            for i, chunk in enumerate(chunks):
             # Skip already processed chunks
-            if i < start_chunk:
-                continue
+                if i < start_chunk:
+                    continue
                 
-            if self.progress_callback:
-                self.progress_callback(i + 1, total_chunks, f"Processing chunk {i + 1}/{total_chunks}")
+                if self.progress_callback:
+                    self.progress_callback(i + 1, total_chunks, f"Processing chunk {i + 1}/{total_chunks}")
             
             # Simple progress print every 10 chunks (visible even without Rich)
-            if (i + 1) % 10 == 0 or i == start_chunk:
-                print(f"  [chunk {i + 1}/{total_chunks}]", flush=True)
+                if (i + 1) % 10 == 0 or i == start_chunk:
+                    print(f"  [chunk {i + 1}/{total_chunks}]", flush=True)
             
-            events, relations = self._extract_llm(chunk, source_book, chunk_index=i)
+                events, relations = self._extract_llm(chunk, source_book, chunk_index=i)
             
-            for event in events:
+                for event in events:
                 # Deduplicate based on normalized description
-                event_key = self._normalize_event_key(event)
-                if event_key not in self._seen_events:
-                    self._seen_events.add(event_key)
-                    all_events.append(event)
+                    event_key = self._normalize_event_key(event)
+                    if event_key not in self._seen_events:
+                        self._seen_events.add(event_key)
+                        all_events.append(event)
             
-            all_relations.extend(relations)
+                all_relations.extend(relations)
             
             # Save checkpoint after each chunk
-            if checkpoint_file:
-                self._save_checkpoint(checkpoint_file, i + 1, total_chunks, all_events, all_relations)
+                if checkpoint_file:
+                    self._save_checkpoint(checkpoint_file, i + 1, total_chunks, all_events, all_relations)
         
         # Clear checkpoint on completion
         if checkpoint_file:
@@ -390,8 +409,85 @@ class EventExtractor:
         
         # Infer additional ordering from year/era
         self._infer_temporal_ordering(graph)
+
+        if resilient and checkpoint_file and self.use_llm:
+            summary = self.get_resilient_summary(checkpoint_file)
+            print(
+                "  Resilient summary: "
+                f"ok={summary.get('ok', 0)} retried={summary.get('retried', 0)} "
+                f"fallback_success={summary.get('fallback_success', 0)} failed={summary.get('failed', 0)}",
+                flush=True,
+            )
         
         return graph
+
+    def get_resilient_summary(self, checkpoint_file: str) -> dict:
+        ledger_path = Path(checkpoint_file).with_suffix(Path(checkpoint_file).suffix + ".ledger.json")
+        try:
+            data = json.loads(ledger_path.read_text(encoding="utf-8"))
+            return data.get("metrics", {})
+        except (FileNotFoundError, json.JSONDecodeError):
+            return {}
+
+    def _run_resilient_chunks(
+        self,
+        *,
+        chunks: list[str],
+        source_book: str,
+        checkpoint_file: str,
+        all_events: list[Event],
+        all_relations: list[EventRelation],
+        fallback_model: Optional[str],
+        total_chunks: int,
+    ) -> None:
+        base = Path(checkpoint_file)
+        ledger_file = base.with_suffix(base.suffix + ".ledger.json")
+        payload_dir = base.with_suffix(base.suffix + ".payloads")
+        payload_dir.mkdir(parents=True, exist_ok=True)
+
+        default_llm = LLMClient()
+        primary_model = getattr(default_llm, "model", "")
+        if not fallback_model:
+            fallback_model = "gpt-4o" if default_llm.provider == "openai" else "llama3.1:70b"
+
+        runner = ResilientChunkRunner(ledger_file)
+
+        def persist_artifact() -> None:
+            completed = len(runner.state.ledger)
+            self._save_checkpoint(checkpoint_file, completed, total_chunks, all_events, all_relations)
+
+        def process_attempt(chunk_index: int, chunk: str, model: str, attempt_no: int) -> ChunkAttemptResult:
+            if self.progress_callback:
+                self.progress_callback(
+                    min(chunk_index + 1, total_chunks),
+                    total_chunks,
+                    f"Processing chunk {chunk_index + 1}/{total_chunks} (attempt {attempt_no}, model {model})",
+                )
+
+            events, relations, reason, raw = self._extract_llm_once(chunk, source_book, chunk_index=chunk_index, model=model)
+            snippet_path = None
+            if reason and raw:
+                snippet_path = str(payload_dir / f"chunk_{chunk_index:04d}_attempt_{attempt_no}.txt")
+                Path(snippet_path).write_text(raw[:3000], encoding="utf-8")
+
+            if reason:
+                return ChunkAttemptResult(False, reason=reason, model=model, payload_snippet_path=snippet_path)
+
+            for event in events:
+                event_key = self._normalize_event_key(event)
+                if event_key not in self._seen_events:
+                    self._seen_events.add(event_key)
+                    all_events.append(event)
+            all_relations.extend(relations)
+            return ChunkAttemptResult(True, model=model)
+
+        runner.run(
+            chunks=chunks,
+            primary_model=primary_model,
+            fallback_model=fallback_model,
+            process_attempt=process_attempt,
+            persist_artifact=persist_artifact,
+        )
     
     @staticmethod
     def _coerce_str(val) -> str:
@@ -612,7 +708,59 @@ Focus on significant plot events, not minor actions. Include 5-15 events.
 
 JSON:"""
 
-        llm = LLMClient()
+        events, relations, _reason, _raw = self._extract_llm_once(
+            text,
+            source_book,
+            chunk_index=chunk_index,
+            model=None,
+        )
+        return events, relations
+
+    def _extract_llm_once(
+        self,
+        text: str,
+        source_book: str,
+        chunk_index: int = 0,
+        model: Optional[str] = None,
+    ) -> tuple[list[Event], list[EventRelation], str, str]:
+        # Limit text for prompt (should already be chunked but ensure limit)
+        text = text[:4000]
+
+        prompt = f"""Extract key events from this fantasy text. For each event identify:
+- description: Short description (e.g., "Bilbo found the Ring")
+- agent: Who did it (e.g., "Bilbo")
+- action: The verb/action (e.g., "found")
+- patient: What was acted upon (e.g., "the Ring")
+- year: Year if mentioned (e.g., 2941)
+- era: Age if mentioned (first_age, second_age, third_age, fourth_age)
+
+Also identify temporal relationships between events:
+- If one event clearly happened before another
+- If one event caused another
+
+Text:
+{text}
+
+Return JSON with two arrays:
+{{
+  "events": [
+    {{"id": "unique_id", "description": "...", "agent": "...", "action": "...", "patient": "...", "year": null, "era": null}},
+    ...
+  ],
+  "relations": [
+    {{"event1": "id1", "relation": "before", "event2": "id2"}},
+    ...
+  ]
+}}
+
+Focus on significant plot events, not minor actions. Include 5-15 events.
+
+JSON:"""
+
+        try:
+            llm = LLMClient(model=model)
+        except TypeError:
+            llm = LLMClient()
         logger.info(
             "Event extraction LLM provider=%s model=%s chunk=%d",
             getattr(llm, "provider", "unknown"),
@@ -694,13 +842,15 @@ JSON:"""
                     "LLM response did not contain valid JSON payload; skipping chunk=%d",
                     chunk_index,
                 )
+                return [], [], "malformed_json", response
         else:
             logger.warning(
                 "LLM request returned empty response; skipping chunk=%d",
                 chunk_index,
             )
+            return [], [], "empty_response", ""
 
-        return events, relations
+        return events, relations, "", response
     
     def _extract_patterns(self, text: str, source_book: str) -> list[Event]:
         """Extract events using pattern matching."""
