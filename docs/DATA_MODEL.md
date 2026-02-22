@@ -463,6 +463,12 @@ Additionally, entities link to their language forms:
 - `LanguageForm.entity_id` MUST be a canonical entity ID present in seeds/graph (`char_*`, `place_*`, `obj_*`).
 - `LanguageDerivation.source_form_id` / `target_form_id` MUST reference canonical `LanguageForm.id` values.
 - Gate metric: language-form → canonical-entity join success rate should remain >=95% (`bga worldbible languages-join-check --strict-namespace`).
+- Wave-B lineage density thresholds (`scripts/waveB_lineage_density.py`):
+  - Hobbit: >=8 lineages, >=18 forms, >=10 derivations
+  - Fellowship of the Ring: >=8 lineages, >=18 forms, >=10 derivations
+  - The Two Towers: >=8 lineages, >=18 forms, >=10 derivations
+  - The Return of the King: >=8 lineages, >=18 forms, >=10 derivations
+  - The Silmarillion: >=9 lineages, >=24 forms, >=14 derivations
 ```
 
 **Status:** ✅ Implemented (v1) — `GraphWriter.write_linguistic_lineage()`, `write_linguistic_lineage_batch()`, `query_linguistic_lineage()`

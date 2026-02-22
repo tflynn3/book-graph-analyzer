@@ -1,0 +1,480 @@
+{
+  "lineages": [
+    {
+      "entity_id": "char_frodo_baggins",
+      "forms": [
+        {
+          "id": "lf:char_frodo_baggins:frodo",
+          "form": "Frodo",
+          "language": "Common Speech",
+          "entity_id": "char_frodo_baggins",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "fellowship_of_ring"
+        },
+        {
+          "id": "lf:char_frodo_baggins:the-ring-bearer",
+          "form": "The Ring-Bearer",
+          "language": "Sindarin",
+          "entity_id": "char_frodo_baggins",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "fellowship_of_ring"
+        },
+        {
+          "id": "lf:char_frodo_baggins:ring-bearer",
+          "form": "Ring-Bearer",
+          "language": "Quenya",
+          "entity_id": "char_frodo_baggins",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "fellowship_of_ring"
+        }
+      ],
+      "derivations": [
+        {
+          "source_form_id": "lf:char_frodo_baggins:frodo",
+          "target_form_id": "lf:char_frodo_baggins:the-ring-bearer",
+          "derivation_type": "translation",
+          "notes": null
+        },
+        {
+          "source_form_id": "lf:char_frodo_baggins:frodo",
+          "target_form_id": "lf:char_frodo_baggins:ring-bearer",
+          "derivation_type": "adaptation",
+          "notes": null
+        }
+      ]
+    },
+    {
+      "entity_id": "char_gandalf",
+      "forms": [
+        {
+          "id": "lf:char_gandalf:gandalf",
+          "form": "Gandalf",
+          "language": "Common Speech",
+          "entity_id": "char_gandalf",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "fellowship_of_ring"
+        },
+        {
+          "id": "lf:char_gandalf:the-white",
+          "form": "The White",
+          "language": "Sindarin",
+          "entity_id": "char_gandalf",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "fellowship_of_ring"
+        },
+        {
+          "id": "lf:char_gandalf:the-grey",
+          "form": "The Grey",
+          "language": "Sindarin",
+          "entity_id": "char_gandalf",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "fellowship_of_ring"
+        }
+      ],
+      "derivations": [
+        {
+          "source_form_id": "lf:char_gandalf:gandalf",
+          "target_form_id": "lf:char_gandalf:the-white",
+          "derivation_type": "translation",
+          "notes": null
+        },
+        {
+          "source_form_id": "lf:char_gandalf:gandalf",
+          "target_form_id": "lf:char_gandalf:the-grey",
+          "derivation_type": "adaptation",
+          "notes": null
+        }
+      ]
+    },
+    {
+      "entity_id": "char_aragorn",
+      "forms": [
+        {
+          "id": "lf:char_aragorn:aragorn",
+          "form": "Aragorn",
+          "language": "Common Speech",
+          "entity_id": "char_aragorn",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "fellowship_of_ring"
+        },
+        {
+          "id": "lf:char_aragorn:strider",
+          "form": "Strider",
+          "language": "Quenya",
+          "entity_id": "char_aragorn",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "fellowship_of_ring"
+        },
+        {
+          "id": "lf:char_aragorn:elessar",
+          "form": "Elessar",
+          "language": "Quenya",
+          "entity_id": "char_aragorn",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "fellowship_of_ring"
+        }
+      ],
+      "derivations": [
+        {
+          "source_form_id": "lf:char_aragorn:aragorn",
+          "target_form_id": "lf:char_aragorn:strider",
+          "derivation_type": "translation",
+          "notes": null
+        },
+        {
+          "source_form_id": "lf:char_aragorn:aragorn",
+          "target_form_id": "lf:char_aragorn:elessar",
+          "derivation_type": "adaptation",
+          "notes": null
+        }
+      ]
+    },
+    {
+      "entity_id": "char_bilbo_baggins",
+      "forms": [
+        {
+          "id": "lf:char_bilbo_baggins:bilbo",
+          "form": "Bilbo",
+          "language": "Common Speech",
+          "entity_id": "char_bilbo_baggins",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "fellowship_of_ring"
+        },
+        {
+          "id": "lf:char_bilbo_baggins:bilbo-baggins",
+          "form": "Bilbo Baggins",
+          "language": "Quenya",
+          "entity_id": "char_bilbo_baggins",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "fellowship_of_ring"
+        },
+        {
+          "id": "lf:char_bilbo_baggins:mr-baggins",
+          "form": "Mr Baggins",
+          "language": "Quenya",
+          "entity_id": "char_bilbo_baggins",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "fellowship_of_ring"
+        }
+      ],
+      "derivations": [
+        {
+          "source_form_id": "lf:char_bilbo_baggins:bilbo",
+          "target_form_id": "lf:char_bilbo_baggins:bilbo-baggins",
+          "derivation_type": "translation",
+          "notes": null
+        },
+        {
+          "source_form_id": "lf:char_bilbo_baggins:bilbo",
+          "target_form_id": "lf:char_bilbo_baggins:mr-baggins",
+          "derivation_type": "adaptation",
+          "notes": null
+        }
+      ]
+    },
+    {
+      "entity_id": "obj_one_ring",
+      "forms": [
+        {
+          "id": "lf:obj_one_ring:the-ring",
+          "form": "The Ring",
+          "language": "Common Speech",
+          "entity_id": "obj_one_ring",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "fellowship_of_ring"
+        },
+        {
+          "id": "lf:obj_one_ring:the-one-ring",
+          "form": "The One Ring",
+          "language": "Sindarin",
+          "entity_id": "obj_one_ring",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "fellowship_of_ring"
+        },
+        {
+          "id": "lf:obj_one_ring:the-ruling-ring",
+          "form": "The Ruling Ring",
+          "language": "Sindarin",
+          "entity_id": "obj_one_ring",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "fellowship_of_ring"
+        }
+      ],
+      "derivations": [
+        {
+          "source_form_id": "lf:obj_one_ring:the-ring",
+          "target_form_id": "lf:obj_one_ring:the-one-ring",
+          "derivation_type": "translation",
+          "notes": null
+        },
+        {
+          "source_form_id": "lf:obj_one_ring:the-ring",
+          "target_form_id": "lf:obj_one_ring:the-ruling-ring",
+          "derivation_type": "adaptation",
+          "notes": null
+        }
+      ]
+    },
+    {
+      "entity_id": "char_samwise_gamgee",
+      "forms": [
+        {
+          "id": "lf:char_samwise_gamgee:sam",
+          "form": "Sam",
+          "language": "Common Speech",
+          "entity_id": "char_samwise_gamgee",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "fellowship_of_ring"
+        },
+        {
+          "id": "lf:char_samwise_gamgee:sam-gamgee",
+          "form": "Sam Gamgee",
+          "language": "Quenya",
+          "entity_id": "char_samwise_gamgee",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "fellowship_of_ring"
+        }
+      ],
+      "derivations": [
+        {
+          "source_form_id": "lf:char_samwise_gamgee:sam",
+          "target_form_id": "lf:char_samwise_gamgee:sam-gamgee",
+          "derivation_type": "translation",
+          "notes": null
+        }
+      ]
+    },
+    {
+      "entity_id": "char_tom_bombadil",
+      "forms": [
+        {
+          "id": "lf:char_tom_bombadil:tom",
+          "form": "Tom",
+          "language": "Common Speech",
+          "entity_id": "char_tom_bombadil",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "fellowship_of_ring"
+        },
+        {
+          "id": "lf:char_tom_bombadil:tom-bombadil",
+          "form": "Tom Bombadil",
+          "language": "Quenya",
+          "entity_id": "char_tom_bombadil",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "fellowship_of_ring"
+        }
+      ],
+      "derivations": [
+        {
+          "source_form_id": "lf:char_tom_bombadil:tom",
+          "target_form_id": "lf:char_tom_bombadil:tom-bombadil",
+          "derivation_type": "translation",
+          "notes": null
+        }
+      ]
+    },
+    {
+      "entity_id": "char_pippin",
+      "forms": [
+        {
+          "id": "lf:char_pippin:pippin",
+          "form": "Pippin",
+          "language": "Common Speech",
+          "entity_id": "char_pippin",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "fellowship_of_ring"
+        },
+        {
+          "id": "lf:char_pippin:peregrin",
+          "form": "Peregrin",
+          "language": "Quenya",
+          "entity_id": "char_pippin",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "fellowship_of_ring"
+        },
+        {
+          "id": "lf:char_pippin:the-thain",
+          "form": "The Thain",
+          "language": "Sindarin",
+          "entity_id": "char_pippin",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "fellowship_of_ring"
+        }
+      ],
+      "derivations": [
+        {
+          "source_form_id": "lf:char_pippin:pippin",
+          "target_form_id": "lf:char_pippin:peregrin",
+          "derivation_type": "translation",
+          "notes": null
+        },
+        {
+          "source_form_id": "lf:char_pippin:pippin",
+          "target_form_id": "lf:char_pippin:the-thain",
+          "derivation_type": "adaptation",
+          "notes": null
+        }
+      ]
+    },
+    {
+      "entity_id": "char_merry",
+      "forms": [
+        {
+          "id": "lf:char_merry:merry",
+          "form": "Merry",
+          "language": "Common Speech",
+          "entity_id": "char_merry",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "fellowship_of_ring"
+        },
+        {
+          "id": "lf:char_merry:meriadoc",
+          "form": "Meriadoc",
+          "language": "Quenya",
+          "entity_id": "char_merry",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "fellowship_of_ring"
+        },
+        {
+          "id": "lf:char_merry:meriadoc-brandybuck",
+          "form": "Meriadoc Brandybuck",
+          "language": "Sindarin",
+          "entity_id": "char_merry",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "fellowship_of_ring"
+        }
+      ],
+      "derivations": [
+        {
+          "source_form_id": "lf:char_merry:merry",
+          "target_form_id": "lf:char_merry:meriadoc",
+          "derivation_type": "translation",
+          "notes": null
+        },
+        {
+          "source_form_id": "lf:char_merry:merry",
+          "target_form_id": "lf:char_merry:meriadoc-brandybuck",
+          "derivation_type": "adaptation",
+          "notes": null
+        }
+      ]
+    },
+    {
+      "entity_id": "char_sauron",
+      "forms": [
+        {
+          "id": "lf:char_sauron:sauron",
+          "form": "Sauron",
+          "language": "Common Speech",
+          "entity_id": "char_sauron",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "fellowship_of_ring"
+        },
+        {
+          "id": "lf:char_sauron:the-enemy",
+          "form": "The Enemy",
+          "language": "Sindarin",
+          "entity_id": "char_sauron",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "fellowship_of_ring"
+        },
+        {
+          "id": "lf:char_sauron:the-eye",
+          "form": "The Eye",
+          "language": "Sindarin",
+          "entity_id": "char_sauron",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "fellowship_of_ring"
+        }
+      ],
+      "derivations": [
+        {
+          "source_form_id": "lf:char_sauron:sauron",
+          "target_form_id": "lf:char_sauron:the-enemy",
+          "derivation_type": "translation",
+          "notes": null
+        },
+        {
+          "source_form_id": "lf:char_sauron:sauron",
+          "target_form_id": "lf:char_sauron:the-eye",
+          "derivation_type": "adaptation",
+          "notes": null
+        }
+      ]
+    },
+    {
+      "entity_id": "char_galadriel",
+      "forms": [
+        {
+          "id": "lf:char_galadriel:galadriel",
+          "form": "Galadriel",
+          "language": "Common Speech",
+          "entity_id": "char_galadriel",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "fellowship_of_ring"
+        },
+        {
+          "id": "lf:char_galadriel:lady-galadriel",
+          "form": "Lady Galadriel",
+          "language": "Quenya",
+          "entity_id": "char_galadriel",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "fellowship_of_ring"
+        },
+        {
+          "id": "lf:char_galadriel:the-lady",
+          "form": "The Lady",
+          "language": "Sindarin",
+          "entity_id": "char_galadriel",
+          "gloss": null,
+          "phonetic": null,
+          "source_passage_id": "fellowship_of_ring"
+        }
+      ],
+      "derivations": [
+        {
+          "source_form_id": "lf:char_galadriel:galadriel",
+          "target_form_id": "lf:char_galadriel:lady-galadriel",
+          "derivation_type": "translation",
+          "notes": null
+        },
+        {
+          "source_form_id": "lf:char_galadriel:galadriel",
+          "target_form_id": "lf:char_galadriel:the-lady",
+          "derivation_type": "adaptation",
+          "notes": null
+        }
+      ]
+    }
+  ]
+}
