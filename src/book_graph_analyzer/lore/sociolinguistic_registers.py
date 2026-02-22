@@ -70,6 +70,69 @@ class CorpusRegisterProfile:
     avg_contraction_rate: float
     per_entity_latest: dict[str, RegisterProfile]
     strongest_drifts: list[RegisterDrift]
+    quality_gate: dict[str, object]
+
+
+@dataclass(frozen=True)
+class RegisterOutputThresholds:
+    min_character_samples: int = 2
+    min_register_families: int = 2
+    min_drift_events: int = 1
+
+
+def ground_character_entity_id(entity_id: str | None) -> str | None:
+    """Normalize + validate character entity ids.
+
+    Returns canonical `char_*` id for character-like inputs, else None.
+    """
+    if not entity_id:
+        return None
+    raw = str(entity_id).strip().lower()
+    if not raw:
+        return None
+
+    raw = raw.replace("-", "_")
+    known_non_character_prefixes = (
+        "place_",
+        "obj_",
+        "object_",
+        "event_",
+        "artifact_",
+        "rel_",
+        "edge_",
+    )
+    if raw.startswith(known_non_character_prefixes):
+        return None
+
+    if raw.startswith("char_"):
+        tail = re.sub(r"[^a-z0-9_]+", "_", raw[5:]).strip("_")
+        return f"char_{tail}" if tail else None
+
+    # Treat plain canonical names/ids as characters and normalize.
+    tail = re.sub(r"[^a-z0-9_]+", "_", raw).strip("_")
+    return f"char_{tail}" if tail else None
+
+
+def evaluate_corpus_quality_gate(
+    report: "CorpusRegisterProfile",
+    *,
+    thresholds: RegisterOutputThresholds | None = None,
+) -> dict[str, object]:
+    thresholds = thresholds or RegisterOutputThresholds()
+    checks = {
+        "character_samples": report.total_samples >= thresholds.min_character_samples,
+        "register_families": len(report.dominant_distribution) >= thresholds.min_register_families,
+        "drift_events": len(report.strongest_drifts) >= thresholds.min_drift_events,
+    }
+    return {
+        "passed": all(checks.values()),
+        "checks": checks,
+        "thresholds": {
+            "min_character_samples": thresholds.min_character_samples,
+            "min_register_families": thresholds.min_register_families,
+            "min_drift_events": thresholds.min_drift_events,
+        },
+    }
 
 
 class SociolinguisticRegisterClassifier:
@@ -167,6 +230,8 @@ def detect_register_drift(baseline: RegisterProfile, current: RegisterProfile) -
 def profile_corpus_registers(
     samples: list[dict],
     classifier: SociolinguisticRegisterClassifier | None = None,
+    *,
+    thresholds: RegisterOutputThresholds | None = None,
 ) -> CorpusRegisterProfile:
     """Build corpus-wide sociolinguistic register profile and drift summary.
 
@@ -179,12 +244,14 @@ def profile_corpus_registers(
 
     for idx, sample in enumerate(samples):
         text = str(sample.get("text", "") or "")
+        grounded_entity_id = ground_character_entity_id(sample.get("entity_id"))
+        if not grounded_entity_id:
+            continue
+
         profile = classifier.classify(text)
         profiles.append(profile)
         dominant_counter[profile.dominant_register] += 1
-        entity_id = sample.get("entity_id")
-        if entity_id:
-            per_entity[str(entity_id)].append((int(sample.get("order", idx)), profile))
+        per_entity[grounded_entity_id].append((int(sample.get("order", idx)), profile))
 
     strongest_drifts: list[RegisterDrift] = []
     latest: dict[str, RegisterProfile] = {}
@@ -201,7 +268,7 @@ def profile_corpus_registers(
     )
 
     total = len(profiles)
-    return CorpusRegisterProfile(
+    report = CorpusRegisterProfile(
         total_samples=total,
         dominant_distribution=dict(dominant_counter),
         avg_formality=round(sum(p.formality_score for p in profiles) / total, 4) if total else 0.0,
@@ -209,7 +276,10 @@ def profile_corpus_registers(
         avg_contraction_rate=round(sum(p.contraction_rate for p in profiles) / total, 4) if total else 0.0,
         per_entity_latest=latest,
         strongest_drifts=strongest_drifts[:20],
+        quality_gate={},
     )
+    report.quality_gate = evaluate_corpus_quality_gate(report, thresholds=thresholds)
+    return report
 
 
 def load_socioreg_samples_json(path: str) -> list[dict]:

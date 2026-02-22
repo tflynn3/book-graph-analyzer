@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING
 from collections import Counter
 
 from .models import ConflictType, SpatiotemporalEvent, TimelineConflict
+from .grounding import compute_temporal_grounding_metrics
 
 if TYPE_CHECKING:
     from .confidence import CalibrationResult
@@ -72,6 +73,19 @@ class ReconciliationReport:
         lines.append("")
 
         if self.events:
+            metrics = compute_temporal_grounding_metrics(self.events)
+            lines.extend([
+                "--- TEMPORAL GROUNDING ---", "",
+                f"  Grounded events: {metrics.grounded_events}/{metrics.total_events} ({metrics.grounded_ratio:.1%})",
+                f"  Era coverage:    {metrics.era_grounded_events}/{metrics.total_events} ({metrics.era_ratio:.1%})",
+                (
+                    "  Year/interval coverage: "
+                    f"{metrics.year_or_interval_grounded_events}/{metrics.total_events} "
+                    f"({metrics.year_or_interval_ratio:.1%})"
+                ),
+                "",
+            ])
+
             lines.extend(["--- SOURCE ATTRIBUTION ---", ""])
             for source, count in self.source_counts.items():
                 lines.append(f"  {source}: {count} event(s)")
@@ -139,6 +153,7 @@ class ReconciliationReport:
     def to_dict(self) -> dict:
         d: dict = {
             "events_analyzed": len(self.events),
+            "temporal_grounding": compute_temporal_grounding_metrics(self.events).to_dict(),
             "total_conflicts": len(self.conflicts),
             "errors": self.error_count,
             "warnings": self.warning_count,

@@ -2,6 +2,7 @@
 
 from typing import Iterator
 from collections import defaultdict
+import re
 
 from neo4j import Driver
 
@@ -877,6 +878,7 @@ class GraphWriter:
                 "agent": e.agent,
                 "action": e.action,
                 "patient": e.patient,
+                "source_text": e.source_text,
                 "era": e.era.value if e.era else None,
                 "year": e.year,
                 "confidence": e.confidence,
@@ -891,6 +893,7 @@ class GraphWriter:
             e.agent = item.agent,
             e.action = item.action,
             e.patient = item.patient,
+            e.source_text = item.source_text,
             e.era = item.era,
             e.year = item.year,
             e.source_book = $book,
@@ -967,43 +970,33 @@ class GraphWriter:
         """
         links = 0
 
-        if event.agent:
-            # Try to find matching character
-            query = """
-            MATCH (c:Character)
-            WHERE toLower(c.canonical_name) CONTAINS toLower($name)
-               OR toLower(c.name) CONTAINS toLower($name)
-            WITH c LIMIT 1
-            MATCH (e:Event {id: $event_id})
-            MERGE (c)-[r:PARTICIPATED_IN]->(e)
-            SET r.role = 'agent'
-            RETURN count(r) as cnt
-            """
-            with self.driver.session() as session:
-                result = session.run(query, name=event.agent, event_id=event.id)
-                record = result.single()
-                if record:
-                    links += record["cnt"]
+        links += self._link_event_role(
+            event_id=event.id,
+            raw_value=event.agent,
+            labels=["Character"],
+            rel_type="PARTICIPATED_IN",
+            role="agent",
+        )
 
-        if event.patient:
-            # Try to find matching entity (could be character, place, or object)
-            for label in ["Character", "Place", "Object"]:
-                query = f"""
-                MATCH (n:{label})
-                WHERE toLower(n.canonical_name) CONTAINS toLower($name)
-                   OR toLower(n.name) CONTAINS toLower($name)
-                WITH n LIMIT 1
-                MATCH (e:Event {{id: $event_id}})
-                MERGE (n)-[r:INVOLVED_IN]->(e)
-                SET r.role = 'patient'
-                RETURN count(r) as cnt
-                """
-                with self.driver.session() as session:
-                    result = session.run(query, name=event.patient, event_id=event.id)
-                    record = result.single()
-                    if record and record["cnt"] > 0:
-                        links += record["cnt"]
-                        break  # Found a match, stop looking
+        # Patient may be Character / Place / Object. Choose one best hit only.
+        links += self._link_event_role(
+            event_id=event.id,
+            raw_value=event.patient,
+            labels=["Character", "Place", "Object"],
+            rel_type="INVOLVED_IN",
+            role="patient",
+        )
+
+        # Conservative place cue fallback from event prose if no explicit patient match.
+        if not event.patient and (event.description or event.source_text):
+            cue_text = f"{event.description or ''} {event.source_text or ''}".strip()
+            links += self._link_event_role(
+                event_id=event.id,
+                raw_value=cue_text,
+                labels=["Place"],
+                rel_type="TOOK_PLACE_AT",
+                role="location_cue",
+            )
 
         return links
 
@@ -1585,6 +1578,12 @@ class GraphWriter:
         source_passage_id: str | None = None,
     ) -> None:
         """Persist the current sociolinguistic register profile for an entity."""
+        from ..lore.sociolinguistic_registers import ground_character_entity_id
+
+        entity_id = ground_character_entity_id(entity_id)
+        if not entity_id:
+            raise ValueError("Register profiles require a canonical character entity id")
+
         with self.driver.session() as session:
             session.run(
                 """
@@ -1620,6 +1619,12 @@ class GraphWriter:
         source_passage_id: str | None = None,
     ) -> None:
         """Write a time-stamped register observation for later drift analysis."""
+        from ..lore.sociolinguistic_registers import ground_character_entity_id
+
+        entity_id = ground_character_entity_id(entity_id)
+        if not entity_id:
+            raise ValueError("Register observations require a canonical character entity id")
+
         with self.driver.session() as session:
             session.run(
                 """
@@ -1659,6 +1664,12 @@ class GraphWriter:
         limit: int = 20,
     ) -> list[dict]:
         """Query consecutive register observations and calculate drift deltas."""
+        from ..lore.sociolinguistic_registers import ground_character_entity_id
+
+        entity_id = ground_character_entity_id(entity_id)
+        if not entity_id:
+            return []
+
         with self.driver.session() as session:
             result = session.run(
                 """
@@ -1707,6 +1718,12 @@ class GraphWriter:
         source_passage_id: str | None = None,
     ) -> None:
         """Persist the current sociolinguistic register profile for an entity."""
+        from ..lore.sociolinguistic_registers import ground_character_entity_id
+
+        entity_id = ground_character_entity_id(entity_id)
+        if not entity_id:
+            raise ValueError("Register profiles require a canonical character entity id")
+
         with self.driver.session() as session:
             session.run(
                 """
@@ -1742,6 +1759,12 @@ class GraphWriter:
         source_passage_id: str | None = None,
     ) -> None:
         """Write a time-stamped register observation for later drift analysis."""
+        from ..lore.sociolinguistic_registers import ground_character_entity_id
+
+        entity_id = ground_character_entity_id(entity_id)
+        if not entity_id:
+            raise ValueError("Register observations require a canonical character entity id")
+
         with self.driver.session() as session:
             session.run(
                 """
@@ -1781,6 +1804,12 @@ class GraphWriter:
         limit: int = 20,
     ) -> list[dict]:
         """Query consecutive register observations and calculate drift deltas."""
+        from ..lore.sociolinguistic_registers import ground_character_entity_id
+
+        entity_id = ground_character_entity_id(entity_id)
+        if not entity_id:
+            return []
+
         with self.driver.session() as session:
             result = session.run(
                 """
@@ -1824,6 +1853,12 @@ class GraphWriter:
         limit: int = 25,
     ) -> list[dict]:
         """Return recent register observations for an entity."""
+        from ..lore.sociolinguistic_registers import ground_character_entity_id
+
+        entity_id = ground_character_entity_id(entity_id)
+        if not entity_id:
+            return []
+
         with self.driver.session() as session:
             result = session.run(
                 """
@@ -1850,6 +1885,19 @@ class GraphWriter:
         limit: int = 100,
     ) -> dict:
         """Summarize drift counts and strongest transition for reporting."""
+        from ..lore.sociolinguistic_registers import ground_character_entity_id
+
+        entity_id = ground_character_entity_id(entity_id)
+        if not entity_id:
+            return {
+                "entity_id": None,
+                "drift_count": 0,
+                "high": 0,
+                "medium": 0,
+                "low": 0,
+                "strongest": None,
+            }
+
         drifts = self.query_register_drift(entity_id=entity_id, min_delta=min_delta, limit=limit)
         if not drifts:
             return {
@@ -2355,3 +2403,107 @@ class GraphWriter:
             for record in session.run(query, source_a=source_a, source_b=source_b, limit=limit):
                 results.append(dict(record))
         return results
+    _STOPWORDS = {
+        "the", "a", "an", "of", "and", "or", "to", "for", "in", "on", "at", "by", "with",
+        "from", "into", "onto", "upon", "his", "her", "their", "its", "him", "them",
+    }
+
+    @staticmethod
+    def _normalize_entity_text(value: str | None) -> str:
+        if not value:
+            return ""
+        text = value.lower().strip()
+        text = re.sub(r"[\"'`]+", "", text)
+        text = re.sub(r"[^a-z0-9\s-]", " ", text)
+        text = re.sub(r"\s+", " ", text).strip()
+        return text
+
+    @classmethod
+    def _meaningful_tokens(cls, value: str | None) -> list[str]:
+        text = cls._normalize_entity_text(value)
+        if not text:
+            return []
+        return [t for t in text.split(" ") if t and t not in cls._STOPWORDS and len(t) > 2]
+
+    @classmethod
+    def _expand_candidate_strings(cls, value: str | None) -> list[str]:
+        """Generate conservative candidate strings for entity matching."""
+        text = cls._normalize_entity_text(value)
+        if not text:
+            return []
+
+        variants = {text}
+        # Split simple conjunction/apposition forms: "Bilbo and dwarves", "Bilbo, Gandalf"
+        for part in re.split(r"\b(?:and|or)\b|,|/", text):
+            p = part.strip()
+            if p:
+                variants.add(p)
+
+        # Add compact token-only variants for noisy spans
+        tokens = cls._meaningful_tokens(text)
+        if len(tokens) >= 2:
+            variants.add(" ".join(tokens))
+        for t in tokens:
+            variants.add(t)
+
+        # Prefer longer strings first for better precision
+        return sorted((v for v in variants if v), key=len, reverse=True)
+
+    def _link_event_role(
+        self,
+        *,
+        event_id: str,
+        raw_value: str | None,
+        labels: list[str],
+        rel_type: str,
+        role: str,
+    ) -> int:
+        """Link one event role to a best-matching canonical entity.
+
+        Returns 1 when a link exists after MERGE, else 0.
+        """
+        candidates = self._expand_candidate_strings(raw_value)
+        if not candidates:
+            return 0
+
+        query = f"""
+        MATCH (e:Event {{id: $event_id}})
+        WITH e, [c IN $candidates WHERE c IS NOT NULL AND trim(c) <> ''] AS candidates
+        UNWIND candidates AS cand
+        MATCH (n)
+        WHERE any(lbl IN $labels WHERE lbl IN labels(n))
+        WITH e, n, cand,
+             toLower(coalesce(n.canonical_name, n.name, '')) AS cname,
+             [a IN coalesce(n.aliases, []) | toLower(a)] AS aliases
+        WHERE cname <> ''
+          AND (
+            cname = cand
+            OR cand IN aliases
+            OR cname CONTAINS cand
+            OR cand CONTAINS cname
+            OR any(a IN aliases WHERE a CONTAINS cand OR cand CONTAINS a)
+          )
+        WITH e, n, cand,
+             CASE
+               WHEN cname = cand OR cand IN aliases THEN 100
+               WHEN any(a IN aliases WHERE a = cand) THEN 95
+               WHEN cname CONTAINS cand OR cand CONTAINS cname THEN 70
+               ELSE 50
+             END AS score,
+             size(cname) AS name_len
+        ORDER BY score DESC, name_len DESC
+        LIMIT 1
+        MERGE (n)-[r:{rel_type}]->(e)
+        SET r.role = $role
+        RETURN count(r) AS cnt
+        """
+
+        with self.driver.session() as session:
+            row = session.run(
+                query,
+                event_id=event_id,
+                candidates=candidates,
+                labels=labels,
+                role=role,
+            ).single()
+            return int(row["cnt"]) if row else 0

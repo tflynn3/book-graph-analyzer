@@ -4,9 +4,11 @@ from click.testing import CliRunner
 
 
 from book_graph_analyzer.lore.sociolinguistic_registers import (
+    RegisterOutputThresholds,
     SociolinguisticRegister,
     SociolinguisticRegisterClassifier,
     detect_register_drift,
+    ground_character_entity_id,
     profile_corpus_registers,
 )
 
@@ -53,6 +55,27 @@ def test_profile_corpus_registers_builds_distribution_and_drifts():
     assert sum(report.dominant_distribution.values()) == 3
     assert "char_frodo" in report.per_entity_latest
     assert isinstance(report.strongest_drifts, list)
+
+
+def test_ground_character_entity_id_enforces_character_only():
+    assert ground_character_entity_id("char_Aragorn") == "char_aragorn"
+    assert ground_character_entity_id("Aragorn") == "char_aragorn"
+    assert ground_character_entity_id("place_bree") is None
+
+
+def test_profile_corpus_registers_filters_non_characters_and_sets_quality_gate():
+    report = profile_corpus_registers(
+        [
+            {"entity_id": "char_frodo", "order": 1, "text": "bread and ale"},
+            {"entity_id": "Frodo", "order": 2, "text": "sacred oath and banner"},
+            {"entity_id": "place_bree", "order": 1, "text": "the road to Bree"},
+        ],
+        thresholds=RegisterOutputThresholds(min_character_samples=2, min_register_families=1, min_drift_events=1),
+    )
+    assert report.total_samples == 2
+    assert "char_frodo" in report.per_entity_latest
+    assert "place_bree" not in report.per_entity_latest
+    assert report.quality_gate["passed"] is True
 
 
 class TestGraphWriterSocioreg:
@@ -119,6 +142,15 @@ class TestGraphWriterSocioreg:
         assert summary["entity_id"] == "char_aragorn"
         assert summary["drift_count"] == 1
         assert summary["strongest"] is not None
+
+    def test_write_profile_rejects_non_character_entity(self):
+        writer, _session = self._make_writer()
+        profile = SociolinguisticRegisterClassifier().classify("The captain gave command.")
+
+        import pytest
+
+        with pytest.raises(ValueError):
+            writer.write_register_profile("place_bree", profile, source_passage_id="p1")
 
 
 def test_cli_commands_registered_and_run():

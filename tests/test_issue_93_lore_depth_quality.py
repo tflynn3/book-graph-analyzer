@@ -1,0 +1,61 @@
+from click.testing import CliRunner
+
+
+def test_candidate_linking_audit_buckets_classify_unresolved_refs():
+    from book_graph_analyzer.lore.depth import (
+        build_candidate_linking_audit_buckets,
+        extract_lore_depth,
+        link_broken_reference_candidates,
+    )
+
+    text = "[[the Enemy]] met [[zzz unknown token]] near the pass."
+    result = extract_lore_depth(text, source_book="The Silmarillion", passage_id="p93-1")
+    link_broken_reference_candidates(result.broken_references, book="The Silmarillion")
+
+    buckets = build_candidate_linking_audit_buckets(result.broken_references)
+
+    assert "no_candidates" in buckets
+    assert "high_confidence_top_candidate" in buckets
+    assert sum(len(v) for v in buckets.values()) == len(result.unresolved_queue)
+
+
+def test_unresolved_quality_gate_reports_failures_when_coverage_low():
+    from book_graph_analyzer.lore.depth import evaluate_unresolved_quality_gates, extract_lore_depth
+
+    # Deliberately no candidate linking pass to keep candidate coverage low.
+    result = extract_lore_depth("[[mystery sigil]]", source_book="LOTR", passage_id="p93-2", context_window=2)
+
+    report = evaluate_unresolved_quality_gates(
+        result.broken_references,
+        min_context_coverage=1.0,
+        min_candidate_coverage=1.0,
+    )
+
+    assert report["passed"] is False
+    assert report["summary"]["total_unresolved"] == 1
+    assert report["failures"]["no_candidates"]
+
+
+def test_cli_worldbible_artifacts_fails_when_quality_gate_fails(tmp_path):
+    from book_graph_analyzer.cli import main
+
+    text_path = tmp_path / "quality_fail.txt"
+    text_path.write_text("[[mystery sigil]]", encoding="utf-8")
+
+    runner = CliRunner()
+    result = runner.invoke(
+        main,
+        [
+            "worldbible",
+            "artifacts",
+            str(text_path),
+            "--no-link-candidates",
+            "--min-context-coverage",
+            "1.0",
+            "--min-candidate-coverage",
+            "1.0",
+        ],
+    )
+
+    assert result.exit_code == 2
+    assert "Quality gate:" in result.output

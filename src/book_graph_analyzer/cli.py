@@ -3292,6 +3292,7 @@ def lore_socioreg_corpus(input_path: str, top_drifts: int, as_json: bool) -> Non
             "avg_formality": report.avg_formality,
             "avg_archaism_rate": report.avg_archaism_rate,
             "avg_contraction_rate": report.avg_contraction_rate,
+            "quality_gate": report.quality_gate,
             "top_drifts": [
                 {
                     "baseline_register": d.baseline_register,
@@ -3311,6 +3312,9 @@ def lore_socioreg_corpus(input_path: str, top_drifts: int, as_json: bool) -> Non
     console.print(f"  Avg formality: {report.avg_formality:.3f}")
     console.print(f"  Avg archaism rate: {report.avg_archaism_rate:.3f}")
     console.print(f"  Avg contraction rate: {report.avg_contraction_rate:.3f}")
+    gate = report.quality_gate
+    gate_color = "green" if gate.get("passed") else "red"
+    console.print(f"  Quality gate: [{gate_color}]{'PASS' if gate.get('passed') else 'FAIL'}[/{gate_color}] (character-only grounded samples)")
 
     table = Table(show_header=True, header_style="bold")
     table.add_column("Register", style="cyan")
@@ -4292,11 +4296,23 @@ def lore_timeline_reconcile(events_file: str, locations: str | None, output: str
               help="Use LLM-assisted causal link extraction (falls back to heuristic)")
 @click.option("--calibrate", is_flag=True,
               help="Apply source authority confidence calibration")
+@click.option("--enforce-grounding-gate", is_flag=True,
+              help="Fail if temporal grounding coverage is below thresholds")
+@click.option("--min-grounded-ratio", default=0.85, show_default=True, type=float,
+              help="Min ratio of events with era or year/interval")
+@click.option("--min-era-ratio", default=0.80, show_default=True, type=float,
+              help="Min ratio of events with canonical era")
+@click.option("--min-year-ratio", default=0.05, show_default=True, type=float,
+              help="Min ratio of events with year/interval")
 def lore_timeline_bridge(
     events_file: str, locations: str | None, seed_locations: bool,
     output: str | None, fmt: str, source_book: str | None,
     write_neo4j: bool = False, causal_links: bool = False,
     use_llm: bool = False, calibrate: bool = False,
+    enforce_grounding_gate: bool = False,
+    min_grounded_ratio: float = 0.85,
+    min_era_ratio: float = 0.80,
+    min_year_ratio: float = 0.05,
 ) -> None:
     """Bridge extracted events through spatiotemporal normalization and reconcile.
 
@@ -4324,6 +4340,7 @@ def lore_timeline_bridge(
         ConflictDetector, ReconciliationReport,
         LocationNode, LocationEdge, ExtractionBridge,
         extract_causal_links,
+        TemporalGroundingGate,
         calibrate_event_confidence,
         calibrate_causal_link_confidence,
         calibrate_conflict_confidence,
@@ -4466,6 +4483,21 @@ def lore_timeline_bridge(
             console.print(f"\n[bold yellow]{report.summary_line()}[/bold yellow]")
     else:
         console.print(f"\n[bold green]{report.summary_line()}[/bold green]")
+
+    if enforce_grounding_gate:
+        gate = TemporalGroundingGate(
+            min_grounded_ratio=min_grounded_ratio,
+            min_era_ratio=min_era_ratio,
+            min_year_or_interval_ratio=min_year_ratio,
+        )
+        gate_result = gate.evaluate(st_events)
+        if gate_result.passed:
+            console.print("[bold green]Temporal grounding gate: PASS[/bold green]")
+        else:
+            console.print("[bold red]Temporal grounding gate: FAIL[/bold red]")
+            for failure in gate_result.failures:
+                console.print(f"  - {failure}")
+            raise SystemExit(2)
 
 
 @lore.command(name="timeline-conflicts")
@@ -6021,6 +6053,12 @@ def worldbible_languages(bible_path: str, entity: str | None, write_graph: bool)
               help="Attach resolver-backed candidate links to unresolved refs")
 @click.option("--llm-fallback", is_flag=True,
               help="Optional model-assisted unresolved-reference fallback")
+@click.option("--quality-gate/--no-quality-gate", default=True,
+              help="Evaluate unresolved-reference precision/quality gates")
+@click.option("--min-context-coverage", default=0.85, show_default=True, type=float,
+              help="Required unresolved refs coverage with usable context")
+@click.option("--min-candidate-coverage", default=0.60, show_default=True, type=float,
+              help="Required unresolved refs coverage with >=1 candidate link")
 def worldbible_artifacts(
     path: str,
     book: str | None,
@@ -6029,9 +6067,16 @@ def worldbible_artifacts(
     context_window: int,
     link_candidates: bool,
     llm_fallback: bool,
+    quality_gate: bool,
+    min_context_coverage: float,
+    min_candidate_coverage: float,
 ) -> None:
     """Extract lore artifacts and broken references from raw text."""
-    from book_graph_analyzer.lore.depth import extract_lore_depth, link_broken_reference_candidates
+    from book_graph_analyzer.lore.depth import (
+        extract_lore_depth,
+        link_broken_reference_candidates,
+        evaluate_unresolved_quality_gates,
+    )
 
     file_path = Path(path)
     text = file_path.read_text(encoding="utf-8", errors="replace")
@@ -6055,9 +6100,27 @@ def worldbible_artifacts(
     if link_candidates:
         link_broken_reference_candidates(result.broken_references, book=source_book)
 
+    quality_report = None
+    if quality_gate:
+        quality_report = evaluate_unresolved_quality_gates(
+            result.broken_references,
+            min_context_coverage=min_context_coverage,
+            min_candidate_coverage=min_candidate_coverage,
+        )
+
     console.print(f"[bold]Lore depth extraction:[/bold] {file_path.name}")
     console.print(f"  Artifacts: [green]{len(result.artifacts)}[/green]")
     console.print(f"  Unresolved refs: [yellow]{len(result.broken_references)}[/yellow]")
+    if quality_report:
+        summary = quality_report["summary"]
+        passed = quality_report["passed"]
+        status = "[green]PASS[/green]" if passed else "[red]FAIL[/red]"
+        console.print(
+            "  Quality gate: "
+            f"{status} "
+            f"(context={summary['context_coverage']:.2f}/{summary['min_context_coverage']:.2f}, "
+            f"candidates={summary['candidate_coverage']:.2f}/{summary['min_candidate_coverage']:.2f})"
+        )
 
     if result.artifacts:
         table = Table(title="Artifacts", show_lines=False)
@@ -6074,6 +6137,8 @@ def worldbible_artifacts(
             "artifacts": [a.model_dump() for a in result.artifacts],
             "broken_references": [b.model_dump() for b in result.broken_references],
         }
+        if quality_report is not None:
+            data["quality_gate"] = quality_report
         Path(output).write_text(json.dumps(data, indent=2), encoding="utf-8")
         console.print(f"[green]OK[/green] Saved to {output}")
 
@@ -6084,6 +6149,9 @@ def worldbible_artifacts(
         b_count = writer.write_broken_references_batch(result.broken_references)
         writer.close()
         console.print(f"[green]OK[/green] Wrote {a_count} artifacts and {b_count} unresolved references to Neo4j")
+
+    if quality_report and not quality_report["passed"]:
+        raise SystemExit(2)
 
 
 @lore.command(name="unresolved-refs")
@@ -6264,9 +6332,16 @@ def lore_genealogy(
               help="Extract causal link candidates (default: on)")
 @click.option("--write-neo4j", is_flag=True,
               help="Persist results to Neo4j")
+@click.option("--enforce-grounding-gate", is_flag=True,
+              help="Fail if temporal grounding coverage is below thresholds")
+@click.option("--min-grounded-ratio", default=0.85, show_default=True, type=float)
+@click.option("--min-era-ratio", default=0.80, show_default=True, type=float)
+@click.option("--min-year-ratio", default=0.05, show_default=True, type=float)
 def corpus_timeline_reconcile(
     corpus_name: str, events_dir: str | None, locations: str | None,
     output: str | None, fmt: str, causal_links: bool, write_neo4j: bool,
+    enforce_grounding_gate: bool, min_grounded_ratio: float,
+    min_era_ratio: float, min_year_ratio: float,
 ) -> None:
     """Reconcile timelines across all books in a corpus.
 
@@ -6284,6 +6359,7 @@ def corpus_timeline_reconcile(
     from book_graph_analyzer.corpus import CorpusManager
     from book_graph_analyzer.spatiotemporal import (
         CorpusReconciler, LocationNode, LocationEdge, SpatiotemporalEvent,
+        TemporalGroundingGate,
     )
 
     manager = CorpusManager(corpus_name)
@@ -6379,6 +6455,22 @@ def corpus_timeline_reconcile(
         else:
             console.print(text)
 
+    if enforce_grounding_gate:
+        gate = TemporalGroundingGate(
+            min_grounded_ratio=min_grounded_ratio,
+            min_era_ratio=min_era_ratio,
+            min_year_or_interval_ratio=min_year_ratio,
+        )
+        all_events = [e for b in result.books for e in b.events]
+        gate_result = gate.evaluate(all_events)
+        if gate_result.passed:
+            console.print("[bold green]Temporal grounding gate: PASS[/bold green]")
+        else:
+            console.print("[bold red]Temporal grounding gate: FAIL[/bold red]")
+            for failure in gate_result.failures:
+                console.print(f"  - {failure}")
+            raise SystemExit(2)
+
 
 @corpus.command(name="timeline-divergence")
 @click.option("--source-a", default="", help="Compare conflicts involving source A")
@@ -6430,11 +6522,25 @@ def corpus_timeline_divergence(source_a: str, source_b: str, min_sources: int, l
 @click.option("--show-authority", "-a", is_flag=True, help="Show authority weights")
 @click.option("--tag-strata", is_flag=True, help="Apply inferred source/stratum metadata to corpus passage JSON files")
 @click.option("--report-divergence", is_flag=True, help="Run basic cross-strata divergence report from tagged passage JSON")
-def corpus_sources(corpus_name: str, show_authority: bool, tag_strata: bool, report_divergence: bool) -> None:
+@click.option("--max-missing-provenance-ratio", default=0.05, show_default=True, type=float,
+              help="Fail divergence reporting if claim-bearing passages exceed this missing provenance ratio")
+@click.option("--min-authority", default=0.0, show_default=True, type=float,
+              help="Minimum allowed source authority weight for claim-bearing passages")
+def corpus_sources(
+    corpus_name: str,
+    show_authority: bool,
+    tag_strata: bool,
+    report_divergence: bool,
+    max_missing_provenance_ratio: float,
+    min_authority: float,
+) -> None:
     """Show editorial source layers for a corpus."""
     from book_graph_analyzer.models.worldbuilding import TOLKIEN_SOURCES, infer_editorial_layer
     from book_graph_analyzer.models.passage import Passage
-    from book_graph_analyzer.worldbible.editorial import detect_editorial_divergences
+    from book_graph_analyzer.worldbible.editorial import (
+        detect_editorial_divergences,
+        validate_editorial_provenance,
+    )
 
     corpus_dir = Path("data") / "corpora" / corpus_name
     candidates: list[str] = []
@@ -6495,10 +6601,56 @@ def corpus_sources(corpus_name: str, show_authority: bool, tag_strata: bool, rep
                 passages.append(Passage(**row))
             except Exception:
                 continue
+
+        validation = validate_editorial_provenance(
+            passages,
+            max_missing_ratio=max_missing_provenance_ratio,
+            min_authority_weight=min_authority,
+        )
+        if not validation.is_valid:
+            raise click.ClickException(
+                "Editorial divergence report gated: provenance validation failed "
+                f"(checked={validation.checked_count}, missing={validation.missing_count}, "
+                f"missing_ratio={validation.missing_ratio:.2%}, "
+                f"invalid_authority={validation.invalid_authority_count})."
+            )
+
         divergences = detect_editorial_divergences(passages)
         console.print(f"\n[bold]Editorial divergence signals:[/bold] {len(divergences)}")
         for d in divergences[:15]:
             console.print(f"  [{d.kind}] {d.signal} (conf={d.confidence:.2f}, passages={len(d.involved_passage_ids)})")
+
+        out_path = Path("data") / "output" / f"{corpus_name}_editorial_divergence_report.json"
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        with open(out_path, "w", encoding="utf-8") as f:
+            json.dump(
+                {
+                    "provenance_validation": {
+                        "checked_count": validation.checked_count,
+                        "missing_count": validation.missing_count,
+                        "missing_ratio": round(validation.missing_ratio, 4),
+                        "invalid_authority_count": validation.invalid_authority_count,
+                        "max_missing_ratio": validation.max_missing_ratio,
+                        "min_authority_weight": validation.min_authority_weight,
+                        "is_valid": validation.is_valid,
+                    },
+                    "divergence_count": len(divergences),
+                    "divergences": [
+                        {
+                            "kind": d.kind,
+                            "signal": d.signal,
+                            "key": d.key,
+                            "involved_passage_ids": d.involved_passage_ids,
+                            "involved_sources": d.involved_sources,
+                            "confidence": d.confidence,
+                        }
+                        for d in divergences
+                    ],
+                },
+                f,
+                indent=2,
+            )
+        console.print(f"[green]OK[/green] Saved divergence artifact: {out_path}")
 
 
 @pipeline.command(name="worldbuilding")
