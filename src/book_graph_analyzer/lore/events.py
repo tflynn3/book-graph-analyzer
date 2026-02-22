@@ -13,6 +13,7 @@ from pathlib import Path
 from dataclasses import dataclass, field
 from typing import Optional
 from collections import defaultdict
+from concurrent.futures import ThreadPoolExecutor, as_completed
 
 from ..llm import LLMClient
 from ..extract.resilient_chunk_runner import (
@@ -310,6 +311,8 @@ class EventExtractor:
         checkpoint_file: Optional[str] = None,
         resilient: bool = False,
         fallback_model: Optional[str] = None,
+        parallel_workers: int = 1,
+        max_inflight: Optional[int] = None,
     ) -> EventGraph:
         """Extract events from a full book using chunked processing.
         
@@ -365,34 +368,55 @@ class EventExtractor:
                 all_relations=all_relations,
                 fallback_model=fallback_model,
                 total_chunks=total_chunks,
+                parallel_workers=parallel_workers,
+                max_inflight=max_inflight,
             )
         else:
-            for i, chunk in enumerate(chunks):
-            # Skip already processed chunks
-                if i < start_chunk:
-                    continue
-                
-                if self.progress_callback:
-                    self.progress_callback(i + 1, total_chunks, f"Processing chunk {i + 1}/{total_chunks}")
-            
-            # Simple progress print every 10 chunks (visible even without Rich)
-                if (i + 1) % 10 == 0 or i == start_chunk:
-                    print(f"  [chunk {i + 1}/{total_chunks}]", flush=True)
-            
-                events, relations = self._extract_llm(chunk, source_book, chunk_index=i)
-            
-                for event in events:
-                # Deduplicate based on normalized description
-                    event_key = self._normalize_event_key(event)
-                    if event_key not in self._seen_events:
-                        self._seen_events.add(event_key)
-                        all_events.append(event)
-            
-                all_relations.extend(relations)
-            
-            # Save checkpoint after each chunk
-                if checkpoint_file:
-                    self._save_checkpoint(checkpoint_file, i + 1, total_chunks, all_events, all_relations)
+            pending = [(i, chunk) for i, chunk in enumerate(chunks) if i >= start_chunk]
+            if parallel_workers > 1 and self.use_llm:
+                max_inflight = max(1, max_inflight or parallel_workers)
+                in_flight = {}
+                chunk_payloads: dict[int, tuple[list[Event], list[EventRelation]]] = {}
+                with ThreadPoolExecutor(max_workers=parallel_workers) as pool:
+                    pending_iter = iter(pending)
+                    while True:
+                        while len(in_flight) < max_inflight:
+                            try:
+                                i, chunk = next(pending_iter)
+                            except StopIteration:
+                                break
+                            if self.progress_callback:
+                                self.progress_callback(i + 1, total_chunks, f"Processing chunk {i + 1}/{total_chunks}")
+                            in_flight[pool.submit(self._extract_llm, chunk, source_book, i)] = i
+
+                        if not in_flight:
+                            break
+
+                        finished = []
+                        for future in as_completed(list(in_flight.keys())):
+                            idx = in_flight.pop(future)
+                            finished.append((idx, future.result()))
+                            break
+
+                        for idx, (events, relations) in finished:
+                            chunk_payloads[idx] = (events, relations)
+                            if checkpoint_file:
+                                next_chunk = len([j for j in chunk_payloads if j >= start_chunk]) + start_chunk
+                                self._save_checkpoint(checkpoint_file, next_chunk, total_chunks, all_events, all_relations)
+
+                for idx in sorted(chunk_payloads.keys()):
+                    events, relations = chunk_payloads[idx]
+                    self._merge_chunk_payload(events, relations, all_events, all_relations)
+            else:
+                for i, chunk in pending:
+                    if self.progress_callback:
+                        self.progress_callback(i + 1, total_chunks, f"Processing chunk {i + 1}/{total_chunks}")
+                    if (i + 1) % 10 == 0 or i == start_chunk:
+                        print(f"  [chunk {i + 1}/{total_chunks}]", flush=True)
+                    events, relations = self._extract_llm(chunk, source_book, chunk_index=i)
+                    self._merge_chunk_payload(events, relations, all_events, all_relations)
+                    if checkpoint_file:
+                        self._save_checkpoint(checkpoint_file, i + 1, total_chunks, all_events, all_relations)
         
         # Add all events to graph
         for event in all_events:
@@ -458,6 +482,8 @@ class EventExtractor:
         all_relations: list[EventRelation],
         fallback_model: Optional[str],
         total_chunks: int,
+        parallel_workers: int,
+        max_inflight: Optional[int],
     ) -> None:
         base = Path(checkpoint_file)
         ledger_file = base.with_suffix(base.suffix + ".ledger.json")
@@ -470,6 +496,8 @@ class EventExtractor:
             fallback_model = "gpt-4o" if default_llm.provider == "openai" else "llama3.1:70b"
 
         runner = ResilientChunkRunner(ledger_file)
+        pending_payloads: dict[int, tuple[list[Event], list[EventRelation]]] = {}
+        merged_upto = -1
 
         def persist_artifact() -> None:
             completed = len(runner.state.ledger)
@@ -492,13 +520,17 @@ class EventExtractor:
             if reason:
                 return ChunkAttemptResult(False, reason=reason, model=model, payload_snippet_path=snippet_path)
 
-            for event in events:
-                event_key = self._normalize_event_key(event)
-                if event_key not in self._seen_events:
-                    self._seen_events.add(event_key)
-                    all_events.append(event)
-            all_relations.extend(relations)
-            return ChunkAttemptResult(True, model=model)
+            return ChunkAttemptResult(True, model=model, data=(events, relations))
+
+        def on_chunk_complete(chunk_index: int, result: ChunkAttemptResult) -> None:
+            nonlocal merged_upto
+            if not result.data:
+                return
+            pending_payloads[chunk_index] = result.data  # type: ignore[assignment]
+            while (merged_upto + 1) in pending_payloads:
+                merged_upto += 1
+                events, relations = pending_payloads.pop(merged_upto)
+                self._merge_chunk_payload(events, relations, all_events, all_relations)
 
         runner.run(
             chunks=chunks,
@@ -506,7 +538,24 @@ class EventExtractor:
             fallback_model=fallback_model,
             process_attempt=process_attempt,
             persist_artifact=persist_artifact,
+            on_chunk_complete=on_chunk_complete,
+            workers=parallel_workers,
+            max_inflight=max_inflight,
         )
+
+    def _merge_chunk_payload(
+        self,
+        events: list[Event],
+        relations: list[EventRelation],
+        all_events: list[Event],
+        all_relations: list[EventRelation],
+    ) -> None:
+        for event in events:
+            event_key = self._normalize_event_key(event)
+            if event_key not in self._seen_events:
+                self._seen_events.add(event_key)
+                all_events.append(event)
+        all_relations.extend(relations)
     
     @staticmethod
     def _coerce_str(val) -> str:

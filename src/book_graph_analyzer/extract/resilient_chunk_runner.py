@@ -14,6 +14,7 @@ from dataclasses import dataclass, field
 from enum import Enum
 from pathlib import Path
 from typing import Callable, Optional
+from concurrent.futures import FIRST_COMPLETED, Future, ThreadPoolExecutor, wait
 
 
 class ChunkStatus(str, Enum):
@@ -29,6 +30,7 @@ class ChunkAttemptResult:
     reason: str = ""
     model: str = ""
     payload_snippet_path: Optional[str] = None
+    data: object | None = None
 
 
 @dataclass
@@ -125,16 +127,18 @@ class ResilientChunkRunner:
         fallback_model: str,
         process_attempt: Callable[[int, str, str, int], ChunkAttemptResult],
         persist_artifact: Callable[[], None],
+        on_chunk_complete: Optional[Callable[[int, ChunkAttemptResult], None]] = None,
+        workers: int = 1,
+        max_inflight: Optional[int] = None,
     ) -> dict[int, ChunkLedgerEntry]:
-        for i, chunk in enumerate(chunks):
-            if self.is_done(i):
-                continue
-
+        def _execute_chunk(i: int, chunk: str) -> tuple[int, ChunkLedgerEntry, ChunkAttemptResult]:
             attempts = [primary_model, primary_model, fallback_model]
             final_entry: Optional[ChunkLedgerEntry] = None
+            final_result: Optional[ChunkAttemptResult] = None
 
             for attempt_no, model in enumerate(attempts, start=1):
                 result = process_attempt(i, chunk, model, attempt_no)
+                final_result = result
                 if result.success:
                     status = ChunkStatus.OK
                     if attempt_no == 2:
@@ -160,7 +164,13 @@ class ResilientChunkRunner:
                     payload_snippet_path=result.payload_snippet_path,
                 )
 
-            assert final_entry is not None
+            assert final_entry is not None and final_result is not None
+            return i, final_entry, final_result
+
+        workers = max(1, workers)
+        max_inflight = max(1, max_inflight or workers)
+
+        def _commit_chunk(i: int, final_entry: ChunkLedgerEntry, final_result: ChunkAttemptResult) -> None:
             self.state.ledger[i] = final_entry
 
             if final_entry.status == ChunkStatus.OK:
@@ -172,9 +182,46 @@ class ResilientChunkRunner:
             else:
                 self.metrics.failed += 1
 
-            if (i + 1) % self.artifact_write_every == 0:
+            if on_chunk_complete and final_result.success:
+                on_chunk_complete(i, final_result)
+
+            if (len(self.state.ledger)) % self.artifact_write_every == 0:
                 persist_artifact()
             self._persist_ledger()
+
+        pending: list[tuple[int, str]] = []
+        for i, chunk in enumerate(chunks):
+            if self.is_done(i):
+                continue
+            pending.append((i, chunk))
+
+        if workers == 1:
+            for i, chunk in pending:
+                idx, entry, result = _execute_chunk(i, chunk)
+                _commit_chunk(idx, entry, result)
+            persist_artifact()
+            self._persist_ledger()
+            return self.state.ledger
+
+        in_flight: dict[Future, tuple[int, str]] = {}
+        pending_iter = iter(pending)
+        with ThreadPoolExecutor(max_workers=workers) as pool:
+            while True:
+                while len(in_flight) < max_inflight:
+                    try:
+                        i, chunk = next(pending_iter)
+                    except StopIteration:
+                        break
+                    in_flight[pool.submit(_execute_chunk, i, chunk)] = (i, chunk)
+
+                if not in_flight:
+                    break
+
+                done, _ = wait(in_flight.keys(), return_when=FIRST_COMPLETED)
+                for fut in done:
+                    in_flight.pop(fut, None)
+                    idx, entry, result = fut.result()
+                    _commit_chunk(idx, entry, result)
 
         persist_artifact()
         self._persist_ledger()
