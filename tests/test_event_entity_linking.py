@@ -36,16 +36,17 @@ class _FakeSession:
         return False
 
     def run(self, query, **kwargs):
-        if "MERGE (e:Event {id: item.id})" in query:
+        if "MERGE (e:Event {id: item.id, source_book: item.source_book})" in query:
             for item in kwargs["batch"]:
-                self.state["events"].add(item["id"])
+                self.state["events"].add((item["id"], item["source_book"]))
             return _FakeResult()
 
-        if "MATCH (e1:Event {id: item.event1_id})" in query:
+        if "MATCH (e1:Event {id: item.event1_id, source_book: item.event1_book})" in query:
             return _FakeResult()
 
         if "MERGE (n)-[r:" in query and "RETURN count(r) AS cnt" in query:
             event_id = kwargs["event_id"]
+            source_book = kwargs["source_book"]
             labels = set(kwargs["labels"])
             candidates = [c.lower() for c in kwargs["candidates"]]
             candidate_ids = [c.lower() for c in kwargs.get("candidate_ids", [])]
@@ -79,10 +80,10 @@ class _FakeSession:
                         best = node
                         best_score = score
 
-            if best is None or event_id not in self.state["events"]:
+            if best is None or (event_id, source_book) not in self.state["events"]:
                 return _FakeResult(single_row={"cnt": 0})
 
-            self.state["rels"].add((best.id, rel_type, event_id, role))
+            self.state["rels"].add((best.id, rel_type, event_id, source_book, role))
             return _FakeResult(single_row={"cnt": 1})
 
         return _FakeResult()

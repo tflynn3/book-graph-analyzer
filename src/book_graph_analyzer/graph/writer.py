@@ -817,6 +817,12 @@ class GraphWriter:
     # Event Graph Integration (Phase 6+)
     # =========================================================================
 
+    @staticmethod
+    def _resolve_event_book(event, fallback_book: str) -> str:
+        """Resolve source book for an event write operation."""
+        event_book = getattr(event, "source_book", None)
+        return (event_book or fallback_book or "").strip()
+
     def write_event(
         self,
         event,  # Event from lore.events
@@ -829,7 +835,7 @@ class GraphWriter:
             book: The book this event was found in
         """
         query = """
-        MERGE (e:Event {id: $id})
+        MERGE (e:Event {id: $id, source_book: $book})
         SET e.description = $description,
             e.agent = $agent,
             e.action = $action,
@@ -850,7 +856,7 @@ class GraphWriter:
                 patient=event.patient,
                 era=event.era.value if event.era else None,
                 year=event.year,
-                book=book,
+                book=self._resolve_event_book(event, book),
                 confidence=event.confidence,
             )
 
@@ -882,13 +888,14 @@ class GraphWriter:
                 "era": e.era.value if e.era else None,
                 "year": e.year,
                 "confidence": e.confidence,
+                "source_book": self._resolve_event_book(e, book),
             }
             for e in events
         ]
 
         query = """
         UNWIND $batch AS item
-        MERGE (e:Event {id: item.id})
+        MERGE (e:Event {id: item.id, source_book: item.source_book})
         SET e.description = item.description,
             e.agent = item.agent,
             e.action = item.action,
@@ -896,18 +903,19 @@ class GraphWriter:
             e.source_text = item.source_text,
             e.era = item.era,
             e.year = item.year,
-            e.source_book = $book,
             e.confidence = item.confidence
         """
 
         with self.driver.session() as session:
-            session.run(query, batch=batch_data, book=book)
+            session.run(query, batch=batch_data)
 
         return len(batch_data)
 
     def write_event_relations_batch(
         self,
         relations: list,  # List of EventRelation objects
+        event_book_by_id: dict[str, str] | None = None,
+        default_book: str | None = None,
     ) -> int:
         """Write event temporal relations.
 
@@ -935,6 +943,8 @@ class GraphWriter:
                 {
                     "event1_id": r.event1_id,
                     "event2_id": r.event2_id,
+                    "event1_book": (event_book_by_id or {}).get(r.event1_id, default_book or ""),
+                    "event2_book": (event_book_by_id or {}).get(r.event2_id, default_book or ""),
                     "confidence": r.confidence,
                 }
                 for r in type_rels
@@ -942,8 +952,8 @@ class GraphWriter:
 
             query = f"""
             UNWIND $batch AS item
-            MATCH (e1:Event {{id: item.event1_id}})
-            MATCH (e2:Event {{id: item.event2_id}})
+            MATCH (e1:Event {{id: item.event1_id, source_book: item.event1_book}})
+            MATCH (e2:Event {{id: item.event2_id, source_book: item.event2_book}})
             MERGE (e1)-[r:{rel_type}]->(e2)
             SET r.confidence = item.confidence
             """
@@ -957,6 +967,7 @@ class GraphWriter:
     def link_event_to_entities(
         self,
         event,  # Event object
+        book: str,
     ) -> int:
         """Link an event to its participant entities.
 
@@ -972,6 +983,7 @@ class GraphWriter:
 
         links += self._link_event_role(
             event_id=event.id,
+            source_book=self._resolve_event_book(event, book),
             raw_value=event.agent,
             labels=["Character"],
             rel_type="PARTICIPATED_IN",
@@ -981,6 +993,7 @@ class GraphWriter:
         # Patient may be Character / Place / Object. Choose one best hit only.
         links += self._link_event_role(
             event_id=event.id,
+            source_book=self._resolve_event_book(event, book),
             raw_value=event.patient,
             labels=["Character", "Place", "Object"],
             rel_type="INVOLVED_IN",
@@ -992,6 +1005,7 @@ class GraphWriter:
             cue_text = f"{event.description or ''} {event.source_text or ''}".strip()
             links += self._link_event_role(
                 event_id=event.id,
+                source_book=self._resolve_event_book(event, book),
                 raw_value=cue_text,
                 labels=["Place"],
                 rel_type="TOOK_PLACE_AT",
@@ -1042,7 +1056,12 @@ class GraphWriter:
         if progress_callback:
             progress_callback(current_step, total_steps, "Writing temporal relations...")
 
-        stats["relations_written"] = self.write_event_relations_batch(event_graph.relations)
+        event_book_by_id = {e.id: self._resolve_event_book(e, book) for e in events}
+        stats["relations_written"] = self.write_event_relations_batch(
+            event_graph.relations,
+            event_book_by_id=event_book_by_id,
+            default_book=book,
+        )
 
         # Step 3: Link to entities
         if link_entities:
@@ -1051,7 +1070,7 @@ class GraphWriter:
                 progress_callback(current_step, total_steps, "Linking to entities...")
 
             for event in events:
-                stats["entity_links"] += self.link_event_to_entities(event)
+                stats["entity_links"] += self.link_event_to_entities(event, book=book)
 
         return stats
 
@@ -2453,6 +2472,7 @@ class GraphWriter:
         self,
         *,
         event_id: str,
+        source_book: str,
         raw_value: str | None,
         labels: list[str],
         rel_type: str,
@@ -2468,7 +2488,7 @@ class GraphWriter:
             return 0
 
         query = f"""
-        MATCH (e:Event {{id: $event_id}})
+        MATCH (e:Event {{id: $event_id, source_book: $source_book}})
         WITH e, [c IN $candidates WHERE c IS NOT NULL AND trim(c) <> ''] AS candidates
         UNWIND candidates AS cand
         MATCH (n)
@@ -2507,6 +2527,7 @@ class GraphWriter:
             row = session.run(
                 query,
                 event_id=event_id,
+                source_book=source_book,
                 candidates=candidates,
                 candidate_ids=candidate_ids,
                 labels=labels,
