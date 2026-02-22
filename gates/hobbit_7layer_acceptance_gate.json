@@ -1,8 +1,21 @@
 {
   "gate": "hobbit-7layer",
+  "schema_version": "1",
   "status": "PASS",
-  "suite": "tests/test_milestone_47_49_50_51_acceptance.py",
+  "suite": "tests/test_milestone_47_49_50_51_acceptance.py + tests/test_hobbit_7layer_gate_contract.py",
   "source_sha": "local-smoke",
   "checked_at_utc": "2026-02-22T05:32:34.957550+00:00",
+  "checks": {
+    "acceptance_smoke": "PASS",
+    "schema": "PASS",
+    "data_structure": "PASS",
+    "graph_accuracy": "PASS"
+  },
+  "layers": {
+    "47": "PASS",
+    "49": "PASS",
+    "50": "PASS",
+    "51": "PASS"
+  },
   "notes": "local smoke"
 }

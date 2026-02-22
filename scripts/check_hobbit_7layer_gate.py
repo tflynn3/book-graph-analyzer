@@ -16,10 +16,16 @@ from pathlib import Path
 
 REQUIRED_KEYS = {
     "gate",
+    "schema_version",
     "status",
     "suite",
     "checked_at_utc",
+    "checks",
+    "layers",
 }
+
+REQUIRED_CHECKS = {"acceptance_smoke", "schema", "data_structure", "graph_accuracy"}
+REQUIRED_LAYERS = {"47", "49", "50", "51"}
 
 
 def parse_args() -> argparse.Namespace:
@@ -58,6 +64,32 @@ def main() -> int:
     status = str(payload.get("status", "")).upper()
     if status != "PASS":
         print(f"FAIL: Hobbit 7-layer gate status is {status or 'UNKNOWN'} (must be PASS)")
+        return 1
+
+    checks = payload.get("checks")
+    if not isinstance(checks, dict):
+        print("FAIL: artifact checks must be an object")
+        return 1
+    missing_checks = sorted(REQUIRED_CHECKS - checks.keys())
+    if missing_checks:
+        print(f"FAIL: artifact checks missing required keys: {', '.join(missing_checks)}")
+        return 1
+    failed_checks = [k for k in sorted(REQUIRED_CHECKS) if str(checks.get(k, "")).upper() != "PASS"]
+    if failed_checks:
+        print(f"FAIL: required gate checks failed: {', '.join(failed_checks)}")
+        return 1
+
+    layers = payload.get("layers")
+    if not isinstance(layers, dict):
+        print("FAIL: artifact layers must be an object")
+        return 1
+    missing_layers = sorted(REQUIRED_LAYERS - layers.keys())
+    if missing_layers:
+        print(f"FAIL: artifact layers missing required keys: {', '.join(missing_layers)}")
+        return 1
+    failed_layers = [k for k in sorted(REQUIRED_LAYERS) if str(layers.get(k, "")).upper() != "PASS"]
+    if failed_layers:
+        print(f"FAIL: required layer checks failed: {', '.join(failed_layers)}")
         return 1
 
     print("PASS: Hobbit 7-layer gate artifact is valid and status=PASS")

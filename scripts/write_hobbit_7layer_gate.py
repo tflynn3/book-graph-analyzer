@@ -24,6 +24,15 @@ def parse_args() -> argparse.Namespace:
         help="Acceptance test suite identifier",
     )
     parser.add_argument("--notes", default="")
+    parser.add_argument("--schema-version", default="1")
+    parser.add_argument("--acceptance-smoke", choices=["PASS", "FAIL"], default="FAIL")
+    parser.add_argument("--schema-check", choices=["PASS", "FAIL"], default="FAIL")
+    parser.add_argument("--data-structure-check", choices=["PASS", "FAIL"], default="FAIL")
+    parser.add_argument("--graph-accuracy-check", choices=["PASS", "FAIL"], default="FAIL")
+    parser.add_argument("--layer-47", choices=["PASS", "FAIL"], default="FAIL")
+    parser.add_argument("--layer-49", choices=["PASS", "FAIL"], default="FAIL")
+    parser.add_argument("--layer-50", choices=["PASS", "FAIL"], default="FAIL")
+    parser.add_argument("--layer-51", choices=["PASS", "FAIL"], default="FAIL")
     return parser.parse_args()
 
 
@@ -34,10 +43,23 @@ def main() -> int:
 
     payload = {
         "gate": "hobbit-7layer",
+        "schema_version": args.schema_version,
         "status": args.status,
         "suite": args.suite,
         "source_sha": args.source_sha,
         "checked_at_utc": datetime.now(timezone.utc).isoformat(),
+        "checks": {
+            "acceptance_smoke": args.acceptance_smoke,
+            "schema": args.schema_check,
+            "data_structure": args.data_structure_check,
+            "graph_accuracy": args.graph_accuracy_check,
+        },
+        "layers": {
+            "47": args.layer_47,
+            "49": args.layer_49,
+            "50": args.layer_50,
+            "51": args.layer_51,
+        },
         "notes": args.notes,
     }
 

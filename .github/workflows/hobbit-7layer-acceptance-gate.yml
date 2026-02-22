@@ -30,19 +30,44 @@ jobs:
         run: |
           pytest -q tests/test_milestone_47_49_50_51_acceptance.py
 
+      - name: Run gate contract checks (schema + data-structure + graph-accuracy)
+        id: gate_contract
+        continue-on-error: true
+        run: |
+          pytest -q tests/test_hobbit_7layer_gate_contract.py
+
       - name: Write machine-readable gate artifact
         run: |
-          if [ "${{ steps.smoke.outcome }}" = "success" ]; then
+          if [ "${{ steps.smoke.outcome }}" = "success" ] && [ "${{ steps.gate_contract.outcome }}" = "success" ]; then
             STATUS=PASS
-            NOTES="Acceptance smoke suite passed in CI"
+            NOTES="Acceptance smoke + gate contract checks passed in CI"
           else
             STATUS=FAIL
-            NOTES="Acceptance smoke suite failed in CI"
+            NOTES="Acceptance smoke and/or gate contract checks failed in CI"
           fi
+
+          [ "${{ steps.smoke.outcome }}" = "success" ] && ACCEPTANCE_SMOKE=PASS || ACCEPTANCE_SMOKE=FAIL
+          [ "${{ steps.gate_contract.outcome }}" = "success" ] && SCHEMA_CHECK=PASS || SCHEMA_CHECK=FAIL
+          [ "${{ steps.gate_contract.outcome }}" = "success" ] && DATA_STRUCTURE_CHECK=PASS || DATA_STRUCTURE_CHECK=FAIL
+          [ "${{ steps.gate_contract.outcome }}" = "success" ] && GRAPH_ACCURACY_CHECK=PASS || GRAPH_ACCURACY_CHECK=FAIL
+
+          # Layer-specific smoke acceptance lives in tests/test_milestone_47_49_50_51_acceptance.py
+          [ "${{ steps.smoke.outcome }}" = "success" ] && L47=PASS || L47=FAIL
+          [ "${{ steps.smoke.outcome }}" = "success" ] && L49=PASS || L49=FAIL
+          [ "${{ steps.smoke.outcome }}" = "success" ] && L50=PASS || L50=FAIL
+          [ "${{ steps.smoke.outcome }}" = "success" ] && L51=PASS || L51=FAIL
 
           python scripts/write_hobbit_7layer_gate.py \
             --status "$STATUS" \
             --source-sha "${GITHUB_SHA}" \
+            --acceptance-smoke "$ACCEPTANCE_SMOKE" \
+            --schema-check "$SCHEMA_CHECK" \
+            --data-structure-check "$DATA_STRUCTURE_CHECK" \
+            --graph-accuracy-check "$GRAPH_ACCURACY_CHECK" \
+            --layer-47 "$L47" \
+            --layer-49 "$L49" \
+            --layer-50 "$L50" \
+            --layer-51 "$L51" \
             --notes "$NOTES"
 
       - name: Validate gate artifact is PASS (hard merge gate)
