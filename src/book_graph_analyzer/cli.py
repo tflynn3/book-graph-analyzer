@@ -6021,6 +6021,12 @@ def worldbible_languages(bible_path: str, entity: str | None, write_graph: bool)
               help="Attach resolver-backed candidate links to unresolved refs")
 @click.option("--llm-fallback", is_flag=True,
               help="Optional model-assisted unresolved-reference fallback")
+@click.option("--quality-gate/--no-quality-gate", default=True,
+              help="Evaluate unresolved-reference precision/quality gates")
+@click.option("--min-context-coverage", default=0.85, show_default=True, type=float,
+              help="Required unresolved refs coverage with usable context")
+@click.option("--min-candidate-coverage", default=0.60, show_default=True, type=float,
+              help="Required unresolved refs coverage with >=1 candidate link")
 def worldbible_artifacts(
     path: str,
     book: str | None,
@@ -6029,9 +6035,16 @@ def worldbible_artifacts(
     context_window: int,
     link_candidates: bool,
     llm_fallback: bool,
+    quality_gate: bool,
+    min_context_coverage: float,
+    min_candidate_coverage: float,
 ) -> None:
     """Extract lore artifacts and broken references from raw text."""
-    from book_graph_analyzer.lore.depth import extract_lore_depth, link_broken_reference_candidates
+    from book_graph_analyzer.lore.depth import (
+        extract_lore_depth,
+        link_broken_reference_candidates,
+        evaluate_unresolved_quality_gates,
+    )
 
     file_path = Path(path)
     text = file_path.read_text(encoding="utf-8", errors="replace")
@@ -6055,9 +6068,27 @@ def worldbible_artifacts(
     if link_candidates:
         link_broken_reference_candidates(result.broken_references, book=source_book)
 
+    quality_report = None
+    if quality_gate:
+        quality_report = evaluate_unresolved_quality_gates(
+            result.broken_references,
+            min_context_coverage=min_context_coverage,
+            min_candidate_coverage=min_candidate_coverage,
+        )
+
     console.print(f"[bold]Lore depth extraction:[/bold] {file_path.name}")
     console.print(f"  Artifacts: [green]{len(result.artifacts)}[/green]")
     console.print(f"  Unresolved refs: [yellow]{len(result.broken_references)}[/yellow]")
+    if quality_report:
+        summary = quality_report["summary"]
+        passed = quality_report["passed"]
+        status = "[green]PASS[/green]" if passed else "[red]FAIL[/red]"
+        console.print(
+            "  Quality gate: "
+            f"{status} "
+            f"(context={summary['context_coverage']:.2f}/{summary['min_context_coverage']:.2f}, "
+            f"candidates={summary['candidate_coverage']:.2f}/{summary['min_candidate_coverage']:.2f})"
+        )
 
     if result.artifacts:
         table = Table(title="Artifacts", show_lines=False)
@@ -6074,6 +6105,8 @@ def worldbible_artifacts(
             "artifacts": [a.model_dump() for a in result.artifacts],
             "broken_references": [b.model_dump() for b in result.broken_references],
         }
+        if quality_report is not None:
+            data["quality_gate"] = quality_report
         Path(output).write_text(json.dumps(data, indent=2), encoding="utf-8")
         console.print(f"[green]OK[/green] Saved to {output}")
 
@@ -6084,6 +6117,9 @@ def worldbible_artifacts(
         b_count = writer.write_broken_references_batch(result.broken_references)
         writer.close()
         console.print(f"[green]OK[/green] Wrote {a_count} artifacts and {b_count} unresolved references to Neo4j")
+
+    if quality_report and not quality_report["passed"]:
+        raise SystemExit(2)
 
 
 @lore.command(name="unresolved-refs")

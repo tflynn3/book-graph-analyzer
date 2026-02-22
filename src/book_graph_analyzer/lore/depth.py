@@ -254,3 +254,91 @@ def link_broken_reference_candidates(
             ref.conflict_weight = max(ref.conflict_weight, min(0.6, candidates[0].confidence * 0.5))
 
     return broken_references
+
+
+def build_candidate_linking_audit_buckets(
+    broken_references: list[BrokenReference],
+    *,
+    weak_candidate_threshold: float = 0.70,
+    ambiguous_delta: float = 0.08,
+) -> dict[str, list[str]]:
+    """Bucket unresolved references for candidate-linking review workflows."""
+    buckets: dict[str, list[str]] = {
+        "no_candidates": [],
+        "weak_top_candidate": [],
+        "ambiguous_top_candidates": [],
+        "high_confidence_top_candidate": [],
+    }
+
+    for ref in broken_references:
+        if ref.resolved_entity_id:
+            continue
+        if not ref.candidates:
+            buckets["no_candidates"].append(ref.id)
+            continue
+
+        top = ref.candidates[0]
+        if top.confidence < weak_candidate_threshold:
+            buckets["weak_top_candidate"].append(ref.id)
+            continue
+
+        if len(ref.candidates) > 1:
+            delta = top.confidence - ref.candidates[1].confidence
+            if delta <= ambiguous_delta:
+                buckets["ambiguous_top_candidates"].append(ref.id)
+                continue
+
+        buckets["high_confidence_top_candidate"].append(ref.id)
+
+    return buckets
+
+
+def evaluate_unresolved_quality_gates(
+    broken_references: list[BrokenReference],
+    *,
+    min_context_chars: int = 8,
+    min_context_coverage: float = 0.85,
+    min_candidate_coverage: float = 0.60,
+) -> dict[str, Any]:
+    """Evaluate precision/quality gates for unresolved references."""
+    unresolved = [r for r in broken_references if not r.resolved_entity_id]
+    total = len(unresolved)
+
+    context_ok = 0
+    candidate_ok = 0
+    low_context_ids: list[str] = []
+    no_candidate_ids: list[str] = []
+
+    for ref in unresolved:
+        before = (ref.context_before or "").strip()
+        after = (ref.context_after or "").strip()
+        if len(before) >= min_context_chars or len(after) >= min_context_chars:
+            context_ok += 1
+        else:
+            low_context_ids.append(ref.id)
+
+        if ref.candidates:
+            candidate_ok += 1
+        else:
+            no_candidate_ids.append(ref.id)
+
+    context_coverage = (context_ok / total) if total else 1.0
+    candidate_coverage = (candidate_ok / total) if total else 1.0
+
+    candidate_audit_buckets = build_candidate_linking_audit_buckets(unresolved)
+
+    return {
+        "passed": (context_coverage >= min_context_coverage and candidate_coverage >= min_candidate_coverage),
+        "summary": {
+            "total_unresolved": total,
+            "context_coverage": round(context_coverage, 4),
+            "candidate_coverage": round(candidate_coverage, 4),
+            "min_context_coverage": min_context_coverage,
+            "min_candidate_coverage": min_candidate_coverage,
+        },
+        "failures": {
+            "low_context": low_context_ids,
+            "no_candidates": no_candidate_ids,
+        },
+        "candidate_linking_audit_buckets": candidate_audit_buckets,
+    }
