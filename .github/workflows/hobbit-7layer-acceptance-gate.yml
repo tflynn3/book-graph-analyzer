@@ -1,0 +1,57 @@
+name: Hobbit 7-layer Acceptance Gate
+
+on:
+  pull_request:
+  push:
+    branches: [master]
+
+jobs:
+  hobbit-7layer-acceptance-gate:
+    name: hobbit-7layer-acceptance-gate
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .[dev]
+
+      - name: Run Hobbit 7-layer acceptance smoke suite
+        id: smoke
+        continue-on-error: true
+        run: |
+          pytest -q tests/test_milestone_47_49_50_51_acceptance.py
+
+      - name: Write machine-readable gate artifact
+        run: |
+          if [ "${{ steps.smoke.outcome }}" = "success" ]; then
+            STATUS=PASS
+            NOTES="Acceptance smoke suite passed in CI"
+          else
+            STATUS=FAIL
+            NOTES="Acceptance smoke suite failed in CI"
+          fi
+
+          python scripts/write_hobbit_7layer_gate.py \
+            --status "$STATUS" \
+            --source-sha "${GITHUB_SHA}" \
+            --notes "$NOTES"
+
+      - name: Validate gate artifact is PASS (hard merge gate)
+        run: |
+          python scripts/check_hobbit_7layer_gate.py
+
+      - name: Upload gate artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: hobbit-7layer-acceptance-gate
+          path: gates/hobbit_7layer_acceptance_gate.json

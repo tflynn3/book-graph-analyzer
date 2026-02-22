@@ -1,0 +1,8 @@
+{
+  "gate": "hobbit-7layer",
+  "status": "PASS",
+  "suite": "tests/test_milestone_47_49_50_51_acceptance.py",
+  "source_sha": "local-smoke",
+  "checked_at_utc": "2026-02-22T05:32:34.957550+00:00",
+  "notes": "local smoke"
+}
