@@ -1397,6 +1397,13 @@ class GraphWriter:
         if not entity_id or source is None:
             return
 
+        resolved = self._resolve_entity_identity(entity_id)
+        if not resolved["resolved"]:
+            return
+        if resolved["ambiguous"]:
+            # Accuracy-first behavior: skip uncertain writes.
+            return
+
         source_props = {
             "source_id": getattr(source, "source_id", None),
             "source_title": getattr(source, "source_title", None),
@@ -1418,7 +1425,8 @@ class GraphWriter:
             return
 
         query = """
-        MATCH (e {id: $entity_id})
+        MATCH (e)
+        WHERE id(e) = $entity_node_id
         MERGE (s:Source {id: $source_id})
         SET s.source_title = $source_title,
             s.editorial_status = $editorial_status,
@@ -1436,7 +1444,7 @@ class GraphWriter:
         with self.driver.session() as session:
             session.run(
                 query,
-                entity_id=entity_id,
+                entity_node_id=resolved["node_id"],
                 source_id=source_id,
                 source_title=source_props["source_title"],
                 editorial_status=source_props["editorial_status"],
@@ -1449,6 +1457,83 @@ class GraphWriter:
                 confidence=max(0.0, min(1.0, float(confidence))),
                 page_ref=page_ref,
             )
+
+    def _resolve_entity_identity(self, entity_hint: str | None) -> dict:
+        """Resolve entity by robust identity contract.
+
+        Contract precedence: id -> canonical_id -> canonical_name/aliases.
+        Returns {resolved, ambiguous, node_id, matched_by, confidence}.
+        """
+        if not entity_hint:
+            return {"resolved": False, "ambiguous": False, "node_id": None, "matched_by": None, "confidence": 0.0}
+
+        raw = str(entity_hint).strip()
+        if not raw:
+            return {"resolved": False, "ambiguous": False, "node_id": None, "matched_by": None, "confidence": 0.0}
+
+        canon = re.sub(r"[^a-z0-9_]+", "_", raw.lower()).strip("_")
+        candidates = [raw, raw.lower(), canon, f"char_{canon}" if canon and not canon.startswith("char_") else canon]
+        candidates = [c for c in dict.fromkeys([c for c in candidates if c])]
+
+        query = """
+        MATCH (e)
+        WHERE e:Character OR e:Place OR e:Object OR e:Event OR e:Entity
+          AND (
+            e.id IN $candidates
+            OR e.canonical_id IN $candidates
+            OR toLower(coalesce(e.canonical_name, '')) IN $candidates_lc
+            OR any(a IN coalesce(e.aliases, []) WHERE toLower(a) IN $candidates_lc)
+          )
+        WITH e,
+             CASE
+               WHEN e.id IN $candidates THEN 4
+               WHEN e.canonical_id IN $candidates THEN 3
+               WHEN toLower(coalesce(e.canonical_name,'')) IN $candidates_lc THEN 2
+               WHEN any(a IN coalesce(e.aliases, []) WHERE toLower(a) IN $candidates_lc) THEN 1
+               ELSE 0
+             END AS score
+        ORDER BY score DESC, e.id ASC
+        RETURN id(e) AS node_id, e.id AS id, score
+        LIMIT 5
+        """
+        with self.driver.session() as session:
+            rows = [dict(r) for r in session.run(query, candidates=candidates, candidates_lc=[c.lower() for c in candidates])]
+
+        if not rows:
+            return {"resolved": False, "ambiguous": False, "node_id": None, "matched_by": None, "confidence": 0.0}
+        if len(rows) > 1 and rows[0]["score"] == rows[1]["score"]:
+            return {"resolved": False, "ambiguous": True, "node_id": None, "matched_by": "ambiguous", "confidence": 0.0}
+
+        score = int(rows[0]["score"])
+        return {
+            "resolved": True,
+            "ambiguous": False,
+            "node_id": rows[0]["node_id"],
+            "matched_by": {4: "id", 3: "canonical_id", 2: "canonical_name", 1: "alias"}.get(score, "unknown"),
+            "confidence": {4: 1.0, 3: 0.95, 2: 0.85, 1: 0.7}.get(score, 0.5),
+        }
+
+    def _resolve_passage_identity(self, passage_hint: str | None) -> dict:
+        if not passage_hint:
+            return {"resolved": False, "ambiguous": False, "node_id": None}
+        raw = str(passage_hint).strip()
+        if not raw:
+            return {"resolved": False, "ambiguous": False, "node_id": None}
+        query = """
+        MATCH (p:Passage)
+        WHERE p.id = $raw OR p.id = toLower($raw) OR p.id CONTAINS $raw
+        RETURN id(p) AS node_id, p.id AS id,
+               CASE WHEN p.id = $raw OR p.id = toLower($raw) THEN 2 ELSE 1 END AS score
+        ORDER BY score DESC
+        LIMIT 5
+        """
+        with self.driver.session() as session:
+            rows = [dict(r) for r in session.run(query, raw=raw)]
+        if not rows:
+            return {"resolved": False, "ambiguous": False, "node_id": None}
+        if len(rows) > 1 and rows[0]["score"] == rows[1]["score"]:
+            return {"resolved": False, "ambiguous": True, "node_id": None}
+        return {"resolved": True, "ambiguous": False, "node_id": rows[0]["node_id"]}
 
     # =========================================================================
     # Lore Depth Engine (Issue #50 slice 1)
@@ -1603,10 +1688,28 @@ class GraphWriter:
         if not entity_id:
             raise ValueError("Register profiles require a canonical character entity id")
 
+        entity_ref = self._resolve_entity_identity(entity_id)
+        if not entity_ref["resolved"]:
+            entity_ref = {
+                "resolved": True,
+                "ambiguous": False,
+                "node_id": None,
+                "matched_by": "legacy_id",
+                "confidence": 0.5,
+            }
+        if entity_ref["ambiguous"]:
+            raise ValueError(f"Ambiguous character entity mapping for '{entity_id}'")
+
+        passage_ref = self._resolve_passage_identity(source_passage_id)
+        passage_node_id = passage_ref["node_id"] if passage_ref["resolved"] and not passage_ref["ambiguous"] else None
+        provenance_confidence = min(1.0, max(0.0, float(entity_ref.get("confidence", 0.8) or 0.8)))
+
         with self.driver.session() as session:
             session.run(
                 """
-                MATCH (e {id: $entity_id})
+                MATCH (e)
+                WHERE ($entity_node_id IS NOT NULL AND id(e) = $entity_node_id)
+                   OR ($entity_node_id IS NULL AND e.id = $entity_id)
                 MERGE (rp:RegisterProfile {entity_id: $entity_id})
                 SET rp.dominant_register = $dominant_register,
                     rp.confidence = $confidence,
@@ -1615,10 +1718,21 @@ class GraphWriter:
                     rp.contraction_rate = $contraction_rate,
                     rp.avg_sentence_length = $avg_sentence_length,
                     rp.token_count = $token_count,
-                    rp.source_passage_id = $source_passage_id,
+                    rp.source_passage_id = coalesce($resolved_source_passage_id, $source_passage_id),
+                    rp.entity_match_method = $entity_match_method,
+                    rp.entity_match_confidence = $entity_match_confidence,
                     rp.updated_at = datetime()
                 MERGE (e)-[:HAS_REGISTER_PROFILE]->(rp)
+                WITH rp
+                OPTIONAL MATCH (p:Passage) WHERE id(p) = $passage_node_id
+                FOREACH (_ IN CASE WHEN p IS NULL THEN [] ELSE [1] END |
+                    MERGE (rp)-[r:ATTESTED_IN]->(p)
+                    SET r.confidence = $provenance_confidence,
+                        r.match_method = 'passage_id',
+                        r.updated_at = datetime()
+                )
                 """,
+                entity_node_id=entity_ref["node_id"],
                 entity_id=entity_id,
                 dominant_register=profile.dominant_register,
                 confidence=profile.confidence,
@@ -1628,6 +1742,11 @@ class GraphWriter:
                 avg_sentence_length=profile.avg_sentence_length,
                 token_count=profile.token_count,
                 source_passage_id=source_passage_id,
+                resolved_source_passage_id=source_passage_id if passage_node_id is not None else None,
+                entity_match_method=entity_ref.get("matched_by"),
+                entity_match_confidence=entity_ref.get("confidence"),
+                passage_node_id=passage_node_id,
+                provenance_confidence=provenance_confidence,
             )
 
     def write_register_observation(
@@ -1644,10 +1763,28 @@ class GraphWriter:
         if not entity_id:
             raise ValueError("Register observations require a canonical character entity id")
 
+        entity_ref = self._resolve_entity_identity(entity_id)
+        if not entity_ref["resolved"]:
+            entity_ref = {
+                "resolved": True,
+                "ambiguous": False,
+                "node_id": None,
+                "matched_by": "legacy_id",
+                "confidence": 0.5,
+            }
+        if entity_ref["ambiguous"]:
+            raise ValueError(f"Ambiguous character entity mapping for '{entity_id}'")
+
+        passage_ref = self._resolve_passage_identity(source_passage_id)
+        passage_node_id = passage_ref["node_id"] if passage_ref["resolved"] and not passage_ref["ambiguous"] else None
+        provenance_confidence = min(1.0, max(0.0, float(entity_ref.get("confidence", 0.8) or 0.8)))
+
         with self.driver.session() as session:
             session.run(
                 """
-                MATCH (e {id: $entity_id})
+                MATCH (e)
+                WHERE ($entity_node_id IS NOT NULL AND id(e) = $entity_node_id)
+                   OR ($entity_node_id IS NULL AND e.id = $entity_id)
                 CREATE (obs:RegisterObservation {
                     id: randomUUID(),
                     entity_id: $entity_id,
@@ -1659,11 +1796,22 @@ class GraphWriter:
                     contraction_rate: $contraction_rate,
                     avg_sentence_length: $avg_sentence_length,
                     token_count: $token_count,
-                    source_passage_id: $source_passage_id,
+                    source_passage_id: coalesce($resolved_source_passage_id, $source_passage_id),
+                    entity_match_method: $entity_match_method,
+                    entity_match_confidence: $entity_match_confidence,
                     created_at: datetime()
                 })
                 MERGE (e)-[:HAS_REGISTER_OBSERVATION]->(obs)
+                WITH obs
+                OPTIONAL MATCH (p:Passage) WHERE id(p) = $passage_node_id
+                FOREACH (_ IN CASE WHEN p IS NULL THEN [] ELSE [1] END |
+                    MERGE (obs)-[r:ATTESTED_IN]->(p)
+                    SET r.confidence = $provenance_confidence,
+                        r.match_method = 'passage_id',
+                        r.updated_at = datetime()
+                )
                 """,
+                entity_node_id=entity_ref["node_id"],
                 entity_id=entity_id,
                 observed_at=observed_at,
                 dominant_register=profile.dominant_register,
@@ -1674,6 +1822,11 @@ class GraphWriter:
                 avg_sentence_length=profile.avg_sentence_length,
                 token_count=profile.token_count,
                 source_passage_id=source_passage_id,
+                resolved_source_passage_id=source_passage_id if passage_node_id is not None else None,
+                entity_match_method=entity_ref.get("matched_by"),
+                entity_match_confidence=entity_ref.get("confidence"),
+                passage_node_id=passage_node_id,
+                provenance_confidence=provenance_confidence,
             )
 
     def query_register_drift(
@@ -1730,7 +1883,7 @@ class GraphWriter:
     # Sociolinguistic Registers (Issue #47 slice 1)
     # =========================================================================
 
-    def write_register_profile(
+    def _deprecated_duplicate_write_register_profile(
         self,
         entity_id: str,
         profile,
@@ -1770,7 +1923,7 @@ class GraphWriter:
                 source_passage_id=source_passage_id,
             )
 
-    def write_register_observation(
+    def _deprecated_duplicate_write_register_observation(
         self,
         entity_id: str,
         profile,
@@ -1816,7 +1969,7 @@ class GraphWriter:
                 source_passage_id=source_passage_id,
             )
 
-    def query_register_drift(
+    def _deprecated_duplicate_query_register_drift(
         self,
         entity_id: str,
         min_delta: float = 0.2,

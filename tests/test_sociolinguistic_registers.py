@@ -98,7 +98,8 @@ class TestGraphWriterSocioreg:
         writer.write_register_profile("char_aragorn", profile, source_passage_id="p1")
         writer.write_register_observation("char_aragorn", profile, observed_at="TA 3019", source_passage_id="p1")
 
-        assert session.run.call_count == 2
+        # Resolver path adds lookup queries before writes.
+        assert session.run.call_count >= 2
 
     def test_query_drift_returns_list(self):
         writer, session = self._make_writer()

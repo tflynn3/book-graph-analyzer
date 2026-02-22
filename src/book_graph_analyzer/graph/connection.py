@@ -52,6 +52,7 @@ def init_schema() -> None:
         "CREATE CONSTRAINT passage_id IF NOT EXISTS FOR (p:Passage) REQUIRE p.id IS UNIQUE",
         "CREATE CONSTRAINT concept_id IF NOT EXISTS FOR (c:Concept) REQUIRE c.id IS UNIQUE",
         "CREATE CONSTRAINT source_id IF NOT EXISTS FOR (s:Source) REQUIRE s.id IS UNIQUE",
+        "CREATE CONSTRAINT register_profile_entity IF NOT EXISTS FOR (rp:RegisterProfile) REQUIRE rp.entity_id IS UNIQUE",
         # Era nodes
         "CREATE CONSTRAINT era_name IF NOT EXISTS FOR (e:Era) REQUIRE e.name IS UNIQUE",
     ]
@@ -73,6 +74,8 @@ def init_schema() -> None:
         # Passage location index
         "CREATE INDEX passage_loc IF NOT EXISTS FOR (p:Passage) ON (p.book, p.chapter_num, p.sentence_num)",
         "CREATE INDEX passage_source_layer IF NOT EXISTS FOR (p:Passage) ON (p.source_id, p.source_stratum)",
+        "CREATE INDEX source_title IF NOT EXISTS FOR (s:Source) ON (s.source_title)",
+        "CREATE INDEX register_obs_entity_time IF NOT EXISTS FOR (o:RegisterObservation) ON (o.entity_id, o.observed_at)",
     ]
 
     with driver.session() as session:
