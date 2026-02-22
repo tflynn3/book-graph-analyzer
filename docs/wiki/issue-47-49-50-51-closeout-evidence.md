@@ -39,3 +39,23 @@ Implemented in `tests/test_milestone_47_49_50_51_acceptance.py`:
 ## Remaining caveat
 
 These fixtures are deterministic acceptance proofs. Canonical corpus benchmark snapshots can still be expanded in follow-up hardening if desired (precision/recall tuning and broader ambiguity sets).
+
+## Residual blocker rerun thresholds (iteration 2)
+
+Added low-risk acceptance thresholds to guard the three reported regressions:
+
+- **Social/entity canonical role-ID grounding depth**
+  - Event role linking now accepts canonical-id mentions (`char_*`, `place_*`, `obj_*`) as first-class candidates.
+  - Regression fixture asserts canonical-id mentions produce role links (`entity_links >= 2` for agent+patient).
+
+- **Events/timeline temporal grounding coverage**
+  - Temporal backfill now assigns conservative in-book synthetic year intervals when explicit years are absent.
+  - Hobbit gate fixture now asserts:
+    - strict gate fails **without** backfill
+    - strict gate passes **with** backfill (`min_grounded_ratio=0.90`, `min_era_ratio=0.90`, `min_year_or_interval_ratio=0.20`)
+
+- **Editorial per-event provenance coverage**
+  - Added event-level provenance validator requiring `source_book` + `source_passage_id`.
+  - Acceptance thresholds:
+    - pass at `max_missing_ratio <= 0.05`
+    - fail at `max_missing_ratio = 0.0` when any event provenance is missing

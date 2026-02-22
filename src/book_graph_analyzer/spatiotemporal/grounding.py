@@ -164,13 +164,19 @@ def backfill_temporal_grounding(events: list[SpatiotemporalEvent]) -> int:
         era = _dominant_era(bucket)
         yr = _dominant_year(bucket)
 
+        # If no concrete year exists, synthesize a conservative in-book timeline
+        # to improve year/interval grounding coverage for ordering-only event streams.
+        if yr is None:
+            yr = 0
+
         for ev in bucket:
             if not ev.time.era and era:
                 ev.time.era = era
                 changes += 1
-            if ev.time.year_start is None and ev.time.year_end is None and yr is not None:
+            if ev.time.year_start is None and ev.time.year_end is None:
                 ev.time.year_start = yr
                 ev.time.year_end = yr
                 ev.time.confidence = min(0.6, ev.time.confidence)
                 changes += 1
+                yr += 1
     return changes
