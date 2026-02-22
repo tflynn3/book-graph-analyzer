@@ -6612,7 +6612,8 @@ def corpus_sources(
                 "Editorial divergence report gated: provenance validation failed "
                 f"(checked={validation.checked_count}, missing={validation.missing_count}, "
                 f"missing_ratio={validation.missing_ratio:.2%}, "
-                f"invalid_authority={validation.invalid_authority_count})."
+                f"invalid_authority={validation.invalid_authority_count}, "
+                f"inconsistent={validation.inconsistent_count})."
             )
 
         divergences = detect_editorial_divergences(passages)

@@ -101,6 +101,22 @@ def test_validate_editorial_provenance_respects_authority_threshold():
     assert result.is_valid is False
 
 
+def test_validate_editorial_provenance_detects_inconsistent_hobbit_source_fields():
+    p = _p(
+        id="p-hobbit",
+        book="The Hobbit",
+        factual_claims={"smaug_location": "erebor"},
+        source_id="src_unfinished_tales",
+        source_title="Unfinished Tales",
+        source_stratum="annotation",
+        source_authority_weight=1.0,
+        provenance_tags=["annotation"],
+    )
+    result = validate_editorial_provenance([p], max_missing_ratio=0.0)
+    assert result.inconsistent_count == 1
+    assert result.is_valid is False
+
+
 def test_corpus_sources_report_divergence_gated_on_missing_provenance():
     from book_graph_analyzer.cli import main
 
@@ -129,3 +145,38 @@ def test_corpus_sources_report_divergence_gated_on_missing_provenance():
         ])
         assert result.exit_code != 0
         assert "gated" in result.output.lower()
+
+
+def test_corpus_sources_report_divergence_gated_on_inconsistent_hobbit_provenance():
+    from book_graph_analyzer.cli import main
+
+    runner = CliRunner()
+    with runner.isolated_filesystem():
+        corpus_dir = "data/corpora/hobbit"
+        import os
+        os.makedirs(corpus_dir, exist_ok=True)
+        with open(f"{corpus_dir}/passages.json", "w", encoding="utf-8") as f:
+            json.dump([
+                {
+                    "id": "p1",
+                    "text": "test",
+                    "book": "The Hobbit",
+                    "chapter": "1",
+                    "chapter_num": 1,
+                    "paragraph_num": 1,
+                    "sentence_num": 1,
+                    "char_offset": 0,
+                    "factual_claims": {"x": "y"},
+                    "source_id": "src_unfinished_tales",
+                    "source_title": "Unfinished Tales",
+                    "source_stratum": "annotation",
+                    "source_authority_weight": 1.0,
+                    "provenance_tags": ["annotation"],
+                }
+            ], f)
+
+        result = runner.invoke(main, [
+            "corpus", "sources", "hobbit", "--report-divergence", "--max-missing-provenance-ratio", "0",
+        ])
+        assert result.exit_code != 0
+        assert "inconsistent" in result.output.lower() or "gated" in result.output.lower()
