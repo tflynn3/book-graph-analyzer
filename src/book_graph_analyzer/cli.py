@@ -4302,7 +4302,7 @@ def lore_timeline_reconcile(events_file: str, locations: str | None, output: str
               help="Min ratio of events with era or year/interval")
 @click.option("--min-era-ratio", default=0.80, show_default=True, type=float,
               help="Min ratio of events with canonical era")
-@click.option("--min-year-ratio", default=0.05, show_default=True, type=float,
+@click.option("--min-year-ratio", default=0.0, show_default=True, type=float,
               help="Min ratio of events with year/interval")
 def lore_timeline_bridge(
     events_file: str, locations: str | None, seed_locations: bool,
@@ -4312,7 +4312,7 @@ def lore_timeline_bridge(
     enforce_grounding_gate: bool = False,
     min_grounded_ratio: float = 0.85,
     min_era_ratio: float = 0.80,
-    min_year_ratio: float = 0.05,
+    min_year_ratio: float = 0.0,
 ) -> None:
     """Bridge extracted events through spatiotemporal normalization and reconcile.
 
@@ -6388,7 +6388,7 @@ def lore_genealogy(
               help="Fail if temporal grounding coverage is below thresholds")
 @click.option("--min-grounded-ratio", default=0.85, show_default=True, type=float)
 @click.option("--min-era-ratio", default=0.80, show_default=True, type=float)
-@click.option("--min-year-ratio", default=0.05, show_default=True, type=float)
+@click.option("--min-year-ratio", default=0.0, show_default=True, type=float)
 def corpus_timeline_reconcile(
     corpus_name: str, events_dir: str | None, locations: str | None,
     output: str | None, fmt: str, causal_links: bool, write_neo4j: bool,
