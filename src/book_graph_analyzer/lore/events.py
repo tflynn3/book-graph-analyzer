@@ -613,6 +613,12 @@ Focus on significant plot events, not minor actions. Include 5-15 events.
 JSON:"""
 
         llm = LLMClient()
+        logger.info(
+            "Event extraction LLM provider=%s model=%s chunk=%d",
+            getattr(llm, "provider", "unknown"),
+            getattr(llm, "model", "unknown"),
+            chunk_index,
+        )
         response = llm.generate(prompt, temperature=0.2, max_tokens=2000)
         
         events = []
@@ -683,7 +689,17 @@ JSON:"""
                         dropped_relations,
                         chunk_index,
                     )
-        
+            else:
+                logger.warning(
+                    "LLM response did not contain valid JSON payload; skipping chunk=%d",
+                    chunk_index,
+                )
+        else:
+            logger.warning(
+                "LLM request returned empty response; skipping chunk=%d",
+                chunk_index,
+            )
+
         return events, relations
     
     def _extract_patterns(self, text: str, source_book: str) -> list[Event]:

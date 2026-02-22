@@ -19,3 +19,17 @@ BGA_NEO4J_URI=bolt://localhost:7687
 BGA_NEO4J_USER=neo4j
 BGA_NEO4J_PASSWORD=bookgraph123
 ```
+
+LLM provider defaults to Ollama. To use OpenAI for lore/corpus event extraction:
+
+```env
+# Choose provider: ollama | huggingface | openai
+BGA_LLM_PROVIDER=openai
+
+# Required for OpenAI provider
+BGA_OPENAI_API_KEY=sk-...
+
+# Optional (defaults shown)
+BGA_OPENAI_MODEL=gpt-4o-mini
+BGA_OPENAI_BASE_URL=https://api.openai.com/v1
+```

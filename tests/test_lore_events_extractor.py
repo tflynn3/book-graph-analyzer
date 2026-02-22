@@ -12,6 +12,17 @@ class _DummyLLM:
         return self.payload
 
 
+class _EmptyLLM:
+    provider = "openai"
+    model = "gpt-4o-mini"
+
+    def generate(self, prompt, temperature=0.2, max_tokens=2000):
+        return ""
+
+    def extract_json(self, response):
+        return None
+
+
 def test_extract_llm_normalizes_list_relation_ids_before_lookup(monkeypatch):
     dummy = _DummyLLM()
     dummy.payload = {
@@ -62,3 +73,15 @@ def test_extract_llm_drops_malformed_rows_with_warning(monkeypatch, caplog):
     assert len(relations) == 1
     assert "Dropped malformed LLM payload rows" in caplog.text
     assert "events=2 relations=3" in caplog.text
+
+
+def test_extract_llm_warns_and_skips_on_empty_response(monkeypatch, caplog):
+    monkeypatch.setattr(events_module, "LLMClient", lambda: _EmptyLLM())
+
+    extractor = EventExtractor()
+    with caplog.at_level(logging.WARNING):
+        extracted_events, relations = extractor._extract_llm("text", "book", chunk_index=4)
+
+    assert extracted_events == []
+    assert relations == []
+    assert "empty response" in caplog.text
