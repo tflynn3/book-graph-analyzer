@@ -160,6 +160,10 @@ class GenealogyRelation(BaseModel):
     era: str | None = None  # When this relationship was established
     passage_ids: list[str] = Field(default_factory=list)
     confidence: float = 1.0
+    evidence_text: str | None = None
+    evidence_start: int | None = None
+    evidence_end: int | None = None
+    resolution_confidence: float | None = None
 
 
 # =============================================================================

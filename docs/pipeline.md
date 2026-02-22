@@ -59,6 +59,11 @@ existing modules:
 
 - **Models** — `models.worldbuilding` adds `LinguisticLineage`, `GenealogyRelation`, `EditorialLayer`
 - **Graph** — `graph.writer` gains `write_linguistic_lineage()`, `write_genealogy_batch()`, `write_editorial_provenance()`
+
+## Genealogy extraction runbook
+
+- Coreference/context + LLM-validator closeout runbook:
+  - `docs/wiki/genealogy-extraction-runbook.md`
 - **CLI** — New commands live under existing groups (`worldbible`, `lore`, `corpus`, `pipeline`)
 
 ### Timeline Reconciliation

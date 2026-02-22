@@ -1,10 +1,9 @@
 """Genealogy extraction + normalization utilities.
 
-Issue #49 Slice 1 MVP:
-- Relationship models normalization
-- Regex/rule extraction for family relations
-- Optional LLM fallback (best-effort, never required)
-- JSON load/save helpers
+Enhancements:
+- Deterministic extraction with local coreference/context carry-over
+- Confidence and evidence-span metadata on each extracted relation
+- Optional LLM proposal stage with deterministic validation + reason codes
 """
 
 from __future__ import annotations
@@ -12,6 +11,7 @@ from __future__ import annotations
 import json
 import re
 from collections import defaultdict, deque
+from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Any
 
@@ -56,6 +56,47 @@ _INVERSE_RELATION: dict[GenealogyRelationType, GenealogyRelationType] = {
     GenealogyRelationType.HALF_SIBLING_OF: GenealogyRelationType.HALF_SIBLING_OF,
 }
 
+_TITLE_WORDS = {
+    "king", "queen", "lord", "lady", "prince", "princess", "sir", "captain", "master", "steward", "thane", "duke",
+}
+
+_PRONOUNS = {"he", "she", "his", "her", "him", "hers"}
+
+LLM_REJECT_SCHEMA = "schema_invalid"
+LLM_REJECT_ENTITY = "entity_unresolvable"
+LLM_REJECT_EVIDENCE = "evidence_misaligned"
+LLM_REJECT_LOW_CONF = "low_confidence"
+LLM_REJECT_RELATION = "unsupported_relation"
+
+
+@dataclass
+class _Sentence:
+    text: str
+    start: int
+    end: int
+
+
+@dataclass
+class _ContextState:
+    # Recent explicit names (most recent first)
+    recent_names: list[str] = field(default_factory=list)
+    # title phrase -> canonical name
+    title_refs: dict[str, str] = field(default_factory=dict)
+    last_subject: str | None = None
+
+    def add_name(self, name: str) -> None:
+        n = _normalize_person_name(name)
+        if not n:
+            return
+        self.recent_names = [x for x in self.recent_names if x.lower() != n.lower()]
+        self.recent_names.insert(0, n)
+        self.recent_names = self.recent_names[:6]
+
+    def bind_title(self, title_phrase: str, name: str) -> None:
+        t = re.sub(r"\s+", " ", title_phrase.strip().lower())
+        if t:
+            self.title_refs[t] = name
+
 
 def normalize_relation_type(raw: str | GenealogyRelationType) -> GenealogyRelationType:
     if isinstance(raw, GenealogyRelationType):
@@ -90,32 +131,23 @@ _HONORIFICS = {
 
 
 def _normalize_person_name(raw: str) -> str:
-    """Best-effort cleanup for extracted person names.
-
-    Removes leading honorifics and trailing appositive clauses to improve
-    canonical-id stability for genealogy extraction.
-    """
     name = re.sub(r"\s+", " ", (raw or "").strip(" ,.;:"))
     if not name:
         return name
-    # Drop trailing appositives: "Aragorn, son of Arathorn" -> "Aragorn"
     name = re.split(r",\s*(?:son|daughter|child|father|mother|brother|sister|heir)\b", name, maxsplit=1, flags=re.I)[0]
     parts = name.split()
     while parts and parts[0].lower() in _HONORIFICS:
         parts = parts[1:]
-    # Trim trailing epithet: "the Tall", "the Younger"
     if len(parts) >= 3 and parts[-2].lower() == "the":
         parts = parts[:-2]
     return " ".join(parts) if parts else name
 
 
 def _resolve_name(raw: str, seen: dict[str, str]) -> str:
-    """Resolve a surface form against names already seen in this passage."""
     cleaned = _normalize_person_name(raw)
     key = cleaned.lower()
     if key in seen:
         return seen[key]
-    # Backoff: single-token mention maps to unique prior full-name tail token.
     if " " not in cleaned:
         token = cleaned.lower()
         matches = [v for k, v in seen.items() if k.endswith(f" {token}") or k == token]
@@ -125,6 +157,52 @@ def _resolve_name(raw: str, seen: dict[str, str]) -> str:
     return cleaned
 
 
+def _split_sentences(text: str) -> list[_Sentence]:
+    out: list[_Sentence] = []
+    for m in re.finditer(r"[^.!?]+[.!?]?", text):
+        frag = m.group(0)
+        if frag.strip():
+            out.append(_Sentence(text=frag, start=m.start(), end=m.end()))
+    return out
+
+
+def _extract_title_bindings(sentence: str, ctx: _ContextState, seen_names: dict[str, str]) -> None:
+    # "King Aragorn" => bind "king" and "the king" to Aragorn
+    for m in re.finditer(r"\b(?P<title>King|Queen|Lord|Lady|Prince|Princess|Captain|Steward)\s+(?P<name>[A-Z][A-Za-z'\-]+(?: [A-Z][A-Za-z'\-]+)*)", sentence):
+        nm = _resolve_name(m.group("name"), seen_names)
+        tl = m.group("title").lower()
+        ctx.bind_title(tl, nm)
+        ctx.bind_title(f"the {tl}", nm)
+        ctx.add_name(nm)
+
+
+def _resolve_mention(raw: str, ctx: _ContextState, seen_names: dict[str, str]) -> tuple[str | None, float]:
+    token = re.sub(r"\s+", " ", (raw or "").strip(" ,.;:")).lower()
+    if not token:
+        return None, 0.0
+
+    if token in _PRONOUNS:
+        if ctx.last_subject:
+            return ctx.last_subject, 0.76
+        if ctx.recent_names:
+            return ctx.recent_names[0], 0.72
+        return None, 0.0
+
+    if token in ctx.title_refs:
+        return ctx.title_refs[token], 0.86
+
+    if token.startswith("the ") and token in ctx.title_refs:
+        return ctx.title_refs[token], 0.84
+
+    # explicit name path
+    if re.match(r"[A-Z]", raw.strip()[:1]):
+        nm = _resolve_name(raw, seen_names)
+        ctx.add_name(nm)
+        return nm, 0.95
+
+    return None, 0.0
+
+
 def _make_relation(
     source_name: str,
     target_name: str,
@@ -132,6 +210,10 @@ def _make_relation(
     house: str | None,
     passage_id: str | None,
     confidence: float,
+    evidence_text: str | None = None,
+    evidence_start: int | None = None,
+    evidence_end: int | None = None,
+    resolution_confidence: float | None = None,
 ) -> GenealogyRelation:
     return GenealogyRelation(
         source_id=_canon_id(source_name),
@@ -142,6 +224,10 @@ def _make_relation(
         house=house,
         passage_ids=[passage_id] if passage_id else [],
         confidence=confidence,
+        evidence_text=evidence_text,
+        evidence_start=evidence_start,
+        evidence_end=evidence_end,
+        resolution_confidence=resolution_confidence,
     )
 
 
@@ -160,6 +246,10 @@ def _add_with_inverse(relations: list[GenealogyRelation], relation: GenealogyRel
             era=relation.era,
             passage_ids=list(relation.passage_ids),
             confidence=relation.confidence,
+            evidence_text=relation.evidence_text,
+            evidence_start=relation.evidence_start,
+            evidence_end=relation.evidence_end,
+            resolution_confidence=relation.resolution_confidence,
         )
     )
 
@@ -172,7 +262,6 @@ _HOUSE_PATTERNS = [
 
 
 def infer_house_from_context(text: str, start: int, end: int, explicit_house: str | None = None) -> str | None:
-    """Infer house/clan near a matched genealogy statement."""
     if explicit_house:
         return explicit_house
     window_start = max(0, start - 120)
@@ -189,7 +278,6 @@ def infer_house_from_context(text: str, start: int, end: int, explicit_house: st
 
 
 def infer_generation_depths(relations: list[GenealogyRelation]) -> list[GenealogyRelation]:
-    """Infer missing generation_depth via relationship type + graph traversal."""
     parent_to_child: dict[str, set[str]] = defaultdict(set)
     child_to_parent: dict[str, set[str]] = defaultdict(set)
 
@@ -234,20 +322,92 @@ def infer_generation_depths(relations: list[GenealogyRelation]) -> list[Genealog
 
 
 _NAME = r"([A-Z][A-Za-z'\-]+(?: [A-Z][A-Za-z'\-]+)*)"
+_SUBJ = rf"(?P<source>{_NAME}|[Hh]e|[Ss]he|[Hh]is|[Hh]er|(?:[Tt]he\s+)?(?:king|queen|lord|lady|prince|princess|captain|steward))"
+_OBJ = rf"(?P<target>{_NAME}|(?:[Tt]he\s+)?(?:king|queen|lord|lady|prince|princess|captain|steward))"
 _RULES: list[tuple[re.Pattern[str], GenealogyRelationType, float]] = [
-    (re.compile(rf"\b{_NAME}\s+son of\s+{_NAME}\b"), GenealogyRelationType.CHILD_OF, 0.9),
-    (re.compile(rf"\b{_NAME}\s+daughter of\s+{_NAME}\b"), GenealogyRelationType.CHILD_OF, 0.9),
-    (re.compile(rf"\b{_NAME}\s+child of\s+{_NAME}\b"), GenealogyRelationType.CHILD_OF, 0.85),
-    (re.compile(rf"\b{_NAME}\s+father of\s+{_NAME}\b"), GenealogyRelationType.PARENT_OF, 0.9),
-    (re.compile(rf"\b{_NAME}\s+mother of\s+{_NAME}\b"), GenealogyRelationType.PARENT_OF, 0.9),
-    (re.compile(rf"\b{_NAME}\s+brother of\s+{_NAME}\b"), GenealogyRelationType.SIBLING_OF, 0.8),
-    (re.compile(rf"\b{_NAME}\s+sister of\s+{_NAME}\b"), GenealogyRelationType.SIBLING_OF, 0.8),
-    (re.compile(rf"\b{_NAME}\s+wed\s+{_NAME}\b"), GenealogyRelationType.SPOUSE_OF, 0.75),
-    (re.compile(rf"\b{_NAME}\s+married\s+{_NAME}\b"), GenealogyRelationType.SPOUSE_OF, 0.8),
-    # Appositive form common in Hobbit prose: "Bilbo, son of Bungo Baggins, ..."
-    (re.compile(rf"\b{_NAME}\s*,\s*son of\s+{_NAME}\b"), GenealogyRelationType.CHILD_OF, 0.92),
-    (re.compile(rf"\b{_NAME}\s*,\s*daughter of\s+{_NAME}\b"), GenealogyRelationType.CHILD_OF, 0.92),
+    (re.compile(rf"\b{_SUBJ}\s+son of\s+{_OBJ}\b"), GenealogyRelationType.CHILD_OF, 0.9),
+    (re.compile(rf"\b{_SUBJ}\s+daughter of\s+{_OBJ}\b"), GenealogyRelationType.CHILD_OF, 0.9),
+    (re.compile(rf"\b{_SUBJ}\s+child of\s+{_OBJ}\b"), GenealogyRelationType.CHILD_OF, 0.85),
+    (re.compile(rf"\b{_SUBJ}\s+(?:was\s+)?father of\s+{_OBJ}\b"), GenealogyRelationType.PARENT_OF, 0.9),
+    (re.compile(rf"\b{_SUBJ}\s+(?:was\s+)?mother of\s+{_OBJ}\b"), GenealogyRelationType.PARENT_OF, 0.9),
+    (re.compile(rf"\b{_SUBJ}\s+brother of\s+{_OBJ}\b"), GenealogyRelationType.SIBLING_OF, 0.8),
+    (re.compile(rf"\b{_SUBJ}\s+sister of\s+{_OBJ}\b"), GenealogyRelationType.SIBLING_OF, 0.8),
+    (re.compile(rf"\b{_SUBJ}\s+wed\s+{_OBJ}\b"), GenealogyRelationType.SPOUSE_OF, 0.75),
+    (re.compile(rf"\b{_SUBJ}\s+married\s+{_OBJ}\b"), GenealogyRelationType.SPOUSE_OF, 0.8),
+    (re.compile(rf"\b{_NAME}\s*,\s*son of\s+{_OBJ}\b"), GenealogyRelationType.CHILD_OF, 0.92),
+    (re.compile(rf"\b{_NAME}\s*,\s*daughter of\s+{_OBJ}\b"), GenealogyRelationType.CHILD_OF, 0.92),
 ]
+
+
+def validate_llm_genealogy_proposals(
+    text: str,
+    proposals: list[dict[str, Any]],
+    known_entities: set[str] | None = None,
+    min_confidence: float = 0.65,
+) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+    accepted: list[dict[str, Any]] = []
+    rejected: list[dict[str, Any]] = []
+    entities = {e.lower() for e in (known_entities or set())}
+
+    for item in proposals:
+        reason = None
+        source = str(item.get("source_name", "")).strip()
+        target = str(item.get("target_name", "")).strip()
+        rel_raw = str(item.get("relation_type", "")).strip()
+        evidence_text = str(item.get("evidence_text", "")).strip()
+        try:
+            ev_start = int(item.get("evidence_start"))
+            ev_end = int(item.get("evidence_end"))
+        except Exception:
+            ev_start = ev_end = -1
+        conf = float(item.get("confidence", 0.0) or 0.0)
+
+        if not source or not target or not rel_raw:
+            reason = LLM_REJECT_SCHEMA
+        elif source == target:
+            reason = LLM_REJECT_ENTITY
+        elif conf < min_confidence:
+            reason = LLM_REJECT_LOW_CONF
+
+        try:
+            rel_type = normalize_relation_type(rel_raw)
+        except Exception:
+            rel_type = None
+        if reason is None and rel_type is None:
+            reason = LLM_REJECT_RELATION
+
+        # entity resolvability guardrail
+        if reason is None and entities:
+            if source.lower() not in entities and target.lower() not in entities:
+                reason = LLM_REJECT_ENTITY
+
+        # evidence span alignment guardrail
+        if reason is None:
+            if not (0 <= ev_start < ev_end <= len(text)):
+                reason = LLM_REJECT_EVIDENCE
+            else:
+                span = text[ev_start:ev_end]
+                if evidence_text and evidence_text not in span and span not in evidence_text:
+                    reason = LLM_REJECT_EVIDENCE
+                elif source.lower() not in span.lower() and target.lower() not in span.lower():
+                    reason = LLM_REJECT_EVIDENCE
+
+        if reason is None:
+            accepted.append({
+                "source_name": source,
+                "target_name": target,
+                "relation_type": rel_type,
+                "evidence_text": evidence_text or text[ev_start:ev_end],
+                "evidence_start": ev_start,
+                "evidence_end": ev_end,
+                "confidence": conf,
+            })
+        else:
+            item = dict(item)
+            item["reason_code"] = reason
+            rejected.append(item)
+
+    return accepted, rejected
 
 
 def extract_genealogy_from_text(
@@ -256,49 +416,86 @@ def extract_genealogy_from_text(
     house: str | None = None,
     llm_client: Any | None = None,
 ) -> list[GenealogyRelation]:
-    """Extract family relations from free text.
-
-    Uses deterministic regex rules first. If no relations are found and
-    ``llm_client`` is provided, tries a best-effort JSON fallback.
-    """
     relations: list[GenealogyRelation] = []
     seen_names: dict[str, str] = {}
+    ctx = _ContextState()
 
-    for pattern, relation_type, confidence in _RULES:
-        for match in pattern.finditer(text):
-            source_name = _resolve_name(match.group(1).strip(), seen_names)
-            target_name = _resolve_name(match.group(2).strip(), seen_names)
-            if source_name == target_name:
-                continue
-            inferred_house = infer_house_from_context(text, match.start(), match.end(), explicit_house=house)
-            rel = _make_relation(source_name, target_name, relation_type, inferred_house, passage_id, confidence)
-            _add_with_inverse(relations, rel)
+    for sentence in _split_sentences(text):
+        _extract_title_bindings(sentence.text, ctx, seen_names)
 
-    if relations or llm_client is None:
-        return infer_generation_depths(_dedupe_relations(relations))
+        for pattern, relation_type, base_confidence in _RULES:
+            for match in pattern.finditer(sentence.text):
+                source_raw = match.group("source") if "source" in match.groupdict() else match.group(1)
+                target_raw = match.group("target") if "target" in match.groupdict() else match.group(2)
 
-    # Optional fallback: extremely defensive JSON contract.
-    prompt = (
-        "Extract genealogy relations from this passage as JSON array with objects "
-        "{source_name,target_name,relation_type}. relation_type must be one of: "
-        "PARENT_OF,CHILD_OF,SIBLING_OF,SPOUSE_OF,ANCESTOR_OF,DESCENDANT_OF.\n\n"
-        f"Passage:\n{text}"
-    )
-    try:
-        raw = llm_client.generate(prompt)
-        payload = json.loads(raw)
-        if isinstance(payload, dict):
-            payload = payload.get("relations", [])
-        for item in payload if isinstance(payload, list) else []:
-            rel_type = normalize_relation_type(str(item.get("relation_type", "")))
-            source_name = str(item.get("source_name", "")).strip()
-            target_name = str(item.get("target_name", "")).strip()
-            if not source_name or not target_name or source_name == target_name:
-                continue
-            rel = _make_relation(source_name, target_name, rel_type, house, passage_id, 0.6)
-            _add_with_inverse(relations, rel)
-    except Exception:
-        pass
+                source_name, source_rc = _resolve_mention(source_raw, ctx, seen_names)
+                target_name, target_rc = _resolve_mention(target_raw, ctx, seen_names)
+                if not source_name or not target_name or source_name == target_name:
+                    continue
+
+                local_start = sentence.start + match.start()
+                local_end = sentence.start + match.end()
+                inferred_house = infer_house_from_context(text, local_start, local_end, explicit_house=house)
+                resolution_conf = min(source_rc, target_rc)
+                conf = round(max(0.0, min(1.0, base_confidence * (0.85 + 0.2 * resolution_conf))), 3)
+                rel = _make_relation(
+                    source_name,
+                    target_name,
+                    relation_type,
+                    inferred_house,
+                    passage_id,
+                    conf,
+                    evidence_text=text[local_start:local_end],
+                    evidence_start=local_start,
+                    evidence_end=local_end,
+                    resolution_confidence=resolution_conf,
+                )
+                _add_with_inverse(relations, rel)
+                ctx.last_subject = source_name
+                ctx.add_name(source_name)
+                ctx.add_name(target_name)
+
+    # LLM proposal stage (optional, strictly validated)
+    if llm_client is not None:
+        entities = set(seen_names.values())
+        prompt = (
+            "Extract genealogy relations from this passage as JSON array. Each object MUST include "
+            "source_name,target_name,relation_type,evidence_text,evidence_start,evidence_end,confidence. "
+            "relation_type one of PARENT_OF,CHILD_OF,SIBLING_OF,SPOUSE_OF,ANCESTOR_OF,DESCENDANT_OF,"
+            "FOSTER_PARENT_OF,FOSTER_CHILD_OF,HALF_SIBLING_OF. "
+            "Only include relations explicitly supported by the span.\n\n"
+            f"Passage:\n{text}"
+        )
+        try:
+            raw = llm_client.generate(prompt)
+            payload = json.loads(raw)
+            if isinstance(payload, dict):
+                proposals = payload.get("relations", [])
+            else:
+                proposals = payload if isinstance(payload, list) else []
+            accepted, _rejected = validate_llm_genealogy_proposals(text, proposals, known_entities=entities or None)
+            for item in accepted:
+                inferred_house = infer_house_from_context(
+                    text,
+                    int(item["evidence_start"]),
+                    int(item["evidence_end"]),
+                    explicit_house=house,
+                )
+                rel = _make_relation(
+                    source_name=item["source_name"],
+                    target_name=item["target_name"],
+                    relation_type=item["relation_type"],
+                    house=inferred_house,
+                    passage_id=passage_id,
+                    confidence=float(item["confidence"]),
+                    evidence_text=str(item["evidence_text"]),
+                    evidence_start=int(item["evidence_start"]),
+                    evidence_end=int(item["evidence_end"]),
+                    resolution_confidence=0.7,
+                )
+                _add_with_inverse(relations, rel)
+        except Exception:
+            pass
 
     return infer_generation_depths(_dedupe_relations(relations))
 
@@ -328,6 +525,10 @@ def parse_genealogy_relation(data: dict[str, Any]) -> GenealogyRelation:
         era=data.get("era"),
         passage_ids=list(data.get("passage_ids") or []),
         confidence=float(data.get("confidence", 1.0) or 1.0),
+        evidence_text=data.get("evidence_text"),
+        evidence_start=data.get("evidence_start"),
+        evidence_end=data.get("evidence_end"),
+        resolution_confidence=data.get("resolution_confidence"),
     )
 
 
@@ -361,6 +562,10 @@ def genealogy_to_json(relations: list[GenealogyRelation]) -> dict[str, Any]:
                 "era": r.era,
                 "passage_ids": r.passage_ids,
                 "confidence": r.confidence,
+                "evidence_text": r.evidence_text,
+                "evidence_start": r.evidence_start,
+                "evidence_end": r.evidence_end,
+                "resolution_confidence": r.resolution_confidence,
             }
             for r in relations
         ]
