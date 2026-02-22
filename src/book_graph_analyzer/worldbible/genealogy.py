@@ -336,7 +336,21 @@ _RULES: list[tuple[re.Pattern[str], GenealogyRelationType, float]] = [
     (re.compile(rf"\b{_SUBJ}\s+married\s+{_OBJ}\b"), GenealogyRelationType.SPOUSE_OF, 0.8),
     (re.compile(rf"\b{_NAME}\s*,\s*son of\s+{_OBJ}\b"), GenealogyRelationType.CHILD_OF, 0.92),
     (re.compile(rf"\b{_NAME}\s*,\s*daughter of\s+{_OBJ}\b"), GenealogyRelationType.CHILD_OF, 0.92),
+    (re.compile(rf"\b{_NAME}\s*,\s*the son of\s+{_NAME}\b"), GenealogyRelationType.CHILD_OF, 0.92),
+    (re.compile(rf"\b{_NAME}\s*,\s*the daughter of\s+{_NAME}\b"), GenealogyRelationType.CHILD_OF, 0.92),
+    (re.compile(rf"\b{_NAME}\s+was\s+the son of\s+{_NAME}\b"), GenealogyRelationType.CHILD_OF, 0.9),
+    (re.compile(rf"\b{_NAME}\s+was\s+the daughter of\s+{_NAME}\b"), GenealogyRelationType.CHILD_OF, 0.9),
+    (re.compile(rf"\b{_NAME}\s+grandson of\s+{_NAME}\b"), GenealogyRelationType.DESCENDANT_OF, 0.86),
+    (re.compile(rf"\b{_NAME}\s+granddaughter of\s+{_NAME}\b"), GenealogyRelationType.DESCENDANT_OF, 0.86),
+    (re.compile(rf"\b{_NAME}\s+heir of\s+{_NAME}\b"), GenealogyRelationType.DESCENDANT_OF, 0.78),
 ]
+
+
+_KINSHIP_CUES = re.compile(
+    r"\b(son of|daughter of|child of|father of|mother of|brother of|sister of|"
+    r"married|wed|wedded|grandson of|granddaughter of|heir of|line of|descended from)\b",
+    re.I,
+)
 
 
 def validate_llm_genealogy_proposals(
@@ -355,12 +369,14 @@ def validate_llm_genealogy_proposals(
         target = str(item.get("target_name", "")).strip()
         rel_raw = str(item.get("relation_type", "")).strip()
         evidence_text = str(item.get("evidence_text", "")).strip()
+        ev_start_raw = item.get("evidence_start")
+        ev_end_raw = item.get("evidence_end")
         try:
-            ev_start = int(item.get("evidence_start"))
-            ev_end = int(item.get("evidence_end"))
+            ev_start = int(ev_start_raw)
+            ev_end = int(ev_end_raw)
         except Exception:
             ev_start = ev_end = -1
-        conf = float(item.get("confidence", 0.0) or 0.0)
+        conf = float(item.get("confidence", 0.7) or 0.7)
 
         if not source or not target or not rel_raw:
             reason = LLM_REJECT_SCHEMA
@@ -380,6 +396,15 @@ def validate_llm_genealogy_proposals(
         if reason is None and entities:
             if source.lower() not in entities and target.lower() not in entities:
                 reason = LLM_REJECT_ENTITY
+
+        # Backward-compat fallback for legacy LLM schema without evidence span fields.
+        if reason is None and (ev_start < 0 or ev_end < 0):
+            src_i = text.lower().find(source.lower())
+            tgt_i = text.lower().find(target.lower())
+            if src_i >= 0 and tgt_i >= 0:
+                ev_start = min(src_i, tgt_i)
+                ev_end = max(src_i + len(source), tgt_i + len(target))
+                evidence_text = text[ev_start:ev_end]
 
         # evidence span alignment guardrail
         if reason is None:
@@ -406,7 +431,6 @@ def validate_llm_genealogy_proposals(
             item = dict(item)
             item["reason_code"] = reason
             rejected.append(item)
-
     return accepted, rejected
 
 
@@ -415,6 +439,7 @@ def extract_genealogy_from_text(
     passage_id: str | None = None,
     house: str | None = None,
     llm_client: Any | None = None,
+    min_relations_for_fallback: int = 2,
 ) -> list[GenealogyRelation]:
     relations: list[GenealogyRelation] = []
     seen_names: dict[str, str] = {}
@@ -422,7 +447,6 @@ def extract_genealogy_from_text(
 
     for sentence in _split_sentences(text):
         _extract_title_bindings(sentence.text, ctx, seen_names)
-
         for pattern, relation_type, base_confidence in _RULES:
             for match in pattern.finditer(sentence.text):
                 source_raw = match.group("source") if "source" in match.groupdict() else match.group(1)
@@ -455,8 +479,9 @@ def extract_genealogy_from_text(
                 ctx.add_name(source_name)
                 ctx.add_name(target_name)
 
-    # LLM proposal stage (optional, strictly validated)
-    if llm_client is not None:
+    # LLM proposal stage (optional, strictly validated, only when useful)
+    deduped = _dedupe_relations(relations)
+    if llm_client is not None and _KINSHIP_CUES.search(text) and len(deduped) < min_relations_for_fallback:
         entities = set(seen_names.values())
         prompt = (
             "Extract genealogy relations from this passage as JSON array. Each object MUST include "
@@ -493,11 +518,10 @@ def extract_genealogy_from_text(
                     evidence_end=int(item["evidence_end"]),
                     resolution_confidence=0.7,
                 )
-                _add_with_inverse(relations, rel)
+                _add_with_inverse(deduped, rel)
         except Exception:
             pass
-
-    return infer_generation_depths(_dedupe_relations(relations))
+    return infer_generation_depths(_dedupe_relations(deduped))
 
 
 def _dedupe_relations(relations: list[GenealogyRelation]) -> list[GenealogyRelation]:

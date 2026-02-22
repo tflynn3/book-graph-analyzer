@@ -6772,6 +6772,7 @@ def pipeline_worldbuilding(path: str, title: str | None, pillars: tuple[str], ou
     from book_graph_analyzer.ingest.loader import load_book
     from book_graph_analyzer.worldbible.extractor import ExtractionConfig, WorldBibleExtractor
     from book_graph_analyzer.worldbible.genealogy import extract_genealogy_from_text, genealogy_to_json
+    from book_graph_analyzer.worldbible.genealogy_validation import evaluate_genealogy_threshold
 
     file_path = Path(path)
     book_title = title or file_path.stem.replace("_", " ").replace("-", " ").title()
@@ -6800,8 +6801,17 @@ def pipeline_worldbuilding(path: str, title: str | None, pillars: tuple[str], ou
                 json.dump(payload, f, indent=2)
 
             count = len(payload.get("relations", []))
-            metrics["pillars"]["genealogy"] = payload.get("metrics", {"relation_count": count})
-            console.print(f"  [green]✓[/green] Genealogy — extracted {count} relations → {output_path}")
+            threshold_eval = evaluate_genealogy_threshold(book_title, count)
+            metrics["pillars"]["genealogy"] = {
+                **payload.get("metrics", {"relation_count": count}),
+                "threshold": threshold_eval.threshold,
+                "passed_threshold": threshold_eval.passed,
+            }
+            status = "PASS" if threshold_eval.passed else "FAIL"
+            console.print(
+                f"  [green]✓[/green] Genealogy — extracted {count} relations "
+                f"(threshold {threshold_eval.threshold}: {status}) → {output_path}"
+            )
 
             if hobbit_gate and count == 0:
                 raise click.ClickException(

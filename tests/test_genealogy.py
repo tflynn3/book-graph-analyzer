@@ -51,6 +51,37 @@ def test_extract_genealogy_appositive_hobbit_style_clause():
     assert ("Bungo Baggins", "Bilbo", "PARENT_OF") in rel_types
 
 
+def test_extract_genealogy_was_the_son_of_pattern():
+    relations = extract_genealogy_from_text("Faramir was the son of Denethor.")
+    rel_types = {(r.source_name, r.target_name, r.relation_type.value) for r in relations}
+    assert ("Faramir", "Denethor", "CHILD_OF") in rel_types
+
+
+def test_extract_genealogy_grandson_pattern():
+    relations = extract_genealogy_from_text("Eldarion grandson of Arathorn.")
+    rel_types = {(r.source_name, r.target_name, r.relation_type.value) for r in relations}
+    assert ("Eldarion", "Arathorn", "DESCENDANT_OF") in rel_types
+
+
+def test_extract_genealogy_safe_llm_fallback_triggers_when_low_yield():
+    class _LLM:
+        def generate(self, _prompt: str) -> str:
+            return json.dumps([
+                {"source_name": "Theoden", "target_name": "Thengel", "relation_type": "CHILD_OF"}
+            ])
+
+    relations = extract_genealogy_from_text(
+        "It is said Theoden heir of Thengel.",
+        llm_client=_LLM(),
+        min_relations_for_fallback=3,
+    )
+    rel_types = {(r.source_name, r.target_name, r.relation_type.value) for r in relations}
+    assert any(
+        {a, b} == {"Theoden", "Thengel"} and rel == "CHILD_OF"
+        for a, b, rel in rel_types
+    )
+
+
 def test_infer_generation_depths_for_ancestor_relation_via_traversal():
     from book_graph_analyzer.models.worldbuilding import GenealogyRelation
 
