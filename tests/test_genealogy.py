@@ -44,6 +44,13 @@ def test_extract_genealogy_infers_generation_depth_for_direct_edges():
     assert all(r.generation_depth == 1 for r in relations)
 
 
+def test_extract_genealogy_appositive_hobbit_style_clause():
+    relations = extract_genealogy_from_text("Bilbo, son of Bungo Baggins, lived in the Shire.")
+    rel_types = {(r.source_name, r.target_name, r.relation_type.value) for r in relations}
+    assert ("Bilbo", "Bungo Baggins", "CHILD_OF") in rel_types
+    assert ("Bungo Baggins", "Bilbo", "PARENT_OF") in rel_types
+
+
 def test_infer_generation_depths_for_ancestor_relation_via_traversal():
     from book_graph_analyzer.models.worldbuilding import GenealogyRelation
 
@@ -87,6 +94,7 @@ def test_build_ancestor_chain_traverses_multiple_generations():
 def test_genealogy_json_roundtrip(tmp_path):
     relations = extract_genealogy_from_text("Thingol father of Luthien.")
     payload = genealogy_to_json(relations)
+    assert payload["metrics"]["relation_count"] == len(relations)
 
     p = tmp_path / "genealogy.json"
     p.write_text(json.dumps(payload), encoding="utf-8")
