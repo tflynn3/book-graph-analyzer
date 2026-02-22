@@ -6691,6 +6691,11 @@ def pipeline_worldbuilding(path: str, title: str | None, pillars: tuple[str], ou
 
     hobbit_gate = "hobbit" in (book_title + " " + file_path.name).lower()
 
+    if hobbit_gate and "genealogy" not in selected:
+        raise click.ClickException(
+            "Hobbit acceptance gate failed: genealogy stage is required in --pillars."
+        )
+
     for pillar in selected:
         if pillar == "genealogy":
             relations = extract_genealogy_from_text(text, passage_id=str(file_path))
@@ -6706,6 +6711,21 @@ def pipeline_worldbuilding(path: str, title: str | None, pillars: tuple[str], ou
                 raise click.ClickException(
                     "Hobbit acceptance gate failed: genealogy extraction produced zero relations."
                 )
+
+            if hobbit_gate and count > 0:
+                relation_rows = payload.get("relations", [])
+                has_depth = any(r.get("generation_depth") is not None for r in relation_rows)
+                has_trait_rationale_output = all(
+                    isinstance(r.get("inheritance_traits"), list) for r in relation_rows
+                )
+                if not has_depth:
+                    raise click.ClickException(
+                        "Hobbit acceptance gate failed: genealogy output missing generation depth metadata."
+                    )
+                if not has_trait_rationale_output:
+                    raise click.ClickException(
+                        "Hobbit acceptance gate failed: genealogy output missing inheritance trait rationale fields."
+                    )
             continue
 
         issue_map = {

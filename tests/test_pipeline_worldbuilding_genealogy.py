@@ -84,3 +84,61 @@ def test_pipeline_worldbuilding_hobbit_gate_accepts_non_population_genealogy(tmp
     )
 
     assert result.exit_code == 0, result.output
+
+
+def test_pipeline_worldbuilding_hobbit_gate_requires_genealogy_stage(tmp_path):
+    hobbit_text = tmp_path / "the_hobbit.txt"
+    hobbit_text.write_text(
+        "Bilbo, son of Bungo Baggins, lived in the Shire.",
+        encoding="utf-8",
+    )
+
+    out_dir = tmp_path / "out"
+    result = CliRunner().invoke(
+        main,
+        [
+            "pipeline",
+            "worldbuilding",
+            str(hobbit_text),
+            "--title",
+            "The Hobbit",
+            "--pillars",
+            "linguistic",
+            "--output-dir",
+            str(out_dir),
+        ],
+    )
+
+    assert result.exit_code != 0
+    assert "genealogy stage is required" in result.output
+
+
+def test_pipeline_worldbuilding_hobbit_gate_enforces_quality_fields(tmp_path):
+    hobbit_text = tmp_path / "the_hobbit.txt"
+    hobbit_text.write_text(
+        "Bilbo, son of Bungo Baggins, lived in the Shire.",
+        encoding="utf-8",
+    )
+
+    out_dir = tmp_path / "out"
+    result = CliRunner().invoke(
+        main,
+        [
+            "pipeline",
+            "worldbuilding",
+            str(hobbit_text),
+            "--title",
+            "The Hobbit",
+            "--pillars",
+            "genealogy",
+            "--output-dir",
+            str(out_dir),
+        ],
+    )
+
+    assert result.exit_code == 0, result.output
+    payload = json.loads((out_dir / "the_hobbit_genealogy.json").read_text(encoding="utf-8"))
+    relations = payload.get("relations", [])
+    assert relations
+    assert any(r.get("generation_depth") is not None for r in relations)
+    assert all(isinstance(r.get("inheritance_traits"), list) for r in relations)
