@@ -18,6 +18,121 @@ def test_story_group_registered():
     assert "solve" in main.commands["story"].commands
     assert "draft" in main.commands["story"].commands
     assert "audit" in main.commands["story"].commands
+    assert "beats" in main.commands["story"].commands
+    assert "expand" in main.commands["story"].commands["beats"].commands
+    assert "validate" in main.commands["story"].commands["beats"].commands
+    assert "show" in main.commands["story"].commands["beats"].commands
+    assert "clean" in main.commands["story"].commands["beats"].commands
+
+
+def test_story_beats_validate_show_clean_flow_and_scoping(tmp_path):
+    runner = CliRunner()
+    proj_dir = tmp_path / "beats-proj"
+    proj_dir.mkdir(parents=True, exist_ok=True)
+    (proj_dir / "project.json").write_text(
+        json.dumps({"name": "Beats", "slug": "beats-proj", "target_chapters": 2, "scenes_per_chapter": 2}, indent=2),
+        encoding="utf-8",
+    )
+    (proj_dir / "shadow_beats.json").write_text(
+        json.dumps(
+            {
+                "schema_version": "shadow-beats-v1",
+                "project_slug": "beats-proj",
+                "beats": [
+                    {"beat_id": "ch01-sc01-b01-aa", "position": 1, "beat_type": "setup", "cause_refs": [], "failed_constraints": []},
+                    {"beat_id": "ch01-sc02-b02-bb", "position": 2, "beat_type": "pivot", "cause_refs": ["missing-ref"], "failed_constraints": []},
+                    {"beat_id": "ch02-sc01-b03-cc", "position": 3, "beat_type": "confrontation", "cause_refs": ["ch01-sc02-b02-bb"], "failed_constraints": ["forbidden:spaceship"]},
+                ],
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+    v = runner.invoke(
+        main,
+        ["story", "beats", "validate", "--project", "beats-proj", "--chapter", "1", "--projects-dir", str(tmp_path)],
+    )
+    assert v.exit_code == 0, v.output
+    report = json.loads((proj_dir / "shadow_beats_validation.json").read_text(encoding="utf-8"))
+    assert report["summary"]["beats"] == 2
+    assert report["summary"]["errors"] == 1
+    assert report["summary"]["warnings"] == 0
+
+    show = runner.invoke(
+        main,
+        ["story", "beats", "show", "--project", "beats-proj", "--scene", "ch02-sc01", "--projects-dir", str(tmp_path)],
+    )
+    assert show.exit_code == 0, show.output
+    assert "count=1" in show.output
+    assert "warnings=1" in runner.invoke(
+        main,
+        ["story", "beats", "validate", "--project", "beats-proj", "--scene", "ch02-sc01", "--projects-dir", str(tmp_path)],
+    ).output
+
+    dry = runner.invoke(
+        main,
+        ["story", "beats", "clean", "--project", "beats-proj", "--chapter", "1", "--dry-run", "--projects-dir", str(tmp_path)],
+    )
+    assert dry.exit_code == 0, dry.output
+    unchanged = json.loads((proj_dir / "shadow_beats.json").read_text(encoding="utf-8"))
+    assert len(unchanged["beats"]) == 3
+
+    clean = runner.invoke(
+        main,
+        ["story", "beats", "clean", "--project", "beats-proj", "--chapter", "1", "--projects-dir", str(tmp_path)],
+    )
+    assert clean.exit_code == 0, clean.output
+    changed = json.loads((proj_dir / "shadow_beats.json").read_text(encoding="utf-8"))
+    assert len(changed["beats"]) == 1
+    assert changed["beats"][0]["beat_id"].startswith("ch02-")
+
+
+def test_story_beats_validate_strict_exit_codes(tmp_path):
+    runner = CliRunner()
+    proj_dir = tmp_path / "beats-strict"
+    proj_dir.mkdir(parents=True, exist_ok=True)
+    (proj_dir / "project.json").write_text(
+        json.dumps({"name": "Strict", "slug": "beats-strict", "target_chapters": 1, "scenes_per_chapter": 1}, indent=2),
+        encoding="utf-8",
+    )
+    (proj_dir / "shadow_beats.json").write_text(
+        json.dumps(
+            {
+                "beats": [
+                    {"beat_id": "ch01-sc01-b01-a", "position": 1, "beat_type": "setup", "cause_refs": [], "failed_constraints": ["forbidden:x"]}
+                ]
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+    non_strict = runner.invoke(main, ["story", "beats", "validate", "--project", "beats-strict", "--projects-dir", str(tmp_path)])
+    assert non_strict.exit_code == 0, non_strict.output
+
+    strict_errors_only = runner.invoke(
+        main,
+        ["story", "beats", "validate", "--project", "beats-strict", "--strict", "--projects-dir", str(tmp_path)],
+    )
+    assert strict_errors_only.exit_code == 0, strict_errors_only.output
+
+    strict_warn = runner.invoke(
+        main,
+        [
+            "story",
+            "beats",
+            "validate",
+            "--project",
+            "beats-strict",
+            "--strict",
+            "--strict-warnings",
+            "--projects-dir",
+            str(tmp_path),
+        ],
+    )
+    assert strict_warn.exit_code != 0
+    assert "Strict validation failed" in strict_warn.output
 
 
 def test_story_init_non_interactive(tmp_path):
@@ -465,6 +580,323 @@ def test_story_solve_fails_hard_when_required_elements_missing(tmp_path):
     out = runner.invoke(main, ["story", "solve", "--project", "solve-hard-gate", "--projects-dir", str(tmp_path)])
     assert out.exit_code != 0
     assert "failed hard required-element gating" in out.output
+
+
+def test_selector_early_stops_on_goal_completion(tmp_path):
+    proj_dir = tmp_path / "solve-early-stop"
+    proj_dir.mkdir(parents=True, exist_ok=True)
+    (proj_dir / "project.json").write_text(json.dumps({"name": "x", "slug": "solve-early-stop"}, indent=2), encoding="utf-8")
+    (proj_dir / "constraints.json").write_text(
+        json.dumps(
+            {
+                "required_elements": [],
+                "forbidden_terms": [],
+                "selection": {"goal_completion_threshold": 1.0, "min_beats_per_scene": 2, "anti_padding_penalty": 1.0},
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    (proj_dir / "shadow_candidates.json").write_text(
+        json.dumps(
+            {
+                "candidates": [
+                    {
+                        "candidate_id": "c1",
+                        "scene_id": "ch01-sc01",
+                        "scene_goal_progress": 0.5,
+                        "shadow_event": {"id": "e1", "action": "setup", "description": "Setup scene.", "characters": ["A"]},
+                        "plausibility_score": 0.95,
+                        "transition_probability": 0.95,
+                    },
+                    {
+                        "candidate_id": "c2",
+                        "scene_id": "ch01-sc02",
+                        "scene_goal_progress": 1.0,
+                        "shadow_event": {"id": "e2", "action": "pivot", "description": "Goal is achieved.", "characters": ["A"]},
+                        "plausibility_score": 0.95,
+                        "transition_probability": 0.95,
+                    },
+                    {
+                        "candidate_id": "c3",
+                        "scene_id": "ch01-sc03",
+                        "scene_goal_progress": 1.0,
+                        "shadow_event": {"id": "e3", "action": "linger", "description": "Padding after completion.", "characters": ["A"]},
+                        "plausibility_score": 0.95,
+                        "transition_probability": 0.95,
+                    },
+                ]
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+    runner = CliRunner()
+    out = runner.invoke(main, ["story", "solve", "--project", "solve-early-stop", "--projects-dir", str(tmp_path)])
+    assert out.exit_code == 0, out.output
+    solved = json.loads((proj_dir / "shadow_solution.json").read_text(encoding="utf-8"))
+    assert solved["k_max"] == 3
+    assert [row["candidate_id"] for row in solved["trajectory"]] == ["c1", "c2"]
+
+
+def test_selector_rejects_padded_nonprogress_beats(tmp_path):
+    proj_dir = tmp_path / "solve-nonprogress-padding"
+    proj_dir.mkdir(parents=True, exist_ok=True)
+    (proj_dir / "project.json").write_text(json.dumps({"name": "x", "slug": "solve-nonprogress-padding"}, indent=2), encoding="utf-8")
+    (proj_dir / "constraints.json").write_text(
+        json.dumps(
+            {
+                "required_elements": [],
+                "forbidden_terms": [],
+                "selection": {
+                    "goal_completion_threshold": 1.0,
+                    "min_beats_per_scene": 2,
+                    "anti_padding_penalty": 1.2,
+                    "unresolved_thread_penalty": 0.7,
+                },
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    (proj_dir / "shadow_candidates.json").write_text(
+        json.dumps(
+            {
+                "candidates": [
+                    {
+                        "candidate_id": "c1",
+                        "scene_id": "ch01-sc01",
+                        "scene_goal_progress": 0.6,
+                        "shadow_event": {"id": "e1", "action": "setup", "description": "Setup scene.", "characters": ["A"]},
+                        "plausibility_score": 0.99,
+                        "transition_probability": 0.99,
+                    },
+                    {
+                        "candidate_id": "c2",
+                        "scene_id": "ch01-sc02",
+                        "scene_goal_progress": 1.0,
+                        "shadow_event": {"id": "e2", "action": "resolve", "description": "Resolution.", "characters": ["A"]},
+                        "plausibility_score": 0.99,
+                        "transition_probability": 0.99,
+                    },
+                    {
+                        "candidate_id": "c3_pad",
+                        "scene_id": "ch01-sc03",
+                        "scene_goal_progress": 1.0,
+                        "unresolved_causal_threads": 2,
+                        "shadow_event": {"id": "e3", "action": "linger", "description": "Extra non-progress beat.", "characters": ["A"]},
+                        "plausibility_score": 0.99,
+                        "transition_probability": 0.99,
+                    },
+                ]
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+    runner = CliRunner()
+    out = runner.invoke(main, ["story", "solve", "--project", "solve-nonprogress-padding", "--projects-dir", str(tmp_path)])
+    assert out.exit_code == 0, out.output
+    solved = json.loads((proj_dir / "shadow_solution.json").read_text(encoding="utf-8"))
+    assert [row["candidate_id"] for row in solved["trajectory"]] == ["c1", "c2"]
+
+
+def test_causal_precondition_fail_with_state_mismatch(tmp_path):
+    proj_dir = tmp_path / "solve-causal-state"
+    proj_dir.mkdir(parents=True, exist_ok=True)
+    (proj_dir / "project.json").write_text(json.dumps({"name": "x", "slug": "solve-causal-state"}, indent=2), encoding="utf-8")
+    (proj_dir / "constraints.json").write_text(
+        json.dumps({"required_elements": [], "forbidden_terms": []}, indent=2),
+        encoding="utf-8",
+    )
+    (proj_dir / "shadow_candidates.json").write_text(
+        json.dumps(
+            {
+                "candidates": [
+                    {
+                        "candidate_id": "c1",
+                        "scene_id": "ch01-sc01",
+                        "shadow_event": {"id": "e1", "action": "approach", "description": "Approach the gate.", "characters": ["A"]},
+                        "plausibility_score": 0.95,
+                        "transition_probability": 0.95,
+                    },
+                    {
+                        "candidate_id": "c2_invalid",
+                        "scene_id": "ch01-sc02",
+                        "preconditions": ["gate_open"],
+                        "shadow_event": {"id": "e2", "action": "enter", "description": "Enter through the gate.", "characters": ["A"]},
+                        "plausibility_score": 0.99,
+                        "transition_probability": 0.99,
+                    },
+                    {
+                        "candidate_id": "c2_valid",
+                        "scene_id": "ch01-sc02",
+                        "shadow_event": {"id": "e3", "action": "wait", "description": "Wait outside the closed gate.", "characters": ["A"]},
+                        "plausibility_score": 0.7,
+                        "transition_probability": 0.7,
+                    },
+                ]
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+    runner = CliRunner()
+    out = runner.invoke(main, ["story", "solve", "--project", "solve-causal-state", "--projects-dir", str(tmp_path)])
+    assert out.exit_code == 0, out.output
+    solved = json.loads((proj_dir / "shadow_solution.json").read_text(encoding="utf-8"))
+    assert [row["candidate_id"] for row in solved["trajectory"]] == ["c1", "c2_valid"]
+
+
+def test_causal_precondition_tristate_unknown_strict_reject_by_default(tmp_path):
+    proj_dir = tmp_path / "solve-causal-state-unknown-reject"
+    proj_dir.mkdir(parents=True, exist_ok=True)
+    (proj_dir / "project.json").write_text(json.dumps({"name": "x", "slug": "solve-causal-state-unknown-reject"}, indent=2), encoding="utf-8")
+    (proj_dir / "constraints.json").write_text(
+        json.dumps({"required_elements": [], "forbidden_terms": []}, indent=2),
+        encoding="utf-8",
+    )
+    (proj_dir / "shadow_candidates.json").write_text(
+        json.dumps(
+            {
+                "candidates": [
+                    {
+                        "candidate_id": "c1",
+                        "scene_id": "ch01-sc01",
+                        "shadow_event": {"id": "e1", "action": "approach", "description": "Approach the gate.", "characters": ["A"]},
+                        "plausibility_score": 0.95,
+                        "transition_probability": 0.95,
+                    },
+                    {
+                        "candidate_id": "c2_unknown_rejected",
+                        "scene_id": "ch01-sc02",
+                        "preconditions": {"gate_open": True},
+                        "shadow_event": {"id": "e2", "action": "enter", "description": "Enter through the gate.", "characters": ["A"]},
+                        "plausibility_score": 0.99,
+                        "transition_probability": 0.99,
+                    },
+                    {
+                        "candidate_id": "c2_valid",
+                        "scene_id": "ch01-sc02",
+                        "shadow_event": {"id": "e3", "action": "wait", "description": "Wait outside the gate.", "characters": ["A"]},
+                        "plausibility_score": 0.7,
+                        "transition_probability": 0.7,
+                    },
+                ]
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+    runner = CliRunner()
+    out = runner.invoke(main, ["story", "solve", "--project", "solve-causal-state-unknown-reject", "--projects-dir", str(tmp_path)])
+    assert out.exit_code == 0, out.output
+    solved = json.loads((proj_dir / "shadow_solution.json").read_text(encoding="utf-8"))
+    assert [row["candidate_id"] for row in solved["trajectory"]] == ["c1", "c2_valid"]
+
+
+def test_causal_precondition_unknown_policy_soft_penalty_allows_candidate(tmp_path):
+    proj_dir = tmp_path / "solve-causal-state-unknown-soft"
+    proj_dir.mkdir(parents=True, exist_ok=True)
+    (proj_dir / "project.json").write_text(json.dumps({"name": "x", "slug": "solve-causal-state-unknown-soft"}, indent=2), encoding="utf-8")
+    (proj_dir / "constraints.json").write_text(
+        json.dumps(
+            {
+                "required_elements": [],
+                "forbidden_terms": [],
+                "enforcement": {
+                    "precondition_unknown_policy": "penalize",
+                    "precondition_unknown_penalty": 0.1,
+                },
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    (proj_dir / "shadow_candidates.json").write_text(
+        json.dumps(
+            {
+                "candidates": [
+                    {
+                        "candidate_id": "c1",
+                        "scene_id": "ch01-sc01",
+                        "shadow_event": {"id": "e1", "action": "approach", "description": "Approach the gate.", "characters": ["A"]},
+                        "plausibility_score": 0.95,
+                        "transition_probability": 0.95,
+                    },
+                    {
+                        "candidate_id": "c2_unknown_soft",
+                        "scene_id": "ch01-sc02",
+                        "preconditions": {"gate_open": "true"},
+                        "shadow_event": {"id": "e2", "action": "enter", "description": "Enter through the gate.", "characters": ["A"]},
+                        "plausibility_score": 0.99,
+                        "transition_probability": 0.99,
+                    },
+                    {
+                        "candidate_id": "c2_valid_low",
+                        "scene_id": "ch01-sc02",
+                        "shadow_event": {"id": "e3", "action": "wait", "description": "Wait outside the gate.", "characters": ["A"]},
+                        "plausibility_score": 0.6,
+                        "transition_probability": 0.6,
+                    },
+                ]
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+    runner = CliRunner()
+    out = runner.invoke(main, ["story", "solve", "--project", "solve-causal-state-unknown-soft", "--projects-dir", str(tmp_path)])
+    assert out.exit_code == 0, out.output
+    solved = json.loads((proj_dir / "shadow_solution.json").read_text(encoding="utf-8"))
+    assert [row["candidate_id"] for row in solved["trajectory"]] == ["c1", "c2_unknown_soft"]
+
+
+def test_causal_precondition_false_satisfies_from_explicit_effect_state(tmp_path):
+    proj_dir = tmp_path / "solve-causal-state-false"
+    proj_dir.mkdir(parents=True, exist_ok=True)
+    (proj_dir / "project.json").write_text(json.dumps({"name": "x", "slug": "solve-causal-state-false"}, indent=2), encoding="utf-8")
+    (proj_dir / "constraints.json").write_text(
+        json.dumps({"required_elements": [], "forbidden_terms": []}, indent=2),
+        encoding="utf-8",
+    )
+    (proj_dir / "shadow_candidates.json").write_text(
+        json.dumps(
+            {
+                "candidates": [
+                    {
+                        "candidate_id": "c1_set_false",
+                        "scene_id": "ch01-sc01",
+                        "effects": {"alarm_on": False},
+                        "shadow_event": {"id": "e1", "action": "silence", "description": "Silence the alarm.", "characters": ["A"]},
+                        "plausibility_score": 0.95,
+                        "transition_probability": 0.95,
+                    },
+                    {
+                        "candidate_id": "c2_requires_false",
+                        "scene_id": "ch01-sc02",
+                        "preconditions": {"alarm_on": False},
+                        "shadow_event": {"id": "e2", "action": "sneak", "description": "Sneak past the gate.", "characters": ["A"]},
+                        "plausibility_score": 0.99,
+                        "transition_probability": 0.99,
+                    },
+                ]
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+    runner = CliRunner()
+    out = runner.invoke(main, ["story", "solve", "--project", "solve-causal-state-false", "--projects-dir", str(tmp_path)])
+    assert out.exit_code == 0, out.output
+    solved = json.loads((proj_dir / "shadow_solution.json").read_text(encoding="utf-8"))
+    assert [row["candidate_id"] for row in solved["trajectory"]] == ["c1_set_false", "c2_requires_false"]
 
 
 def test_story_grow_shadow_applies_project_priors_and_audit_reports_domain_metrics(tmp_path):

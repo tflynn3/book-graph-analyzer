@@ -6,6 +6,7 @@ import math
 import random
 import re
 from collections import Counter, defaultdict
+from dataclasses import dataclass, asdict
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -112,6 +113,115 @@ def _stable_seed(*parts: str) -> int:
     material = "||".join(parts)
     digest = hashlib.sha256(material.encode("utf-8")).hexdigest()
     return int(digest[:16], 16) % (2**32)
+
+
+def _compute_dynamic_beat_budget(target_words_per_scene: float | int, ordinal: int, beat_count: int) -> int:
+    """Compute per-beat budget deterministically.
+
+    Important: floor before clamp to preserve deterministic integer behavior.
+    """
+    base = float(target_words_per_scene) / max(1, int(beat_count))
+    shaped = base * (1.0 + (0.08 if ordinal == 2 else 0.0) - (0.05 if ordinal == beat_count else 0.0))
+    return max(45, min(220, math.floor(shaped)))
+
+
+@dataclass
+class StoryBeat:
+    beat_id: str
+    position: int
+    beat_type: str
+    intent: str
+    prose_budget_words: int
+    cause_refs: list[str]
+    failed_constraints: list[str]
+
+
+def _make_shadow_beat(scene: dict[str, Any], slug: str, constraints: dict[str, Any], index: int, total_scenes: int, style_words: float | int = 320) -> StoryBeat:
+    scene_id = str(scene.get("scene_id") or f"scene-{index:03d}")
+    goal = str(scene.get("goal") or "advance scene continuity")
+    summary = str(scene.get("summary") or "")
+    beat_count = 3 if total_scenes > 1 else 2
+    beat_type = "setup" if index == 1 else ("pivot" if index == total_scenes else "confrontation")
+    beat_id_seed = _stable_seed(slug, scene_id, str(index))
+    beat_id = f"{scene_id}-b{index:02d}-{beat_id_seed:06x}"
+    cause_refs = [] if index == 1 else [f"{scene_id}-b{(index-1):02d}-{_stable_seed(slug, scene_id, str(index-1)):06x}"]
+    forbidden_terms = [str(x).lower() for x in constraints.get("forbidden_terms", [])]
+    text = f"{goal} {summary}".lower()
+    failed_constraints = [f"forbidden:{t}" for t in forbidden_terms if t and t in text]
+    return StoryBeat(
+        beat_id=beat_id,
+        position=index,
+        beat_type=beat_type,
+        intent=(summary or goal),
+        prose_budget_words=_compute_dynamic_beat_budget(style_words, index, beat_count),
+        cause_refs=cause_refs,
+        failed_constraints=failed_constraints,
+    )
+
+
+def _validate_cause_ref_positions(beats: list[StoryBeat]) -> list[str]:
+    pos_by_id = {b.beat_id: b.position for b in beats}
+    issues: list[str] = []
+    for beat in beats:
+        for ref in beat.cause_refs:
+            ref_pos = pos_by_id.get(ref)
+            if ref_pos is None:
+                issues.append(f"missing-cause-ref:{beat.beat_id}->{ref}")
+            elif ref_pos >= beat.position:
+                issues.append(f"non-prior-cause-ref:{beat.beat_id}->{ref}")
+    return issues
+
+
+def _scene_from_beat_id(beat_id: str) -> str:
+    core = str(beat_id or "").split("-b", 1)[0]
+    return core or "unknown-scene"
+
+
+def _chapter_from_scene_id(scene_id: str) -> int | None:
+    m = re.match(r"^ch(\d+)-", str(scene_id or "").lower())
+    return int(m.group(1)) if m else None
+
+
+def _select_beats_scope(beats: list[dict[str, Any]], chapter: int | None, scene: str | None) -> list[dict[str, Any]]:
+    if chapter is not None and scene:
+        raise click.ClickException("Use only one of --chapter or --scene.")
+    if scene:
+        return [b for b in beats if _scene_from_beat_id(str(b.get("beat_id", ""))) == scene]
+    if chapter is not None:
+        out = []
+        for b in beats:
+            scene_id = _scene_from_beat_id(str(b.get("beat_id", "")))
+            ch = _chapter_from_scene_id(scene_id)
+            if ch == chapter:
+                out.append(b)
+        return out
+    return list(beats)
+
+
+def _beats_validation_from_rows(beats: list[dict[str, Any]]) -> dict[str, Any]:
+    by_id = {str(b.get("beat_id", "")): int(b.get("position", 0) or 0) for b in beats}
+    issues: list[dict[str, Any]] = []
+    for b in beats:
+        beat_id = str(b.get("beat_id", ""))
+        pos = int(b.get("position", 0) or 0)
+        for ref in b.get("cause_refs", []) or []:
+            if ref not in by_id:
+                issues.append({"level": "error", "code": "MISSING_CAUSE_REF", "beat_id": beat_id, "message": f"Missing cause ref: {ref}"})
+            elif by_id[ref] >= pos:
+                issues.append({"level": "error", "code": "NON_PRIOR_CAUSE_REF", "beat_id": beat_id, "message": f"Cause ref is not prior: {ref}"})
+        for term in b.get("failed_constraints", []) or []:
+            issues.append({"level": "warn", "code": "FAILED_CONSTRAINT", "beat_id": beat_id, "message": f"Constraint failed: {term}"})
+
+    counts = Counter(it["level"] for it in issues)
+    return {
+        "summary": {
+            "beats": len(beats),
+            "errors": int(counts.get("error", 0)),
+            "warnings": int(counts.get("warn", 0)),
+            "status": "pass" if not counts.get("error", 0) else "fail",
+        },
+        "issues": issues,
+    }
 
 
 def _load_weights_arg(weights: str | None) -> dict[str, float]:
@@ -500,6 +610,198 @@ def _validate_plan(project: dict, plan: dict, constraints: dict) -> dict:
 def story() -> None:
     """Story workflow commands (init, auto-plan, validate)."""
     pass
+
+
+@story.group("beats")
+def story_beats() -> None:
+    """Scene-to-beat expansion commands."""
+    pass
+
+
+@story_beats.command("expand")
+@click.option("--project", "project_slug", required=True, help="Project slug")
+@click.option("--method", type=click.Choice(["template", "deterministic"], case_sensitive=False), default="template", show_default=True)
+@click.option("--projects-dir", default=str(DEFAULT_PROJECTS_DIR), show_default=True, type=click.Path())
+def story_beats_expand(project_slug: str, method: str, projects_dir: str) -> None:
+    """Expand plan scenes into deterministic shadow beats."""
+    proj_dir = _project_dir(project_slug, Path(projects_dir))
+    _load_project(project_slug, Path(projects_dir))
+    plan = _load_json(proj_dir / "plan.json", default={})
+    if not plan.get("chapters"):
+        raise click.ClickException("Missing or empty plan.json. Run 'bga story plan --project <slug> --auto' first.")
+    constraints = _load_constraints(proj_dir)
+    style_words = float(constraints.get("style", {}).get("target_words_per_scene", 320))
+
+    scene_rows = [sc for ch in plan.get("chapters", []) for sc in ch.get("scenes", [])]
+    beats: list[StoryBeat] = []
+    for idx, scene in enumerate(scene_rows, start=1):
+        beats.append(_make_shadow_beat(scene, project_slug, constraints, idx, len(scene_rows), style_words=style_words))
+
+    validation_issues = _validate_cause_ref_positions(beats)
+    payload = {
+        "schema_version": "shadow-beats-v1",
+        "project_slug": project_slug,
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "method": method.lower(),
+        "seed": _stable_seed(project_slug, _canonical_json(plan), _canonical_json(constraints)),
+        "beats": [asdict(b) for b in beats],
+        "validation": {
+            "cause_ref_issues": validation_issues,
+            "failed_constraints": [
+                {"beat_id": b.beat_id, "failed_constraints": b.failed_constraints}
+                for b in beats
+                if b.failed_constraints
+            ],
+        },
+    }
+
+    out_path = proj_dir / "shadow_beats.json"
+    out_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+
+    sidecar = proj_dir / "shadow_selected.json"
+    if sidecar.exists():
+        selected = _load_json(sidecar, default={})
+        (proj_dir / "shadow_beats_selected_sidecar.json").write_text(
+            json.dumps(
+                {
+                    "schema_version": "shadow-beats-selected-sidecar-v1",
+                    "project_slug": project_slug,
+                    "source": "shadow_selected.json",
+                    "selected": selected.get("selected", []),
+                },
+                indent=2,
+            ),
+            encoding="utf-8",
+        )
+
+    console.print(f"[green]OK[/green] Beats expanded: {out_path}")
+
+
+@story_beats.command("validate")
+@click.option("--project", "project_slug", required=True, help="Project slug")
+@click.option("--chapter", type=int, default=None, help="Limit validation to a chapter number")
+@click.option("--scene", default="", help="Limit validation to a scene id (e.g. ch01-sc02)")
+@click.option("--strict/--no-strict", default=False, help="Exit non-zero when validation has errors")
+@click.option("--strict-warnings", is_flag=True, help="With --strict, also fail on warnings")
+@click.option("--json-out", default="", help="Optional explicit JSON report path")
+@click.option("--projects-dir", default=str(DEFAULT_PROJECTS_DIR), show_default=True, type=click.Path())
+def story_beats_validate(project_slug: str, chapter: int | None, scene: str, strict: bool, strict_warnings: bool, json_out: str, projects_dir: str) -> None:
+    """Validate beat artifacts, optionally scoped by chapter or scene."""
+    proj_dir = _project_dir(project_slug, Path(projects_dir))
+    _load_project(project_slug, Path(projects_dir))
+    beats_path = proj_dir / "shadow_beats.json"
+    if not beats_path.exists():
+        raise click.ClickException("Missing shadow_beats.json. Run: bga story beats expand --project <slug>")
+
+    payload = _load_json(beats_path, default={})
+    beats = payload.get("beats", []) if isinstance(payload, dict) else []
+    scoped = _select_beats_scope(beats, chapter=chapter, scene=(scene or "").strip() or None)
+    report = _beats_validation_from_rows(scoped)
+    report.update(
+        {
+            "schema_version": "shadow-beats-validation-v1",
+            "project_slug": project_slug,
+            "validated_at": datetime.now(timezone.utc).isoformat(),
+            "scope": {"chapter": chapter, "scene": (scene or "").strip() or None},
+        }
+    )
+
+    report_path = Path(json_out) if json_out else (proj_dir / "shadow_beats_validation.json")
+    report_path.write_text(json.dumps(report, indent=2), encoding="utf-8")
+
+    s = report["summary"]
+    console.print(
+        f"Beats validate: {s['status'].upper()} | beats={s['beats']} | errors={s['errors']} | warnings={s['warnings']}"
+    )
+    console.print(f"JSON report: {report_path}")
+
+    should_fail = strict and (s["errors"] > 0 or (strict_warnings and s["warnings"] > 0))
+    if should_fail:
+        raise click.ClickException("Strict validation failed.")
+
+
+@story_beats.command("show")
+@click.option("--project", "project_slug", required=True, help="Project slug")
+@click.option("--chapter", type=int, default=None, help="Show beats for chapter")
+@click.option("--scene", default="", help="Show beats for scene id")
+@click.option("--projects-dir", default=str(DEFAULT_PROJECTS_DIR), show_default=True, type=click.Path())
+def story_beats_show(project_slug: str, chapter: int | None, scene: str, projects_dir: str) -> None:
+    """Show concise beat summary for a scene/chapter."""
+    proj_dir = _project_dir(project_slug, Path(projects_dir))
+    _load_project(project_slug, Path(projects_dir))
+    payload = _load_json(proj_dir / "shadow_beats.json", default={})
+    beats = payload.get("beats", []) if isinstance(payload, dict) else []
+    scoped = _select_beats_scope(beats, chapter=chapter, scene=(scene or "").strip() or None)
+    report = _beats_validation_from_rows(scoped)
+
+    type_counts = Counter(str(b.get("beat_type", "unknown")) for b in scoped)
+    ids = [str(b.get("beat_id", "")) for b in scoped]
+    scene_counts = Counter(_scene_from_beat_id(i) for i in ids)
+    top_issues = report["issues"][:3]
+    console.print(f"Beats summary | count={len(scoped)} | scenes={len(scene_counts)}")
+    console.print(f"Types: {dict(type_counts)}")
+    console.print(f"IDs: {', '.join(ids[:8])}" + (" ..." if len(ids) > 8 else ""))
+    if top_issues:
+        console.print("Top issues:")
+        for it in top_issues:
+            console.print(f"- [{it['level']}] {it['code']} {it['beat_id']}")
+    else:
+        console.print("Top issues: none")
+
+
+@story_beats.command("clean")
+@click.option("--project", "project_slug", required=True, help="Project slug")
+@click.option("--chapter", type=int, default=None, help="Remove beats only in chapter")
+@click.option("--scene", default="", help="Remove beats only in scene id")
+@click.option("--dry-run", is_flag=True, help="Preview without writing changes")
+@click.option("--projects-dir", default=str(DEFAULT_PROJECTS_DIR), show_default=True, type=click.Path())
+def story_beats_clean(project_slug: str, chapter: int | None, scene: str, dry_run: bool, projects_dir: str) -> None:
+    """Clean beat artifacts safely (whole-project or scoped)."""
+    proj_dir = _project_dir(project_slug, Path(projects_dir))
+    _load_project(project_slug, Path(projects_dir))
+    scene = (scene or "").strip()
+    scoped_mode = bool(scene) or (chapter is not None)
+
+    beats_path = proj_dir / "shadow_beats.json"
+    sidecar_path = proj_dir / "shadow_beats_selected_sidecar.json"
+    validation_path = proj_dir / "shadow_beats_validation.json"
+
+    if not scoped_mode:
+        removed = [p for p in [beats_path, sidecar_path, validation_path] if p.exists()]
+        if dry_run:
+            console.print(f"Dry-run: would remove {len(removed)} files")
+            for p in removed:
+                console.print(f"- {p}")
+            return
+        for p in removed:
+            p.unlink()
+        console.print(f"[green]OK[/green] Removed {len(removed)} beat artifact files")
+        return
+
+    if not beats_path.exists():
+        raise click.ClickException("No shadow_beats.json to clean.")
+    payload = _load_json(beats_path, default={})
+    beats = payload.get("beats", []) if isinstance(payload, dict) else []
+    doomed = _select_beats_scope(beats, chapter=chapter, scene=scene or None)
+    doomed_ids = {str(b.get("beat_id", "")) for b in doomed}
+    kept = [b for b in beats if str(b.get("beat_id", "")) not in doomed_ids]
+    console.print(f"Scoped clean: removing {len(doomed)} beats, keeping {len(kept)}")
+    if dry_run:
+        return
+    payload["beats"] = kept
+    payload.setdefault("validation", {})
+    if isinstance(payload.get("validation"), dict):
+        v = payload["validation"]
+        if isinstance(v.get("failed_constraints"), list):
+            v["failed_constraints"] = [
+                row for row in v["failed_constraints"] if str(row.get("beat_id", "")) not in doomed_ids
+            ]
+        if isinstance(v.get("cause_ref_issues"), list):
+            v["cause_ref_issues"] = [
+                row for row in v["cause_ref_issues"] if not any(did in str(row) for did in doomed_ids)
+            ]
+    beats_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    console.print(f"[green]OK[/green] Updated {beats_path}")
 
 
 @story.command("init")
@@ -1174,17 +1476,139 @@ def story_solve(project_slug: str, projects_dir: str) -> None:
     required = [str(x).lower() for x in constraints.get("required_elements", [])]
     forbidden = [str(x).lower() for x in constraints.get("forbidden_terms", [])]
 
+    selection_cfg = constraints.get("selection", {}) if isinstance(constraints.get("selection"), dict) else {}
+    enforcement_cfg = constraints.get("enforcement", {}) if isinstance(constraints.get("enforcement"), dict) else {}
+
+    goal_completion_threshold = float(
+        selection_cfg.get("goal_completion_threshold", enforcement_cfg.get("goal_completion_threshold", 1.0))
+    )
+    min_beats_per_scene = int(selection_cfg.get("min_beats_per_scene", enforcement_cfg.get("min_beats_per_scene", 1)) or 1)
+    anti_padding_penalty = float(selection_cfg.get("anti_padding_penalty", 1.0))
+    unresolved_thread_penalty = float(selection_cfg.get("unresolved_thread_penalty", 0.4))
+    precondition_unknown_policy = str(
+        selection_cfg.get(
+            "precondition_unknown_policy",
+            enforcement_cfg.get("precondition_unknown_policy", "reject"),
+        )
+    ).strip().lower() or "reject"
+    precondition_unknown_penalty = float(
+        selection_cfg.get(
+            "precondition_unknown_penalty",
+            enforcement_cfg.get("precondition_unknown_penalty", 0.75),
+        )
+    )
+
     beam_width_schedule = [4, 8, 16]
+    k_max = len(scene_ids)
     best_score = float("-inf")
     best_path: list[dict] = []
     missing_required: list[str] = []
     selected_beam_width = beam_width_schedule[0]
 
+    def _normalize_fact_state(value: Any, default_value: str = "unknown") -> str:
+        if isinstance(value, str):
+            v = value.strip().lower()
+            if v in {"true", "t", "1", "yes", "y", "on"}:
+                return "true"
+            if v in {"false", "f", "0", "no", "n", "off"}:
+                return "false"
+            if v in {"unknown", "unk", "?", "none", "null"}:
+                return "unknown"
+            return default_value
+        if isinstance(value, bool):
+            return "true" if value else "false"
+        if value is None:
+            return "unknown"
+        return "true" if bool(value) else "false"
+
+    def _as_fact_state_map(raw: Any, default_value: str = "true") -> dict[str, str]:
+        if isinstance(raw, dict):
+            out: dict[str, str] = {}
+            for k, v in raw.items():
+                key = str(k).strip().lower()
+                if not key:
+                    continue
+                out[key] = _normalize_fact_state(v, default_value=default_value)
+            return out
+        if isinstance(raw, list):
+            out: dict[str, str] = {}
+            for item in raw:
+                key = str(item).strip().lower()
+                if key:
+                    out[key] = default_value
+            return out
+        return {}
+
+    def _evaluate_preconditions(
+        world_state: dict[str, str],
+        preconditions: dict[str, str],
+        unknown_policy: str,
+        unknown_penalty: float,
+    ) -> tuple[bool, float]:
+        penalty = 0.0
+        for fact, expected in preconditions.items():
+            observed = _normalize_fact_state(world_state.get(fact, "unknown"), default_value="unknown")
+            if observed == expected:
+                continue
+
+            # Backward-compatible default semantics: unknown does NOT satisfy true,
+            # but remains acceptable for expected=false unless caller opts into strictness.
+            if observed == "unknown" and expected == "false":
+                continue
+
+            if observed == "unknown":
+                if unknown_policy in {"penalize", "soft_penalty", "soft"}:
+                    penalty += max(0.0, float(unknown_penalty))
+                    continue
+                return False, penalty
+
+            return False, penalty
+        return True, penalty
+
+    def _candidate_progress(cand: dict[str, Any]) -> float:
+        raw = cand.get("scene_goal_progress", cand.get("goal_progress", cand.get("progress", 0.0)))
+        if raw is None:
+            raw = cand.get("shadow_event", {}).get("scene_goal_progress", 0.0)
+        try:
+            return max(0.0, min(1.0, float(raw)))
+        except (TypeError, ValueError):
+            return 0.0
+
+    def _unresolved_threads_count(cand: dict[str, Any]) -> int:
+        raw = cand.get("unresolved_causal_threads", cand.get("unresolved_threads", 0))
+        if raw is None:
+            raw = cand.get("shadow_event", {}).get("unresolved_causal_threads", 0)
+        if isinstance(raw, list):
+            return len(raw)
+        try:
+            return max(0, int(raw))
+        except (TypeError, ValueError):
+            return 0
+
     for beam_width in beam_width_schedule:
-        beam: list[tuple[float, list[dict]]] = [(0.0, [])]
-        for sid in scene_ids:
-            next_beam: list[tuple[float, list[dict]]] = []
-            for base_score, path in beam:
+        beam: list[dict[str, Any]] = [{"score": 0.0, "path": [], "next_idx": 0, "max_progress": 0.0, "world_state": {}}]
+        completed: list[dict[str, Any]] = []
+        for _ in range(k_max):
+            next_beam: list[dict[str, Any]] = []
+            for node in beam:
+                base_score = float(node.get("score", 0.0))
+                path = list(node.get("path", []))
+                next_idx = int(node.get("next_idx", 0))
+                max_progress = float(node.get("max_progress", 0.0))
+                world_state = {
+                    str(k).strip().lower(): _normalize_fact_state(v, default_value="unknown")
+                    for k, v in dict(node.get("world_state", {})).items()
+                    if str(k).strip()
+                }
+
+                if len(path) >= min_beats_per_scene and max_progress >= goal_completion_threshold:
+                    completed.append(node)
+
+                if next_idx >= k_max:
+                    completed.append(node)
+                    continue
+
+                sid = scene_ids[next_idx]
                 action_counts = Counter(str(p.get("shadow_event", {}).get("action", "unknown")) for p in path)
                 chosen_characters = {
                     c.lower()
@@ -1216,12 +1640,62 @@ def story_solve(project_slug: str, projects_dir: str) -> None:
                     repeat_penalty = 0.5 * action_counts.get(action, 0)
                     novelty_bonus = 0.35 * len(chars_l - chosen_characters)
 
-                    score = base_score + math.log(p) + 0.5 * math.log(t) + novelty_bonus - repeat_penalty - placeholder_penalty
-                    next_beam.append((score, path + [cand]))
-            next_beam.sort(key=lambda x: x[0], reverse=True)
+                    preconditions = _as_fact_state_map(
+                        cand.get("preconditions", cand.get("shadow_event", {}).get("preconditions", [])),
+                        default_value="true",
+                    )
+                    preconditions_ok, unknown_mismatch_penalty = _evaluate_preconditions(
+                        world_state,
+                        preconditions,
+                        unknown_policy=precondition_unknown_policy,
+                        unknown_penalty=precondition_unknown_penalty,
+                    )
+                    if not preconditions_ok:
+                        continue
+
+                    effects = _as_fact_state_map(
+                        cand.get("effects", cand.get("shadow_event", {}).get("effects", [])),
+                        default_value="true",
+                    )
+                    next_state = dict(world_state)
+                    next_state.update(effects)
+
+                    cand_progress = _candidate_progress(cand)
+                    next_progress = max(max_progress, cand_progress)
+                    progress_gain = max(0.0, next_progress - max_progress)
+                    nonprogress_penalty = anti_padding_penalty if progress_gain <= 1e-9 else 0.0
+                    unresolved_penalty = unresolved_thread_penalty * _unresolved_threads_count(cand)
+
+                    score = (
+                        base_score
+                        + math.log(p)
+                        + 0.5 * math.log(t)
+                        + novelty_bonus
+                        - repeat_penalty
+                        - placeholder_penalty
+                        - unknown_mismatch_penalty
+                        - nonprogress_penalty
+                        - unresolved_penalty
+                    )
+                    next_beam.append(
+                        {
+                            "score": score,
+                            "path": path + [cand],
+                            "next_idx": next_idx + 1,
+                            "max_progress": next_progress,
+                            "world_state": next_state,
+                        }
+                    )
+            next_beam.sort(key=lambda x: float(x.get("score", float("-inf"))), reverse=True)
             beam = next_beam[:beam_width] or beam
 
-        cand_score, cand_path = beam[0]
+        completed.extend(beam)
+        completed.sort(key=lambda x: float(x.get("score", float("-inf"))), reverse=True)
+
+        top = completed[0]
+        cand_score = float(top.get("score", float("-inf")))
+        cand_path = list(top.get("path", []))
+
         full_text = "\n".join(c.get("shadow_event", {}).get("description", "") for c in cand_path).lower()
         missing = [r for r in required if r not in full_text]
         best_score, best_path = cand_score, cand_path
@@ -1242,8 +1716,9 @@ def story_solve(project_slug: str, projects_dir: str) -> None:
         "schema_version": "shadow-solution-v1",
         "project_slug": project_slug,
         "generated_at": datetime.now(timezone.utc).isoformat(),
+        "k_max": k_max,
         "beam_width": selected_beam_width,
-        "objective": "sum(log(plausibility)+0.5*log(transition_probability)+novelty_bonus-repeat_penalty-placeholder_penalty)",
+        "objective": "sum(log(plausibility)+0.5*log(transition_probability)+novelty_bonus-repeat_penalty-placeholder_penalty-nonprogress_penalty-unresolved_thread_penalty)",
         "best_score": round(best_score, 6),
         "status": status,
         "missing_required_elements": missing_required,
