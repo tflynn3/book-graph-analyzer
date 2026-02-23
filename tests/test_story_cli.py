@@ -320,3 +320,90 @@ def test_story_draft_fails_when_required_terms_never_appear(tmp_path, monkeypatc
     assert draft.exit_code != 0
     assert "failed required-term enforcement" in draft.output
     assert "Missing required terms" in draft.output
+
+
+def test_story_solve_fails_hard_when_required_elements_missing(tmp_path):
+    proj_dir = tmp_path / "solve-hard-gate"
+    proj_dir.mkdir(parents=True, exist_ok=True)
+    (proj_dir / "project.json").write_text(
+        json.dumps({"name": "x", "slug": "solve-hard-gate", "target_chapters": 1, "scenes_per_chapter": 1}, indent=2),
+        encoding="utf-8",
+    )
+    (proj_dir / "constraints.json").write_text(
+        json.dumps({"required_elements": ["Melian"], "forbidden_terms": []}, indent=2),
+        encoding="utf-8",
+    )
+    (proj_dir / "shadow_candidates.json").write_text(
+        json.dumps(
+            {
+                "candidates": [
+                    {
+                        "candidate_id": "c1",
+                        "scene_id": "ch01-sc01",
+                        "shadow_event": {"id": "e1", "action": "journey", "description": "Beren travels.", "characters": ["Beren"]},
+                        "plausibility_score": 0.9,
+                        "transition_probability": 0.9,
+                    }
+                ]
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+    runner = CliRunner()
+    out = runner.invoke(main, ["story", "solve", "--project", "solve-hard-gate", "--projects-dir", str(tmp_path)])
+    assert out.exit_code != 0
+    assert "failed hard required-element gating" in out.output
+
+
+def test_story_grow_shadow_applies_project_priors_and_audit_reports_domain_metrics(tmp_path):
+    events_path = tmp_path / "events.json"
+    events_path.write_text(json.dumps({"events": [], "relations": []}), encoding="utf-8")
+
+    proj_dir = tmp_path / "beren-luthien-expanded"
+    proj_dir.mkdir(parents=True, exist_ok=True)
+    (proj_dir / "project.json").write_text(
+        json.dumps(
+            {
+                "name": "Beren and Luthien Expanded",
+                "slug": "beren-luthien-expanded",
+                "target_chapters": 1,
+                "scenes_per_chapter": 1,
+                "event_files": [str(events_path)],
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    (proj_dir / "constraints.json").write_text(
+        json.dumps({"required_elements": ["Thingol"], "forbidden_terms": []}, indent=2), encoding="utf-8"
+    )
+    (proj_dir / "plan.json").write_text(
+        json.dumps({"project_slug": "beren-luthien-expanded", "chapters": [{"chapter_number": 1, "scenes": [{"scene_id": "ch01-sc01", "goal": "setup", "summary": "x"}]}]}, indent=2),
+        encoding="utf-8",
+    )
+    (proj_dir / "context_stats.json").write_text(
+        json.dumps(
+            {
+                "event_transition_probabilities": {"unknown": {"journey": 0.8, "unknown": 0.2}},
+                "character_participation_priors": {"Frodo": 0.95, "Beren": 0.2, "Thingol": 0.2},
+                "motif_reference_density_priors": {"oath": 0.7, "song": 0.6},
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+    runner = CliRunner()
+    assert runner.invoke(main, ["story", "grow-shadow", "--project", "beren-luthien-expanded", "--auto", "--projects-dir", str(tmp_path)]).exit_code == 0
+    assert runner.invoke(main, ["story", "solve", "--project", "beren-luthien-expanded", "--projects-dir", str(tmp_path)]).exit_code == 0
+    assert runner.invoke(main, ["story", "draft", "--project", "beren-luthien-expanded", "--chapter", "1", "--grounded", "--projects-dir", str(tmp_path)]).exit_code == 0
+    assert runner.invoke(main, ["story", "audit", "--project", "beren-luthien-expanded", "--chapter", "1", "--projects-dir", str(tmp_path)]).exit_code == 0
+
+    cand = json.loads((proj_dir / "shadow_candidates.json").read_text(encoding="utf-8"))["candidates"][0]
+    assert cand["project_prior"]["canon_hits"] >= 1
+
+    audit = json.loads((proj_dir / "chapter_01_audit.json").read_text(encoding="utf-8"))
+    assert "quality_proxies" in audit
+    assert "domain_alignment" in audit
