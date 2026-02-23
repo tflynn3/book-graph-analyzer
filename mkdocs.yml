@@ -57,6 +57,7 @@ nav:
       - World-Building RFC: tolkien-worldbuilding-rfc.md
       - "Issue #47 Sociolinguistic Registers (Slice 1)": issue-47-socioreg-slice1.md
       - Story Generation: story-generation.md
+      - Story Workflow CLI: story-workflow-cli.md
       - Full End-to-End Example: end-to-end-example.md
       - Full Lifecycle Tutorial (Ingest -> Analyze -> Generate): full-lifecycle-tutorial.md
       - Examples: examples.md

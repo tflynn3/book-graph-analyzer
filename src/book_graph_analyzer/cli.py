@@ -17,6 +17,7 @@ from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TaskPr
 from rich.table import Table
 
 from book_graph_analyzer import __version__
+from book_graph_analyzer.story_cli import story
 
 console = Console()
 
@@ -26,6 +27,9 @@ console = Console()
 def main() -> None:
     """Book Graph Analyzer - Transform novels into queryable knowledge graphs."""
     pass
+
+
+main.add_command(story)
 
 
 @main.command()
