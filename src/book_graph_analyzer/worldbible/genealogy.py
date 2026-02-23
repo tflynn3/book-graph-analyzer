@@ -343,6 +343,14 @@ _RULES: list[tuple[re.Pattern[str], GenealogyRelationType, float]] = [
     (re.compile(rf"\b{_NAME}\s+grandson of\s+{_NAME}\b"), GenealogyRelationType.DESCENDANT_OF, 0.86),
     (re.compile(rf"\b{_NAME}\s+granddaughter of\s+{_NAME}\b"), GenealogyRelationType.DESCENDANT_OF, 0.86),
     (re.compile(rf"\b{_NAME}\s+heir of\s+{_NAME}\b"), GenealogyRelationType.DESCENDANT_OF, 0.78),
+    # TT/ROTK high-value forms
+    (re.compile(rf"\b{_SUBJ}\s+is\s+the\s+son of\s+{_OBJ}\b", re.I), GenealogyRelationType.CHILD_OF, 0.9),
+    (re.compile(rf"\b{_SUBJ}\s+is\s+the\s+daughter of\s+{_OBJ}\b", re.I), GenealogyRelationType.CHILD_OF, 0.9),
+    (re.compile(rf"\b{_SUBJ}\s+is\s+heir to\s+{_OBJ}\b", re.I), GenealogyRelationType.DESCENDANT_OF, 0.8),
+    (re.compile(rf"\b{_SUBJ}\s+descended from\s+{_OBJ}\b", re.I), GenealogyRelationType.DESCENDANT_OF, 0.84),
+    (re.compile(rf"\b{_SUBJ}\s+of the line of\s+{_OBJ}\b", re.I), GenealogyRelationType.DESCENDANT_OF, 0.82),
+    (re.compile(rf"\b{_SUBJ}\s+brother to\s+{_OBJ}\b", re.I), GenealogyRelationType.SIBLING_OF, 0.8),
+    (re.compile(rf"\b{_SUBJ}\s+sister to\s+{_OBJ}\b", re.I), GenealogyRelationType.SIBLING_OF, 0.8),
 ]
 
 
@@ -525,10 +533,19 @@ def extract_genealogy_from_text(
 
 
 def _dedupe_relations(relations: list[GenealogyRelation]) -> list[GenealogyRelation]:
-    seen: set[tuple[str, str, str]] = set()
+    seen: set[tuple[str, str, str, int | None, int | None]] = set()
     out: list[GenealogyRelation] = []
     for rel in relations:
-        key = (rel.source_id, rel.target_id, rel.relation_type.value)
+        # keep at most one relation per identity + evidence span; this prevents
+        # duplicate writes when multiple patterns match the same text span while
+        # preserving distinct evidentiary occurrences.
+        key = (
+            rel.source_id,
+            rel.target_id,
+            rel.relation_type.value,
+            rel.evidence_start,
+            rel.evidence_end,
+        )
         if key in seen:
             continue
         seen.add(key)

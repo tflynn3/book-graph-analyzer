@@ -1,0 +1,81 @@
+{
+  "overall": {
+    "gold": 38,
+    "accepted": 37,
+    "tp": 36,
+    "fp": 1,
+    "fn": 2,
+    "precision": 0.973,
+    "recall": 0.9474,
+    "f1": 0.96
+  },
+  "by_book": {
+    "hobbit": {
+      "gold": 6,
+      "extracted": 12,
+      "accepted": 6,
+      "tp": 6,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "fellowship": {
+      "gold": 7,
+      "extracted": 14,
+      "accepted": 7,
+      "tp": 7,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "two_towers": {
+      "gold": 12,
+      "extracted": 24,
+      "accepted": 12,
+      "tp": 11,
+      "fp": 1,
+      "fn": 1,
+      "precision": 0.9167,
+      "recall": 0.9167,
+      "f1": 0.9167
+    },
+    "return_of_king": {
+      "gold": 11,
+      "extracted": 22,
+      "accepted": 11,
+      "tp": 11,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "silmarillion": {
+      "gold": 11,
+      "extracted": 22,
+      "accepted": 11,
+      "tp": 11,
+      "fp": 0,
+      "fn": 0,
+      "precision": 1.0,
+      "recall": 1.0,
+      "f1": 1.0
+    },
+    "appendix": {
+      "gold": 4,
+      "extracted": 6,
+      "accepted": 3,
+      "tp": 3,
+      "fp": 0,
+      "fn": 1,
+      "precision": 1.0,
+      "recall": 0.75,
+      "f1": 0.8571
+    }
+  },
+  "reject_reason_histogram": {}
+}

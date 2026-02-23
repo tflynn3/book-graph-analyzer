@@ -1,0 +1,63 @@
+{"book":"hobbit","source_name":"Bilbo","target_name":"Bungo Baggins","relation_type":"CHILD_OF","evidence_text":"Bilbo, son of Bungo Baggins, lived in the Shire."}
+{"book":"hobbit","source_name":"Bungo Baggins","target_name":"Bilbo","relation_type":"PARENT_OF","evidence_text":"Bilbo, son of Bungo Baggins, lived in the Shire."}
+{"book":"hobbit","source_name":"Belladonna Took","target_name":"Bilbo","relation_type":"PARENT_OF","evidence_text":"Belladonna Took mother of Bilbo."}
+{"book":"hobbit","source_name":"Bilbo","target_name":"Belladonna Took","relation_type":"CHILD_OF","evidence_text":"Bilbo was the son of Belladonna Took."}
+{"book":"hobbit","source_name":"Thorin","target_name":"Thrain","relation_type":"CHILD_OF","evidence_text":"Thorin son of Thrain."}
+{"book":"hobbit","source_name":"Thrain","target_name":"Thror","relation_type":"CHILD_OF","evidence_text":"Thrain son of Thror."}
+{"book":"hobbit","source_name":"Thror","target_name":"Thrain","relation_type":"PARENT_OF","evidence_text":"Thror father of Thrain."}
+{"book":"hobbit","source_name":"Thranduil","target_name":"Legolas","relation_type":"PARENT_OF","evidence_text":"Thranduil father of Legolas."}
+{"book":"hobbit","source_name":"Legolas","target_name":"Thranduil","relation_type":"CHILD_OF","evidence_text":"Legolas son of Thranduil."}
+{"book":"hobbit","source_name":"Dain","target_name":"Nain","relation_type":"CHILD_OF","evidence_text":"Dain son of Nain."}
+{"book":"fellowship","source_name":"Aragorn","target_name":"Arathorn","relation_type":"CHILD_OF","evidence_text":"Aragorn son of Arathorn."}
+{"book":"fellowship","source_name":"Arathorn","target_name":"Aragorn","relation_type":"PARENT_OF","evidence_text":"Arathorn father of Aragorn."}
+{"book":"fellowship","source_name":"Arwen","target_name":"Elrond","relation_type":"CHILD_OF","evidence_text":"Arwen daughter of Elrond."}
+{"book":"fellowship","source_name":"Elrond","target_name":"Arwen","relation_type":"PARENT_OF","evidence_text":"Elrond father of Arwen."}
+{"book":"fellowship","source_name":"Boromir","target_name":"Denethor","relation_type":"CHILD_OF","evidence_text":"Boromir son of Denethor."}
+{"book":"fellowship","source_name":"Faramir","target_name":"Denethor","relation_type":"CHILD_OF","evidence_text":"Faramir son of Denethor."}
+{"book":"fellowship","source_name":"Denethor","target_name":"Boromir","relation_type":"PARENT_OF","evidence_text":"Denethor father of Boromir."}
+{"book":"fellowship","source_name":"Denethor","target_name":"Faramir","relation_type":"PARENT_OF","evidence_text":"Denethor father of Faramir."}
+{"book":"fellowship","source_name":"Gimli","target_name":"Gloin","relation_type":"CHILD_OF","evidence_text":"Gimli son of Gloin."}
+{"book":"fellowship","source_name":"Gloin","target_name":"Gimli","relation_type":"PARENT_OF","evidence_text":"Gloin father of Gimli."}
+{"book":"fellowship","source_name":"Peregrin Took","target_name":"Paladin Took","relation_type":"CHILD_OF","evidence_text":"Peregrin Took son of Paladin Took."}
+{"book":"fellowship","source_name":"Meriadoc Brandybuck","target_name":"Saradoc Brandybuck","relation_type":"CHILD_OF","evidence_text":"Meriadoc Brandybuck son of Saradoc Brandybuck."}
+{"book":"two_towers","source_name":"Aragorn","target_name":"Arathorn","relation_type":"CHILD_OF","evidence_text":"King Aragorn son of Arathorn."}
+{"book":"two_towers","source_name":"Aragorn","target_name":"Eldarion","relation_type":"PARENT_OF","evidence_text":"The king father of Eldarion."}
+{"book":"two_towers","source_name":"Theoden","target_name":"Thengel","relation_type":"CHILD_OF","evidence_text":"Theoden heir of Thengel."}
+{"book":"two_towers","source_name":"Eomer","target_name":"Eomund","relation_type":"CHILD_OF","evidence_text":"Eomer son of Eomund."}
+{"book":"two_towers","source_name":"Eowyn","target_name":"Eomund","relation_type":"CHILD_OF","evidence_text":"Eowyn daughter of Eomund."}
+{"book":"two_towers","source_name":"Faramir","target_name":"Denethor","relation_type":"CHILD_OF","evidence_text":"Faramir was the son of Denethor."}
+{"book":"two_towers","source_name":"Arwen","target_name":"Elrond","relation_type":"CHILD_OF","evidence_text":"Lady Arwen daughter of Elrond."}
+{"book":"two_towers","source_name":"Elrond","target_name":"Earendil","relation_type":"CHILD_OF","evidence_text":"Elrond son of Earendil."}
+{"book":"two_towers","source_name":"Elladan","target_name":"Elrond","relation_type":"CHILD_OF","evidence_text":"Elladan son of Elrond."}
+{"book":"two_towers","source_name":"Elrohir","target_name":"Elrond","relation_type":"CHILD_OF","evidence_text":"Elrohir son of Elrond."}
+{"book":"two_towers","source_name":"Gloin","target_name":"Gimli","relation_type":"PARENT_OF","evidence_text":"Gloin father of Gimli."}
+{"book":"two_towers","source_name":"Theodred","target_name":"Theoden","relation_type":"CHILD_OF","evidence_text":"Theodred son of Theoden."}
+{"book":"return_of_king","source_name":"Aragorn","target_name":"Arathorn","relation_type":"CHILD_OF","evidence_text":"Aragorn son of Arathorn."}
+{"book":"return_of_king","source_name":"Aragorn","target_name":"Eldarion","relation_type":"PARENT_OF","evidence_text":"Aragorn father of Eldarion."}
+{"book":"return_of_king","source_name":"Faramir","target_name":"Denethor","relation_type":"CHILD_OF","evidence_text":"Faramir son of Denethor."}
+{"book":"return_of_king","source_name":"Boromir","target_name":"Denethor","relation_type":"CHILD_OF","evidence_text":"Boromir son of Denethor."}
+{"book":"return_of_king","source_name":"Eowyn","target_name":"Eomund","relation_type":"CHILD_OF","evidence_text":"Eowyn daughter of Eomund."}
+{"book":"return_of_king","source_name":"Eomer","target_name":"Eomund","relation_type":"CHILD_OF","evidence_text":"Eomer son of Eomund."}
+{"book":"return_of_king","source_name":"Eldarion","target_name":"Aragorn","relation_type":"CHILD_OF","evidence_text":"Eldarion son of Aragorn."}
+{"book":"return_of_king","source_name":"Eldarion","target_name":"Arwen","relation_type":"CHILD_OF","evidence_text":"Eldarion son of Arwen."}
+{"book":"return_of_king","source_name":"Arwen","target_name":"Elrond","relation_type":"CHILD_OF","evidence_text":"Arwen daughter of Elrond."}
+{"book":"return_of_king","source_name":"Elrond","target_name":"Earendil","relation_type":"CHILD_OF","evidence_text":"Elrond son of Earendil."}
+{"book":"return_of_king","source_name":"Peregrin","target_name":"Paladin Took","relation_type":"CHILD_OF","evidence_text":"Peregrin son of Paladin Took."}
+{"book":"return_of_king","source_name":"Meriadoc","target_name":"Saradoc Brandybuck","relation_type":"CHILD_OF","evidence_text":"Meriadoc son of Saradoc Brandybuck."}
+{"book":"silmarillion","source_name":"Fingolfin","target_name":"Finwe","relation_type":"CHILD_OF","evidence_text":"Fingolfin son of Finwe."}
+{"book":"silmarillion","source_name":"Finarfin","target_name":"Finwe","relation_type":"CHILD_OF","evidence_text":"Finarfin son of Finwe."}
+{"book":"silmarillion","source_name":"Feanor","target_name":"Finwe","relation_type":"CHILD_OF","evidence_text":"Feanor son of Finwe."}
+{"book":"silmarillion","source_name":"Thingol","target_name":"Luthien","relation_type":"PARENT_OF","evidence_text":"Thingol father of Luthien."}
+{"book":"silmarillion","source_name":"Luthien","target_name":"Thingol","relation_type":"CHILD_OF","evidence_text":"Luthien daughter of Thingol."}
+{"book":"silmarillion","source_name":"Dior","target_name":"Luthien","relation_type":"CHILD_OF","evidence_text":"Dior son of Luthien."}
+{"book":"silmarillion","source_name":"Earendil","target_name":"Tuor","relation_type":"CHILD_OF","evidence_text":"Earendil son of Tuor."}
+{"book":"silmarillion","source_name":"Earendil","target_name":"Idril","relation_type":"CHILD_OF","evidence_text":"Earendil son of Idril."}
+{"book":"silmarillion","source_name":"Elrond","target_name":"Earendil","relation_type":"CHILD_OF","evidence_text":"Elrond son of Earendil."}
+{"book":"silmarillion","source_name":"Elros","target_name":"Earendil","relation_type":"CHILD_OF","evidence_text":"Elros son of Earendil."}
+{"book":"silmarillion","source_name":"Turgon","target_name":"Fingolfin","relation_type":"CHILD_OF","evidence_text":"Turgon son of Fingolfin."}
+{"book":"silmarillion","source_name":"Idril","target_name":"Turgon","relation_type":"CHILD_OF","evidence_text":"Idril daughter of Turgon."}
+{"book":"appendix","source_name":"Arathorn","target_name":"Arador","relation_type":"CHILD_OF","evidence_text":"Arathorn son of Arador."}
+{"book":"appendix","source_name":"Arador","target_name":"Argonui","relation_type":"CHILD_OF","evidence_text":"Arador son of Argonui."}
+{"book":"appendix","source_name":"Argonui","target_name":"Arathorn","relation_type":"PARENT_OF","evidence_text":"Argonui father of Arador."}
+{"book":"appendix","source_name":"Elendil","target_name":"Isildur","relation_type":"PARENT_OF","evidence_text":"Elendil father of Isildur."}
+{"book":"appendix","source_name":"Isildur","target_name":"Elendil","relation_type":"CHILD_OF","evidence_text":"Isildur son of Elendil."}
