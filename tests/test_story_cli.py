@@ -320,3 +320,69 @@ def test_story_draft_fails_when_required_terms_never_appear(tmp_path, monkeypatc
     assert draft.exit_code != 0
     assert "failed required-term enforcement" in draft.output
     assert "Missing required terms" in draft.output
+
+
+def test_required_term_matcher_is_token_boundary_and_alias_aware():
+    from book_graph_analyzer.story_cli import _missing_required_terms
+
+    constraints = {
+        "required_element_aliases": {
+            "Tol-in-Gaurhoth confrontation": ["isle of werewolves confrontation"],
+        }
+    }
+    text = "The isle of werewolves confrontation begins, but NotThingol should not count as a match."
+    missing = _missing_required_terms(text, ["Thingol", "Tol-in-Gaurhoth confrontation"], constraints)
+    assert "Thingol" in missing
+    assert "Tol-in-Gaurhoth confrontation" not in missing
+
+
+def test_grow_shadow_is_deterministic_and_scales_candidate_pool(tmp_path):
+    events_path = tmp_path / "events.json"
+    events_payload = {
+        "events": {
+            str(i): {"id": str(i), "description": f"e{i}", "agent": "Beren", "action": "act", "patient": "x", "era": "First Age", "year": 450 + i}
+            for i in range(1, 5)
+        },
+        "relations": [],
+    }
+    events_path.write_text(json.dumps(events_payload), encoding="utf-8")
+
+    proj_dir = tmp_path / "det-proj"
+    proj_dir.mkdir(parents=True, exist_ok=True)
+    (proj_dir / "project.json").write_text(json.dumps({"name": "x", "slug": "det-proj", "target_chapters": 5, "scenes_per_chapter": 5, "event_files": [str(events_path)]}), encoding="utf-8")
+    (proj_dir / "constraints.json").write_text(json.dumps({"required_elements": ["oath"], "forbidden_terms": [], "search": {"target_candidates": 600}}), encoding="utf-8")
+    runner = CliRunner()
+    assert runner.invoke(main, ["story", "context", "--project", "det-proj", "--graph-stats", "--projects-dir", str(tmp_path)]).exit_code == 0
+
+    first = runner.invoke(main, ["story", "grow-shadow", "--project", "det-proj", "--auto", "--projects-dir", str(tmp_path)])
+    assert first.exit_code == 0, first.output
+    payload1 = json.loads((proj_dir / "shadow_candidates.json").read_text(encoding="utf-8"))
+
+    second = runner.invoke(main, ["story", "grow-shadow", "--project", "det-proj", "--auto", "--projects-dir", str(tmp_path)])
+    assert second.exit_code == 0, second.output
+    payload2 = json.loads((proj_dir / "shadow_candidates.json").read_text(encoding="utf-8"))
+
+    assert payload1["seed"] == payload2["seed"]
+    assert payload1["selected_auto"] == payload2["selected_auto"]
+    assert payload1["sampling"]["generated_candidates"] >= 500
+
+
+def test_story_audit_fails_on_semantic_grounding_alignment(tmp_path):
+    proj_dir = tmp_path / "audit-proj"
+    proj_dir.mkdir(parents=True, exist_ok=True)
+    (proj_dir / "project.json").write_text(json.dumps({"name": "x", "slug": "audit-proj", "target_chapters": 1, "scenes_per_chapter": 1}), encoding="utf-8")
+    (proj_dir / "constraints.json").write_text(json.dumps({"required_elements": ["Thingol"], "required_element_aliases": {"Thingol": ["King Thingol"]}}), encoding="utf-8")
+    (proj_dir / "chapter_01.md").write_text("# Chapter\n\nUnrelated words only.", encoding="utf-8")
+    (proj_dir / "shadow_solution.json").write_text(json.dumps({"trajectory": [{"scene_id": "ch01-sc01"}]}), encoding="utf-8")
+    (proj_dir / "shadow_graph.json").write_text(json.dumps({"nodes": [{"id": "shadow-ch01-sc01"}, {"id": "shadow-event-1"}]}), encoding="utf-8")
+    (proj_dir / "chapter_01_trace.json").write_text(
+        json.dumps({"sections": [{"section": 1, "scene_id": "ch01-sc01", "shadow_event_id": "shadow-event-1", "shadow_scene_id": "shadow-ch01-sc01", "text_excerpt": "Thingol and Doriath stand in memory", "source_canon_node_ids": []}]}),
+        encoding="utf-8",
+    )
+
+    runner = CliRunner()
+    out = runner.invoke(main, ["story", "audit", "--project", "audit-proj", "--chapter", "1", "--projects-dir", str(tmp_path), "--enforce-required-terms"])
+    assert out.exit_code == 0, out.output
+    report = json.loads((proj_dir / "chapter_01_audit.json").read_text(encoding="utf-8"))
+    assert report["status"] == "fail"
+    assert report["grounding"]["evidence_alignment"]["ratio"] < 0.95

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import math
 import random
 import re
@@ -142,9 +143,56 @@ def _required_terms(constraints: dict) -> list[str]:
     return [str(x).strip() for x in rows if str(x).strip()]
 
 
-def _missing_required_terms(text: str, required_terms: list[str]) -> list[str]:
-    text_l = text.lower()
-    return [term for term in required_terms if term.lower() not in text_l]
+def _tokenize_for_match(text: str) -> list[str]:
+    return re.findall(r"[a-z0-9]+(?:['-][a-z0-9]+)?", text.lower())
+
+
+def _build_required_term_aliases(required_terms: list[str], constraints: dict | None = None) -> dict[str, list[str]]:
+    aliases_cfg = (constraints or {}).get("required_element_aliases", {}) if isinstance(constraints, dict) else {}
+    aliases: dict[str, list[str]] = {}
+    for term in required_terms:
+        extra = aliases_cfg.get(term, []) if isinstance(aliases_cfg, dict) else []
+        variants = [term] + ([str(x) for x in extra] if isinstance(extra, list) else [])
+        cleaned = [v.strip() for v in variants if str(v).strip()]
+        aliases[term] = list(dict.fromkeys(cleaned))
+    return aliases
+
+
+def _contains_phrase_tokens(text_tokens: list[str], phrase: str) -> bool:
+    phrase_tokens = _tokenize_for_match(phrase)
+    if not phrase_tokens:
+        return False
+    n = len(phrase_tokens)
+    for i in range(0, max(0, len(text_tokens) - n + 1)):
+        if text_tokens[i : i + n] == phrase_tokens:
+            return True
+    return False
+
+
+def _missing_required_terms(text: str, required_terms: list[str], constraints: dict | None = None) -> list[str]:
+    text_tokens = _tokenize_for_match(text)
+    aliases = _build_required_term_aliases(required_terms, constraints)
+    missing: list[str] = []
+    for term in required_terms:
+        variants = aliases.get(term, [term])
+        if not any(_contains_phrase_tokens(text_tokens, v) for v in variants):
+            missing.append(term)
+    return missing
+
+
+def _stable_seed(*parts: str) -> int:
+    material = "||".join(parts)
+    digest = hashlib.sha256(material.encode("utf-8")).hexdigest()
+    return int(digest[:16], 16) % (2**32)
+
+
+def _evidence_alignment_ratio(text: str, excerpt: str) -> float:
+    text_tokens = set(_tokenize_for_match(text))
+    excerpt_tokens = [t for t in _tokenize_for_match(excerpt) if len(t) > 3]
+    if not excerpt_tokens:
+        return 1.0
+    matched = sum(1 for t in excerpt_tokens if t in text_tokens)
+    return matched / max(1, len(excerpt_tokens))
 
 
 def _render_grounded_chapter_text(chapter: int, chapter_rows: list[dict], graph_node_by_id: dict[str, dict], required_terms: list[str]) -> tuple[str, list[dict]]:
@@ -588,10 +636,15 @@ def story_grow_shadow(project_slug: str, auto_mode: bool, projects_dir: str) -> 
     motif_priors = context.get("motif_reference_density_priors", {})
     top_characters = [k for k, _ in sorted(char_priors.items(), key=lambda kv: kv[1], reverse=True)[:12]] or ["Beren", "Luthien"]
     top_motifs = [k for k, _ in sorted(motif_priors.items(), key=lambda kv: kv[1], reverse=True)[:30]] or ["song", "oath", "shadow"]
-    seed = abs(hash(project_slug)) % (2**32)
+    seed = _stable_seed(project_slug, json.dumps(plan, sort_keys=True), json.dumps(constraints, sort_keys=True))
     rng = random.Random(seed)
     required = [str(x) for x in constraints.get("required_elements", [])]
     forbidden = {str(x).lower() for x in constraints.get("forbidden_terms", [])}
+    search_cfg = constraints.get("search", {}) if isinstance(constraints.get("search"), dict) else {}
+
+    scene_count = sum(len(ch.get("scenes", [])) for ch in plan.get("chapters", []))
+    target_candidates = int(search_cfg.get("target_candidates", max(500, scene_count * 24)))
+    candidates_per_scene = max(6, min(128, math.ceil(target_candidates / max(1, scene_count))))
 
     graph_nodes = []
     graph_edges = []
@@ -599,6 +652,7 @@ def story_grow_shadow(project_slug: str, auto_mode: bool, projects_dir: str) -> 
     selected = []
     prev_action = "unknown"
 
+    elites_grid: dict[str, dict] = {}
     for ch in plan.get("chapters", []):
         chapter_num = int(ch.get("chapter_number", 1))
         scenes = ch.get("scenes", [])
@@ -615,11 +669,11 @@ def story_grow_shadow(project_slug: str, auto_mode: bool, projects_dir: str) -> 
             graph_nodes.append(scene_node)
 
             row_candidates = []
-            for rank in range(3):
+            for rank in range(candidates_per_scene):
                 action_choices = list(transitions.get(prev_action, {"journey": 0.34, "conflict": 0.33, "reveal": 0.33}).items())
-                action = action_choices[min(rank, len(action_choices) - 1)][0]
-                transition_prob = float(action_choices[min(rank, len(action_choices) - 1)][1])
-                chars = rng.sample(top_characters, k=min(2 + rank, len(top_characters)))
+                action = action_choices[rank % max(1, len(action_choices))][0]
+                transition_prob = float(action_choices[rank % max(1, len(action_choices))][1])
+                chars = rng.sample(top_characters, k=min(2 + (rank % 3), len(top_characters)))
                 motifs = rng.sample(top_motifs, k=min(2, len(top_motifs)))
                 if required and chapter_num == 1 and rank == 0:
                     motifs = list(dict.fromkeys((required[:1] + motifs)))
@@ -631,7 +685,27 @@ def story_grow_shadow(project_slug: str, auto_mode: bool, projects_dir: str) -> 
                 char_score = sum(float(char_priors.get(c, 0.01)) for c in chars) / max(1, len(chars))
                 motif_score = sum(float(motif_priors.get(m, 0.005)) for m in motifs) / max(1, len(motifs))
                 plausibility = round(min(0.99, max(0.05, (0.5 * transition_prob) + (0.3 * char_score) + (0.2 * motif_score))), 6)
+                score_components = {
+                    "transition": round(transition_prob, 6),
+                    "character_participation": round(char_score, 6),
+                    "motif_grounding": round(motif_score, 6),
+                    "constraint_bonus": round(0.05 if any(m in required for m in motifs) else 0.0, 6),
+                }
+                total_score = round(
+                    (0.55 * score_components["transition"])
+                    + (0.25 * score_components["character_participation"])
+                    + (0.15 * score_components["motif_grounding"])
+                    + score_components["constraint_bonus"],
+                    6,
+                )
                 cid = f"{scene_id}-cand-{rank + 1}"
+                behavior_descriptor = {
+                    "action": action,
+                    "character_load": "high" if len(chars) >= 4 else "medium" if len(chars) == 3 else "low",
+                    "motif_load": "rich" if len(motifs) >= 2 else "sparse",
+                }
+                cell_key = f"{behavior_descriptor['action']}|{behavior_descriptor['character_load']}|{behavior_descriptor['motif_load']}"
+                elite = elites_grid.get(cell_key)
                 row_candidates.append(
                     {
                         "candidate_id": cid,
@@ -647,10 +721,16 @@ def story_grow_shadow(project_slug: str, auto_mode: bool, projects_dir: str) -> 
                         },
                         "transition_probability": round(transition_prob, 6),
                         "plausibility_score": plausibility,
+                        "score_components": score_components,
+                        "score_total": total_score,
+                        "behavior_descriptor": behavior_descriptor,
                         "hard_constraints_ok": True,
                     }
                 )
-            row_candidates.sort(key=lambda c: c["plausibility_score"], reverse=True)
+                if elite is None or total_score > float(elite.get("score_total", 0.0)):
+                    elites_grid[cell_key] = {"candidate_id": cid, "score_total": total_score}
+
+            row_candidates.sort(key=lambda c: (c["score_total"], c["plausibility_score"]), reverse=True)
             if row_candidates:
                 selected.append(row_candidates[0])
                 prev_action = row_candidates[0]["shadow_event"]["action"]
@@ -688,9 +768,18 @@ def story_grow_shadow(project_slug: str, auto_mode: bool, projects_dir: str) -> 
         "schema_version": "shadow-candidates-v1",
         "project_slug": project_slug,
         "generated_at": datetime.now(timezone.utc).isoformat(),
+        "seed": seed,
         "constraints_snapshot": constraints,
+        "sampling": {
+            "scene_count": scene_count,
+            "target_candidates": target_candidates,
+            "candidates_per_scene": candidates_per_scene,
+            "generated_candidates": len(candidates),
+            "elites_cells": len(elites_grid),
+        },
         "candidates": candidates,
         "selected_auto": [c["candidate_id"] for c in selected],
+        "elites_grid": elites_grid,
     }
 
     (proj_dir / "shadow_graph.json").write_text(json.dumps(graph_payload, indent=2), encoding="utf-8")
@@ -728,7 +817,7 @@ def story_solve(project_slug: str, projects_dir: str) -> None:
                 desc = str(cand.get("shadow_event", {}).get("description", "")).lower()
                 if any(term in desc for term in forbidden):
                     continue
-                p = max(1e-6, float(cand.get("plausibility_score", 0.01)))
+                p = max(1e-6, float(cand.get("score_total", cand.get("plausibility_score", 0.01))))
                 t = max(1e-6, float(cand.get("transition_probability", 0.01)))
                 score = base_score + math.log(p) + 0.5 * math.log(t)
                 next_beam.append((score, path + [cand]))
@@ -797,7 +886,7 @@ def story_draft(project_slug: str, chapter: int, grounded: bool, projects_dir: s
     while attempts <= max_retries:
         attempts += 1
         final_text, final_trace = _render_grounded_chapter_text(chapter, chapter_rows, graph_node_by_id, required_terms)
-        missing = _missing_required_terms(final_text, required_terms)
+        missing = _missing_required_terms(final_text, required_terms, constraints)
         if not missing:
             break
 
@@ -863,21 +952,47 @@ def story_audit(project_slug: str, chapter: int, projects_dir: str, enforce_requ
     coverage = round(len(traced) / max(1, len(expected_scenes)), 6)
 
     forbidden = [str(x).lower() for x in constraints.get("forbidden_terms", [])]
-    required = [str(x).lower() for x in constraints.get("required_elements", [])]
+    required_terms = [str(x) for x in constraints.get("required_elements", [])]
     text_l = text.lower()
     forbidden_hits = [t for t in forbidden if t in text_l]
-    required_missing = [t for t in required if t not in text_l]
+    required_missing = _missing_required_terms(text, required_terms, constraints)
+
+    required_aliases = _build_required_term_aliases(required_terms, constraints)
+    scene_required_coverage = []
+    for sec in traced:
+        excerpt = str(sec.get("text_excerpt", "") or "")
+        missing_scene = _missing_required_terms(excerpt, required_terms, constraints)
+        scene_required_coverage.append(
+            {
+                "section": sec.get("section"),
+                "covered_terms": sorted([t for t in required_terms if t not in missing_scene]),
+                "missing_terms": missing_scene,
+            }
+        )
 
     node_ids = {n.get("id") for n in graph.get("nodes", []) if isinstance(n, dict)}
     invalid_refs = []
+    unaligned_sections = []
+    unaligned_section_ids: set[int] = set()
     for sec in traced:
         for key in ("shadow_event_id", "shadow_scene_id"):
             rid = sec.get(key)
             if rid and rid not in node_ids:
                 invalid_refs.append({"section": sec.get("section"), "missing": rid, "field": key})
+        excerpt = str(sec.get("text_excerpt", "") or "")
+        if excerpt and _evidence_alignment_ratio(text, excerpt) < 0.6:
+            unaligned_sections.append({"section": sec.get("section"), "excerpt": excerpt[:120]})
+            if isinstance(sec.get("section"), int):
+                unaligned_section_ids.add(int(sec.get("section")))
+        if not sec.get("source_canon_node_ids"):
+            unaligned_sections.append({"section": sec.get("section"), "reason": "missing_source_canon_node_ids"})
+            if isinstance(sec.get("section"), int):
+                unaligned_section_ids.add(int(sec.get("section")))
+
+    evidence_alignment_ratio = round((len(traced) - len(unaligned_section_ids)) / max(1, len(traced)), 6)
 
     status = "pass"
-    if coverage < 0.99 or forbidden_hits or invalid_refs:
+    if coverage < 0.99 or forbidden_hits or invalid_refs or evidence_alignment_ratio < 0.95:
         status = "fail"
     elif required_missing and enforce_required_terms:
         status = "fail"
@@ -898,10 +1013,16 @@ def story_audit(project_slug: str, chapter: int, projects_dir: str, enforce_requ
         "constraints": {
             "forbidden_hits": forbidden_hits,
             "required_missing": required_missing,
+            "required_aliases": required_aliases,
+            "required_scene_coverage": scene_required_coverage,
             "required_terms_enforced": bool(enforce_required_terms),
         },
         "grounding": {
             "invalid_trace_refs": invalid_refs,
+            "evidence_alignment": {
+                "ratio": evidence_alignment_ratio,
+                "unaligned_sections": unaligned_sections,
+            },
         },
     }
 

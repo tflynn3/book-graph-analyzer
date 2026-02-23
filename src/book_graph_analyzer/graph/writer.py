@@ -821,7 +821,10 @@ class GraphWriter:
     def _resolve_event_book(event, fallback_book: str) -> str:
         """Resolve source book for an event write operation."""
         event_book = getattr(event, "source_book", None)
-        return (event_book or fallback_book or "").strip()
+        resolved = (event_book or fallback_book or "").strip()
+        if not resolved:
+            raise ValueError("source_book must be non-empty for Event namespace writes")
+        return resolved
 
     def write_event(
         self,
@@ -956,11 +959,12 @@ class GraphWriter:
             MATCH (e2:Event {{id: item.event2_id, source_book: item.event2_book}})
             MERGE (e1)-[r:{rel_type}]->(e2)
             SET r.confidence = item.confidence
+            RETURN count(r) AS rel_count
             """
 
             with self.driver.session() as session:
-                session.run(query, batch=batch_data)
-                count += len(batch_data)
+                written = session.run(query, batch=batch_data).single() or {"rel_count": 0}
+                count += int(written.get("rel_count", 0))
 
         return count
 

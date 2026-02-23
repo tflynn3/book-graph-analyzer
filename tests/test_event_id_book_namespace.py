@@ -27,12 +27,14 @@ class _FakeSession:
             return _FakeResult()
 
         if "MATCH (e1:Event {id: item.event1_id, source_book: item.event1_book})" in query:
+            written = 0
             for item in kwargs["batch"]:
                 a = (item["event1_id"], item["event1_book"])
                 b = (item["event2_id"], item["event2_book"])
                 if a in self.state["events"] and b in self.state["events"]:
                     self.state["rels"].add((a, b))
-            return _FakeResult()
+                    written += 1
+            return _FakeResult(single_row={"rel_count": written})
 
         return _FakeResult(single_row={"cnt": 0})
 
@@ -77,3 +79,32 @@ def test_relations_bind_to_book_scoped_event_nodes(monkeypatch):
     assert (("event1", "The Hobbit"), ("event2", "The Hobbit")) in driver.state["rels"]
     assert (("event1", "Unfinished Tales"), ("event2", "Unfinished Tales")) in driver.state["rels"]
     assert len(driver.state["rels"]) == 2
+
+
+def test_non_empty_source_book_is_enforced(monkeypatch):
+    driver = _FakeDriver()
+    writer = GraphWriter(driver=driver)
+    monkeypatch.setattr(writer, "initialize", lambda: None)
+
+    g = EventGraph()
+    g.add_event(Event(id="event1", description="x", source_book=""))
+
+    try:
+        writer.write_event_graph(g, book="", link_entities=False)
+    except ValueError as exc:
+        assert "source_book must be non-empty" in str(exc)
+    else:
+        raise AssertionError("Expected ValueError for empty source_book namespace")
+
+
+def test_relation_write_count_tracks_matched_relations(monkeypatch):
+    driver = _FakeDriver()
+    writer = GraphWriter(driver=driver)
+    monkeypatch.setattr(writer, "initialize", lambda: None)
+
+    g = EventGraph()
+    g.add_event(Event(id="event1", description="a", source_book="The Hobbit"))
+    g.add_relation(EventRelation(event1_id="event1", event2_id="missing", relation="before", confidence=0.9))
+
+    stats = writer.write_event_graph(g, book="The Hobbit", link_entities=False)
+    assert stats["relations_written"] == 0
