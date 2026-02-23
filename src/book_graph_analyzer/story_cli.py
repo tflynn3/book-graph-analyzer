@@ -160,6 +160,99 @@ class StoryBeat:
     prose_budget_words: int
     cause_refs: list[str]
     failed_constraints: list[str]
+    action: str
+    participants: list[str]
+    motifs: list[str]
+    preconditions: list[str]
+    effects: list[str]
+    source_canon_node_ids: list[str]
+    style_register_hints: dict[str, Any]
+    scoring_breakdown: dict[str, float]
+
+
+def _extract_scene_participants(scene: dict[str, Any], project_slug: str) -> list[str]:
+    raw = scene.get("characters")
+    out: list[str] = []
+    if isinstance(raw, list):
+        out.extend(str(x).strip() for x in raw if str(x).strip())
+
+    canon_entities = _project_canon_entities(project_slug)
+    text = f"{scene.get('goal', '')} {scene.get('summary', '')}".lower()
+    for c in canon_entities:
+        if c.lower() in text:
+            out.append(c)
+
+    return list(dict.fromkeys(out))[:4] or ["Unknown"]
+
+
+def _extract_scene_motifs(scene: dict[str, Any]) -> list[str]:
+    hooks = scene.get("continuity_hooks") or []
+    motifs: list[str] = []
+    if isinstance(hooks, list):
+        motifs.extend(str(h).strip().lower() for h in hooks if str(h).strip())
+
+    text = f"{scene.get('goal', '')} {scene.get('summary', '')}".lower()
+    for token in _tokenize(text):
+        if token in {"oath", "song", "shadow", "fate", "love", "hunt", "doom", "crown"}:
+            motifs.append(token)
+    return list(dict.fromkeys(motifs))[:4]
+
+
+def _beat_semantics(
+    *,
+    scene: dict[str, Any],
+    project_slug: str,
+    constraints: dict[str, Any],
+    beat_type: str,
+    beat_idx_in_scene: int,
+    beats_in_scene: int,
+    style_words: float | int,
+) -> dict[str, Any]:
+    goal = str(scene.get("goal") or "advance scene continuity")
+    summary = str(scene.get("summary") or "")
+    participants = _extract_scene_participants(scene, project_slug)
+    motifs = _extract_scene_motifs(scene)
+
+    action = (
+        "establish" if beat_type == "setup" else "resolve" if beat_type == "pivot" else "confront"
+    )
+    preconditions = [f"scene-goal:{goal[:72]}", "prior-beat-resolved"] if beat_idx_in_scene > 1 else [f"scene-goal:{goal[:72]}"]
+    effects = [f"intent-advanced:{_slugify(goal)[:24]}", f"beat-{beat_type}-completed"]
+
+    canon = {c.lower(): c for c in _project_canon_entities(project_slug)}
+    source_canon_node_ids: list[str] = []
+    for p in participants:
+        if p.lower() in canon:
+            source_canon_node_ids.append(f"canon-entity-{_slugify(p)}")
+    for m in motifs[:2]:
+        source_canon_node_ids.append(f"canon-motif-{_slugify(m)}")
+    source_canon_node_ids = list(dict.fromkeys(source_canon_node_ids))
+
+    target_words = float(constraints.get("style", {}).get("target_words_per_scene", style_words or 320))
+    beat_budget = float(_compute_dynamic_beat_budget(style_words, beat_idx_in_scene, beats_in_scene))
+    style_fit = max(0.0, 1.0 - min(1.0, abs(beat_budget - (target_words / max(1, beats_in_scene))) / max(1.0, target_words)))
+    lore_fit = 1.0 if source_canon_node_ids else 0.55
+    coherence_fit = 0.95 if (summary or goal) else 0.4
+
+    return {
+        "action": action,
+        "participants": participants,
+        "motifs": motifs,
+        "preconditions": preconditions,
+        "effects": effects,
+        "source_canon_node_ids": source_canon_node_ids,
+        "style_register_hints": {
+            "tone": str(constraints.get("style", {}).get("tone") or "neutral"),
+            "target_words_per_scene": int(round(target_words)),
+            "beat_share": round(1.0 / max(1, beats_in_scene), 4),
+            "register": "elevated" if "beren" in project_slug.lower() else "neutral",
+        },
+        "scoring_breakdown": {
+            "lore": round(float(lore_fit), 6),
+            "style": round(float(style_fit), 6),
+            "coherence": round(float(coherence_fit), 6),
+        },
+    }
 
 
 def _make_shadow_beat(
@@ -182,6 +275,15 @@ def _make_shadow_beat(
     forbidden_terms = [str(x).lower() for x in constraints.get("forbidden_terms", [])]
     text = f"{goal} {summary}".lower()
     failed_constraints = [f"forbidden:{t}" for t in forbidden_terms if t and t in text]
+    semantic = _beat_semantics(
+        scene=scene,
+        project_slug=slug,
+        constraints=constraints,
+        beat_type=beat_type,
+        beat_idx_in_scene=beat_idx_in_scene,
+        beats_in_scene=beats_in_scene,
+        style_words=style_words,
+    )
     return StoryBeat(
         beat_id=beat_id,
         position=position,
@@ -190,6 +292,14 @@ def _make_shadow_beat(
         prose_budget_words=_compute_dynamic_beat_budget(style_words, beat_idx_in_scene, beats_in_scene),
         cause_refs=cause_refs,
         failed_constraints=failed_constraints,
+        action=semantic["action"],
+        participants=semantic["participants"],
+        motifs=semantic["motifs"],
+        preconditions=semantic["preconditions"],
+        effects=semantic["effects"],
+        source_canon_node_ids=semantic["source_canon_node_ids"],
+        style_register_hints=semantic["style_register_hints"],
+        scoring_breakdown=semantic["scoring_breakdown"],
     )
 
 
@@ -232,9 +342,13 @@ def _select_beats_scope(beats: list[dict[str, Any]], chapter: int | None, scene:
     return list(beats)
 
 
-def _beats_validation_from_rows(beats: list[dict[str, Any]]) -> dict[str, Any]:
+def _beats_validation_from_rows(beats: list[dict[str, Any]], project_slug: str = "", constraints: dict[str, Any] | None = None) -> dict[str, Any]:
     by_id = {str(b.get("beat_id", "")): int(b.get("position", 0) or 0) for b in beats}
     issues: list[dict[str, Any]] = []
+    prior_effects: set[str] = set()
+    canon_entities = {c.lower() for c in _project_canon_entities(project_slug)}
+    out_of_domain = _out_of_domain_entities(project_slug)
+    target_words = float((constraints or {}).get("style", {}).get("target_words_per_scene", 320))
     for b in beats:
         beat_id = str(b.get("beat_id", ""))
         pos = int(b.get("position", 0) or 0)
@@ -245,6 +359,45 @@ def _beats_validation_from_rows(beats: list[dict[str, Any]]) -> dict[str, Any]:
                 issues.append({"level": "error", "code": "NON_PRIOR_CAUSE_REF", "beat_id": beat_id, "message": f"Cause ref is not prior: {ref}"})
         for term in b.get("failed_constraints", []) or []:
             issues.append({"level": "warn", "code": "FAILED_CONSTRAINT", "beat_id": beat_id, "message": f"Constraint failed: {term}"})
+
+        has_semantic_payload = any(k in b for k in ("action", "participants", "motifs", "preconditions", "effects", "source_canon_node_ids", "canon_refs"))
+        canon_refs = b.get("source_canon_node_ids", []) or b.get("canon_refs", []) or []
+        if has_semantic_payload and not canon_refs:
+            issues.append({"level": "warn", "code": "CANON_GROUNDING_WEAK", "beat_id": beat_id, "message": "No canon refs present on beat."})
+
+        participants = [str(p) for p in (b.get("participants", []) or [])]
+        for p in participants:
+            pl = p.lower()
+            if pl in out_of_domain:
+                issues.append({"level": "error", "code": "OUT_OF_DOMAIN_PARTICIPANT", "beat_id": beat_id, "message": f"Participant outside domain: {p}"})
+            elif canon_entities and pl not in canon_entities and p != "Unknown":
+                issues.append({"level": "warn", "code": "UNKNOWN_PARTICIPANT", "beat_id": beat_id, "message": f"Participant not in project canon set: {p}"})
+
+        preconditions = [str(x) for x in (b.get("preconditions", []) or [])]
+        unmet = [p for p in preconditions if p != "prior-beat-resolved" and p not in prior_effects and p.startswith("effect:")]
+        if unmet:
+            issues.append({"level": "error", "code": "UNMET_PRECONDITION", "beat_id": beat_id, "message": f"Unmet preconditions: {', '.join(unmet[:3])}"})
+        for eff in b.get("effects", []) or []:
+            prior_effects.add(str(eff))
+
+        style_hints = b.get("style_register_hints", {}) if isinstance(b.get("style_register_hints", {}), dict) else {}
+        if style_hints:
+            beat_budget = float(b.get("prose_budget_words", 0) or 0)
+            beat_share = float(style_hints.get("beat_share", 0) or 0)
+            expected = target_words * beat_share if beat_share > 0 else max(45.0, target_words / 2.0)
+            if abs(beat_budget - expected) > max(30.0, expected * 0.45):
+                issues.append({
+                    "level": "warn",
+                    "code": "STYLE_BUDGET_MISMATCH",
+                    "beat_id": beat_id,
+                    "message": f"Beat prose budget {int(beat_budget)} diverges from style expectation {int(round(expected))}.",
+                })
+
+        breakdown = b.get("scoring_breakdown", {}) if isinstance(b.get("scoring_breakdown", {}), dict) else {}
+        if breakdown:
+            for k in ("lore", "style", "coherence"):
+                if k in breakdown and not (0.0 <= float(breakdown.get(k, 0.0)) <= 1.0):
+                    issues.append({"level": "error", "code": "INVALID_SCORE_COMPONENT", "beat_id": beat_id, "message": f"Scoring component {k} out of range [0,1]."})
 
     counts = Counter(it["level"] for it in issues)
     return {
@@ -773,7 +926,8 @@ def story_beats_validate(project_slug: str, chapter: int | None, scene: str, str
     payload = _load_json(beats_path, default={})
     beats = payload.get("beats", []) if isinstance(payload, dict) else []
     scoped = _select_beats_scope(beats, chapter=chapter, scene=(scene or "").strip() or None)
-    report = _beats_validation_from_rows(scoped)
+    constraints = _load_constraints(proj_dir)
+    report = _beats_validation_from_rows(scoped, project_slug=project_slug, constraints=constraints)
     report.update(
         {
             "schema_version": "shadow-beats-validation-v1",
@@ -809,7 +963,8 @@ def story_beats_show(project_slug: str, chapter: int | None, scene: str, project
     payload = _load_json(proj_dir / "shadow_beats.json", default={})
     beats = payload.get("beats", []) if isinstance(payload, dict) else []
     scoped = _select_beats_scope(beats, chapter=chapter, scene=(scene or "").strip() or None)
-    report = _beats_validation_from_rows(scoped)
+    constraints = _load_constraints(proj_dir)
+    report = _beats_validation_from_rows(scoped, project_slug=project_slug, constraints=constraints)
 
     type_counts = Counter(str(b.get("beat_type", "unknown")) for b in scoped)
     ids = [str(b.get("beat_id", "")) for b in scoped]
@@ -821,6 +976,19 @@ def story_beats_show(project_slug: str, chapter: int | None, scene: str, project
         console.print(f"Per-scene counts: {rendered_scene_counts}")
     console.print(f"Types: {dict(type_counts)}")
     console.print(f"IDs: {', '.join(ids[:8])}" + (" ..." if len(ids) > 8 else ""))
+    if scoped:
+        console.print("Sample beat semantics:")
+        for b in scoped[:3]:
+            lore_status = "grounded" if (b.get("source_canon_node_ids") or b.get("canon_refs")) else "ungrounded"
+            style_status = "ok"
+            for it in report["issues"]:
+                if it.get("beat_id") == b.get("beat_id") and it.get("code") == "STYLE_BUDGET_MISMATCH":
+                    style_status = "warn"
+                    break
+            console.print(
+                f"- {b.get('beat_id')}: action={b.get('action', 'n/a')} | participants={','.join((b.get('participants') or [])[:3]) or 'n/a'}"
+                f" | motifs={','.join((b.get('motifs') or [])[:3]) or 'n/a'} | lore={lore_status} | style={style_status}"
+            )
     if top_issues:
         console.print("Top issues:")
         for it in top_issues:
