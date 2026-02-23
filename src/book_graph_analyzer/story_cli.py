@@ -1476,17 +1476,81 @@ def story_solve(project_slug: str, projects_dir: str) -> None:
     required = [str(x).lower() for x in constraints.get("required_elements", [])]
     forbidden = [str(x).lower() for x in constraints.get("forbidden_terms", [])]
 
+    selection_cfg = constraints.get("selection", {}) if isinstance(constraints.get("selection"), dict) else {}
+    enforcement_cfg = constraints.get("enforcement", {}) if isinstance(constraints.get("enforcement"), dict) else {}
+
+    goal_completion_threshold = float(
+        selection_cfg.get("goal_completion_threshold", enforcement_cfg.get("goal_completion_threshold", 1.0))
+    )
+    min_beats_per_scene = int(selection_cfg.get("min_beats_per_scene", enforcement_cfg.get("min_beats_per_scene", 1)) or 1)
+    anti_padding_penalty = float(selection_cfg.get("anti_padding_penalty", 1.0))
+    unresolved_thread_penalty = float(selection_cfg.get("unresolved_thread_penalty", 0.4))
+
     beam_width_schedule = [4, 8, 16]
+    k_max = len(scene_ids)
     best_score = float("-inf")
     best_path: list[dict] = []
     missing_required: list[str] = []
     selected_beam_width = beam_width_schedule[0]
 
+    def _as_bool_map(raw: Any, default_value: bool = True) -> dict[str, bool]:
+        if isinstance(raw, dict):
+            out: dict[str, bool] = {}
+            for k, v in raw.items():
+                key = str(k).strip().lower()
+                if not key:
+                    continue
+                out[key] = bool(v)
+            return out
+        if isinstance(raw, list):
+            out = {}
+            for item in raw:
+                key = str(item).strip().lower()
+                if key:
+                    out[key] = default_value
+            return out
+        return {}
+
+    def _candidate_progress(cand: dict[str, Any]) -> float:
+        raw = cand.get("scene_goal_progress", cand.get("goal_progress", cand.get("progress", 0.0)))
+        if raw is None:
+            raw = cand.get("shadow_event", {}).get("scene_goal_progress", 0.0)
+        try:
+            return max(0.0, min(1.0, float(raw)))
+        except (TypeError, ValueError):
+            return 0.0
+
+    def _unresolved_threads_count(cand: dict[str, Any]) -> int:
+        raw = cand.get("unresolved_causal_threads", cand.get("unresolved_threads", 0))
+        if raw is None:
+            raw = cand.get("shadow_event", {}).get("unresolved_causal_threads", 0)
+        if isinstance(raw, list):
+            return len(raw)
+        try:
+            return max(0, int(raw))
+        except (TypeError, ValueError):
+            return 0
+
     for beam_width in beam_width_schedule:
-        beam: list[tuple[float, list[dict]]] = [(0.0, [])]
-        for sid in scene_ids:
-            next_beam: list[tuple[float, list[dict]]] = []
-            for base_score, path in beam:
+        beam: list[dict[str, Any]] = [{"score": 0.0, "path": [], "next_idx": 0, "max_progress": 0.0, "world_state": {}}]
+        completed: list[dict[str, Any]] = []
+        for _ in range(k_max):
+            next_beam: list[dict[str, Any]] = []
+            for node in beam:
+                base_score = float(node.get("score", 0.0))
+                path = list(node.get("path", []))
+                next_idx = int(node.get("next_idx", 0))
+                max_progress = float(node.get("max_progress", 0.0))
+                world_state = dict(node.get("world_state", {}))
+
+                if len(path) >= min_beats_per_scene and max_progress >= goal_completion_threshold:
+                    completed.append(node)
+
+                if next_idx >= k_max:
+                    completed.append(node)
+                    continue
+
+                sid = scene_ids[next_idx]
                 action_counts = Counter(str(p.get("shadow_event", {}).get("action", "unknown")) for p in path)
                 chosen_characters = {
                     c.lower()
@@ -1518,12 +1582,52 @@ def story_solve(project_slug: str, projects_dir: str) -> None:
                     repeat_penalty = 0.5 * action_counts.get(action, 0)
                     novelty_bonus = 0.35 * len(chars_l - chosen_characters)
 
-                    score = base_score + math.log(p) + 0.5 * math.log(t) + novelty_bonus - repeat_penalty - placeholder_penalty
-                    next_beam.append((score, path + [cand]))
-            next_beam.sort(key=lambda x: x[0], reverse=True)
+                    preconditions = _as_bool_map(
+                        cand.get("preconditions", cand.get("shadow_event", {}).get("preconditions", [])),
+                        default_value=True,
+                    )
+                    if any(world_state.get(fact, False) != expected for fact, expected in preconditions.items()):
+                        continue
+
+                    effects = _as_bool_map(cand.get("effects", cand.get("shadow_event", {}).get("effects", [])), default_value=True)
+                    next_state = dict(world_state)
+                    next_state.update(effects)
+
+                    cand_progress = _candidate_progress(cand)
+                    next_progress = max(max_progress, cand_progress)
+                    progress_gain = max(0.0, next_progress - max_progress)
+                    nonprogress_penalty = anti_padding_penalty if progress_gain <= 1e-9 else 0.0
+                    unresolved_penalty = unresolved_thread_penalty * _unresolved_threads_count(cand)
+
+                    score = (
+                        base_score
+                        + math.log(p)
+                        + 0.5 * math.log(t)
+                        + novelty_bonus
+                        - repeat_penalty
+                        - placeholder_penalty
+                        - nonprogress_penalty
+                        - unresolved_penalty
+                    )
+                    next_beam.append(
+                        {
+                            "score": score,
+                            "path": path + [cand],
+                            "next_idx": next_idx + 1,
+                            "max_progress": next_progress,
+                            "world_state": next_state,
+                        }
+                    )
+            next_beam.sort(key=lambda x: float(x.get("score", float("-inf"))), reverse=True)
             beam = next_beam[:beam_width] or beam
 
-        cand_score, cand_path = beam[0]
+        completed.extend(beam)
+        completed.sort(key=lambda x: float(x.get("score", float("-inf"))), reverse=True)
+
+        top = completed[0]
+        cand_score = float(top.get("score", float("-inf")))
+        cand_path = list(top.get("path", []))
+
         full_text = "\n".join(c.get("shadow_event", {}).get("description", "") for c in cand_path).lower()
         missing = [r for r in required if r not in full_text]
         best_score, best_path = cand_score, cand_path
@@ -1544,8 +1648,9 @@ def story_solve(project_slug: str, projects_dir: str) -> None:
         "schema_version": "shadow-solution-v1",
         "project_slug": project_slug,
         "generated_at": datetime.now(timezone.utc).isoformat(),
+        "k_max": k_max,
         "beam_width": selected_beam_width,
-        "objective": "sum(log(plausibility)+0.5*log(transition_probability)+novelty_bonus-repeat_penalty-placeholder_penalty)",
+        "objective": "sum(log(plausibility)+0.5*log(transition_probability)+novelty_bonus-repeat_penalty-placeholder_penalty-nonprogress_penalty-unresolved_thread_penalty)",
         "best_score": round(best_score, 6),
         "status": status,
         "missing_required_elements": missing_required,

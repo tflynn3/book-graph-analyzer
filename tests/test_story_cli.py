@@ -582,6 +582,175 @@ def test_story_solve_fails_hard_when_required_elements_missing(tmp_path):
     assert "failed hard required-element gating" in out.output
 
 
+def test_selector_early_stops_on_goal_completion(tmp_path):
+    proj_dir = tmp_path / "solve-early-stop"
+    proj_dir.mkdir(parents=True, exist_ok=True)
+    (proj_dir / "project.json").write_text(json.dumps({"name": "x", "slug": "solve-early-stop"}, indent=2), encoding="utf-8")
+    (proj_dir / "constraints.json").write_text(
+        json.dumps(
+            {
+                "required_elements": [],
+                "forbidden_terms": [],
+                "selection": {"goal_completion_threshold": 1.0, "min_beats_per_scene": 2, "anti_padding_penalty": 1.0},
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    (proj_dir / "shadow_candidates.json").write_text(
+        json.dumps(
+            {
+                "candidates": [
+                    {
+                        "candidate_id": "c1",
+                        "scene_id": "ch01-sc01",
+                        "scene_goal_progress": 0.5,
+                        "shadow_event": {"id": "e1", "action": "setup", "description": "Setup scene.", "characters": ["A"]},
+                        "plausibility_score": 0.95,
+                        "transition_probability": 0.95,
+                    },
+                    {
+                        "candidate_id": "c2",
+                        "scene_id": "ch01-sc02",
+                        "scene_goal_progress": 1.0,
+                        "shadow_event": {"id": "e2", "action": "pivot", "description": "Goal is achieved.", "characters": ["A"]},
+                        "plausibility_score": 0.95,
+                        "transition_probability": 0.95,
+                    },
+                    {
+                        "candidate_id": "c3",
+                        "scene_id": "ch01-sc03",
+                        "scene_goal_progress": 1.0,
+                        "shadow_event": {"id": "e3", "action": "linger", "description": "Padding after completion.", "characters": ["A"]},
+                        "plausibility_score": 0.95,
+                        "transition_probability": 0.95,
+                    },
+                ]
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+    runner = CliRunner()
+    out = runner.invoke(main, ["story", "solve", "--project", "solve-early-stop", "--projects-dir", str(tmp_path)])
+    assert out.exit_code == 0, out.output
+    solved = json.loads((proj_dir / "shadow_solution.json").read_text(encoding="utf-8"))
+    assert solved["k_max"] == 3
+    assert [row["candidate_id"] for row in solved["trajectory"]] == ["c1", "c2"]
+
+
+def test_selector_rejects_padded_nonprogress_beats(tmp_path):
+    proj_dir = tmp_path / "solve-nonprogress-padding"
+    proj_dir.mkdir(parents=True, exist_ok=True)
+    (proj_dir / "project.json").write_text(json.dumps({"name": "x", "slug": "solve-nonprogress-padding"}, indent=2), encoding="utf-8")
+    (proj_dir / "constraints.json").write_text(
+        json.dumps(
+            {
+                "required_elements": [],
+                "forbidden_terms": [],
+                "selection": {
+                    "goal_completion_threshold": 1.0,
+                    "min_beats_per_scene": 2,
+                    "anti_padding_penalty": 1.2,
+                    "unresolved_thread_penalty": 0.7,
+                },
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    (proj_dir / "shadow_candidates.json").write_text(
+        json.dumps(
+            {
+                "candidates": [
+                    {
+                        "candidate_id": "c1",
+                        "scene_id": "ch01-sc01",
+                        "scene_goal_progress": 0.6,
+                        "shadow_event": {"id": "e1", "action": "setup", "description": "Setup scene.", "characters": ["A"]},
+                        "plausibility_score": 0.99,
+                        "transition_probability": 0.99,
+                    },
+                    {
+                        "candidate_id": "c2",
+                        "scene_id": "ch01-sc02",
+                        "scene_goal_progress": 1.0,
+                        "shadow_event": {"id": "e2", "action": "resolve", "description": "Resolution.", "characters": ["A"]},
+                        "plausibility_score": 0.99,
+                        "transition_probability": 0.99,
+                    },
+                    {
+                        "candidate_id": "c3_pad",
+                        "scene_id": "ch01-sc03",
+                        "scene_goal_progress": 1.0,
+                        "unresolved_causal_threads": 2,
+                        "shadow_event": {"id": "e3", "action": "linger", "description": "Extra non-progress beat.", "characters": ["A"]},
+                        "plausibility_score": 0.99,
+                        "transition_probability": 0.99,
+                    },
+                ]
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+    runner = CliRunner()
+    out = runner.invoke(main, ["story", "solve", "--project", "solve-nonprogress-padding", "--projects-dir", str(tmp_path)])
+    assert out.exit_code == 0, out.output
+    solved = json.loads((proj_dir / "shadow_solution.json").read_text(encoding="utf-8"))
+    assert [row["candidate_id"] for row in solved["trajectory"]] == ["c1", "c2"]
+
+
+def test_causal_precondition_fail_with_state_mismatch(tmp_path):
+    proj_dir = tmp_path / "solve-causal-state"
+    proj_dir.mkdir(parents=True, exist_ok=True)
+    (proj_dir / "project.json").write_text(json.dumps({"name": "x", "slug": "solve-causal-state"}, indent=2), encoding="utf-8")
+    (proj_dir / "constraints.json").write_text(
+        json.dumps({"required_elements": [], "forbidden_terms": []}, indent=2),
+        encoding="utf-8",
+    )
+    (proj_dir / "shadow_candidates.json").write_text(
+        json.dumps(
+            {
+                "candidates": [
+                    {
+                        "candidate_id": "c1",
+                        "scene_id": "ch01-sc01",
+                        "shadow_event": {"id": "e1", "action": "approach", "description": "Approach the gate.", "characters": ["A"]},
+                        "plausibility_score": 0.95,
+                        "transition_probability": 0.95,
+                    },
+                    {
+                        "candidate_id": "c2_invalid",
+                        "scene_id": "ch01-sc02",
+                        "preconditions": ["gate_open"],
+                        "shadow_event": {"id": "e2", "action": "enter", "description": "Enter through the gate.", "characters": ["A"]},
+                        "plausibility_score": 0.99,
+                        "transition_probability": 0.99,
+                    },
+                    {
+                        "candidate_id": "c2_valid",
+                        "scene_id": "ch01-sc02",
+                        "shadow_event": {"id": "e3", "action": "wait", "description": "Wait outside the closed gate.", "characters": ["A"]},
+                        "plausibility_score": 0.7,
+                        "transition_probability": 0.7,
+                    },
+                ]
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+    runner = CliRunner()
+    out = runner.invoke(main, ["story", "solve", "--project", "solve-causal-state", "--projects-dir", str(tmp_path)])
+    assert out.exit_code == 0, out.output
+    solved = json.loads((proj_dir / "shadow_solution.json").read_text(encoding="utf-8"))
+    assert [row["candidate_id"] for row in solved["trajectory"]] == ["c1", "c2_valid"]
+
+
 def test_story_grow_shadow_applies_project_priors_and_audit_reports_domain_metrics(tmp_path):
     events_path = tmp_path / "events.json"
     events_path.write_text(json.dumps({"events": [], "relations": []}), encoding="utf-8")
