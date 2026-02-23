@@ -104,7 +104,9 @@ def test_relation_write_count_tracks_matched_relations(monkeypatch):
 
     g = EventGraph()
     g.add_event(Event(id="event1", description="a", source_book="The Hobbit"))
+    g.add_event(Event(id="event2", description="b", source_book="The Hobbit"))
+    g.add_relation(EventRelation(event1_id="event1", event2_id="event2", relation="before", confidence=0.9))
     g.add_relation(EventRelation(event1_id="event1", event2_id="missing", relation="before", confidence=0.9))
 
     stats = writer.write_event_graph(g, book="The Hobbit", link_entities=False)
-    assert stats["relations_written"] == 0
+    assert stats["relations_written"] == 1

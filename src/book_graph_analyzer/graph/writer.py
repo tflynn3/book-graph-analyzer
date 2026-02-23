@@ -963,8 +963,8 @@ class GraphWriter:
             """
 
             with self.driver.session() as session:
-                written = session.run(query, batch=batch_data).single() or {"rel_count": 0}
-                count += int(written.get("rel_count", 0))
+                written = session.run(query, batch=batch_data).single()
+                count += int(written["rel_count"]) if written else 0
 
         return count
 
