@@ -103,6 +103,25 @@ Generates:
 
 ## 7) Draft grounded chapter prose
 
+## 6.5) Expand scene beats (deterministic/template)
+
+```bash
+bga story beats expand --project mithrandir-east --method template
+```
+
+Generates:
+
+- `data/projects/<slug>/shadow_beats.json`
+- `data/projects/<slug>/shadow_beats_selected_sidecar.json` (when `shadow_selected.json` exists)
+
+Notes:
+
+- Offline-first (no LLM required).
+- Stable deterministic IDs + seed for repeatable output.
+- Validation includes `cause_ref_issues` and per-beat `failed_constraints[]`.
+
+## 7) Draft grounded chapter prose
+
 ```bash
 bga story draft --project mithrandir-east --chapter 1 --grounded
 ```

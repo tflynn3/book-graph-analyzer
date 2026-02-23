@@ -17,6 +17,7 @@ from .shadow.graph import ShadowGraph
 from .pipeline import StagedPipeline
 from .voice_patcher import VoicePatcher
 from .style_injector import StyleInjector, StyleConstraints
+from .beat_expander import BeatSheetBeat, BeatSheetV1, ShadowBeatsV1
 
 __all__ = [
     "Story",
@@ -38,4 +39,7 @@ __all__ = [
     "VoicePatcher",
     "StyleInjector",
     "StyleConstraints",
+    "BeatSheetBeat",
+    "BeatSheetV1",
+    "ShadowBeatsV1",
 ]

@@ -6,6 +6,7 @@ import math
 import random
 import re
 from collections import Counter, defaultdict
+from dataclasses import dataclass, asdict
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
@@ -112,6 +113,63 @@ def _stable_seed(*parts: str) -> int:
     material = "||".join(parts)
     digest = hashlib.sha256(material.encode("utf-8")).hexdigest()
     return int(digest[:16], 16) % (2**32)
+
+
+def _compute_dynamic_beat_budget(target_words_per_scene: float | int, ordinal: int, beat_count: int) -> int:
+    """Compute per-beat budget deterministically.
+
+    Important: floor before clamp to preserve deterministic integer behavior.
+    """
+    base = float(target_words_per_scene) / max(1, int(beat_count))
+    shaped = base * (1.0 + (0.08 if ordinal == 2 else 0.0) - (0.05 if ordinal == beat_count else 0.0))
+    return max(45, min(220, math.floor(shaped)))
+
+
+@dataclass
+class StoryBeat:
+    beat_id: str
+    position: int
+    beat_type: str
+    intent: str
+    prose_budget_words: int
+    cause_refs: list[str]
+    failed_constraints: list[str]
+
+
+def _make_shadow_beat(scene: dict[str, Any], slug: str, constraints: dict[str, Any], index: int, total_scenes: int, style_words: float | int = 320) -> StoryBeat:
+    scene_id = str(scene.get("scene_id") or f"scene-{index:03d}")
+    goal = str(scene.get("goal") or "advance scene continuity")
+    summary = str(scene.get("summary") or "")
+    beat_count = 3 if total_scenes > 1 else 2
+    beat_type = "setup" if index == 1 else ("pivot" if index == total_scenes else "confrontation")
+    beat_id_seed = _stable_seed(slug, scene_id, str(index))
+    beat_id = f"{scene_id}-b{index:02d}-{beat_id_seed:06x}"
+    cause_refs = [] if index == 1 else [f"{scene_id}-b{(index-1):02d}-{_stable_seed(slug, scene_id, str(index-1)):06x}"]
+    forbidden_terms = [str(x).lower() for x in constraints.get("forbidden_terms", [])]
+    text = f"{goal} {summary}".lower()
+    failed_constraints = [f"forbidden:{t}" for t in forbidden_terms if t and t in text]
+    return StoryBeat(
+        beat_id=beat_id,
+        position=index,
+        beat_type=beat_type,
+        intent=(summary or goal),
+        prose_budget_words=_compute_dynamic_beat_budget(style_words, index, beat_count),
+        cause_refs=cause_refs,
+        failed_constraints=failed_constraints,
+    )
+
+
+def _validate_cause_ref_positions(beats: list[StoryBeat]) -> list[str]:
+    pos_by_id = {b.beat_id: b.position for b in beats}
+    issues: list[str] = []
+    for beat in beats:
+        for ref in beat.cause_refs:
+            ref_pos = pos_by_id.get(ref)
+            if ref_pos is None:
+                issues.append(f"missing-cause-ref:{beat.beat_id}->{ref}")
+            elif ref_pos >= beat.position:
+                issues.append(f"non-prior-cause-ref:{beat.beat_id}->{ref}")
+    return issues
 
 
 def _load_weights_arg(weights: str | None) -> dict[str, float]:
@@ -500,6 +558,71 @@ def _validate_plan(project: dict, plan: dict, constraints: dict) -> dict:
 def story() -> None:
     """Story workflow commands (init, auto-plan, validate)."""
     pass
+
+
+@story.group("beats")
+def story_beats() -> None:
+    """Scene-to-beat expansion commands."""
+    pass
+
+
+@story_beats.command("expand")
+@click.option("--project", "project_slug", required=True, help="Project slug")
+@click.option("--method", type=click.Choice(["template", "deterministic"], case_sensitive=False), default="template", show_default=True)
+@click.option("--projects-dir", default=str(DEFAULT_PROJECTS_DIR), show_default=True, type=click.Path())
+def story_beats_expand(project_slug: str, method: str, projects_dir: str) -> None:
+    """Expand plan scenes into deterministic shadow beats."""
+    proj_dir = _project_dir(project_slug, Path(projects_dir))
+    _load_project(project_slug, Path(projects_dir))
+    plan = _load_json(proj_dir / "plan.json", default={})
+    if not plan.get("chapters"):
+        raise click.ClickException("Missing or empty plan.json. Run 'bga story plan --project <slug> --auto' first.")
+    constraints = _load_constraints(proj_dir)
+    style_words = float(constraints.get("style", {}).get("target_words_per_scene", 320))
+
+    scene_rows = [sc for ch in plan.get("chapters", []) for sc in ch.get("scenes", [])]
+    beats: list[StoryBeat] = []
+    for idx, scene in enumerate(scene_rows, start=1):
+        beats.append(_make_shadow_beat(scene, project_slug, constraints, idx, len(scene_rows), style_words=style_words))
+
+    validation_issues = _validate_cause_ref_positions(beats)
+    payload = {
+        "schema_version": "shadow-beats-v1",
+        "project_slug": project_slug,
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "method": method.lower(),
+        "seed": _stable_seed(project_slug, _canonical_json(plan), _canonical_json(constraints)),
+        "beats": [asdict(b) for b in beats],
+        "validation": {
+            "cause_ref_issues": validation_issues,
+            "failed_constraints": [
+                {"beat_id": b.beat_id, "failed_constraints": b.failed_constraints}
+                for b in beats
+                if b.failed_constraints
+            ],
+        },
+    }
+
+    out_path = proj_dir / "shadow_beats.json"
+    out_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+
+    sidecar = proj_dir / "shadow_selected.json"
+    if sidecar.exists():
+        selected = _load_json(sidecar, default={})
+        (proj_dir / "shadow_beats_selected_sidecar.json").write_text(
+            json.dumps(
+                {
+                    "schema_version": "shadow-beats-selected-sidecar-v1",
+                    "project_slug": project_slug,
+                    "source": "shadow_selected.json",
+                    "selected": selected.get("selected", []),
+                },
+                indent=2,
+            ),
+            encoding="utf-8",
+        )
+
+    console.print(f"[green]OK[/green] Beats expanded: {out_path}")
 
 
 @story.command("init")

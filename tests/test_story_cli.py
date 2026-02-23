@@ -18,6 +18,8 @@ def test_story_group_registered():
     assert "solve" in main.commands["story"].commands
     assert "draft" in main.commands["story"].commands
     assert "audit" in main.commands["story"].commands
+    assert "beats" in main.commands["story"].commands
+    assert "expand" in main.commands["story"].commands["beats"].commands
 
 
 def test_story_init_non_interactive(tmp_path):
