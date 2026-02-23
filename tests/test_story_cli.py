@@ -751,6 +751,154 @@ def test_causal_precondition_fail_with_state_mismatch(tmp_path):
     assert [row["candidate_id"] for row in solved["trajectory"]] == ["c1", "c2_valid"]
 
 
+def test_causal_precondition_tristate_unknown_strict_reject_by_default(tmp_path):
+    proj_dir = tmp_path / "solve-causal-state-unknown-reject"
+    proj_dir.mkdir(parents=True, exist_ok=True)
+    (proj_dir / "project.json").write_text(json.dumps({"name": "x", "slug": "solve-causal-state-unknown-reject"}, indent=2), encoding="utf-8")
+    (proj_dir / "constraints.json").write_text(
+        json.dumps({"required_elements": [], "forbidden_terms": []}, indent=2),
+        encoding="utf-8",
+    )
+    (proj_dir / "shadow_candidates.json").write_text(
+        json.dumps(
+            {
+                "candidates": [
+                    {
+                        "candidate_id": "c1",
+                        "scene_id": "ch01-sc01",
+                        "shadow_event": {"id": "e1", "action": "approach", "description": "Approach the gate.", "characters": ["A"]},
+                        "plausibility_score": 0.95,
+                        "transition_probability": 0.95,
+                    },
+                    {
+                        "candidate_id": "c2_unknown_rejected",
+                        "scene_id": "ch01-sc02",
+                        "preconditions": {"gate_open": True},
+                        "shadow_event": {"id": "e2", "action": "enter", "description": "Enter through the gate.", "characters": ["A"]},
+                        "plausibility_score": 0.99,
+                        "transition_probability": 0.99,
+                    },
+                    {
+                        "candidate_id": "c2_valid",
+                        "scene_id": "ch01-sc02",
+                        "shadow_event": {"id": "e3", "action": "wait", "description": "Wait outside the gate.", "characters": ["A"]},
+                        "plausibility_score": 0.7,
+                        "transition_probability": 0.7,
+                    },
+                ]
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+    runner = CliRunner()
+    out = runner.invoke(main, ["story", "solve", "--project", "solve-causal-state-unknown-reject", "--projects-dir", str(tmp_path)])
+    assert out.exit_code == 0, out.output
+    solved = json.loads((proj_dir / "shadow_solution.json").read_text(encoding="utf-8"))
+    assert [row["candidate_id"] for row in solved["trajectory"]] == ["c1", "c2_valid"]
+
+
+def test_causal_precondition_unknown_policy_soft_penalty_allows_candidate(tmp_path):
+    proj_dir = tmp_path / "solve-causal-state-unknown-soft"
+    proj_dir.mkdir(parents=True, exist_ok=True)
+    (proj_dir / "project.json").write_text(json.dumps({"name": "x", "slug": "solve-causal-state-unknown-soft"}, indent=2), encoding="utf-8")
+    (proj_dir / "constraints.json").write_text(
+        json.dumps(
+            {
+                "required_elements": [],
+                "forbidden_terms": [],
+                "enforcement": {
+                    "precondition_unknown_policy": "penalize",
+                    "precondition_unknown_penalty": 0.1,
+                },
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    (proj_dir / "shadow_candidates.json").write_text(
+        json.dumps(
+            {
+                "candidates": [
+                    {
+                        "candidate_id": "c1",
+                        "scene_id": "ch01-sc01",
+                        "shadow_event": {"id": "e1", "action": "approach", "description": "Approach the gate.", "characters": ["A"]},
+                        "plausibility_score": 0.95,
+                        "transition_probability": 0.95,
+                    },
+                    {
+                        "candidate_id": "c2_unknown_soft",
+                        "scene_id": "ch01-sc02",
+                        "preconditions": {"gate_open": "true"},
+                        "shadow_event": {"id": "e2", "action": "enter", "description": "Enter through the gate.", "characters": ["A"]},
+                        "plausibility_score": 0.99,
+                        "transition_probability": 0.99,
+                    },
+                    {
+                        "candidate_id": "c2_valid_low",
+                        "scene_id": "ch01-sc02",
+                        "shadow_event": {"id": "e3", "action": "wait", "description": "Wait outside the gate.", "characters": ["A"]},
+                        "plausibility_score": 0.6,
+                        "transition_probability": 0.6,
+                    },
+                ]
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+    runner = CliRunner()
+    out = runner.invoke(main, ["story", "solve", "--project", "solve-causal-state-unknown-soft", "--projects-dir", str(tmp_path)])
+    assert out.exit_code == 0, out.output
+    solved = json.loads((proj_dir / "shadow_solution.json").read_text(encoding="utf-8"))
+    assert [row["candidate_id"] for row in solved["trajectory"]] == ["c1", "c2_unknown_soft"]
+
+
+def test_causal_precondition_false_satisfies_from_explicit_effect_state(tmp_path):
+    proj_dir = tmp_path / "solve-causal-state-false"
+    proj_dir.mkdir(parents=True, exist_ok=True)
+    (proj_dir / "project.json").write_text(json.dumps({"name": "x", "slug": "solve-causal-state-false"}, indent=2), encoding="utf-8")
+    (proj_dir / "constraints.json").write_text(
+        json.dumps({"required_elements": [], "forbidden_terms": []}, indent=2),
+        encoding="utf-8",
+    )
+    (proj_dir / "shadow_candidates.json").write_text(
+        json.dumps(
+            {
+                "candidates": [
+                    {
+                        "candidate_id": "c1_set_false",
+                        "scene_id": "ch01-sc01",
+                        "effects": {"alarm_on": False},
+                        "shadow_event": {"id": "e1", "action": "silence", "description": "Silence the alarm.", "characters": ["A"]},
+                        "plausibility_score": 0.95,
+                        "transition_probability": 0.95,
+                    },
+                    {
+                        "candidate_id": "c2_requires_false",
+                        "scene_id": "ch01-sc02",
+                        "preconditions": {"alarm_on": False},
+                        "shadow_event": {"id": "e2", "action": "sneak", "description": "Sneak past the gate.", "characters": ["A"]},
+                        "plausibility_score": 0.99,
+                        "transition_probability": 0.99,
+                    },
+                ]
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+    runner = CliRunner()
+    out = runner.invoke(main, ["story", "solve", "--project", "solve-causal-state-false", "--projects-dir", str(tmp_path)])
+    assert out.exit_code == 0, out.output
+    solved = json.loads((proj_dir / "shadow_solution.json").read_text(encoding="utf-8"))
+    assert [row["candidate_id"] for row in solved["trajectory"]] == ["c1_set_false", "c2_requires_false"]
+
+
 def test_story_grow_shadow_applies_project_priors_and_audit_reports_domain_metrics(tmp_path):
     events_path = tmp_path / "events.json"
     events_path.write_text(json.dumps({"events": [], "relations": []}), encoding="utf-8")

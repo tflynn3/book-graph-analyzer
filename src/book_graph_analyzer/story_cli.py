@@ -1485,6 +1485,18 @@ def story_solve(project_slug: str, projects_dir: str) -> None:
     min_beats_per_scene = int(selection_cfg.get("min_beats_per_scene", enforcement_cfg.get("min_beats_per_scene", 1)) or 1)
     anti_padding_penalty = float(selection_cfg.get("anti_padding_penalty", 1.0))
     unresolved_thread_penalty = float(selection_cfg.get("unresolved_thread_penalty", 0.4))
+    precondition_unknown_policy = str(
+        selection_cfg.get(
+            "precondition_unknown_policy",
+            enforcement_cfg.get("precondition_unknown_policy", "reject"),
+        )
+    ).strip().lower() or "reject"
+    precondition_unknown_penalty = float(
+        selection_cfg.get(
+            "precondition_unknown_penalty",
+            enforcement_cfg.get("precondition_unknown_penalty", 0.75),
+        )
+    )
 
     beam_width_schedule = [4, 8, 16]
     k_max = len(scene_ids)
@@ -1493,23 +1505,65 @@ def story_solve(project_slug: str, projects_dir: str) -> None:
     missing_required: list[str] = []
     selected_beam_width = beam_width_schedule[0]
 
-    def _as_bool_map(raw: Any, default_value: bool = True) -> dict[str, bool]:
+    def _normalize_fact_state(value: Any, default_value: str = "unknown") -> str:
+        if isinstance(value, str):
+            v = value.strip().lower()
+            if v in {"true", "t", "1", "yes", "y", "on"}:
+                return "true"
+            if v in {"false", "f", "0", "no", "n", "off"}:
+                return "false"
+            if v in {"unknown", "unk", "?", "none", "null"}:
+                return "unknown"
+            return default_value
+        if isinstance(value, bool):
+            return "true" if value else "false"
+        if value is None:
+            return "unknown"
+        return "true" if bool(value) else "false"
+
+    def _as_fact_state_map(raw: Any, default_value: str = "true") -> dict[str, str]:
         if isinstance(raw, dict):
-            out: dict[str, bool] = {}
+            out: dict[str, str] = {}
             for k, v in raw.items():
                 key = str(k).strip().lower()
                 if not key:
                     continue
-                out[key] = bool(v)
+                out[key] = _normalize_fact_state(v, default_value=default_value)
             return out
         if isinstance(raw, list):
-            out = {}
+            out: dict[str, str] = {}
             for item in raw:
                 key = str(item).strip().lower()
                 if key:
                     out[key] = default_value
             return out
         return {}
+
+    def _evaluate_preconditions(
+        world_state: dict[str, str],
+        preconditions: dict[str, str],
+        unknown_policy: str,
+        unknown_penalty: float,
+    ) -> tuple[bool, float]:
+        penalty = 0.0
+        for fact, expected in preconditions.items():
+            observed = _normalize_fact_state(world_state.get(fact, "unknown"), default_value="unknown")
+            if observed == expected:
+                continue
+
+            # Backward-compatible default semantics: unknown does NOT satisfy true,
+            # but remains acceptable for expected=false unless caller opts into strictness.
+            if observed == "unknown" and expected == "false":
+                continue
+
+            if observed == "unknown":
+                if unknown_policy in {"penalize", "soft_penalty", "soft"}:
+                    penalty += max(0.0, float(unknown_penalty))
+                    continue
+                return False, penalty
+
+            return False, penalty
+        return True, penalty
 
     def _candidate_progress(cand: dict[str, Any]) -> float:
         raw = cand.get("scene_goal_progress", cand.get("goal_progress", cand.get("progress", 0.0)))
@@ -1541,7 +1595,11 @@ def story_solve(project_slug: str, projects_dir: str) -> None:
                 path = list(node.get("path", []))
                 next_idx = int(node.get("next_idx", 0))
                 max_progress = float(node.get("max_progress", 0.0))
-                world_state = dict(node.get("world_state", {}))
+                world_state = {
+                    str(k).strip().lower(): _normalize_fact_state(v, default_value="unknown")
+                    for k, v in dict(node.get("world_state", {})).items()
+                    if str(k).strip()
+                }
 
                 if len(path) >= min_beats_per_scene and max_progress >= goal_completion_threshold:
                     completed.append(node)
@@ -1582,14 +1640,23 @@ def story_solve(project_slug: str, projects_dir: str) -> None:
                     repeat_penalty = 0.5 * action_counts.get(action, 0)
                     novelty_bonus = 0.35 * len(chars_l - chosen_characters)
 
-                    preconditions = _as_bool_map(
+                    preconditions = _as_fact_state_map(
                         cand.get("preconditions", cand.get("shadow_event", {}).get("preconditions", [])),
-                        default_value=True,
+                        default_value="true",
                     )
-                    if any(world_state.get(fact, False) != expected for fact, expected in preconditions.items()):
+                    preconditions_ok, unknown_mismatch_penalty = _evaluate_preconditions(
+                        world_state,
+                        preconditions,
+                        unknown_policy=precondition_unknown_policy,
+                        unknown_penalty=precondition_unknown_penalty,
+                    )
+                    if not preconditions_ok:
                         continue
 
-                    effects = _as_bool_map(cand.get("effects", cand.get("shadow_event", {}).get("effects", [])), default_value=True)
+                    effects = _as_fact_state_map(
+                        cand.get("effects", cand.get("shadow_event", {}).get("effects", [])),
+                        default_value="true",
+                    )
                     next_state = dict(world_state)
                     next_state.update(effects)
 
@@ -1606,6 +1673,7 @@ def story_solve(project_slug: str, projects_dir: str) -> None:
                         + novelty_bonus
                         - repeat_penalty
                         - placeholder_penalty
+                        - unknown_mismatch_penalty
                         - nonprogress_penalty
                         - unresolved_penalty
                     )
