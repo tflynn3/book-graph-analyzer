@@ -10,6 +10,11 @@ def test_story_group_registered():
     assert "init" in main.commands["story"].commands
     assert "plan" in main.commands["story"].commands
     assert "validate" in main.commands["story"].commands
+    assert "context" in main.commands["story"].commands
+    assert "grow-shadow" in main.commands["story"].commands
+    assert "solve" in main.commands["story"].commands
+    assert "draft" in main.commands["story"].commands
+    assert "audit" in main.commands["story"].commands
 
 
 def test_story_init_non_interactive(tmp_path):
@@ -120,3 +125,81 @@ def test_story_validate_generates_reports(tmp_path):
     report = json.loads((proj_dir / "validation_report.json").read_text(encoding="utf-8"))
     assert report["project_slug"] == "val-proj"
     assert report["status"] in {"pass", "fail"}
+
+
+def test_shadow_graph_workflow_end_to_end(tmp_path):
+    events_path = tmp_path / "events.json"
+    events_payload = {
+        "events": {
+            "1": {"id": "1", "description": "Beren enters Doriath in secret.", "agent": "Beren", "action": "enter", "patient": "Doriath", "era": "First Age", "year": 465},
+            "2": {"id": "2", "description": "Luthien sings beneath moonlit beeches.", "agent": "Luthien", "action": "sing", "patient": "song", "era": "First Age", "year": 465},
+            "3": {"id": "3", "description": "Thingol sets a perilous bride-price.", "agent": "Thingol", "action": "decree", "patient": "quest", "era": "First Age", "year": 466},
+            "4": {"id": "4", "description": "Beren swears an oath and departs.", "agent": "Beren", "action": "swear", "patient": "oath", "era": "First Age", "year": 466},
+        },
+        "relations": [],
+    }
+    events_path.write_text(json.dumps(events_payload, indent=2), encoding="utf-8")
+
+    proj_dir = tmp_path / "beren-luthien-expanded"
+    proj_dir.mkdir(parents=True, exist_ok=True)
+    (proj_dir / "project.json").write_text(
+        json.dumps(
+            {
+                "name": "Beren and Luthien Expanded",
+                "slug": "beren-luthien-expanded",
+                "genre": "fantasy",
+                "premise": "A grounded retelling that explores implied beats between canonical events.",
+                "target_chapters": 2,
+                "scenes_per_chapter": 2,
+                "event_files": [str(events_path)],
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    (proj_dir / "constraints.json").write_text(
+        json.dumps({"required_elements": ["oath"], "forbidden_terms": ["spaceship"], "style": {}}, indent=2),
+        encoding="utf-8",
+    )
+    (proj_dir / "plan.json").write_text(
+        json.dumps(
+            {
+                "project_slug": "beren-luthien-expanded",
+                "chapters": [
+                    {"chapter_number": 1, "title": "Ch1", "scenes": [{"scene_id": "ch01-sc01", "goal": "setup", "summary": "Beren enters"}, {"scene_id": "ch01-sc02", "goal": "vow", "summary": "Oath set"}]},
+                    {"chapter_number": 2, "title": "Ch2", "scenes": [{"scene_id": "ch02-sc01", "goal": "journey", "summary": "Road"}, {"scene_id": "ch02-sc02", "goal": "trial", "summary": "Trial"}]},
+                ],
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+    runner = CliRunner()
+    commands = [
+        ["story", "context", "--project", "beren-luthien-expanded", "--graph-stats", "--projects-dir", str(tmp_path)],
+        ["story", "grow-shadow", "--project", "beren-luthien-expanded", "--auto", "--projects-dir", str(tmp_path)],
+        ["story", "solve", "--project", "beren-luthien-expanded", "--projects-dir", str(tmp_path)],
+        ["story", "draft", "--project", "beren-luthien-expanded", "--chapter", "1", "--grounded", "--projects-dir", str(tmp_path)],
+        ["story", "audit", "--project", "beren-luthien-expanded", "--chapter", "1", "--projects-dir", str(tmp_path)],
+    ]
+    for cmd in commands:
+        result = runner.invoke(main, cmd)
+        assert result.exit_code == 0, result.output
+
+    assert (proj_dir / "context_stats.json").exists()
+    assert (proj_dir / "shadow_graph.json").exists()
+    assert (proj_dir / "shadow_candidates.json").exists()
+    assert (proj_dir / "shadow_solution.json").exists()
+    assert (proj_dir / "chapter_01.md").exists()
+    assert (proj_dir / "chapter_01_trace.json").exists()
+    assert (proj_dir / "chapter_01_audit.json").exists()
+
+    trace = json.loads((proj_dir / "chapter_01_trace.json").read_text(encoding="utf-8"))
+    assert trace["schema_version"] == "chapter-trace-v1"
+    assert trace["chapter"] == 1
+    assert len(trace["sections"]) == 2
+
+    audit = json.loads((proj_dir / "chapter_01_audit.json").read_text(encoding="utf-8"))
+    assert audit["schema_version"] == "chapter-audit-v1"
+    assert audit["status"] in {"pass", "warn", "fail"}
