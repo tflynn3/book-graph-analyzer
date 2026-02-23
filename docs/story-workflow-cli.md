@@ -1,6 +1,6 @@
 # Story Workflow CLI (Product UX)
 
-The `story` command group provides a friendly workflow for project setup, auto-planning, and validation.
+The `story` command group provides a friendly workflow for project setup, planning, validation, and graph-grounded chapter synthesis.
 
 ## 1) Initialize a project
 
@@ -57,42 +57,90 @@ You can also override JSON output path:
 bga story validate --project mithrandir-east --json-out artifacts/mithrandir-validate.json
 ```
 
-## 4) Draft grounded chapters with required-term enforcement
+## 4) Build graph-native context stats
 
 ```bash
-bga story draft --project mithrandir-east --chapter 1
+bga story context --project mithrandir-east --graph-stats
 ```
 
-Behavior:
+Generates:
+
+- `data/projects/<slug>/context_stats.json`
+
+Stats include:
+
+- event transition probabilities
+- motif/reference density priors
+- character participation priors
+- register/style budgets
+
+## 5) Grow probabilistic shadow graph
+
+```bash
+bga story grow-shadow --project mithrandir-east --auto
+```
+
+Generates:
+
+- `data/projects/<slug>/shadow_graph.json`
+- `data/projects/<slug>/shadow_candidates.json`
+
+## 6) Solve best valid trajectory
+
+```bash
+bga story solve --project mithrandir-east
+```
+
+Generates:
+
+- `data/projects/<slug>/shadow_solution.json`
+
+## 7) Draft grounded chapter prose
+
+```bash
+bga story draft --project mithrandir-east --chapter 1 --grounded
+```
+
+Generates:
+
+- `data/projects/<slug>/chapter_01.md`
+- `data/projects/<slug>/chapter_01_trace.json`
+- `data/projects/<slug>/chapter_01_draft.json`
+
+Required-term enforcement behavior:
 
 - Reads `constraints.json.required_elements` as required terms.
-- Injects required terms into grounded generation constraints.
-- Post-checks generated chapter text and regenerates when required terms are missing.
-- Retry cap defaults to `constraints.json.enforcement.max_retries` (default: `2`).
-- Fails clearly if still missing after retries.
-
-Artifacts:
-
-- `data/projects/<slug>/chapters/chapter-01.md`
-- `data/projects/<slug>/chapters/chapter-01.draft.json` (attempt + enforcement metadata)
+- Regenerates up to `constraints.json.enforcement.max_retries` (default `2`) when required terms are missing.
+- Fails clearly if terms are still missing after retries.
 
 Tradeoffs:
 
-- Stronger canon adherence for mandatory phrases/anchors.
-- Can reduce prose naturalness if required terms are very long or highly specific.
-- Retry loops increase generation cost/latency when the model repeatedly misses terms.
+- Improves deterministic canon anchor coverage.
+- May reduce prose naturalness when required terms are very long/rigid.
+- Retry loops increase generation latency when misses occur.
 
-## 5) Audit chapter required/forbidden terms
+## 8) Audit chapter grounding and constraints
+
+```bash
+bga story audit --project mithrandir-east --chapter 1
+```
+
+Use strict mode explicitly when desired:
 
 ```bash
 bga story audit --project mithrandir-east --chapter 1 --enforce-required-terms
 ```
 
-When enforcement is on, missing required terms are emitted as `ERROR` issues (status `FAIL`).
-When enforcement is off, missing required terms are warnings only.
+When enforcement is enabled, missing required terms are treated as errors (`status=fail`).
+
+Generates:
+
+- `data/projects/<slug>/chapter_01_audit.json`
+- `data/projects/<slug>/chapter_01_audit.md`
 
 ## Notes
 
 - Basic flow requires no manual JSON editing.
 - Canon integration is read-only in this iteration (uses configured canon file when present).
 - `story plan` currently supports `--auto` mode only.
+- `story grow-shadow` currently supports `--auto` mode only.

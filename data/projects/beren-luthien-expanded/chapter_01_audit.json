@@ -1,0 +1,20 @@
+{
+  "schema_version": "chapter-audit-v1",
+  "project_slug": "beren-luthien-expanded",
+  "chapter": 1,
+  "audited_at": "2026-02-23T04:29:21.919403+00:00",
+  "status": "pass",
+  "coverage": {
+    "expected_scene_count": 3,
+    "traced_scene_count": 3,
+    "ratio": 1.0
+  },
+  "constraints": {
+    "forbidden_hits": [],
+    "required_missing": [],
+    "required_terms_enforced": true
+  },
+  "grounding": {
+    "invalid_trace_refs": []
+  }
+}

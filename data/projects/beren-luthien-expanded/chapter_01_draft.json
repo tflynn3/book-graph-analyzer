@@ -1,0 +1,11 @@
+{
+  "project_slug": "beren-luthien-expanded",
+  "chapter": 1,
+  "generated_at": "2026-02-23T04:29:21.766403+00:00",
+  "required_term_enforcement": {
+    "enabled": true,
+    "attempts": 1,
+    "max_retries": 2,
+    "missing_required_terms": []
+  }
+}
