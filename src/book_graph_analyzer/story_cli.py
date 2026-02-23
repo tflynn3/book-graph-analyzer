@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -39,9 +40,123 @@ def _default_constraints() -> dict:
     return {
         "required_elements": [],
         "forbidden_terms": [],
+        "enforcement": {
+            "required_terms": True,
+            "max_retries": 2,
+        },
         "style": {
             "tone": "Consistent with project premise",
             "target_words_per_scene": 900,
+        },
+    }
+
+
+def _required_terms_from_constraints(constraints: dict) -> list[str]:
+    if not isinstance(constraints, dict):
+        return []
+    items = constraints.get("required_elements", [])
+    if not isinstance(items, list):
+        return []
+    return [str(item).strip() for item in items if str(item).strip()]
+
+
+def _missing_required_terms(text: str, required_terms: list[str]) -> list[str]:
+    text_l = text.lower()
+    return [term for term in required_terms if term.lower() not in text_l]
+
+
+def _generate_grounded_chapter_text(project: dict, constraints: dict, chapter_number: int) -> str:
+    """Deterministic draft fallback used by `story draft`.
+
+    In production this can be replaced by an LLM-backed generator.
+    """
+    premise = project.get("premise", "")
+    required_terms = _required_terms_from_constraints(constraints)
+    simulate_missing = os.getenv("BGA_STORY_SIMULATE_MISSING_REQUIRED", "").strip() == "1"
+
+    lines = [
+        f"# Chapter {chapter_number}",
+        "",
+        f"In this grounded draft pass, the narrative advances the premise: {premise}",
+    ]
+    if not simulate_missing and required_terms:
+        lines.extend(
+            [
+                "",
+                "Required canon anchors integrated in this chapter:",
+                *[f"- {term}" for term in required_terms],
+            ]
+        )
+    return "\n".join(lines) + "\n"
+
+
+def _draft_grounded_chapter(
+    project: dict,
+    constraints: dict,
+    chapter_number: int,
+    max_retries: int,
+) -> tuple[str, dict]:
+    required_terms = _required_terms_from_constraints(constraints)
+    attempts = 0
+    last_missing: list[str] = []
+
+    while attempts <= max_retries:
+        attempts += 1
+        draft_text = _generate_grounded_chapter_text(project, constraints, chapter_number)
+        last_missing = _missing_required_terms(draft_text, required_terms)
+        if not last_missing:
+            return draft_text, {
+                "attempts": attempts,
+                "required_terms": required_terms,
+                "missing_required_terms": [],
+                "enforced": True,
+            }
+
+    raise click.ClickException(
+        "Grounded draft failed required-term enforcement "
+        f"after {attempts} attempts. Missing required terms: {last_missing}"
+    )
+
+
+def _audit_chapter_text(text: str, constraints: dict, enforce_required_terms: bool) -> dict:
+    issues: list[dict] = []
+    warnings: list[dict] = []
+
+    required_terms = _required_terms_from_constraints(constraints)
+    missing_required = _missing_required_terms(text, required_terms)
+    if missing_required:
+        target = issues if enforce_required_terms else warnings
+        severity = "ERROR" if enforce_required_terms else "WARN"
+        for term in missing_required:
+            target.append(
+                {
+                    "code": "MISSING_REQUIRED_TERM",
+                    "severity": severity,
+                    "message": f"Required term missing from chapter text: {term}",
+                }
+            )
+
+    forbidden = constraints.get("forbidden_terms", []) if isinstance(constraints, dict) else []
+    hits = [term for term in forbidden if term.lower() in text.lower()]
+    for term in hits:
+        issues.append(
+            {
+                "code": "FORBIDDEN_TERM_PRESENT",
+                "severity": "ERROR",
+                "message": f"Forbidden term present in chapter text: {term}",
+            }
+        )
+
+    status = "PASS" if not issues else "FAIL"
+    return {
+        "status": status,
+        "issues": issues,
+        "warnings": warnings,
+        "summary": {
+            "issue_count": len(issues),
+            "warning_count": len(warnings),
+            "required_terms_total": len(required_terms),
+            "required_terms_missing": len(missing_required),
         },
     }
 
@@ -340,3 +455,93 @@ def story_validate(project_slug: str, projects_dir: str, json_out: str) -> None:
     console.print(f"Issues: {report['summary']['issues']} | Warnings: {report['summary']['warnings']}")
     console.print(f"Human report: {md_path}")
     console.print(f"JSON report: {json_report_path}")
+
+
+@story.command("draft")
+@click.option("--project", "project_slug", required=True, help="Project slug")
+@click.option("--chapter", "chapter_number", required=True, type=int, help="Chapter number to draft")
+@click.option("--projects-dir", default=str(DEFAULT_PROJECTS_DIR), show_default=True, type=click.Path())
+@click.option("--max-retries", type=int, default=None, help="Override required-term regeneration retry cap")
+def story_draft(project_slug: str, chapter_number: int, projects_dir: str, max_retries: int | None) -> None:
+    """Generate a grounded chapter draft with required-term enforcement."""
+    project = _load_project(project_slug, Path(projects_dir))
+    proj_dir = _project_dir(project_slug, Path(projects_dir))
+    constraints_path = proj_dir / "constraints.json"
+    constraints = (
+        json.loads(constraints_path.read_text(encoding="utf-8"))
+        if constraints_path.exists()
+        else _default_constraints()
+    )
+
+    configured_retries = int(constraints.get("enforcement", {}).get("max_retries", 2))
+    retries = configured_retries if max_retries is None else max(0, max_retries)
+    text, meta = _draft_grounded_chapter(
+        project=project,
+        constraints=constraints,
+        chapter_number=chapter_number,
+        max_retries=retries,
+    )
+
+    chapter_dir = proj_dir / "chapters"
+    chapter_dir.mkdir(parents=True, exist_ok=True)
+    chapter_path = chapter_dir / f"chapter-{chapter_number:02d}.md"
+    chapter_path.write_text(text, encoding="utf-8")
+
+    meta_path = chapter_dir / f"chapter-{chapter_number:02d}.draft.json"
+    meta_payload = {
+        "project_slug": project_slug,
+        "chapter_number": chapter_number,
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "required_term_enforcement": {
+            "enabled": True,
+            "max_retries": retries,
+            **meta,
+        },
+    }
+    meta_path.write_text(json.dumps(meta_payload, indent=2), encoding="utf-8")
+
+    console.print(f"[green]OK[/green] Drafted chapter {chapter_number} for [bold]{project_slug}[/bold]")
+    console.print(f"Draft: {chapter_path}")
+    console.print(f"Metadata: {meta_path}")
+
+
+@story.command("audit")
+@click.option("--project", "project_slug", required=True, help="Project slug")
+@click.option("--chapter", "chapter_number", required=True, type=int, help="Chapter number to audit")
+@click.option("--projects-dir", default=str(DEFAULT_PROJECTS_DIR), show_default=True, type=click.Path())
+@click.option("--enforce-required-terms/--no-enforce-required-terms", default=True, show_default=True)
+def story_audit(project_slug: str, chapter_number: int, projects_dir: str, enforce_required_terms: bool) -> None:
+    """Audit a drafted chapter for required/forbidden terms."""
+    proj_dir = _project_dir(project_slug, Path(projects_dir))
+    constraints_path = proj_dir / "constraints.json"
+    constraints = (
+        json.loads(constraints_path.read_text(encoding="utf-8"))
+        if constraints_path.exists()
+        else _default_constraints()
+    )
+
+    chapter_path = proj_dir / "chapters" / f"chapter-{chapter_number:02d}.md"
+    if not chapter_path.exists():
+        raise click.ClickException(f"Missing chapter draft: {chapter_path}")
+
+    report = _audit_chapter_text(
+        text=chapter_path.read_text(encoding="utf-8"),
+        constraints=constraints,
+        enforce_required_terms=enforce_required_terms,
+    )
+    report.update(
+        {
+            "project_slug": project_slug,
+            "chapter_number": chapter_number,
+            "audited_at": datetime.now(timezone.utc).isoformat(),
+            "required_term_enforcement": {"enabled": enforce_required_terms},
+        }
+    )
+
+    audit_path = proj_dir / "chapters" / f"chapter-{chapter_number:02d}.audit.json"
+    audit_path.write_text(json.dumps(report, indent=2), encoding="utf-8")
+
+    color = "green" if report["status"] == "PASS" else "red"
+    console.print(f"[{color}]Audit {report['status']}[/{color}] for chapter {chapter_number}")
+    console.print(f"Issues: {report['summary']['issue_count']} | Warnings: {report['summary']['warning_count']}")
+    console.print(f"Report: {audit_path}")

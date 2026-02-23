@@ -57,6 +57,40 @@ You can also override JSON output path:
 bga story validate --project mithrandir-east --json-out artifacts/mithrandir-validate.json
 ```
 
+## 4) Draft grounded chapters with required-term enforcement
+
+```bash
+bga story draft --project mithrandir-east --chapter 1
+```
+
+Behavior:
+
+- Reads `constraints.json.required_elements` as required terms.
+- Injects required terms into grounded generation constraints.
+- Post-checks generated chapter text and regenerates when required terms are missing.
+- Retry cap defaults to `constraints.json.enforcement.max_retries` (default: `2`).
+- Fails clearly if still missing after retries.
+
+Artifacts:
+
+- `data/projects/<slug>/chapters/chapter-01.md`
+- `data/projects/<slug>/chapters/chapter-01.draft.json` (attempt + enforcement metadata)
+
+Tradeoffs:
+
+- Stronger canon adherence for mandatory phrases/anchors.
+- Can reduce prose naturalness if required terms are very long or highly specific.
+- Retry loops increase generation cost/latency when the model repeatedly misses terms.
+
+## 5) Audit chapter required/forbidden terms
+
+```bash
+bga story audit --project mithrandir-east --chapter 1 --enforce-required-terms
+```
+
+When enforcement is on, missing required terms are emitted as `ERROR` issues (status `FAIL`).
+When enforcement is off, missing required terms are warnings only.
+
 ## Notes
 
 - Basic flow requires no manual JSON editing.
