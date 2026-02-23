@@ -418,6 +418,20 @@ def test_shadow_sampler_determinism_and_selector(tmp_path):
     assert pairs == sorted(pairs, key=lambda x: (-x[0], x[1]))
 
 
+def test_stable_seed_uses_canonical_json_materialization():
+    from book_graph_analyzer.story_cli import _canonical_json, _stable_seed
+
+    plan_a = {"b": 1, "a": 2}
+    plan_b = {"a": 2, "b": 1}
+    constraints_a = {"required_elements": ["oath"], "forbidden_terms": []}
+    constraints_b = {"forbidden_terms": [], "required_elements": ["oath"]}
+
+    seed_a = _stable_seed("proj", _canonical_json(plan_a), _canonical_json(constraints_a))
+    seed_b = _stable_seed("proj", _canonical_json(plan_b), _canonical_json(constraints_b))
+
+    assert seed_a == seed_b
+
+
 def test_story_solve_fails_hard_when_required_elements_missing(tmp_path):
     proj_dir = tmp_path / "solve-hard-gate"
     proj_dir.mkdir(parents=True, exist_ok=True)

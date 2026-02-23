@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import hashlib
 import math
 import random
 import re
@@ -101,6 +102,16 @@ def _safe_prob(counter: dict[str, int]) -> dict[str, float]:
 def _topk_keys(weights: dict[str, float], k: int, fallback: list[str]) -> list[str]:
     keys = [k for k, _ in sorted(weights.items(), key=lambda kv: kv[1], reverse=True)[:k]]
     return keys or fallback
+
+
+def _canonical_json(payload: Any) -> str:
+    return json.dumps(payload, sort_keys=True, separators=(",", ":"))
+
+
+def _stable_seed(*parts: str) -> int:
+    material = "||".join(parts)
+    digest = hashlib.sha256(material.encode("utf-8")).hexdigest()
+    return int(digest[:16], 16) % (2**32)
 
 
 def _load_weights_arg(weights: str | None) -> dict[str, float]:
@@ -764,7 +775,7 @@ def story_grow_shadow(project_slug: str, auto_mode: bool, projects_dir: str) -> 
     # Strong project priors: canon first, then observed priors.
     top_characters = list(dict.fromkeys(canon_entities + top_characters))[:18]
     top_motifs = [k for k, _ in sorted(motif_priors.items(), key=lambda kv: kv[1], reverse=True)[:30]] or ["song", "oath", "shadow"]
-    seed = abs(hash(project_slug)) % (2**32)
+    seed = _stable_seed(project_slug, _canonical_json(plan), _canonical_json(constraints))
     rng = random.Random(seed)
     required = [str(x) for x in constraints.get("required_elements", [])]
     forbidden = {str(x).lower() for x in constraints.get("forbidden_terms", [])}
@@ -931,7 +942,7 @@ def story_sample_shadow(
     top_characters = _topk_keys(char_priors, 16, ["Beren", "Luthien", "Thingol"])
     top_motifs = _topk_keys(motif_priors, 40, ["oath", "song", "fate", "shadow"])
 
-    eff_seed = int(seed if seed is not None else (abs(hash(f"{project_slug}:{n}:{steps}:{method}")) % (2**32)))
+    eff_seed = int(seed if seed is not None else _stable_seed(project_slug, str(n), str(steps), method))
     rng = random.Random(eff_seed)
     out_path = proj_dir / "shadow_samples.jsonl"
 

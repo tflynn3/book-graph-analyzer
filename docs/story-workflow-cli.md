@@ -85,6 +85,12 @@ Generates:
 - `data/projects/<slug>/shadow_graph.json`
 - `data/projects/<slug>/shadow_candidates.json`
 
+Statistical engine v1 hardening:
+
+- Deterministic seed uses a stable SHA-256 hash of `(project_slug, plan, constraints)`.
+- Candidate sampling scales to large pools (default target: `max(500, scenes*24)`), overridable by `constraints.search.target_candidates`.
+- `shadow_candidates.json` includes `seed`, `sampling`, per-candidate interpretable `score_components` + `score_total`, and `elites_grid` behavior-cell winners.
+
 ## 6) Solve best valid trajectory
 
 ```bash
@@ -110,6 +116,8 @@ Generates:
 Required-term enforcement behavior:
 
 - Reads `constraints.json.required_elements` as required terms.
+- Uses token-boundary phrase matching (not naive substring checks).
+- Supports aliases via `constraints.json.required_element_aliases`.
 - Regenerates up to `constraints.json.enforcement.max_retries` (default `2`) when required terms are missing.
 - Fails clearly if terms are still missing after retries.
 
@@ -132,6 +140,12 @@ bga story audit --project mithrandir-east --chapter 1 --enforce-required-terms
 ```
 
 When enforcement is enabled, missing required terms are treated as errors (`status=fail`).
+
+Grounding hardening checks:
+
+- Audit reports per-scene required-term coverage (`constraints.required_scene_coverage`).
+- Semantic evidence alignment checks verify trace excerpts align with chapter text.
+- Trace sections must carry non-empty `source_canon_node_ids`.
 
 Generates:
 
