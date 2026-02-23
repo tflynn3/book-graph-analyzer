@@ -1,0 +1,10 @@
+{
+  "order": ["hobbit", "fellowship", "two_towers", "return_of_king", "silmarillion"],
+  "scorecards": {
+    "hobbit": {"precision": 1.0, "recall": 1.0, "f1": 1.0, "extracted": 12, "accepted": 6, "materialize": true},
+    "fellowship": {"precision": 1.0, "recall": 1.0, "f1": 1.0, "extracted": 14, "accepted": 7, "materialize": true},
+    "two_towers": {"precision": 0.9167, "recall": 0.9167, "f1": 0.9167, "extracted": 24, "accepted": 12, "materialize": true},
+    "return_of_king": {"precision": 1.0, "recall": 1.0, "f1": 1.0, "extracted": 22, "accepted": 11, "materialize": true},
+    "silmarillion": {"precision": 1.0, "recall": 1.0, "f1": 1.0, "extracted": 22, "accepted": 11, "materialize": true}
+  }
+}

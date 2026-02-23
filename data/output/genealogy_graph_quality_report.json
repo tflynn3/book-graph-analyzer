@@ -1,0 +1,57 @@
+{
+  "thresholds": {
+    "precision_ok": true,
+    "recall_ok": true,
+    "minima_ok": true
+  },
+  "graph_integrity": {
+    "self_links": 0,
+    "unresolved_ids": 0,
+    "contradictions": 0,
+    "inverse_missing": 0,
+    "passed": true
+  },
+  "per_book_minima": {
+    "hobbit": {
+      "extracted_ok": true,
+      "accepted_ok": true,
+      "observed_extracted": 12,
+      "observed_accepted": 6,
+      "min_extracted": 8,
+      "min_accepted": 6
+    },
+    "fellowship": {
+      "extracted_ok": true,
+      "accepted_ok": true,
+      "observed_extracted": 14,
+      "observed_accepted": 7,
+      "min_extracted": 10,
+      "min_accepted": 7
+    },
+    "two_towers": {
+      "extracted_ok": true,
+      "accepted_ok": true,
+      "observed_extracted": 24,
+      "observed_accepted": 12,
+      "min_extracted": 10,
+      "min_accepted": 8
+    },
+    "return_of_king": {
+      "extracted_ok": true,
+      "accepted_ok": true,
+      "observed_extracted": 22,
+      "observed_accepted": 11,
+      "min_extracted": 10,
+      "min_accepted": 8
+    },
+    "silmarillion": {
+      "extracted_ok": true,
+      "accepted_ok": true,
+      "observed_extracted": 22,
+      "observed_accepted": 11,
+      "min_extracted": 15,
+      "min_accepted": 11
+    }
+  },
+  "passed": true
+}
