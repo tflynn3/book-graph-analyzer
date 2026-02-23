@@ -61,6 +61,7 @@ nav:
       - Shadow Graph Statistical Engine v1: wiki/issue-shadow-graph-stat-engine-v1.md
       - Shadow Graph Statistical Engine Runbook: wiki/shadow-graph-stat-engine-runbook.md
       - Shadow Sampler v1: wiki/shadow-sampler-v1.md
+      - Scene to Beat Expansion Design (v1): wiki/scene-beat-expansion-design.md
       - Full End-to-End Example: end-to-end-example.md
       - Full Lifecycle Tutorial (Ingest -> Analyze -> Generate): full-lifecycle-tutorial.md
       - Examples: examples.md
