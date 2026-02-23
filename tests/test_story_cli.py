@@ -12,6 +12,9 @@ def test_story_group_registered():
     assert "validate" in main.commands["story"].commands
     assert "context" in main.commands["story"].commands
     assert "grow-shadow" in main.commands["story"].commands
+    assert "sample-shadow" in main.commands["story"].commands
+    assert "score-shadow" in main.commands["story"].commands
+    assert "select-shadow" in main.commands["story"].commands
     assert "solve" in main.commands["story"].commands
     assert "draft" in main.commands["story"].commands
     assert "audit" in main.commands["story"].commands
@@ -320,3 +323,96 @@ def test_story_draft_fails_when_required_terms_never_appear(tmp_path, monkeypatc
     assert draft.exit_code != 0
     assert "failed required-term enforcement" in draft.output
     assert "Missing required terms" in draft.output
+
+
+def test_shadow_sampler_determinism_and_selector(tmp_path):
+    proj_dir = tmp_path / "beren-luthien-expanded"
+    proj_dir.mkdir(parents=True, exist_ok=True)
+    (proj_dir / "project.json").write_text(
+        json.dumps({"name": "B&L", "slug": "beren-luthien-expanded", "target_chapters": 2, "scenes_per_chapter": 2}, indent=2),
+        encoding="utf-8",
+    )
+    (proj_dir / "plan.json").write_text(
+        json.dumps(
+            {
+                "chapters": [
+                    {"chapter_number": 1, "scenes": [{"scene_id": "ch01-sc01", "goal": "setup", "summary": "setup"}, {"scene_id": "ch01-sc02", "goal": "vow", "summary": "vow"}]},
+                    {"chapter_number": 2, "scenes": [{"scene_id": "ch02-sc01", "goal": "journey", "summary": "journey"}, {"scene_id": "ch02-sc02", "goal": "trial", "summary": "trial"}]},
+                ]
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    (proj_dir / "context_stats.json").write_text(
+        json.dumps(
+            {
+                "event_transition_probabilities": {
+                    "unknown": {"journey": 0.7, "reveal": 0.3},
+                    "journey": {"journey": 0.2, "conflict": 0.8},
+                    "conflict": {"reveal": 0.6, "journey": 0.4},
+                    "reveal": {"journey": 1.0},
+                },
+                "character_participation_priors": {"Beren": 0.5, "Luthien": 0.4, "Thingol": 0.1},
+                "motif_reference_density_priors": {"oath": 0.5, "song": 0.3, "fate": 0.2},
+                "register_style_budgets": {"target_words_per_scene": 3},
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    (proj_dir / "constraints.json").write_text(
+        json.dumps({"required_elements": ["oath"], "forbidden_terms": ["spaceship"]}, indent=2),
+        encoding="utf-8",
+    )
+
+    runner = CliRunner()
+    sample_cmd = [
+        "story",
+        "sample-shadow",
+        "--project",
+        "beren-luthien-expanded",
+        "--n",
+        "12",
+        "--method",
+        "anneal",
+        "--seed",
+        "42",
+        "--steps",
+        "20",
+        "--projects-dir",
+        str(tmp_path),
+    ]
+    r1 = runner.invoke(main, sample_cmd)
+    assert r1.exit_code == 0, r1.output
+    first = (proj_dir / "shadow_samples.jsonl").read_text(encoding="utf-8")
+    r2 = runner.invoke(main, sample_cmd)
+    assert r2.exit_code == 0, r2.output
+    second = (proj_dir / "shadow_samples.jsonl").read_text(encoding="utf-8")
+    assert first == second
+
+    score = runner.invoke(main, ["story", "score-shadow", "--project", "beren-luthien-expanded", "--pareto", "--projects-dir", str(tmp_path)])
+    assert score.exit_code == 0, score.output
+    score_payload = json.loads((proj_dir / "shadow_scores.json").read_text(encoding="utf-8"))
+    assert score_payload["scores"]
+    one = score_payload["scores"][0]
+    comps = one["components"]
+    for key in (
+        "canon_consistency_penalty",
+        "canon_consistency",
+        "transition_likelihood",
+        "arc_coherence",
+        "style_register",
+        "novelty_diversity",
+    ):
+        assert key in comps
+        assert 0.0 <= float(comps[key]) <= 1.0
+    assert (proj_dir / "shadow_pareto_front.json").exists()
+
+    sel = runner.invoke(main, ["story", "select-shadow", "--project", "beren-luthien-expanded", "--top", "5", "--projects-dir", str(tmp_path)])
+    assert sel.exit_code == 0, sel.output
+    selected = json.loads((proj_dir / "shadow_selected.json").read_text(encoding="utf-8"))
+    assert len(selected["selected"]) == 5
+    # stable ordering rule
+    pairs = [(float(r["weighted_score"]), str(r["candidate_id"])) for r in selected["selected"]]
+    assert pairs == sorted(pairs, key=lambda x: (-x[0], x[1]))
