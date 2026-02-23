@@ -20,6 +20,119 @@ def test_story_group_registered():
     assert "audit" in main.commands["story"].commands
     assert "beats" in main.commands["story"].commands
     assert "expand" in main.commands["story"].commands["beats"].commands
+    assert "validate" in main.commands["story"].commands["beats"].commands
+    assert "show" in main.commands["story"].commands["beats"].commands
+    assert "clean" in main.commands["story"].commands["beats"].commands
+
+
+def test_story_beats_validate_show_clean_flow_and_scoping(tmp_path):
+    runner = CliRunner()
+    proj_dir = tmp_path / "beats-proj"
+    proj_dir.mkdir(parents=True, exist_ok=True)
+    (proj_dir / "project.json").write_text(
+        json.dumps({"name": "Beats", "slug": "beats-proj", "target_chapters": 2, "scenes_per_chapter": 2}, indent=2),
+        encoding="utf-8",
+    )
+    (proj_dir / "shadow_beats.json").write_text(
+        json.dumps(
+            {
+                "schema_version": "shadow-beats-v1",
+                "project_slug": "beats-proj",
+                "beats": [
+                    {"beat_id": "ch01-sc01-b01-aa", "position": 1, "beat_type": "setup", "cause_refs": [], "failed_constraints": []},
+                    {"beat_id": "ch01-sc02-b02-bb", "position": 2, "beat_type": "pivot", "cause_refs": ["missing-ref"], "failed_constraints": []},
+                    {"beat_id": "ch02-sc01-b03-cc", "position": 3, "beat_type": "confrontation", "cause_refs": ["ch01-sc02-b02-bb"], "failed_constraints": ["forbidden:spaceship"]},
+                ],
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+    v = runner.invoke(
+        main,
+        ["story", "beats", "validate", "--project", "beats-proj", "--chapter", "1", "--projects-dir", str(tmp_path)],
+    )
+    assert v.exit_code == 0, v.output
+    report = json.loads((proj_dir / "shadow_beats_validation.json").read_text(encoding="utf-8"))
+    assert report["summary"]["beats"] == 2
+    assert report["summary"]["errors"] == 1
+    assert report["summary"]["warnings"] == 0
+
+    show = runner.invoke(
+        main,
+        ["story", "beats", "show", "--project", "beats-proj", "--scene", "ch02-sc01", "--projects-dir", str(tmp_path)],
+    )
+    assert show.exit_code == 0, show.output
+    assert "count=1" in show.output
+    assert "warnings=1" in runner.invoke(
+        main,
+        ["story", "beats", "validate", "--project", "beats-proj", "--scene", "ch02-sc01", "--projects-dir", str(tmp_path)],
+    ).output
+
+    dry = runner.invoke(
+        main,
+        ["story", "beats", "clean", "--project", "beats-proj", "--chapter", "1", "--dry-run", "--projects-dir", str(tmp_path)],
+    )
+    assert dry.exit_code == 0, dry.output
+    unchanged = json.loads((proj_dir / "shadow_beats.json").read_text(encoding="utf-8"))
+    assert len(unchanged["beats"]) == 3
+
+    clean = runner.invoke(
+        main,
+        ["story", "beats", "clean", "--project", "beats-proj", "--chapter", "1", "--projects-dir", str(tmp_path)],
+    )
+    assert clean.exit_code == 0, clean.output
+    changed = json.loads((proj_dir / "shadow_beats.json").read_text(encoding="utf-8"))
+    assert len(changed["beats"]) == 1
+    assert changed["beats"][0]["beat_id"].startswith("ch02-")
+
+
+def test_story_beats_validate_strict_exit_codes(tmp_path):
+    runner = CliRunner()
+    proj_dir = tmp_path / "beats-strict"
+    proj_dir.mkdir(parents=True, exist_ok=True)
+    (proj_dir / "project.json").write_text(
+        json.dumps({"name": "Strict", "slug": "beats-strict", "target_chapters": 1, "scenes_per_chapter": 1}, indent=2),
+        encoding="utf-8",
+    )
+    (proj_dir / "shadow_beats.json").write_text(
+        json.dumps(
+            {
+                "beats": [
+                    {"beat_id": "ch01-sc01-b01-a", "position": 1, "beat_type": "setup", "cause_refs": [], "failed_constraints": ["forbidden:x"]}
+                ]
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+    non_strict = runner.invoke(main, ["story", "beats", "validate", "--project", "beats-strict", "--projects-dir", str(tmp_path)])
+    assert non_strict.exit_code == 0, non_strict.output
+
+    strict_errors_only = runner.invoke(
+        main,
+        ["story", "beats", "validate", "--project", "beats-strict", "--strict", "--projects-dir", str(tmp_path)],
+    )
+    assert strict_errors_only.exit_code == 0, strict_errors_only.output
+
+    strict_warn = runner.invoke(
+        main,
+        [
+            "story",
+            "beats",
+            "validate",
+            "--project",
+            "beats-strict",
+            "--strict",
+            "--strict-warnings",
+            "--projects-dir",
+            str(tmp_path),
+        ],
+    )
+    assert strict_warn.exit_code != 0
+    assert "Strict validation failed" in strict_warn.output
 
 
 def test_story_init_non_interactive(tmp_path):

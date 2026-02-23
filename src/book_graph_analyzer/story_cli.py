@@ -172,6 +172,58 @@ def _validate_cause_ref_positions(beats: list[StoryBeat]) -> list[str]:
     return issues
 
 
+def _scene_from_beat_id(beat_id: str) -> str:
+    core = str(beat_id or "").split("-b", 1)[0]
+    return core or "unknown-scene"
+
+
+def _chapter_from_scene_id(scene_id: str) -> int | None:
+    m = re.match(r"^ch(\d+)-", str(scene_id or "").lower())
+    return int(m.group(1)) if m else None
+
+
+def _select_beats_scope(beats: list[dict[str, Any]], chapter: int | None, scene: str | None) -> list[dict[str, Any]]:
+    if chapter is not None and scene:
+        raise click.ClickException("Use only one of --chapter or --scene.")
+    if scene:
+        return [b for b in beats if _scene_from_beat_id(str(b.get("beat_id", ""))) == scene]
+    if chapter is not None:
+        out = []
+        for b in beats:
+            scene_id = _scene_from_beat_id(str(b.get("beat_id", "")))
+            ch = _chapter_from_scene_id(scene_id)
+            if ch == chapter:
+                out.append(b)
+        return out
+    return list(beats)
+
+
+def _beats_validation_from_rows(beats: list[dict[str, Any]]) -> dict[str, Any]:
+    by_id = {str(b.get("beat_id", "")): int(b.get("position", 0) or 0) for b in beats}
+    issues: list[dict[str, Any]] = []
+    for b in beats:
+        beat_id = str(b.get("beat_id", ""))
+        pos = int(b.get("position", 0) or 0)
+        for ref in b.get("cause_refs", []) or []:
+            if ref not in by_id:
+                issues.append({"level": "error", "code": "MISSING_CAUSE_REF", "beat_id": beat_id, "message": f"Missing cause ref: {ref}"})
+            elif by_id[ref] >= pos:
+                issues.append({"level": "error", "code": "NON_PRIOR_CAUSE_REF", "beat_id": beat_id, "message": f"Cause ref is not prior: {ref}"})
+        for term in b.get("failed_constraints", []) or []:
+            issues.append({"level": "warn", "code": "FAILED_CONSTRAINT", "beat_id": beat_id, "message": f"Constraint failed: {term}"})
+
+    counts = Counter(it["level"] for it in issues)
+    return {
+        "summary": {
+            "beats": len(beats),
+            "errors": int(counts.get("error", 0)),
+            "warnings": int(counts.get("warn", 0)),
+            "status": "pass" if not counts.get("error", 0) else "fail",
+        },
+        "issues": issues,
+    }
+
+
 def _load_weights_arg(weights: str | None) -> dict[str, float]:
     if not weights:
         return {
@@ -623,6 +675,133 @@ def story_beats_expand(project_slug: str, method: str, projects_dir: str) -> Non
         )
 
     console.print(f"[green]OK[/green] Beats expanded: {out_path}")
+
+
+@story_beats.command("validate")
+@click.option("--project", "project_slug", required=True, help="Project slug")
+@click.option("--chapter", type=int, default=None, help="Limit validation to a chapter number")
+@click.option("--scene", default="", help="Limit validation to a scene id (e.g. ch01-sc02)")
+@click.option("--strict/--no-strict", default=False, help="Exit non-zero when validation has errors")
+@click.option("--strict-warnings", is_flag=True, help="With --strict, also fail on warnings")
+@click.option("--json-out", default="", help="Optional explicit JSON report path")
+@click.option("--projects-dir", default=str(DEFAULT_PROJECTS_DIR), show_default=True, type=click.Path())
+def story_beats_validate(project_slug: str, chapter: int | None, scene: str, strict: bool, strict_warnings: bool, json_out: str, projects_dir: str) -> None:
+    """Validate beat artifacts, optionally scoped by chapter or scene."""
+    proj_dir = _project_dir(project_slug, Path(projects_dir))
+    _load_project(project_slug, Path(projects_dir))
+    beats_path = proj_dir / "shadow_beats.json"
+    if not beats_path.exists():
+        raise click.ClickException("Missing shadow_beats.json. Run: bga story beats expand --project <slug>")
+
+    payload = _load_json(beats_path, default={})
+    beats = payload.get("beats", []) if isinstance(payload, dict) else []
+    scoped = _select_beats_scope(beats, chapter=chapter, scene=(scene or "").strip() or None)
+    report = _beats_validation_from_rows(scoped)
+    report.update(
+        {
+            "schema_version": "shadow-beats-validation-v1",
+            "project_slug": project_slug,
+            "validated_at": datetime.now(timezone.utc).isoformat(),
+            "scope": {"chapter": chapter, "scene": (scene or "").strip() or None},
+        }
+    )
+
+    report_path = Path(json_out) if json_out else (proj_dir / "shadow_beats_validation.json")
+    report_path.write_text(json.dumps(report, indent=2), encoding="utf-8")
+
+    s = report["summary"]
+    console.print(
+        f"Beats validate: {s['status'].upper()} | beats={s['beats']} | errors={s['errors']} | warnings={s['warnings']}"
+    )
+    console.print(f"JSON report: {report_path}")
+
+    should_fail = strict and (s["errors"] > 0 or (strict_warnings and s["warnings"] > 0))
+    if should_fail:
+        raise click.ClickException("Strict validation failed.")
+
+
+@story_beats.command("show")
+@click.option("--project", "project_slug", required=True, help="Project slug")
+@click.option("--chapter", type=int, default=None, help="Show beats for chapter")
+@click.option("--scene", default="", help="Show beats for scene id")
+@click.option("--projects-dir", default=str(DEFAULT_PROJECTS_DIR), show_default=True, type=click.Path())
+def story_beats_show(project_slug: str, chapter: int | None, scene: str, projects_dir: str) -> None:
+    """Show concise beat summary for a scene/chapter."""
+    proj_dir = _project_dir(project_slug, Path(projects_dir))
+    _load_project(project_slug, Path(projects_dir))
+    payload = _load_json(proj_dir / "shadow_beats.json", default={})
+    beats = payload.get("beats", []) if isinstance(payload, dict) else []
+    scoped = _select_beats_scope(beats, chapter=chapter, scene=(scene or "").strip() or None)
+    report = _beats_validation_from_rows(scoped)
+
+    type_counts = Counter(str(b.get("beat_type", "unknown")) for b in scoped)
+    ids = [str(b.get("beat_id", "")) for b in scoped]
+    scene_counts = Counter(_scene_from_beat_id(i) for i in ids)
+    top_issues = report["issues"][:3]
+    console.print(f"Beats summary | count={len(scoped)} | scenes={len(scene_counts)}")
+    console.print(f"Types: {dict(type_counts)}")
+    console.print(f"IDs: {', '.join(ids[:8])}" + (" ..." if len(ids) > 8 else ""))
+    if top_issues:
+        console.print("Top issues:")
+        for it in top_issues:
+            console.print(f"- [{it['level']}] {it['code']} {it['beat_id']}")
+    else:
+        console.print("Top issues: none")
+
+
+@story_beats.command("clean")
+@click.option("--project", "project_slug", required=True, help="Project slug")
+@click.option("--chapter", type=int, default=None, help="Remove beats only in chapter")
+@click.option("--scene", default="", help="Remove beats only in scene id")
+@click.option("--dry-run", is_flag=True, help="Preview without writing changes")
+@click.option("--projects-dir", default=str(DEFAULT_PROJECTS_DIR), show_default=True, type=click.Path())
+def story_beats_clean(project_slug: str, chapter: int | None, scene: str, dry_run: bool, projects_dir: str) -> None:
+    """Clean beat artifacts safely (whole-project or scoped)."""
+    proj_dir = _project_dir(project_slug, Path(projects_dir))
+    _load_project(project_slug, Path(projects_dir))
+    scene = (scene or "").strip()
+    scoped_mode = bool(scene) or (chapter is not None)
+
+    beats_path = proj_dir / "shadow_beats.json"
+    sidecar_path = proj_dir / "shadow_beats_selected_sidecar.json"
+    validation_path = proj_dir / "shadow_beats_validation.json"
+
+    if not scoped_mode:
+        removed = [p for p in [beats_path, sidecar_path, validation_path] if p.exists()]
+        if dry_run:
+            console.print(f"Dry-run: would remove {len(removed)} files")
+            for p in removed:
+                console.print(f"- {p}")
+            return
+        for p in removed:
+            p.unlink()
+        console.print(f"[green]OK[/green] Removed {len(removed)} beat artifact files")
+        return
+
+    if not beats_path.exists():
+        raise click.ClickException("No shadow_beats.json to clean.")
+    payload = _load_json(beats_path, default={})
+    beats = payload.get("beats", []) if isinstance(payload, dict) else []
+    doomed = _select_beats_scope(beats, chapter=chapter, scene=scene or None)
+    doomed_ids = {str(b.get("beat_id", "")) for b in doomed}
+    kept = [b for b in beats if str(b.get("beat_id", "")) not in doomed_ids]
+    console.print(f"Scoped clean: removing {len(doomed)} beats, keeping {len(kept)}")
+    if dry_run:
+        return
+    payload["beats"] = kept
+    payload.setdefault("validation", {})
+    if isinstance(payload.get("validation"), dict):
+        v = payload["validation"]
+        if isinstance(v.get("failed_constraints"), list):
+            v["failed_constraints"] = [
+                row for row in v["failed_constraints"] if str(row.get("beat_id", "")) not in doomed_ids
+            ]
+        if isinstance(v.get("cause_ref_issues"), list):
+            v["cause_ref_issues"] = [
+                row for row in v["cause_ref_issues"] if not any(did in str(row) for did in doomed_ids)
+            ]
+    beats_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    console.print(f"[green]OK[/green] Updated {beats_path}")
 
 
 @story.command("init")

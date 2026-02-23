@@ -120,6 +120,37 @@ Notes:
 - Stable deterministic IDs + seed for repeatable output.
 - Validation includes `cause_ref_issues` and per-beat `failed_constraints[]`.
 
+Validate beats (optionally scoped):
+
+```bash
+bga story beats validate --project mithrandir-east --chapter 1
+bga story beats validate --project mithrandir-east --scene ch01-sc02 --strict
+bga story beats validate --project mithrandir-east --strict --strict-warnings
+```
+
+Outputs:
+
+- `data/projects/<slug>/shadow_beats_validation.json` (or `--json-out <path>`)
+
+Show beat summary for a scope:
+
+```bash
+bga story beats show --project mithrandir-east --chapter 1
+bga story beats show --project mithrandir-east --scene ch01-sc02
+```
+
+Summary includes count, beat ids, beat types, and top issues.
+
+Clean beat artifacts safely:
+
+```bash
+bga story beats clean --project mithrandir-east --dry-run
+bga story beats clean --project mithrandir-east --chapter 1
+```
+
+- With scope flags (`--chapter` / `--scene`), `clean` removes only matching beats from `shadow_beats.json`.
+- Without scope flags, `clean` removes beat artifact files (`shadow_beats.json`, sidecar, and beat validation report).
+
 ## 7) Draft grounded chapter prose
 
 ```bash
