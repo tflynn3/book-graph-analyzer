@@ -846,15 +846,19 @@ def story_grow_shadow(project_slug: str, auto_mode: bool, projects_dir: str) -> 
                 prev_action = row_candidates[0]["shadow_event"]["action"]
             candidates.extend(row_candidates)
 
-    for idx, chosen in enumerate(selected):
-        ev = chosen["shadow_event"]
+    # Materialize all candidate events so solved trajectories always have valid grounding refs.
+    for cand in candidates:
+        ev = cand["shadow_event"]
         graph_nodes.append(ev)
         graph_edges.append({
-            "source": f"shadow-{chosen['scene_id']}",
+            "source": f"shadow-{cand['scene_id']}",
             "target": ev["id"],
             "type": "HAS_EVENT",
-            "probability": chosen["plausibility_score"],
+            "probability": cand["plausibility_score"],
         })
+
+    for idx, chosen in enumerate(selected):
+        ev = chosen["shadow_event"]
         for c in ev["characters"]:
             cid = f"shadow-char-{re.sub(r'[^a-z0-9]+', '-', c.lower()).strip('-')}"
             graph_nodes.append({"id": cid, "type": "ShadowCharacter", "name": c})
