@@ -299,6 +299,26 @@ def _missing_required_terms(text: str, required_terms: list[str]) -> list[str]:
     return [term for term in required_terms if term.lower() not in text_l]
 
 
+def _project_canon_entities(project_slug: str) -> list[str]:
+    slug = (project_slug or "").lower()
+    if "beren" in slug or "luthien" in slug:
+        return [
+            "Beren", "Luthien", "Lúthien", "Thingol", "Melian", "Sauron", "Morgoth",
+            "Finrod", "Celegorm", "Curufin", "Huan", "Tol-in-Gaurhoth", "Doriath", "Nargothrond",
+        ]
+    return []
+
+
+def _out_of_domain_entities(project_slug: str) -> set[str]:
+    slug = (project_slug or "").lower()
+    if "beren" in slug or "luthien" in slug:
+        return {
+            "frodo", "sam", "gandalf", "aragorn", "legolas", "gimli", "boromir", "faramir",
+            "pippin", "merry", "gollum", "smeagol", "saruman", "eowyn", "theoden", "denethor",
+        }
+    return set()
+
+
 def _render_grounded_chapter_text(chapter: int, chapter_rows: list[dict], graph_node_by_id: dict[str, dict], required_terms: list[str]) -> tuple[str, list[dict]]:
     lines = [f"# Chapter {chapter}: Shadow-Woven Paths", ""]
     trace_sections = []
@@ -739,6 +759,10 @@ def story_grow_shadow(project_slug: str, auto_mode: bool, projects_dir: str) -> 
     char_priors = context.get("character_participation_priors", {})
     motif_priors = context.get("motif_reference_density_priors", {})
     top_characters = [k for k, _ in sorted(char_priors.items(), key=lambda kv: kv[1], reverse=True)[:12]] or ["Beren", "Luthien"]
+    canon_entities = _project_canon_entities(project_slug)
+    out_of_domain = _out_of_domain_entities(project_slug)
+    # Strong project priors: canon first, then observed priors.
+    top_characters = list(dict.fromkeys(canon_entities + top_characters))[:18]
     top_motifs = [k for k, _ in sorted(motif_priors.items(), key=lambda kv: kv[1], reverse=True)[:30]] or ["song", "oath", "shadow"]
     seed = abs(hash(project_slug)) % (2**32)
     rng = random.Random(seed)
@@ -776,13 +800,22 @@ def story_grow_shadow(project_slug: str, auto_mode: bool, projects_dir: str) -> 
                 if required and chapter_num == 1 and rank == 0:
                     motifs = list(dict.fromkeys((required[:1] + motifs)))
 
-                description = f"{scene.get('goal', 'Advance plot')} via {action}."
+                # Spread hard anchors across early candidates to keep hard-gated solve feasible.
+                if required:
+                    req_idx = ((chapter_num - 1) * max(1, len(scenes)) + rank) % len(required)
+                    motifs = list(dict.fromkeys(motifs + [required[req_idx]]))
+
+                description = f"{scene.get('goal', 'Advance plot')} via {action}. Characters: {', '.join(chars[:3])}. Motifs: {', '.join(motifs[:3])}."
                 if any(term in description.lower() for term in forbidden):
                     continue
 
                 char_score = sum(float(char_priors.get(c, 0.01)) for c in chars) / max(1, len(chars))
+                canon_hits = sum(1 for c in chars if c in canon_entities)
+                out_of_domain_hits = sum(1 for c in chars if c.lower() in out_of_domain)
+                unknown_hits = sum(1 for c in chars if c.strip().lower() in {"unknown", "they", "someone"})
                 motif_score = sum(float(motif_priors.get(m, 0.005)) for m in motifs) / max(1, len(motifs))
-                plausibility = round(min(0.99, max(0.05, (0.5 * transition_prob) + (0.3 * char_score) + (0.2 * motif_score))), 6)
+                prior_boost = (0.10 * canon_hits) - (0.22 * out_of_domain_hits) - (0.25 * unknown_hits)
+                plausibility = round(min(0.99, max(0.01, (0.5 * transition_prob) + (0.3 * char_score) + (0.2 * motif_score) + prior_boost)), 6)
                 cid = f"{scene_id}-cand-{rank + 1}"
                 row_candidates.append(
                     {
@@ -800,6 +833,11 @@ def story_grow_shadow(project_slug: str, auto_mode: bool, projects_dir: str) -> 
                         "transition_probability": round(transition_prob, 6),
                         "plausibility_score": plausibility,
                         "hard_constraints_ok": True,
+                        "project_prior": {
+                            "canon_hits": canon_hits,
+                            "out_of_domain_hits": out_of_domain_hits,
+                            "unknown_entity_hits": unknown_hits,
+                        },
                     }
                 )
             row_candidates.sort(key=lambda c: c["plausibility_score"], reverse=True)
@@ -1121,34 +1159,76 @@ def story_solve(project_slug: str, projects_dir: str) -> None:
     required = [str(x).lower() for x in constraints.get("required_elements", [])]
     forbidden = [str(x).lower() for x in constraints.get("forbidden_terms", [])]
 
-    beam: list[tuple[float, list[dict]]] = [(0.0, [])]
-    beam_width = 4
+    beam_width_schedule = [4, 8, 16]
+    best_score = float("-inf")
+    best_path: list[dict] = []
+    missing_required: list[str] = []
+    selected_beam_width = beam_width_schedule[0]
 
-    for sid in scene_ids:
-        next_beam: list[tuple[float, list[dict]]] = []
-        for base_score, path in beam:
-            for cand in by_scene[sid][:4]:
-                desc = str(cand.get("shadow_event", {}).get("description", "")).lower()
-                if any(term in desc for term in forbidden):
-                    continue
-                p = max(1e-6, float(cand.get("plausibility_score", 0.01)))
-                t = max(1e-6, float(cand.get("transition_probability", 0.01)))
-                score = base_score + math.log(p) + 0.5 * math.log(t)
-                next_beam.append((score, path + [cand]))
-        next_beam.sort(key=lambda x: x[0], reverse=True)
-        beam = next_beam[:beam_width] or beam
+    for beam_width in beam_width_schedule:
+        beam: list[tuple[float, list[dict]]] = [(0.0, [])]
+        for sid in scene_ids:
+            next_beam: list[tuple[float, list[dict]]] = []
+            for base_score, path in beam:
+                action_counts = Counter(str(p.get("shadow_event", {}).get("action", "unknown")) for p in path)
+                chosen_characters = {
+                    c.lower()
+                    for p in path
+                    for c in (p.get("shadow_event", {}).get("characters", []) or [])
+                    if isinstance(c, str)
+                }
+                for cand in by_scene[sid][:6]:
+                    desc = str(cand.get("shadow_event", {}).get("description", "")).lower()
+                    if any(term in desc for term in forbidden):
+                        continue
+                    p = max(1e-6, float(cand.get("plausibility_score", 0.01)))
+                    t = max(1e-6, float(cand.get("transition_probability", 0.01)))
 
-    best_score, best_path = beam[0]
-    full_text = "\n".join(c.get("shadow_event", {}).get("description", "") for c in best_path).lower()
-    missing_required = [r for r in required if r not in full_text]
-    status = "pass" if not missing_required else "warn"
+                    action = str(cand.get("shadow_event", {}).get("action", "unknown")).strip().lower() or "unknown"
+                    chars = [str(c).strip() for c in (cand.get("shadow_event", {}).get("characters", []) or []) if str(c).strip()]
+                    chars_l = {c.lower() for c in chars}
+                    prior = cand.get("project_prior", {}) if isinstance(cand.get("project_prior"), dict) else {}
+                    out_of_domain_hits = int(prior.get("out_of_domain_hits", 0) or 0)
+
+                    # Mode-collapse/placeholder suppression + diversity regularization.
+                    placeholder_penalty = 0.0
+                    if action in {"unknown", "placeholder", "tbd"}:
+                        placeholder_penalty += 2.0
+                    if any(c.lower() in {"unknown", "they", "someone"} for c in chars):
+                        placeholder_penalty += 1.5
+                    placeholder_penalty += 1.2 * out_of_domain_hits
+
+                    repeat_penalty = 0.5 * action_counts.get(action, 0)
+                    novelty_bonus = 0.35 * len(chars_l - chosen_characters)
+
+                    score = base_score + math.log(p) + 0.5 * math.log(t) + novelty_bonus - repeat_penalty - placeholder_penalty
+                    next_beam.append((score, path + [cand]))
+            next_beam.sort(key=lambda x: x[0], reverse=True)
+            beam = next_beam[:beam_width] or beam
+
+        cand_score, cand_path = beam[0]
+        full_text = "\n".join(c.get("shadow_event", {}).get("description", "") for c in cand_path).lower()
+        missing = [r for r in required if r not in full_text]
+        best_score, best_path = cand_score, cand_path
+        missing_required = missing
+        selected_beam_width = beam_width
+        if not missing:
+            break
+
+    status = "pass" if not missing_required else "fail"
+    if missing_required:
+        raise click.ClickException(
+            "Solved trajectory failed hard required-element gating "
+            f"after retries (beam schedule={beam_width_schedule}, last_beam={selected_beam_width}). "
+            f"Missing required elements: {missing_required}"
+        )
 
     solved = {
         "schema_version": "shadow-solution-v1",
         "project_slug": project_slug,
         "generated_at": datetime.now(timezone.utc).isoformat(),
-        "beam_width": beam_width,
-        "objective": "sum(log(plausibility)+0.5*log(transition_probability))",
+        "beam_width": selected_beam_width,
+        "objective": "sum(log(plausibility)+0.5*log(transition_probability)+novelty_bonus-repeat_penalty-placeholder_penalty)",
         "best_score": round(best_score, 6),
         "status": status,
         "missing_required_elements": missing_required,
@@ -1259,7 +1339,7 @@ def story_audit(project_slug: str, chapter: int, projects_dir: str, enforce_requ
     graph = _load_json(graph_path, default={})
     constraints = _load_constraints(proj_dir)
     if enforce_required_terms is None:
-        enforce_required_terms = bool(constraints.get("enforcement", {}).get("required_terms", False))
+        enforce_required_terms = True
 
     expected_scenes = [row for row in solved.get("trajectory", []) if str(row.get("scene_id", "")).startswith(f"ch{chapter:02d}-")]
     traced = trace.get("sections", [])
@@ -1270,6 +1350,28 @@ def story_audit(project_slug: str, chapter: int, projects_dir: str, enforce_requ
     text_l = text.lower()
     forbidden_hits = [t for t in forbidden if t in text_l]
     required_missing = [t for t in required if t not in text_l]
+    canon_entities = {c.lower() for c in _project_canon_entities(project_slug)}
+    out_of_domain = _out_of_domain_entities(project_slug)
+
+    chapter_traj = [row for row in expected_scenes if isinstance(row, dict)]
+    action_seq = [str(row.get("action") or "unknown").lower() for row in chapter_traj]
+    unique_actions = len(set(action_seq))
+    action_diversity = round(unique_actions / max(1, len(action_seq)), 6)
+
+    words = re.findall(r"\b[\w'-]+\b", text)
+    word_count = len(words)
+    ttr = round((len({w.lower() for w in words}) / max(1, word_count)), 6)
+
+    chapter_chars = []
+    graph_by_id = {n.get("id"): n for n in graph.get("nodes", []) if isinstance(n, dict)}
+    for row in chapter_traj:
+        ev = graph_by_id.get(row.get("shadow_event_id"), {})
+        for c in (ev.get("characters", []) or []):
+            if isinstance(c, str):
+                chapter_chars.append(c)
+    out_hits = [c for c in chapter_chars if c.lower() in out_of_domain]
+    canon_hits = [c for c in chapter_chars if c.lower() in canon_entities]
+    out_rate = round((len(out_hits) / max(1, len(chapter_chars))), 6)
 
     node_ids = {n.get("id") for n in graph.get("nodes", []) if isinstance(n, dict)}
     invalid_refs = []
@@ -1282,10 +1384,8 @@ def story_audit(project_slug: str, chapter: int, projects_dir: str, enforce_requ
     status = "pass"
     if coverage < 0.99 or forbidden_hits or invalid_refs:
         status = "fail"
-    elif required_missing and enforce_required_terms:
-        status = "fail"
     elif required_missing:
-        status = "warn"
+        status = "fail"
 
     report = {
         "schema_version": "chapter-audit-v1",
@@ -1306,6 +1406,18 @@ def story_audit(project_slug: str, chapter: int, projects_dir: str, enforce_requ
         "grounding": {
             "invalid_trace_refs": invalid_refs,
         },
+        "quality_proxies": {
+            "word_count": word_count,
+            "type_token_ratio": ttr,
+            "action_diversity": action_diversity,
+            "unique_actions": unique_actions,
+        },
+        "domain_alignment": {
+            "chapter_character_mentions": len(chapter_chars),
+            "canon_entity_hits": len(canon_hits),
+            "out_of_domain_hits": len(out_hits),
+            "out_of_domain_rate": out_rate,
+        },
     }
 
     json_path = _audit_json_path(proj_dir, chapter)
@@ -1319,6 +1431,9 @@ def story_audit(project_slug: str, chapter: int, projects_dir: str, enforce_requ
         f"- Forbidden hits: {len(forbidden_hits)}",
         f"- Required missing: {len(required_missing)}",
         f"- Invalid trace refs: {len(invalid_refs)}",
+        f"- Action diversity: {unique_actions}/{max(1, len(action_seq))} ({action_diversity:.2%})",
+        f"- Out-of-domain entity rate: {out_rate:.2%}",
+        f"- Word count: {word_count}",
         "",
         "## Details",
         f"- forbidden_hits: {forbidden_hits or '[]'}",
