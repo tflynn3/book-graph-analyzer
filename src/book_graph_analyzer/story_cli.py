@@ -136,7 +136,15 @@ class StoryBeat:
     failed_constraints: list[str]
 
 
-def _make_shadow_beat(scene: dict[str, Any], slug: str, constraints: dict[str, Any], index: int, total_scenes: int, style_words: float | int = 320) -> StoryBeat:
+def _make_shadow_beat(
+    scene: dict[str, Any],
+    slug: str,
+    constraints: dict[str, Any],
+    index: int,
+    total_scenes: int,
+    style_words: float | int = 320,
+    prior_beat_id: str | None = None,
+) -> StoryBeat:
     scene_id = str(scene.get("scene_id") or f"scene-{index:03d}")
     goal = str(scene.get("goal") or "advance scene continuity")
     summary = str(scene.get("summary") or "")
@@ -144,7 +152,7 @@ def _make_shadow_beat(scene: dict[str, Any], slug: str, constraints: dict[str, A
     beat_type = "setup" if index == 1 else ("pivot" if index == total_scenes else "confrontation")
     beat_id_seed = _stable_seed(slug, scene_id, str(index))
     beat_id = f"{scene_id}-b{index:02d}-{beat_id_seed:06x}"
-    cause_refs = [] if index == 1 else [f"{scene_id}-b{(index-1):02d}-{_stable_seed(slug, scene_id, str(index-1)):06x}"]
+    cause_refs = [prior_beat_id] if prior_beat_id else []
     forbidden_terms = [str(x).lower() for x in constraints.get("forbidden_terms", [])]
     text = f"{goal} {summary}".lower()
     failed_constraints = [f"forbidden:{t}" for t in forbidden_terms if t and t in text]
@@ -635,7 +643,18 @@ def story_beats_expand(project_slug: str, method: str, projects_dir: str) -> Non
     scene_rows = [sc for ch in plan.get("chapters", []) for sc in ch.get("scenes", [])]
     beats: list[StoryBeat] = []
     for idx, scene in enumerate(scene_rows, start=1):
-        beats.append(_make_shadow_beat(scene, project_slug, constraints, idx, len(scene_rows), style_words=style_words))
+        prior_beat_id = beats[-1].beat_id if beats else None
+        beats.append(
+            _make_shadow_beat(
+                scene,
+                project_slug,
+                constraints,
+                idx,
+                len(scene_rows),
+                style_words=style_words,
+                prior_beat_id=prior_beat_id,
+            )
+        )
 
     validation_issues = _validate_cause_ref_positions(beats)
     payload = {
