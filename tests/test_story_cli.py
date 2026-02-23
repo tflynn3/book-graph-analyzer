@@ -65,6 +65,7 @@ def test_story_beats_validate_show_clean_flow_and_scoping(tmp_path):
     )
     assert show.exit_code == 0, show.output
     assert "count=1" in show.output
+    assert "Per-scene counts: ch02-sc01:1" in show.output
     assert "warnings=1" in runner.invoke(
         main,
         ["story", "beats", "validate", "--project", "beats-proj", "--scene", "ch02-sc01", "--projects-dir", str(tmp_path)],

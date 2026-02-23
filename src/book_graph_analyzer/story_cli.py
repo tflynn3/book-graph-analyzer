@@ -125,6 +125,32 @@ def _compute_dynamic_beat_budget(target_words_per_scene: float | int, ordinal: i
     return max(45, min(220, math.floor(shaped)))
 
 
+def _compute_scene_beat_count(scene: dict[str, Any], min_beats: int, max_beats: int) -> int:
+    """Deterministically derive a per-scene beat count from scene complexity.
+
+    Uses only local scene fields (offline-first, no stochastic inputs).
+    """
+    lo = max(1, int(min_beats))
+    hi = max(lo, int(max_beats))
+    goal = str(scene.get("goal") or "")
+    summary = str(scene.get("summary") or "")
+    hooks = scene.get("continuity_hooks") or []
+    hook_count = len(hooks) if isinstance(hooks, list) else 0
+
+    words = len((goal + " " + summary).split())
+    # Light complexity heuristic: longer summaries and more hooks => more beats.
+    estimated = 1 + (words // 18) + (hook_count // 2)
+    return max(lo, min(hi, int(estimated)))
+
+
+def _beat_type_for_scene(beat_idx: int, beat_count: int) -> str:
+    if beat_idx <= 1:
+        return "setup"
+    if beat_idx >= beat_count:
+        return "pivot"
+    return "confrontation"
+
+
 @dataclass
 class StoryBeat:
     beat_id: str
@@ -140,28 +166,28 @@ def _make_shadow_beat(
     scene: dict[str, Any],
     slug: str,
     constraints: dict[str, Any],
-    index: int,
-    total_scenes: int,
+    position: int,
+    beat_idx_in_scene: int,
+    beats_in_scene: int,
     style_words: float | int = 320,
     prior_beat_id: str | None = None,
 ) -> StoryBeat:
     scene_id = str(scene.get("scene_id") or f"scene-{index:03d}")
     goal = str(scene.get("goal") or "advance scene continuity")
     summary = str(scene.get("summary") or "")
-    beat_count = 3 if total_scenes > 1 else 2
-    beat_type = "setup" if index == 1 else ("pivot" if index == total_scenes else "confrontation")
-    beat_id_seed = _stable_seed(slug, scene_id, str(index))
-    beat_id = f"{scene_id}-b{index:02d}-{beat_id_seed:06x}"
+    beat_type = _beat_type_for_scene(beat_idx_in_scene, beats_in_scene)
+    beat_id_seed = _stable_seed(slug, scene_id, str(beat_idx_in_scene), goal, summary)
+    beat_id = f"{scene_id}-b{beat_idx_in_scene:02d}-{beat_id_seed:06x}"
     cause_refs = [prior_beat_id] if prior_beat_id else []
     forbidden_terms = [str(x).lower() for x in constraints.get("forbidden_terms", [])]
     text = f"{goal} {summary}".lower()
     failed_constraints = [f"forbidden:{t}" for t in forbidden_terms if t and t in text]
     return StoryBeat(
         beat_id=beat_id,
-        position=index,
+        position=position,
         beat_type=beat_type,
         intent=(summary or goal),
-        prose_budget_words=_compute_dynamic_beat_budget(style_words, index, beat_count),
+        prose_budget_words=_compute_dynamic_beat_budget(style_words, beat_idx_in_scene, beats_in_scene),
         cause_refs=cause_refs,
         failed_constraints=failed_constraints,
     )
@@ -629,8 +655,18 @@ def story_beats() -> None:
 @story_beats.command("expand")
 @click.option("--project", "project_slug", required=True, help="Project slug")
 @click.option("--method", type=click.Choice(["template", "deterministic"], case_sensitive=False), default="template", show_default=True)
+@click.option("--beats-per-scene", type=int, default=None, help="Fixed beats emitted per scene (overrides dynamic)")
+@click.option("--min-beats-per-scene", type=int, default=1, show_default=True, help="Dynamic mode lower bound")
+@click.option("--max-beats-per-scene", type=int, default=4, show_default=True, help="Dynamic mode upper bound")
 @click.option("--projects-dir", default=str(DEFAULT_PROJECTS_DIR), show_default=True, type=click.Path())
-def story_beats_expand(project_slug: str, method: str, projects_dir: str) -> None:
+def story_beats_expand(
+    project_slug: str,
+    method: str,
+    beats_per_scene: int | None,
+    min_beats_per_scene: int,
+    max_beats_per_scene: int,
+    projects_dir: str,
+) -> None:
     """Expand plan scenes into deterministic shadow beats."""
     proj_dir = _project_dir(project_slug, Path(projects_dir))
     _load_project(project_slug, Path(projects_dir))
@@ -641,20 +677,36 @@ def story_beats_expand(project_slug: str, method: str, projects_dir: str) -> Non
     style_words = float(constraints.get("style", {}).get("target_words_per_scene", 320))
 
     scene_rows = [sc for ch in plan.get("chapters", []) for sc in ch.get("scenes", [])]
+    if beats_per_scene is not None and beats_per_scene <= 0:
+        raise click.ClickException("--beats-per-scene must be > 0")
+    if min_beats_per_scene <= 0 or max_beats_per_scene <= 0:
+        raise click.ClickException("--min-beats-per-scene and --max-beats-per-scene must be > 0")
+    if min_beats_per_scene > max_beats_per_scene:
+        raise click.ClickException("--min-beats-per-scene cannot be greater than --max-beats-per-scene")
+
     beats: list[StoryBeat] = []
-    for idx, scene in enumerate(scene_rows, start=1):
-        prior_beat_id = beats[-1].beat_id if beats else None
-        beats.append(
-            _make_shadow_beat(
-                scene,
-                project_slug,
-                constraints,
-                idx,
-                len(scene_rows),
-                style_words=style_words,
-                prior_beat_id=prior_beat_id,
-            )
+    position = 1
+    for scene in scene_rows:
+        per_scene_count = int(beats_per_scene) if beats_per_scene is not None else _compute_scene_beat_count(
+            scene,
+            min_beats=min_beats_per_scene,
+            max_beats=max_beats_per_scene,
         )
+        for beat_idx in range(1, per_scene_count + 1):
+            prior_beat_id = beats[-1].beat_id if beats else None
+            beats.append(
+                _make_shadow_beat(
+                    scene,
+                    project_slug,
+                    constraints,
+                    position=position,
+                    beat_idx_in_scene=beat_idx,
+                    beats_in_scene=per_scene_count,
+                    style_words=style_words,
+                    prior_beat_id=prior_beat_id,
+                )
+            )
+            position += 1
 
     validation_issues = _validate_cause_ref_positions(beats)
     payload = {
@@ -663,6 +715,12 @@ def story_beats_expand(project_slug: str, method: str, projects_dir: str) -> Non
         "generated_at": datetime.now(timezone.utc).isoformat(),
         "method": method.lower(),
         "seed": _stable_seed(project_slug, _canonical_json(plan), _canonical_json(constraints)),
+        "expansion": {
+            "beats_per_scene": beats_per_scene,
+            "min_beats_per_scene": min_beats_per_scene,
+            "max_beats_per_scene": max_beats_per_scene,
+            "mode": "fixed" if beats_per_scene is not None else "dynamic",
+        },
         "beats": [asdict(b) for b in beats],
         "validation": {
             "cause_ref_issues": validation_issues,
@@ -758,6 +816,9 @@ def story_beats_show(project_slug: str, chapter: int | None, scene: str, project
     scene_counts = Counter(_scene_from_beat_id(i) for i in ids)
     top_issues = report["issues"][:3]
     console.print(f"Beats summary | count={len(scoped)} | scenes={len(scene_counts)}")
+    if scene_counts:
+        rendered_scene_counts = ", ".join(f"{sid}:{cnt}" for sid, cnt in sorted(scene_counts.items()))
+        console.print(f"Per-scene counts: {rendered_scene_counts}")
     console.print(f"Types: {dict(type_counts)}")
     console.print(f"IDs: {', '.join(ids[:8])}" + (" ..." if len(ids) > 8 else ""))
     if top_issues:
