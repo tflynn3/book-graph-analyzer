@@ -203,3 +203,120 @@ def test_shadow_graph_workflow_end_to_end(tmp_path):
     audit = json.loads((proj_dir / "chapter_01_audit.json").read_text(encoding="utf-8"))
     assert audit["schema_version"] == "chapter-audit-v1"
     assert audit["status"] in {"pass", "warn", "fail"}
+
+
+def test_story_draft_enforces_required_terms(tmp_path):
+    events_path = tmp_path / "events.json"
+    events_path.write_text(json.dumps({"events": [], "relations": []}), encoding="utf-8")
+
+    proj_dir = tmp_path / "required-terms-proj"
+    proj_dir.mkdir(parents=True, exist_ok=True)
+    (proj_dir / "project.json").write_text(
+        json.dumps(
+            {
+                "name": "Required Terms Project",
+                "slug": "required-terms-proj",
+                "genre": "fantasy",
+                "premise": "A constrained grounded draft.",
+                "target_chapters": 1,
+                "scenes_per_chapter": 1,
+                "event_files": [str(events_path)],
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    (proj_dir / "constraints.json").write_text(
+        json.dumps(
+            {
+                "required_elements": ["Thingol", "Tol-in-Gaurhoth confrontation"],
+                "forbidden_terms": [],
+                "enforcement": {"required_terms": True, "max_retries": 2},
+                "style": {},
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    (proj_dir / "shadow_solution.json").write_text(
+        json.dumps(
+            {
+                "trajectory": [
+                    {
+                        "scene_id": "ch01-sc01",
+                        "shadow_event_id": "shadow-event-1",
+                    }
+                ]
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    (proj_dir / "shadow_graph.json").write_text(
+        json.dumps(
+            {
+                "nodes": [
+                    {
+                        "id": "shadow-event-1",
+                        "characters": ["Beren", "Luthien"],
+                        "motifs": ["song"],
+                        "action": "journey",
+                    },
+                    {"id": "shadow-ch01-sc01"},
+                ]
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+    runner = CliRunner()
+    draft = runner.invoke(
+        main,
+        ["story", "draft", "--project", "required-terms-proj", "--chapter", "1", "--grounded", "--projects-dir", str(tmp_path)],
+    )
+    assert draft.exit_code == 0, draft.output
+
+    chapter_text = (proj_dir / "chapter_01.md").read_text(encoding="utf-8")
+    assert "Thingol" in chapter_text
+    assert "Tol-in-Gaurhoth confrontation" in chapter_text
+
+    audit = runner.invoke(
+        main,
+        ["story", "audit", "--project", "required-terms-proj", "--chapter", "1", "--projects-dir", str(tmp_path), "--enforce-required-terms"],
+    )
+    assert audit.exit_code == 0, audit.output
+    audit_report = json.loads((proj_dir / "chapter_01_audit.json").read_text(encoding="utf-8"))
+    assert audit_report["status"] == "pass"
+    assert audit_report["constraints"]["required_missing"] == []
+
+
+def test_story_draft_fails_when_required_terms_never_appear(tmp_path, monkeypatch):
+    from book_graph_analyzer import story_cli as story_module
+
+    proj_dir = tmp_path / "required-terms-fail"
+    proj_dir.mkdir(parents=True, exist_ok=True)
+    (proj_dir / "project.json").write_text(
+        json.dumps({"name": "x", "slug": "required-terms-fail", "target_chapters": 1, "scenes_per_chapter": 1}, indent=2),
+        encoding="utf-8",
+    )
+    (proj_dir / "constraints.json").write_text(
+        json.dumps({"required_elements": ["Melian"], "forbidden_terms": [], "enforcement": {"required_terms": True, "max_retries": 2}}, indent=2),
+        encoding="utf-8",
+    )
+    (proj_dir / "shadow_solution.json").write_text(
+        json.dumps({"trajectory": [{"scene_id": "ch01-sc01", "shadow_event_id": "shadow-event-1"}]}, indent=2),
+        encoding="utf-8",
+    )
+    (proj_dir / "shadow_graph.json").write_text(json.dumps({"nodes": [{"id": "shadow-event-1"}]}, indent=2), encoding="utf-8")
+
+    monkeypatch.setattr(story_module, "_render_grounded_chapter_text", lambda chapter, chapter_rows, graph_node_by_id, required_terms: ("# Chapter\n\nNo required term appears here.\n", []))
+
+    runner = CliRunner()
+    draft = runner.invoke(
+        main,
+        ["story", "draft", "--project", "required-terms-fail", "--chapter", "1", "--grounded", "--projects-dir", str(tmp_path)],
+    )
+    assert draft.exit_code != 0
+    assert "failed required-term enforcement" in draft.output
+    assert "Missing required terms" in draft.output

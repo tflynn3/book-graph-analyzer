@@ -105,12 +105,33 @@ Generates:
 
 - `data/projects/<slug>/chapter_01.md`
 - `data/projects/<slug>/chapter_01_trace.json`
+- `data/projects/<slug>/chapter_01_draft.json`
+
+Required-term enforcement behavior:
+
+- Reads `constraints.json.required_elements` as required terms.
+- Regenerates up to `constraints.json.enforcement.max_retries` (default `2`) when required terms are missing.
+- Fails clearly if terms are still missing after retries.
+
+Tradeoffs:
+
+- Improves deterministic canon anchor coverage.
+- May reduce prose naturalness when required terms are very long/rigid.
+- Retry loops increase generation latency when misses occur.
 
 ## 8) Audit chapter grounding and constraints
 
 ```bash
 bga story audit --project mithrandir-east --chapter 1
 ```
+
+Use strict mode explicitly when desired:
+
+```bash
+bga story audit --project mithrandir-east --chapter 1 --enforce-required-terms
+```
+
+When enforcement is enabled, missing required terms are treated as errors (`status=fail`).
 
 Generates:
 

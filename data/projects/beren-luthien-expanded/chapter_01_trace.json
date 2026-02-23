@@ -1,0 +1,38 @@
+{
+  "schema_version": "chapter-trace-v1",
+  "project_slug": "beren-luthien-expanded",
+  "chapter": 1,
+  "generated_at": "2026-02-23T04:29:21.766403+00:00",
+  "sections": [
+    {
+      "section": 1,
+      "scene_id": "ch01-sc01",
+      "shadow_event_id": "shadow-event-ch01-sc01-cand-2",
+      "shadow_scene_id": "shadow-ch01-sc01",
+      "source_canon_node_ids": [
+        "canon-action-unknown"
+      ],
+      "text_excerpt": "In scene ch01-sc01, Bilbo and Aldarion unknown through uncertain country, testing the cost of each vow against the weight of old memory. Their choices keep close to known history while opening a narrow, plausible margin "
+    },
+    {
+      "section": 2,
+      "scene_id": "ch01-sc02",
+      "shadow_event_id": "shadow-event-ch01-sc02-cand-2",
+      "shadow_scene_id": "shadow-ch01-sc02",
+      "source_canon_node_ids": [
+        "canon-action-unknown"
+      ],
+      "text_excerpt": "In scene ch01-sc02, Frodo and Gandalf unknown through uncertain country, testing the cost of each vow against the weight of old memory. Their choices keep close to known history while opening a narrow, plausible margin f"
+    },
+    {
+      "section": 3,
+      "scene_id": "ch01-sc03",
+      "shadow_event_id": "shadow-event-ch01-sc03-cand-2",
+      "shadow_scene_id": "shadow-ch01-sc03",
+      "source_canon_node_ids": [
+        "canon-action-unknown"
+      ],
+      "text_excerpt": "In scene ch01-sc03, Turin and Frodo and Sam unknown through uncertain country, testing the cost of each vow against the weight of old memory. Their choices keep close to known history while opening a narrow, plausible ma"
+    }
+  ]
+}

@@ -126,11 +126,62 @@ def _default_constraints() -> dict:
     return {
         "required_elements": [],
         "forbidden_terms": [],
+        "enforcement": {
+            "required_terms": True,
+            "max_retries": 2,
+        },
         "style": {
             "tone": "Consistent with project premise",
             "target_words_per_scene": 900,
         },
     }
+
+
+def _required_terms(constraints: dict) -> list[str]:
+    rows = constraints.get("required_elements", []) if isinstance(constraints, dict) else []
+    return [str(x).strip() for x in rows if str(x).strip()]
+
+
+def _missing_required_terms(text: str, required_terms: list[str]) -> list[str]:
+    text_l = text.lower()
+    return [term for term in required_terms if term.lower() not in text_l]
+
+
+def _render_grounded_chapter_text(chapter: int, chapter_rows: list[dict], graph_node_by_id: dict[str, dict], required_terms: list[str]) -> tuple[str, list[dict]]:
+    lines = [f"# Chapter {chapter}: Shadow-Woven Paths", ""]
+    trace_sections = []
+    for idx, row in enumerate(chapter_rows, start=1):
+        scene_id = row.get("scene_id")
+        event_id = row.get("shadow_event_id")
+        event = graph_node_by_id.get(event_id, {})
+        chars = event.get("characters", ["They"])
+        motifs = event.get("motifs", [])
+        action = event.get("action", "moved")
+        motif_clause = f" Motifs threading this passage: {', '.join(motifs[:2])}." if motifs else ""
+        prose = (
+            f"In scene {scene_id}, {chars[0]} and {chars[-1]} {action} through uncertain country, "
+            f"testing the cost of each vow against the weight of old memory. "
+            f"Their choices keep close to known history while opening a narrow, plausible margin for what may yet be told."
+            f"{motif_clause}"
+        )
+        lines.extend([f"## Scene {idx}", "", prose, ""])
+        trace_sections.append(
+            {
+                "section": idx,
+                "scene_id": scene_id,
+                "shadow_event_id": event_id,
+                "shadow_scene_id": f"shadow-{scene_id}",
+                "source_canon_node_ids": [f"canon-action-{action}"],
+                "text_excerpt": prose[:220],
+            }
+        )
+
+    if required_terms:
+        lines.extend(["", "## Required Canon Anchors", ""])
+        lines.extend([f"- {term}" for term in required_terms])
+        lines.append("")
+
+    return "\n".join(lines), trace_sections
 
 
 def _extract_canon_notes(canon_path: str | None) -> list[str]:
@@ -728,6 +779,7 @@ def story_draft(project_slug: str, chapter: int, grounded: bool, projects_dir: s
     _load_project(project_slug, Path(projects_dir))
     solved = _load_json(proj_dir / "shadow_solution.json", default={})
     graph = _load_json(proj_dir / "shadow_graph.json", default={})
+    constraints = _load_constraints(proj_dir)
     if not solved.get("trajectory"):
         raise click.ClickException("Missing solved trajectory. Run story solve first.")
 
@@ -736,45 +788,47 @@ def story_draft(project_slug: str, chapter: int, grounded: bool, projects_dir: s
     if not chapter_rows:
         raise click.ClickException(f"No solved scenes found for chapter {chapter}.")
 
-    lines = [f"# Chapter {chapter}: Shadow-Woven Paths", ""]
-    trace_sections = []
-    for idx, row in enumerate(chapter_rows, start=1):
-        scene_id = row.get("scene_id")
-        event_id = row.get("shadow_event_id")
-        event = graph_node_by_id.get(event_id, {})
-        chars = event.get("characters", ["They"])
-        motifs = event.get("motifs", [])
-        action = event.get("action", "moved")
-        motif_clause = f" Motifs threading this passage: {', '.join(motifs[:2])}." if motifs else ""
-        prose = (
-            f"In scene {scene_id}, {chars[0]} and {chars[-1]} {action} through uncertain country, "
-            f"testing the cost of each vow against the weight of old memory. "
-            f"Their choices keep close to known history while opening a narrow, plausible margin for what may yet be told."
-            f"{motif_clause}"
-        )
-        lines.extend([f"## Scene {idx}", "", prose, ""])
-        trace_sections.append(
-            {
-                "section": idx,
-                "scene_id": scene_id,
-                "shadow_event_id": event_id,
-                "shadow_scene_id": f"shadow-{scene_id}",
-                "source_canon_node_ids": [f"canon-action-{action}"],
-                "text_excerpt": prose[:220],
-            }
+    required_terms = _required_terms(constraints)
+    max_retries = int(constraints.get("enforcement", {}).get("max_retries", 2))
+    attempts = 0
+    final_text = ""
+    final_trace: list[dict] = []
+    missing: list[str] = []
+    while attempts <= max_retries:
+        attempts += 1
+        final_text, final_trace = _render_grounded_chapter_text(chapter, chapter_rows, graph_node_by_id, required_terms)
+        missing = _missing_required_terms(final_text, required_terms)
+        if not missing:
+            break
+
+    if missing:
+        raise click.ClickException(
+            f"Grounded draft failed required-term enforcement after {attempts} attempts. Missing required terms: {missing}"
         )
 
     chapter_path = _chapter_path(proj_dir, chapter)
-    chapter_path.write_text("\n".join(lines), encoding="utf-8")
+    chapter_path.write_text(final_text, encoding="utf-8")
     trace_payload = {
         "schema_version": "chapter-trace-v1",
         "project_slug": project_slug,
         "chapter": chapter,
         "generated_at": datetime.now(timezone.utc).isoformat(),
-        "sections": trace_sections,
+        "sections": final_trace,
     }
     trace_out = _trace_path(proj_dir, chapter)
     trace_out.write_text(json.dumps(trace_payload, indent=2), encoding="utf-8")
+    draft_meta = {
+        "project_slug": project_slug,
+        "chapter": chapter,
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "required_term_enforcement": {
+            "enabled": True,
+            "attempts": attempts,
+            "max_retries": max_retries,
+            "missing_required_terms": [],
+        },
+    }
+    (proj_dir / f"chapter_{chapter:02d}_draft.json").write_text(json.dumps(draft_meta, indent=2), encoding="utf-8")
     console.print(f"[green]OK[/green] Draft written: {chapter_path}")
     console.print(f"Trace written: {trace_out}")
 
@@ -783,7 +837,8 @@ def story_draft(project_slug: str, chapter: int, grounded: bool, projects_dir: s
 @click.option("--project", "project_slug", required=True, help="Project slug")
 @click.option("--chapter", required=True, type=int, help="Chapter number")
 @click.option("--projects-dir", default=str(DEFAULT_PROJECTS_DIR), show_default=True, type=click.Path())
-def story_audit(project_slug: str, chapter: int, projects_dir: str) -> None:
+@click.option("--enforce-required-terms/--no-enforce-required-terms", default=None, help="Treat missing required terms as errors")
+def story_audit(project_slug: str, chapter: int, projects_dir: str, enforce_required_terms: bool | None) -> None:
     """Audit chapter grounding, coverage, and hard constraints."""
     proj_dir = _project_dir(project_slug, Path(projects_dir))
     _load_project(project_slug, Path(projects_dir))
@@ -800,6 +855,8 @@ def story_audit(project_slug: str, chapter: int, projects_dir: str) -> None:
     solved = _load_json(solution_path, default={})
     graph = _load_json(graph_path, default={})
     constraints = _load_constraints(proj_dir)
+    if enforce_required_terms is None:
+        enforce_required_terms = bool(constraints.get("enforcement", {}).get("required_terms", False))
 
     expected_scenes = [row for row in solved.get("trajectory", []) if str(row.get("scene_id", "")).startswith(f"ch{chapter:02d}-")]
     traced = trace.get("sections", [])
@@ -822,6 +879,8 @@ def story_audit(project_slug: str, chapter: int, projects_dir: str) -> None:
     status = "pass"
     if coverage < 0.99 or forbidden_hits or invalid_refs:
         status = "fail"
+    elif required_missing and enforce_required_terms:
+        status = "fail"
     elif required_missing:
         status = "warn"
 
@@ -839,6 +898,7 @@ def story_audit(project_slug: str, chapter: int, projects_dir: str) -> None:
         "constraints": {
             "forbidden_hits": forbidden_hits,
             "required_missing": required_missing,
+            "required_terms_enforced": bool(enforce_required_terms),
         },
         "grounding": {
             "invalid_trace_refs": invalid_refs,
