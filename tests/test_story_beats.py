@@ -29,7 +29,17 @@ def test_shadow_beats_id_and_seed_are_deterministic(tmp_path):
     )
 
     runner = CliRunner()
-    cmd = ["story", "beats", "expand", "--project", "det-proj", "--projects-dir", str(tmp_path)]
+    cmd = [
+        "story",
+        "beats",
+        "expand",
+        "--project",
+        "det-proj",
+        "--beats-per-scene",
+        "2",
+        "--projects-dir",
+        str(tmp_path),
+    ]
     r1 = runner.invoke(main, cmd)
     assert r1.exit_code == 0, r1.output
     p1 = json.loads((proj / "shadow_beats.json").read_text(encoding="utf-8"))
@@ -40,6 +50,7 @@ def test_shadow_beats_id_and_seed_are_deterministic(tmp_path):
 
     assert p1["seed"] == p2["seed"]
     assert [b["beat_id"] for b in p1["beats"]] == [b["beat_id"] for b in p2["beats"]]
+    assert [b["position"] for b in p1["beats"]] == [1, 2, 3, 4]
     assert p1["validation"]["cause_ref_issues"] == []
 
 
@@ -115,3 +126,82 @@ def test_story_beats_expand_writes_artifact_and_sidecar(tmp_path):
     assert payload["beats"]
     assert "failed_constraints" in payload["validation"]
     assert (proj / "shadow_beats_selected_sidecar.json").exists()
+
+
+def test_story_beats_expand_emits_more_than_one_beat_per_scene_when_budget_gt_one(tmp_path):
+    proj = tmp_path / "multi-beat-proj"
+    proj.mkdir(parents=True, exist_ok=True)
+    (proj / "project.json").write_text(json.dumps({"name": "MB", "slug": "multi-beat-proj"}, indent=2), encoding="utf-8")
+    (proj / "constraints.json").write_text(json.dumps({"required_elements": [], "forbidden_terms": [], "style": {}}, indent=2), encoding="utf-8")
+    (proj / "plan.json").write_text(
+        json.dumps(
+            {
+                "project_slug": "multi-beat-proj",
+                "chapters": [{"chapter_number": 1, "scenes": [{"scene_id": "ch01-sc01", "goal": "g1", "summary": "s1"}]}],
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+    runner = CliRunner()
+    result = runner.invoke(
+        main,
+        [
+            "story",
+            "beats",
+            "expand",
+            "--project",
+            "multi-beat-proj",
+            "--beats-per-scene",
+            "3",
+            "--projects-dir",
+            str(tmp_path),
+        ],
+    )
+    assert result.exit_code == 0, result.output
+
+    payload = json.loads((proj / "shadow_beats.json").read_text(encoding="utf-8"))
+    assert len(payload["beats"]) == 3
+    ids = [b["beat_id"] for b in payload["beats"]]
+    assert ids[0].startswith("ch01-sc01-b01-")
+    assert ids[1].startswith("ch01-sc01-b02-")
+    assert ids[2].startswith("ch01-sc01-b03-")
+
+
+def test_story_beats_strict_validate_passes_for_generated_multi_beat_scenes(tmp_path):
+    proj = tmp_path / "strict-multi"
+    proj.mkdir(parents=True, exist_ok=True)
+    (proj / "project.json").write_text(json.dumps({"name": "Strict Multi", "slug": "strict-multi"}, indent=2), encoding="utf-8")
+    (proj / "constraints.json").write_text(json.dumps({"required_elements": [], "forbidden_terms": [], "style": {}}, indent=2), encoding="utf-8")
+    (proj / "plan.json").write_text(
+        json.dumps(
+            {
+                "project_slug": "strict-multi",
+                "chapters": [
+                    {
+                        "chapter_number": 1,
+                        "scenes": [
+                            {"scene_id": "ch01-sc01", "goal": "g1", "summary": "s1"},
+                            {"scene_id": "ch01-sc02", "goal": "g2", "summary": "s2"},
+                        ],
+                    }
+                ],
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+    runner = CliRunner()
+    expand = runner.invoke(
+        main,
+        ["story", "beats", "expand", "--project", "strict-multi", "--beats-per-scene", "2", "--projects-dir", str(tmp_path)],
+    )
+    assert expand.exit_code == 0, expand.output
+
+    strict = runner.invoke(
+        main,
+        ["story", "beats", "validate", "--project", "strict-multi", "--strict", "--projects-dir", str(tmp_path)],
+    )
+    assert strict.exit_code == 0, strict.output
