@@ -1,6 +1,6 @@
 # Story Workflow CLI (Product UX)
 
-The `story` command group provides a friendly workflow for project setup, auto-planning, and validation.
+The `story` command group provides a friendly workflow for project setup, planning, validation, and graph-grounded chapter synthesis.
 
 ## 1) Initialize a project
 
@@ -57,8 +57,69 @@ You can also override JSON output path:
 bga story validate --project mithrandir-east --json-out artifacts/mithrandir-validate.json
 ```
 
+## 4) Build graph-native context stats
+
+```bash
+bga story context --project mithrandir-east --graph-stats
+```
+
+Generates:
+
+- `data/projects/<slug>/context_stats.json`
+
+Stats include:
+
+- event transition probabilities
+- motif/reference density priors
+- character participation priors
+- register/style budgets
+
+## 5) Grow probabilistic shadow graph
+
+```bash
+bga story grow-shadow --project mithrandir-east --auto
+```
+
+Generates:
+
+- `data/projects/<slug>/shadow_graph.json`
+- `data/projects/<slug>/shadow_candidates.json`
+
+## 6) Solve best valid trajectory
+
+```bash
+bga story solve --project mithrandir-east
+```
+
+Generates:
+
+- `data/projects/<slug>/shadow_solution.json`
+
+## 7) Draft grounded chapter prose
+
+```bash
+bga story draft --project mithrandir-east --chapter 1 --grounded
+```
+
+Generates:
+
+- `data/projects/<slug>/chapter_01.md`
+- `data/projects/<slug>/chapter_01_trace.json`
+
+## 8) Audit chapter grounding and constraints
+
+```bash
+bga story audit --project mithrandir-east --chapter 1
+```
+
+Generates:
+
+- `data/projects/<slug>/chapter_01_audit.json`
+- `data/projects/<slug>/chapter_01_audit.md`
+
 ## Notes
 
 - Basic flow requires no manual JSON editing.
 - Canon integration is read-only in this iteration (uses configured canon file when present).
 - `story plan` currently supports `--auto` mode only.
+- `story grow-shadow` currently supports `--auto` mode only.
