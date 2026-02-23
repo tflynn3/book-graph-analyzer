@@ -7,6 +7,7 @@ import re
 from collections import Counter, defaultdict
 from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any
 
 import click
 from rich.console import Console
@@ -95,6 +96,157 @@ def _safe_prob(counter: dict[str, int]) -> dict[str, float]:
     if total <= 0:
         return {}
     return {k: round(v / total, 6) for k, v in counter.items()}
+
+
+def _topk_keys(weights: dict[str, float], k: int, fallback: list[str]) -> list[str]:
+    keys = [k for k, _ in sorted(weights.items(), key=lambda kv: kv[1], reverse=True)[:k]]
+    return keys or fallback
+
+
+def _load_weights_arg(weights: str | None) -> dict[str, float]:
+    if not weights:
+        return {
+            "canon_consistency": 0.25,
+            "transition_likelihood": 0.25,
+            "arc_coherence": 0.2,
+            "style_register": 0.15,
+            "novelty_diversity": 0.15,
+        }
+    maybe_path = Path(weights)
+    if maybe_path.exists():
+        payload = json.loads(maybe_path.read_text(encoding="utf-8"))
+    else:
+        payload = json.loads(weights)
+    out = _load_weights_arg(None)
+    for k, v in payload.items():
+        out[str(k)] = float(v)
+    total = sum(max(0.0, float(v)) for v in out.values())
+    if total > 0:
+        out = {k: round(max(0.0, float(v)) / total, 6) for k, v in out.items()}
+    return out
+
+
+def _interp_temp(step: int, steps: int, start: float, end: float) -> float:
+    if steps <= 1:
+        return max(1e-6, end)
+    alpha = step / max(1, steps - 1)
+    return max(1e-6, (1.0 - alpha) * start + alpha * end)
+
+
+def _build_initial_shadow_state(
+    plan: dict[str, Any],
+    transitions: dict[str, dict[str, float]],
+    top_characters: list[str],
+    top_motifs: list[str],
+    rng: random.Random,
+) -> list[dict[str, Any]]:
+    state: list[dict[str, Any]] = []
+    prev_action = "unknown"
+    for ch in plan.get("chapters", []):
+        chapter_num = int(ch.get("chapter_number", 1))
+        for scene in ch.get("scenes", []):
+            scene_id = str(scene.get("scene_id"))
+            action_dist = transitions.get(prev_action) or transitions.get("unknown") or {"journey": 1.0}
+            action = max(action_dist.items(), key=lambda kv: kv[1])[0]
+            chars = rng.sample(top_characters, k=min(2, len(top_characters))) if top_characters else ["Beren", "Luthien"]
+            motifs = rng.sample(top_motifs, k=min(2, len(top_motifs))) if top_motifs else ["oath"]
+            desc = f"{scene.get('goal', 'advance')} via {action}."
+            state.append(
+                {
+                    "scene_id": scene_id,
+                    "chapter": chapter_num,
+                    "summary": scene.get("summary", ""),
+                    "action": action,
+                    "characters": chars,
+                    "motifs": motifs,
+                    "description": desc,
+                }
+            )
+            prev_action = action
+    return state
+
+
+def _anneal_energy(
+    state: list[dict[str, Any]],
+    transitions: dict[str, dict[str, float]],
+    char_priors: dict[str, float],
+    motif_priors: dict[str, float],
+    constraints: dict[str, Any],
+    style_budget: dict[str, Any],
+) -> float:
+    required = [str(x).lower() for x in constraints.get("required_elements", [])]
+    forbidden = [str(x).lower() for x in constraints.get("forbidden_terms", [])]
+    text = "\n".join(str(r.get("description", "")) for r in state).lower()
+
+    trans_score = 0.0
+    for i, row in enumerate(state):
+        prev = state[i - 1]["action"] if i > 0 else "unknown"
+        p = float(transitions.get(prev, {}).get(row["action"], 0.05))
+        trans_score += math.log(max(1e-6, p))
+
+    char_score = 0.0
+    motif_score = 0.0
+    unique_motifs: set[str] = set()
+    actions: list[str] = []
+    words_per_scene = []
+    for row in state:
+        actions.append(str(row.get("action", "")))
+        chars = [str(c) for c in row.get("characters", [])]
+        motifs = [str(m) for m in row.get("motifs", [])]
+        if chars:
+            char_score += sum(float(char_priors.get(c, 0.01)) for c in chars) / len(chars)
+        if motifs:
+            motif_score += sum(float(motif_priors.get(m, 0.01)) for m in motifs) / len(motifs)
+            unique_motifs.update(motifs)
+        words_per_scene.append(len(str(row.get("description", "")).split()))
+
+    arc_changes = sum(1 for i in range(1, len(actions)) if actions[i] != actions[i - 1])
+    arc_coherence = 1.0 - (arc_changes / max(1, len(actions) - 1))
+    target_words = float(style_budget.get("target_words_per_scene", 300))
+    mean_words = sum(words_per_scene) / max(1, len(words_per_scene))
+    style_penalty = abs(mean_words - target_words) / max(1.0, target_words)
+    missing_required = sum(1 for r in required if r not in text)
+    forbidden_hits = sum(1 for f in forbidden if f in text)
+    novelty = len(unique_motifs) / max(1, len(state) * 2)
+
+    # Minimize energy.
+    return (
+        -0.9 * trans_score
+        - 2.0 * char_score
+        - 1.2 * motif_score
+        + 1.5 * arc_coherence
+        + 6.0 * style_penalty
+        + 12.0 * missing_required
+        + 20.0 * forbidden_hits
+        - 2.0 * novelty
+    )
+
+
+def _mutate_state(
+    state: list[dict[str, Any]],
+    transitions: dict[str, dict[str, float]],
+    top_characters: list[str],
+    top_motifs: list[str],
+    rng: random.Random,
+) -> list[dict[str, Any]]:
+    nxt = json.loads(json.dumps(state))
+    if not nxt:
+        return nxt
+    i = rng.randrange(len(nxt))
+    mode = rng.choice(["action", "chars", "motifs", "all"])
+    prev_action = nxt[i - 1]["action"] if i > 0 else "unknown"
+    action_dist = transitions.get(prev_action) or transitions.get("unknown") or {"journey": 1.0}
+    actions = list(action_dist.keys())
+    if mode in {"action", "all"} and actions:
+        nxt[i]["action"] = rng.choice(actions)
+    if mode in {"chars", "all"} and top_characters:
+        k = min(max(1, len(nxt[i].get("characters", []))), len(top_characters))
+        nxt[i]["characters"] = rng.sample(top_characters, k=k)
+    if mode in {"motifs", "all"} and top_motifs:
+        k = min(max(1, len(nxt[i].get("motifs", []))), len(top_motifs))
+        nxt[i]["motifs"] = rng.sample(top_motifs, k=k)
+    nxt[i]["description"] = f"{nxt[i].get('summary') or 'advance'} via {nxt[i]['action']}."
+    return nxt
 
 
 def _load_constraints(proj_dir: Path) -> dict:
@@ -734,6 +886,257 @@ def story_grow_shadow(project_slug: str, auto_mode: bool, projects_dir: str) -> 
     (proj_dir / "shadow_graph.json").write_text(json.dumps(graph_payload, indent=2), encoding="utf-8")
     (proj_dir / "shadow_candidates.json").write_text(json.dumps(candidates_payload, indent=2), encoding="utf-8")
     console.print(f"[green]OK[/green] Shadow graph artifacts written under {proj_dir}")
+
+
+@story.command("sample-shadow")
+@click.option("--project", "project_slug", required=True, help="Project slug")
+@click.option("--n", required=True, type=int, help="Number of shadow candidates to sample")
+@click.option("--method", type=click.Choice(["anneal"], case_sensitive=False), default="anneal", show_default=True)
+@click.option("--seed", type=int, default=None, help="Deterministic random seed")
+@click.option("--steps", type=int, default=80, show_default=True, help="Annealing mutation steps per candidate")
+@click.option("--temp-start", type=float, default=1.2, show_default=True)
+@click.option("--temp-end", type=float, default=0.05, show_default=True)
+@click.option("--projects-dir", default=str(DEFAULT_PROJECTS_DIR), show_default=True, type=click.Path())
+def story_sample_shadow(
+    project_slug: str,
+    n: int,
+    method: str,
+    seed: int | None,
+    steps: int,
+    temp_start: float,
+    temp_end: float,
+    projects_dir: str,
+) -> None:
+    """Sample N shadow-graph candidates via local mutations + annealing acceptance."""
+    if n <= 0:
+        raise click.ClickException("--n must be > 0")
+    proj_dir = _project_dir(project_slug, Path(projects_dir))
+    _load_project(project_slug, Path(projects_dir))
+    context = _load_json(proj_dir / "context_stats.json", default={})
+    plan = _load_json(proj_dir / "plan.json", default={})
+    constraints = _load_constraints(proj_dir)
+    if not context:
+        raise click.ClickException("Missing context_stats.json. Run: bga story context --graph-stats")
+    if not plan:
+        raise click.ClickException("Missing plan.json. Run: bga story plan --auto")
+
+    transitions = context.get("event_transition_probabilities", {})
+    char_priors = context.get("character_participation_priors", {})
+    motif_priors = context.get("motif_reference_density_priors", {})
+    style_budget = context.get("register_style_budgets", {})
+    top_characters = _topk_keys(char_priors, 16, ["Beren", "Luthien", "Thingol"])
+    top_motifs = _topk_keys(motif_priors, 40, ["oath", "song", "fate", "shadow"])
+
+    eff_seed = int(seed if seed is not None else (abs(hash(f"{project_slug}:{n}:{steps}:{method}")) % (2**32)))
+    rng = random.Random(eff_seed)
+    out_path = proj_dir / "shadow_samples.jsonl"
+
+    with out_path.open("w", encoding="utf-8") as f:
+        for idx in range(n):
+            candidate_seed = rng.randrange(2**32)
+            crng = random.Random(candidate_seed)
+            state = _build_initial_shadow_state(plan, transitions, top_characters, top_motifs, crng)
+            best = json.loads(json.dumps(state))
+            e_cur = _anneal_energy(state, transitions, char_priors, motif_priors, constraints, style_budget)
+            e_best = e_cur
+            accepted = 0
+            for step in range(max(1, steps)):
+                temp = _interp_temp(step, max(1, steps), temp_start, temp_end)
+                proposal = _mutate_state(state, transitions, top_characters, top_motifs, crng)
+                e_next = _anneal_energy(proposal, transitions, char_priors, motif_priors, constraints, style_budget)
+                delta = e_next - e_cur
+                accept = delta <= 0 or (crng.random() < math.exp(-delta / temp))
+                if accept:
+                    state = proposal
+                    e_cur = e_next
+                    accepted += 1
+                    if e_cur < e_best:
+                        best = json.loads(json.dumps(state))
+                        e_best = e_cur
+            row = {
+                "schema_version": "shadow-sample-v1",
+                "project_slug": project_slug,
+                "candidate_id": f"shadow-sample-{idx+1:05d}",
+                "method": method,
+                "seed": candidate_seed,
+                "steps": max(1, steps),
+                "temp_start": temp_start,
+                "temp_end": temp_end,
+                "acceptance_ratio": round(accepted / max(1, steps), 6),
+                "anneal_energy": round(float(e_best), 6),
+                "state": best,
+            }
+            f.write(json.dumps(row) + "\n")
+
+    console.print(f"[green]OK[/green] Shadow samples written: {out_path} (n={n}, seed={eff_seed})")
+
+
+@story.command("score-shadow")
+@click.option("--project", "project_slug", required=True, help="Project slug")
+@click.option("--weights", default=None, help="JSON string or path to weights json")
+@click.option("--pareto", is_flag=True, help="Also emit Pareto front")
+@click.option("--projects-dir", default=str(DEFAULT_PROJECTS_DIR), show_default=True, type=click.Path())
+def story_score_shadow(project_slug: str, weights: str | None, pareto: bool, projects_dir: str) -> None:
+    """Score sampled shadow graphs with transparent component breakdowns."""
+    proj_dir = _project_dir(project_slug, Path(projects_dir))
+    _load_project(project_slug, Path(projects_dir))
+    samples_path = proj_dir / "shadow_samples.jsonl"
+    if not samples_path.exists():
+        raise click.ClickException("Missing shadow_samples.jsonl. Run: bga story sample-shadow ...")
+
+    context = _load_json(proj_dir / "context_stats.json", default={})
+    constraints = _load_constraints(proj_dir)
+    transitions = context.get("event_transition_probabilities", {})
+    char_priors = context.get("character_participation_priors", {})
+    motif_priors = context.get("motif_reference_density_priors", {})
+    style_budget = context.get("register_style_budgets", {})
+
+    ws = _load_weights_arg(weights)
+    rows = []
+    motif_sets = []
+    with samples_path.open("r", encoding="utf-8") as f:
+        for line in f:
+            line = line.strip()
+            if not line:
+                continue
+            rec = json.loads(line)
+            state = rec.get("state", [])
+            motif_sets.append(set(m for s in state for m in s.get("motifs", [])))
+            rows.append(rec)
+
+    results = []
+    for idx, rec in enumerate(rows):
+        state = rec.get("state", [])
+        text = "\n".join(str(s.get("description", "")) for s in state).lower()
+        required = [str(x).lower() for x in constraints.get("required_elements", [])]
+        forbidden = [str(x).lower() for x in constraints.get("forbidden_terms", [])]
+
+        missing_required = sum(1 for r in required if r not in text)
+        forbidden_hits = sum(1 for f in forbidden if f in text)
+        canon_penalty = min(1.0, 0.6 * forbidden_hits + 0.4 * (missing_required / max(1, len(required))))
+        canon_consistency = round(max(0.0, 1.0 - canon_penalty), 6)
+
+        trans_vals = []
+        actions = [str(s.get("action", "unknown")) for s in state]
+        for i, action in enumerate(actions):
+            prev = actions[i - 1] if i > 0 else "unknown"
+            trans_vals.append(float(transitions.get(prev, {}).get(action, 0.05)))
+        transition_likelihood = round(sum(trans_vals) / max(1, len(trans_vals)), 6)
+
+        action_switches = sum(1 for i in range(1, len(actions)) if actions[i] != actions[i - 1])
+        arc_coherence = round(1.0 - (action_switches / max(1, len(actions) - 1)), 6)
+
+        target_words = float(style_budget.get("target_words_per_scene", 300))
+        words = [len(str(s.get("description", "")).split()) for s in state]
+        mean_words = sum(words) / max(1, len(words))
+        style_register = round(max(0.0, 1.0 - min(1.0, abs(mean_words - target_words) / max(1.0, target_words))), 6)
+
+        motif_set = motif_sets[idx]
+        avg_jaccard = 0.0
+        if len(motif_sets) > 1:
+            sims = []
+            for j, other in enumerate(motif_sets):
+                if j == idx:
+                    continue
+                union = len(motif_set | other)
+                sims.append((len(motif_set & other) / union) if union else 1.0)
+            avg_jaccard = sum(sims) / max(1, len(sims))
+        novelty_diversity = round(max(0.0, 1.0 - avg_jaccard), 6)
+
+        total = (
+            ws["canon_consistency"] * canon_consistency
+            + ws["transition_likelihood"] * transition_likelihood
+            + ws["arc_coherence"] * arc_coherence
+            + ws["style_register"] * style_register
+            + ws["novelty_diversity"] * novelty_diversity
+        )
+        results.append(
+            {
+                "candidate_id": rec.get("candidate_id"),
+                "seed": rec.get("seed"),
+                "anneal_energy": rec.get("anneal_energy"),
+                "components": {
+                    "canon_consistency_penalty": round(canon_penalty, 6),
+                    "canon_consistency": canon_consistency,
+                    "transition_likelihood": transition_likelihood,
+                    "arc_coherence": arc_coherence,
+                    "style_register": style_register,
+                    "novelty_diversity": novelty_diversity,
+                },
+                "weighted_score": round(float(total), 6),
+            }
+        )
+
+    results.sort(key=lambda r: (-r["weighted_score"], str(r["candidate_id"])))
+    out = {
+        "schema_version": "shadow-scores-v1",
+        "project_slug": project_slug,
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "weights": ws,
+        "scores": results,
+    }
+    out_path = proj_dir / "shadow_scores.json"
+    out_path.write_text(json.dumps(out, indent=2), encoding="utf-8")
+    console.print(f"[green]OK[/green] Shadow scores written: {out_path}")
+
+    if pareto:
+        dims = ["canon_consistency", "transition_likelihood", "arc_coherence", "style_register", "novelty_diversity"]
+
+        def dominates(a: dict[str, Any], b: dict[str, Any]) -> bool:
+            ca, cb = a["components"], b["components"]
+            return all(float(ca[d]) >= float(cb[d]) for d in dims) and any(float(ca[d]) > float(cb[d]) for d in dims)
+
+        front = []
+        for i, cand in enumerate(results):
+            dominated = False
+            for j, other in enumerate(results):
+                if i == j:
+                    continue
+                if dominates(other, cand):
+                    dominated = True
+                    break
+            if not dominated:
+                front.append(cand)
+        front.sort(key=lambda r: (-r["weighted_score"], str(r["candidate_id"])))
+        pareto_payload = {
+            "schema_version": "shadow-pareto-v1",
+            "project_slug": project_slug,
+            "generated_at": datetime.now(timezone.utc).isoformat(),
+            "dimensions": dims,
+            "candidates": front,
+        }
+        pareto_path = proj_dir / "shadow_pareto_front.json"
+        pareto_path.write_text(json.dumps(pareto_payload, indent=2), encoding="utf-8")
+        console.print(f"Pareto front written: {pareto_path} (n={len(front)})")
+
+
+@story.command("select-shadow")
+@click.option("--project", "project_slug", required=True, help="Project slug")
+@click.option("--top", "top_k", required=True, type=int, help="Select top-K candidates")
+@click.option("--projects-dir", default=str(DEFAULT_PROJECTS_DIR), show_default=True, type=click.Path())
+def story_select_shadow(project_slug: str, top_k: int, projects_dir: str) -> None:
+    """Select top-K shadow candidates from weighted scores (stable ordering)."""
+    if top_k <= 0:
+        raise click.ClickException("--top must be > 0")
+    proj_dir = _project_dir(project_slug, Path(projects_dir))
+    _load_project(project_slug, Path(projects_dir))
+    scores = _load_json(proj_dir / "shadow_scores.json", default={})
+    rows = scores.get("scores", [])
+    if not rows:
+        raise click.ClickException("Missing/empty shadow_scores.json. Run: bga story score-shadow ...")
+    rows = sorted(rows, key=lambda r: (-float(r.get("weighted_score", 0.0)), str(r.get("candidate_id", ""))))
+    selected = rows[:top_k]
+    payload = {
+        "schema_version": "shadow-selected-v1",
+        "project_slug": project_slug,
+        "generated_at": datetime.now(timezone.utc).isoformat(),
+        "strategy": "weighted_score_desc_then_candidate_id_asc",
+        "top_k": top_k,
+        "selected": selected,
+    }
+    out_path = proj_dir / "shadow_selected.json"
+    out_path.write_text(json.dumps(payload, indent=2), encoding="utf-8")
+    console.print(f"[green]OK[/green] Shadow selection written: {out_path} (k={len(selected)})")
 
 
 @story.command("solve")
