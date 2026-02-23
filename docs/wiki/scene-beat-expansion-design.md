@@ -230,7 +230,11 @@ Extend `story audit` with beat-aware checks:
 
 Dynamic budget suggestion (v1):
 
-`beats_target = clamp(min,max, base + participants_weight*unique_participants + motifs_weight*unique_motifs + scene_complexity_weight*scene_complexity_score)`
+`beats_target = clamp(min,max, floor(base + participants_weight*unique_participants + motifs_weight*unique_motifs + scene_complexity_weight*scene_complexity_score))`
+
+Implementation note:
+- because beat slots are discrete, convert weighted sums to integer (`floor` or `round`) before clamping
+- prefer `floor` for predictable conservative budgets in v1
 
 ---
 
