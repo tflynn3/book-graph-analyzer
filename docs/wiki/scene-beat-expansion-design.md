@@ -89,6 +89,18 @@ Beat candidate fields:
 - `selection_objective`
 - `best_score`
 
+### 2.5) Failure-safe state and eventual unified trace
+
+For v1, separate `shadow_beats.json` and `shadow_beats_selected.json` keeps implementation simple.
+
+To reduce desync risk when a job fails mid-pipeline:
+
+- write `shadow_beats_selected.json.tmp` and atomically rename to `shadow_beats_selected.json` only on success
+- include `source_shadow_beats_hash` in `shadow_beats_selected.json`
+- on load, verify the hash against current `shadow_beats.json`; fail fast if mismatch
+
+Future direction (v2): fold both into a single append-only trace artifact (`story_trace.jsonl` or unified `story_trace.json`) to make partial writes and replay easier.
+
 ### 3) `chapter_XX_trace.json` extension
 
 Add optional beat-level fields per section:
@@ -107,12 +119,13 @@ For each selected scene candidate from `shadow_solution.json`:
    - Build `K` slots (default 12, configurable)
    - Ensure coverage of: setup, escalation, turn, consequence
 
-2. **Generate beat candidates per slot**
+2. **Generate beat candidates per slot (autoregressive with beam context)**
    - Deterministic seeded sampling from:
      - scene action + motifs
      - participant priors
      - canon-linked action templates
    - keep 2–4 candidates per slot for tractable selection
+   - slot `N+1` candidate generation receives context from each surviving beam path through slot `N` (for causal coherence and valid `cause_refs`)
 
 3. **Score each beat candidate**
    - weighted score with hard penalties for forbidden terms / broken grounding
@@ -127,11 +140,12 @@ For each selected scene candidate from `shadow_solution.json`:
 
 ### Initial score formula
 
-`total = 0.30*canon_grounding + 0.25*causal_coherence + 0.20*scene_goal_progress + 0.10*style_fit + 0.10*novelty - 0.15*constraint_penalty`
+`total = 0.3158*canon_grounding + 0.2632*causal_coherence + 0.2105*scene_goal_progress + 0.1053*style_fit + 0.1053*novelty - 0.15*constraint_penalty`
 
 Notes:
 - weights configurable in `constraints.json.story.beat_scoring`
 - clamp `[0,1]` for components
+- positive weights are normalized to 1.0 for easier reasoning
 
 ---
 
@@ -167,7 +181,7 @@ Extend `story audit` with beat-aware checks:
    - forbidden terms absent
 
 5. **Density sanity**
-   - beats per scene in configured range (default 8–24)
+   - beats per scene in configured range (default dynamic range, see below)
 
 ### v1 acceptance criteria
 
@@ -190,20 +204,33 @@ Extend `story audit` with beat-aware checks:
     "beat_expansion": {
       "enabled": true,
       "target_beats_per_scene": 12,
+      "min_beats_per_scene": 8,
+      "max_beats_per_scene": 24,
+      "dynamic_budget": {
+        "enabled": true,
+        "base": 8,
+        "participants_weight": 1.0,
+        "motifs_weight": 0.5,
+        "scene_complexity_weight": 1.5
+      },
       "candidate_beats_per_slot": 3,
       "beam_width": 8
     },
     "beat_scoring": {
-      "canon_grounding": 0.30,
-      "causal_coherence": 0.25,
-      "scene_goal_progress": 0.20,
-      "style_fit": 0.10,
-      "novelty": 0.10,
+      "canon_grounding": 0.3158,
+      "causal_coherence": 0.2632,
+      "scene_goal_progress": 0.2105,
+      "style_fit": 0.1053,
+      "novelty": 0.1053,
       "constraint_penalty": 0.15
     }
   }
 }
 ```
+
+Dynamic budget suggestion (v1):
+
+`beats_target = clamp(min,max, base + participants_weight*unique_participants + motifs_weight*unique_motifs + scene_complexity_weight*scene_complexity_score)`
 
 ---
 
@@ -216,6 +243,9 @@ Extend `story audit` with beat-aware checks:
 - Implement beat selection beam search
 - Add `--from-beats` drafting path using template prose
 - Add tests (unit + focused e2e)
+- Add explicit constraint-debug fields on beats:
+  - `failed_constraints: string[]` (replacing/augmenting boolean-only `hard_constraints_ok`)
+  - validation rule: every `cause_refs` target must have lower `position` than current beat
 
 ### Phase 2
 
