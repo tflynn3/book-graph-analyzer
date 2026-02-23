@@ -51,7 +51,58 @@ def test_shadow_beats_id_and_seed_are_deterministic(tmp_path):
     assert p1["seed"] == p2["seed"]
     assert [b["beat_id"] for b in p1["beats"]] == [b["beat_id"] for b in p2["beats"]]
     assert [b["position"] for b in p1["beats"]] == [1, 2, 3, 4]
+    for beat in p1["beats"]:
+        assert beat["action"]
+        assert isinstance(beat["participants"], list)
+        assert isinstance(beat["motifs"], list)
+        assert isinstance(beat["preconditions"], list)
+        assert isinstance(beat["effects"], list)
+        assert isinstance(beat["source_canon_node_ids"], list)
+        assert isinstance(beat["style_register_hints"], dict)
+        assert set(beat["scoring_breakdown"].keys()) == {"lore", "style", "coherence"}
     assert p1["validation"]["cause_ref_issues"] == []
+
+
+def test_story_beats_validate_lore_and_style_signals(tmp_path):
+    proj = tmp_path / "beren-luthien-lore"
+    proj.mkdir(parents=True, exist_ok=True)
+    (proj / "project.json").write_text(json.dumps({"name": "BL", "slug": "beren-luthien-lore"}, indent=2), encoding="utf-8")
+    (proj / "constraints.json").write_text(json.dumps({"required_elements": [], "forbidden_terms": [], "style": {"target_words_per_scene": 900}}, indent=2), encoding="utf-8")
+    (proj / "shadow_beats.json").write_text(
+        json.dumps(
+            {
+                "beats": [
+                    {
+                        "beat_id": "ch01-sc01-b01-a",
+                        "position": 1,
+                        "beat_type": "setup",
+                        "cause_refs": [],
+                        "failed_constraints": [],
+                        "action": "establish",
+                        "participants": ["Frodo"],
+                        "motifs": ["shadow"],
+                        "preconditions": ["scene-goal:x"],
+                        "effects": ["effect:x"],
+                        "source_canon_node_ids": [],
+                        "style_register_hints": {"beat_share": 0.1},
+                        "prose_budget_words": 220,
+                        "scoring_breakdown": {"lore": 0.4, "style": 0.7, "coherence": 0.8},
+                    }
+                ]
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+    runner = CliRunner()
+    result = runner.invoke(main, ["story", "beats", "validate", "--project", "beren-luthien-lore", "--projects-dir", str(tmp_path)])
+    assert result.exit_code == 0, result.output
+    report = json.loads((proj / "shadow_beats_validation.json").read_text(encoding="utf-8"))
+    codes = {i["code"] for i in report["issues"]}
+    assert "OUT_OF_DOMAIN_PARTICIPANT" in codes
+    assert "CANON_GROUNDING_WEAK" in codes
+    assert "STYLE_BUDGET_MISMATCH" in codes
 
 
 def test_shadow_beats_cause_refs_are_existing_and_prior(tmp_path):

@@ -136,6 +136,33 @@ def test_story_beats_validate_strict_exit_codes(tmp_path):
     assert "Strict validation failed" in strict_warn.output
 
 
+def test_story_beats_validate_backward_compatible_with_legacy_artifact(tmp_path):
+    runner = CliRunner()
+    proj_dir = tmp_path / "legacy-beats"
+    proj_dir.mkdir(parents=True, exist_ok=True)
+    (proj_dir / "project.json").write_text(json.dumps({"name": "Legacy", "slug": "legacy-beats"}, indent=2), encoding="utf-8")
+    (proj_dir / "shadow_beats.json").write_text(
+        json.dumps(
+            {
+                "schema_version": "shadow-beats-v1",
+                "project_slug": "legacy-beats",
+                "beats": [
+                    {"beat_id": "ch01-sc01-b01-aa", "position": 1, "beat_type": "setup", "cause_refs": [], "failed_constraints": []},
+                    {"beat_id": "ch01-sc01-b02-bb", "position": 2, "beat_type": "pivot", "cause_refs": ["ch01-sc01-b01-aa"], "failed_constraints": []},
+                ],
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+    res = runner.invoke(main, ["story", "beats", "validate", "--project", "legacy-beats", "--projects-dir", str(tmp_path)])
+    assert res.exit_code == 0, res.output
+    report = json.loads((proj_dir / "shadow_beats_validation.json").read_text(encoding="utf-8"))
+    codes = {i["code"] for i in report["issues"]}
+    assert "CANON_GROUNDING_WEAK" not in codes
+
+
 def test_story_init_non_interactive(tmp_path):
     runner = CliRunner()
     result = runner.invoke(
