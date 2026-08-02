@@ -44,6 +44,7 @@ class _EchoStorySceneGenerator:
     def __init__(self, shadow_graph=None):
         self.shadow_graph = shadow_graph
         self.driver = None
+        self.calls = []
 
     def load_world_bible(self, _path):
         return None
@@ -51,6 +52,7 @@ class _EchoStorySceneGenerator:
     def generate_scene(self, **kwargs):
         from book_graph_analyzer.generate.models import GenerationStatus, Scene, SceneScores
 
+        self.calls.append(dict(kwargs))
         text = (
             f"{kwargs['scene_goal']} "
             f"At {kwargs['place']}, {', '.join(kwargs['characters'])} move within the tale's shadow."
@@ -124,6 +126,139 @@ def test_story_group_registered():
     assert "validate" in main.commands["story"].commands["beats"].commands
     assert "show" in main.commands["story"].commands["beats"].commands
     assert "clean" in main.commands["story"].commands["beats"].commands
+
+
+def test_hunt_domain_allows_canon_investigation_entities():
+    from book_graph_analyzer.story_cli import (
+        _non_character_entities,
+        _out_of_domain_entities,
+        _project_canon_entities,
+    )
+
+    canon_characters = set(_project_canon_entities("hunt-for-gollum"))
+    excluded = _out_of_domain_entities("hunt-for-gollum")
+    places = _non_character_entities("hunt-for-gollum")
+
+    assert {"Denethor", "Isildur", "Saruman", "Sauron"} <= canon_characters
+    assert {"saruman", "minas tirith", "gondor"}.isdisjoint(excluded)
+    assert {"minas tirith", "gondor", "dol guldur", "lórien"} <= places
+
+
+def test_story_draft_passes_scene_word_target_to_llm_generator(tmp_path, monkeypatch):
+    from book_graph_analyzer import story_cli as story_module
+
+    generator = _EchoStorySceneGenerator()
+    monkeypatch.setattr(
+        story_module,
+        "_new_story_shadow_graph",
+        lambda story_id: _FakeStoryShadowGraph(story_id),
+    )
+    monkeypatch.setattr(story_module, "_new_story_scene_generator", lambda _shadow_graph: generator)
+    monkeypatch.setattr(
+        story_module,
+        "_new_story_generation_writer",
+        lambda: _FakeStoryGenerationWriter(),
+    )
+
+    proj_dir = tmp_path / "target-word-proj"
+    proj_dir.mkdir(parents=True, exist_ok=True)
+    (proj_dir / "project.json").write_text(
+        json.dumps(
+            {
+                "name": "Target Word Project",
+                "slug": "target-word-proj",
+                "target_chapters": 1,
+                "scenes_per_chapter": 1,
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    (proj_dir / "constraints.json").write_text(
+        json.dumps(
+            {
+                "required_elements": [],
+                "forbidden_terms": [],
+                "quality": {"target_scene_words": 1050},
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    (proj_dir / "plan.json").write_text(
+        json.dumps(
+            {
+                "project_slug": "target-word-proj",
+                "chapters": [
+                    {
+                        "chapter_number": 1,
+                        "title": "The Trail",
+                        "scenes": [
+                            {
+                                "scene_id": "ch01-sc01",
+                                "goal": "Aragorn follows the trail east.",
+                                "summary": "The trail leads east.",
+                                "characters": ["Aragorn"],
+                                "setting": "Wilderland",
+                            }
+                        ],
+                    }
+                ],
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    (proj_dir / "shadow_solution.json").write_text(
+        json.dumps(
+            {
+                "trajectory": [
+                    {
+                        "scene_id": "ch01-sc01",
+                        "shadow_event_id": "shadow-event-1",
+                        "action": "track",
+                    }
+                ]
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+    (proj_dir / "shadow_graph.json").write_text(
+        json.dumps(
+            {
+                "nodes": [
+                    {
+                        "id": "shadow-event-1",
+                        "characters": ["Aragorn"],
+                        "action": "track",
+                        "description": "Aragorn follows the trail east.",
+                    },
+                    {"id": "shadow-ch01-sc01"},
+                ]
+            },
+            indent=2,
+        ),
+        encoding="utf-8",
+    )
+
+    result = CliRunner().invoke(
+        main,
+        [
+            "story",
+            "draft",
+            "--project",
+            "target-word-proj",
+            "--chapter",
+            "1",
+            "--grounded",
+            "--projects-dir",
+            str(tmp_path),
+        ],
+    )
+
+    assert result.exit_code == 0, result.output
+    assert generator.calls[0]["target_words"] == 1050
 
 
 def test_story_beats_validate_show_clean_flow_and_scoping(tmp_path):
@@ -1953,6 +2088,112 @@ def test_story_audit_fails_on_template_artifacts(tmp_path):
     assert audit["status"] == "fail"
     assert "brace_placeholder" in audit["quality_proxies"]["template_artifact_hits"]
     assert "in_road" in audit["quality_proxies"]["template_artifact_hits"]
+
+
+def test_hunt_scaffold_artifact_families_are_detected():
+    from book_graph_analyzer.story_cli import _template_artifact_hits
+
+    text = """The first fen sign changed warning; then rain road-work tested warning.
+
+'Captures gives captures direction, not captures answer,' answered Aragorn.
+
+'Doubles hurts first; rope answers doubles,' Gollum said.
+
+By the end of the chapter the anchors must stand. The final page bears the cost.
+The chapter could not close the darkness. Thus the three movements of the tale drew apart.
+"""
+
+    hits = set(_template_artifact_hits(text))
+
+    assert {
+        "ordinal_sign_changed",
+        "road_work_tested",
+        "keyword_substitution_dialogue",
+        "gollum_keyword_frame",
+        "meta_end_of_chapter",
+        "meta_final_page",
+        "meta_chapter_could_not",
+        "meta_three_movements",
+    } <= hits
+
+
+def test_template_artifact_detection_does_not_flag_ordinary_named_road_prose():
+    from book_graph_analyzer.story_cli import _template_artifact_hits
+
+    assert "road_and_object" not in _template_artifact_hits(
+        "The strangers watched the East Road and withdrew before the Ranger approached."
+    )
+    assert "road_and_object" in _template_artifact_hits(
+        "The generated inventory contained Road and folded letters."
+    )
+
+
+def test_template_artifact_detection_flags_modern_process_language():
+    from book_graph_analyzer.story_cli import _template_artifact_hits
+
+    hits = set(
+        _template_artifact_hits(
+            "The investigation needed a stopping rule. Mercy entered as a controlled risk, "
+            "and the guard followed the protocol."
+        )
+    )
+
+    assert {
+        "modern_stopping_rule",
+        "modern_controlled_risk",
+        "modern_process_jargon",
+    } <= hits
+
+
+def test_dialogue_word_count_supports_typographic_and_straight_quotes():
+    from book_graph_analyzer.story_cli import _dialogue_word_count, _event_density_stats
+
+    text = (
+        '“Follow the river,” said Gandalf. "Read the bank," Aragorn answered. '
+        "‘Don’t linger,’ said the guard. 'Don't stop,' said another."
+    )
+
+    assert _dialogue_word_count(text) == 10
+    assert _event_density_stats(text)["dialogue_sentence_count"] == 4
+
+
+def test_quality_settings_support_explicit_chapter_overrides():
+    from book_graph_analyzer.story_cli import _quality_settings
+
+    constraints = {
+        "quality": {"min_dialogue_ratio": 0.08},
+        "quality_by_chapter": {
+            "7": {
+                "min_dialogue_ratio": 0.0,
+                "min_scene_words": 700,
+                "rationale": "Solo viewpoints",
+            }
+        },
+    }
+
+    default = _quality_settings(constraints, chapter=6)
+    overridden = _quality_settings(constraints, chapter=7)
+
+    assert default["min_dialogue_ratio"] == 0.08
+    assert default["min_scene_words"] == 0
+    assert overridden["min_dialogue_ratio"] == 0.0
+    assert overridden["min_scene_words"] == 700
+    assert "rationale" not in overridden
+
+
+def test_lowercase_paragraph_detection_looks_past_opening_quotes():
+    from book_graph_analyzer.story_cli import _lowercase_paragraph_start_samples
+
+    samples = _lowercase_paragraph_start_samples(
+        "“lowercase words begin this paragraph.”\n\n"
+        "'also lowercase here.'\n\n"
+        "“Uppercase is fine.”"
+    )
+
+    assert samples == [
+        "“lowercase words begin this paragraph.”",
+        "'also lowercase here.'",
+    ]
 
 
 def test_story_audit_fails_when_dialogue_ratio_is_too_low(tmp_path):

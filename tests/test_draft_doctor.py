@@ -126,6 +126,59 @@ def test_draft_doctor_strict_mode_fails_after_writing_report(tmp_path):
     assert report["strict_validation"]["pass"] is False
 
 
+def test_draft_doctor_does_not_treat_named_road_conjunction_as_placeholder(tmp_path):
+    chapter = tmp_path / "chapter_01.md"
+    chapter.write_text(
+        "# Watch\n\nThe strangers watched the East Road and withdrew before dawn.\n",
+        encoding="utf-8",
+    )
+
+    report = analyze_draft(
+        tmp_path,
+        min_chapter_words=0,
+        min_scene_words=0,
+        min_total_words=0,
+    )
+
+    placeholder_messages = [
+        issue["message"]
+        for issue in report["issues"]
+        if issue["category"] == "placeholder_continuity_lint"
+    ]
+    assert all("road_and_object" not in message for message in placeholder_messages)
+
+
+def test_draft_doctor_blocks_editorial_leaks_and_modern_process_diction(tmp_path):
+    chapter = tmp_path / "chapter_01.md"
+    chapter.write_text(
+        "# Watch\n\n"
+        "By the end of the chapter the warning had to stand.\n\n"
+        "* * *\n\n"
+        "The investigation needed a stopping rule, and mercy entered as a controlled risk.\n",
+        encoding="utf-8",
+    )
+
+    report = analyze_draft(
+        tmp_path,
+        min_chapter_words=0,
+        min_scene_words=0,
+        min_total_words=0,
+    )
+
+    assert report["strict_validation"]["pass"] is False
+    assert any(
+        issue["category"] == "placeholder_continuity_lint"
+        and issue["evidence"].get("pattern") == "meta_end_of_chapter"
+        for issue in report["issues"]
+    )
+    assert any(
+        issue["category"] == "tolkien_register_balance"
+        and issue["evidence"].get("kind") == "modern_analytical_diction"
+        and set(issue["evidence"].get("patterns", [])) == {"stopping_rule", "controlled_risk"}
+        for issue in report["issues"]
+    )
+
+
 def test_draft_doctor_strict_mode_passes_clean_draft(tmp_path):
     draft_dir = tmp_path / "clean"
     draft_dir.mkdir()

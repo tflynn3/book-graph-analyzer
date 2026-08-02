@@ -140,6 +140,51 @@ def test_scene_generator_accepts_assembled_context():
     assert scene.model_used == "stub:test-model"
 
 
+def test_scene_generator_prompts_use_requested_length_and_keep_default_range():
+    from book_graph_analyzer.generate.generator import SceneGenerator
+    from book_graph_analyzer.generate.models import SceneScores
+
+    generator = SceneGenerator()
+    generator.driver = None
+    generator.llm = MagicMock()
+    generator.llm.generate.return_value = "Scene text"
+    generator.llm.provider_label = "stub:test-model"
+    generator.pipeline.run = MagicMock(side_effect=lambda scene, **_kwargs: (scene, []))
+    generator._score_scene = MagicMock(return_value=SceneScores())
+
+    normal_scene = generator.generate_scene(
+        scene_goal="Follow the trail east",
+        characters=["Aragorn"],
+        place="Wilderland",
+        target_words=1050,
+    )
+    fog_scene = generator.generate_scene(
+        scene_goal="Enter the lightless ruin",
+        characters=["Aragorn"],
+        place="an unnamed ruin",
+        fog_of_war=True,
+        target_words=900,
+    )
+    default_scene = generator.generate_scene(
+        scene_goal="Keep watch",
+        characters=["Aragorn"],
+        place="the road",
+    )
+
+    assert (
+        "Write approximately 1050 words (within 10 percent of the target)."
+        in normal_scene.generation_prompt
+    )
+    assert (
+        "Write approximately 900 words (within 10 percent of the target)."
+        in fog_scene.generation_prompt
+    )
+    assert "Write 400-800 words." in default_scene.generation_prompt
+    assert "avoid modern analytical, clinical, or process jargon" in normal_scene.generation_prompt
+    assert "not as a scene outline to reconstruct beat by beat" in normal_scene.generation_prompt
+    assert "avoid modern analytical or process jargon" in fog_scene.generation_prompt
+
+
 def test_scene_generator_does_not_award_unverified_lore_or_voice_scores():
     from book_graph_analyzer.generate.generator import SceneGenerator
     from book_graph_analyzer.generate.models import Scene, SceneScores

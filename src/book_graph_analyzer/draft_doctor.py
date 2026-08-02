@@ -198,8 +198,44 @@ PLACEHOLDER_PATTERNS: list[tuple[str, str, str]] = [
     ("in_westward_road", r"\bIn\s+the\s+westward\s+road\b", "Malformed generated road phrase."),
     ("about_westward_road", r"\bAbout\s+the\s+westward\s+road\b", "Malformed generated road phrase."),
     ("maps_and_road", r"\bmaps?\s+and\s+Road\b", "Mixed object/location placeholder."),
-    ("object_and_road", r"\band\s+Road\b", "Mixed object/location placeholder."),
-    ("road_and_object", r"\bRoad\s+and\b", "Mixed location/object placeholder."),
+    (
+        "object_and_road",
+        r"\b(?:branches?|cloak|fish bones?|folded letters?|lamps?|maps?|muddy water|"
+        r"rope|staff|weathered cloak)\s+and\s+Road\b",
+        "Mixed object/location placeholder.",
+    ),
+    (
+        "road_and_object",
+        r"\bRoad\s+and\s+(?:branches?|cloak|fish bones?|folded letters?|lamps?|maps?|"
+        r"muddy water|rope|staff|weathered cloak)\b",
+        "Mixed location/object placeholder.",
+    ),
+    ("meta_end_of_chapter", r"\bBy the end of the chapter\b", "Editorial process leaked into the fiction."),
+    ("meta_final_page", r"\bthe final page\b", "Editorial process leaked into the fiction."),
+    ("meta_chapter_could_not", r"\bThe chapter could not\b", "Editorial process leaked into the fiction."),
+    ("meta_three_movements", r"\bthree movements of the tale\b", "Editorial process leaked into the fiction."),
+    (
+        "meta_imagination_supplied",
+        r"\bimagination supplied (?:one|it|them)\b",
+        "Authorial reasoning leaked into the viewpoint.",
+    ),
+    (
+        "meta_borrowed_before_time",
+        r"\bborrowed before (?:its|their) time\b",
+        "Canon-management language leaked into the fiction.",
+    ),
+]
+
+MODERN_ANALYTICAL_PATTERNS: list[tuple[str, str]] = [
+    ("stopping_rule", r"\bstopping rule\b"),
+    ("independent_uncertainties", r"\bindependent uncertainties\b"),
+    ("revise_fear_downward", r"\brevise (?:the )?fear downward\b"),
+    ("failed_experiment", r"\bfailed experiment\b"),
+    ("controlled_risk", r"\bcontrolled risk\b"),
+    ("trauma_response", r"\btrauma response\b"),
+    ("alternative_causes", r"\balternative causes\b"),
+    ("forensic_process", r"\b(?:forensic|provenance|compliance)\b"),
+    ("formal_process", r"\b(?:protocol|procedure)\b"),
 ]
 
 ENDING_PATTERNS: list[tuple[str, str]] = [
@@ -805,6 +841,26 @@ def _scene_causality_issues(scenes: list[SceneRef]) -> list[dict[str, Any]]:
 def _register_balance_issues(paragraphs: list[ParagraphRef], scenes: list[SceneRef]) -> list[dict[str, Any]]:
     issues = []
     for p in paragraphs:
+        analytical_hits = [
+            name
+            for name, pattern in MODERN_ANALYTICAL_PATTERNS
+            if re.search(pattern, p.text, re.IGNORECASE)
+        ]
+        if analytical_hits:
+            issues.append(
+                _issue(
+                    category="tolkien_register_balance",
+                    severity="medium",
+                    ref=p,
+                    message="Modern analytical or process language breaks the secondary-world register.",
+                    suggestion=(
+                        "Express the reasoning through observed signs, remembered lore, disagreement, "
+                        "or a concrete decision made under pressure."
+                    ),
+                    examples=[p.text],
+                    evidence={"kind": "modern_analytical_diction", "patterns": analytical_hits},
+                )
+            )
         words = _tokens(p.text)
         if len(words) < 16:
             continue

@@ -42,13 +42,16 @@ at past greatness or horror, and let silence carry weight. Do not explain what t
 character cannot know.
 
 Register guidance for scenes of mystery:
-- The landscape itself feels conscious and watching
+- The landscape may feel conscious or watchful when the viewpoint earns that impression; use this sparingly
 - Details are physical and sensory — cold stone, old smell, soundlessness
 - The character notices without understanding
 - Formal, measured prose; no modern psychological interiority
 - Dread or wonder conveyed through what is NOT said
+- Put reasoning into observed signs, remembered lore, disagreement, and immediate choices; avoid modern analytical or process jargon
+- Once an action has shown its moral or evidentiary meaning, do not explain that meaning again
+- End on changed pressure or a concrete image, not a summary maxim
 
-Write 400-800 words. Begin the scene directly, no preamble.'''
+{length_instruction} Begin the scene directly, no preamble.'''
 
     GENERATION_PROMPT = '''Write an original high-fantasy scene in a Tolkien-inspired register.
 Do not quote, paraphrase, or continue any source passage. Keep the prose original while
@@ -68,7 +71,13 @@ WORLD RULES TO RESPECT:
 
 {style_constraints}
 
-Write 400-800 words. Begin the scene directly, no preamble. Avoid modern idiom,
+PROSE DISCIPLINE:
+- Put reasoning into observed signs, remembered lore, disagreement, and immediate choices; avoid modern analytical, clinical, or process jargon.
+- Once an action has shown its moral or evidentiary meaning, do not explain that meaning again.
+- Treat canon evidence as a boundary and source of consequences, not as a scene outline to reconstruct beat by beat.
+- End on changed pressure, a decision, or a concrete image—not a detachable summary maxim.
+
+{length_instruction} Begin the scene directly, no preamble. Avoid modern idiom,
 placeholder names, and characters who do not belong to this story-time.'''
 
     CRITIQUE_PROMPT = '''Review this passage for lore violations and inconsistencies.
@@ -278,6 +287,13 @@ Keep the same general content and length, just fix the problems.'''
                     rules.append(f"- [{category.value}] {rule.title}: {rule.description}")
         
         return "\n".join(rules[:20])  # Limit to avoid context overflow
+
+    @staticmethod
+    def _length_instruction(target_words: int | None) -> str:
+        """Return an explicit scene-length instruction for the generation prompt."""
+        if target_words is None or target_words <= 0:
+            return "Write 400-800 words."
+        return f"Write approximately {target_words} words (within 10 percent of the target)."
     
     def generate_scene(
         self,
@@ -294,6 +310,7 @@ Keep the same general content and length, just fix the problems.'''
         story_era: Optional[str] = None,
         story_year: Optional[int] = None,
         voice_profiles: Optional[dict] = None,
+        target_words: int | None = None,
     ) -> Scene:
         """Generate a scene with full pipeline.
 
@@ -302,6 +319,8 @@ Keep the same general content and length, just fix the problems.'''
                 The characters know nothing of the location's history. The LLM writes
                 from a position of uncertainty — producing naturally ominous, mysterious prose.
                 Use for: entering Moria, approaching a ruined city, Fog-filled valleys.
+            target_words: Approximate scene length to request. When omitted, the prompt
+                retains the general-purpose 400-800 word range.
         """
         
         # 1. Get context from Neo4j (restricted in fog_of_war mode)
@@ -367,6 +386,7 @@ Keep the same general content and length, just fix the problems.'''
 
         scene_type: Optional[str] = None
         style_constraints_obj = None
+        length_instruction = self._length_instruction(target_words)
 
         # 3. Generate initial scene
         if fog_of_war:
@@ -382,6 +402,7 @@ Keep the same general content and length, just fix the problems.'''
                 character_knowledge=character_knowledge,
                 scene_goal=scene_goal,
                 world_rules=self.get_world_rules(),
+                length_instruction=length_instruction,
             )
         else:
             self.style_injector.driver = self.driver
@@ -396,6 +417,7 @@ Keep the same general content and length, just fix the problems.'''
                 scene_goal=scene_goal,
                 world_rules=self.get_world_rules(),
                 style_constraints=style_block,
+                length_instruction=length_instruction,
             )
         
         scene_text = self.llm.generate(prompt, temperature=self.config.temperature)

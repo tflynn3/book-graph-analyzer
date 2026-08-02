@@ -67,7 +67,12 @@ PROJECT_TIMELINE_DEFAULTS = {
 }
 PLACEHOLDER_PARTICIPANTS = {"unknown", "someone", "they", "them", "he", "she", "it", "tbd", "placeholder"}
 DEFAULT_PLACEHOLDER_TERMS = ["Unknown", "Someone", "TBD", "placeholder"]
-DIALOGUE_QUOTE_RE = re.compile(r"(?<![A-Za-z])'([^'\n]{2,2500})'")
+DIALOGUE_QUOTE_RE = re.compile(
+    r'“(?P<curly_double>[^”\n]{2,2500})”'
+    r'|"(?P<straight_double>[^"\n]{2,2500})"'
+    r'|(?<![A-Za-z])‘(?P<curly_single>(?:[^’\n]|(?<=[A-Za-z])’(?=[A-Za-z])){2,2500})’(?![A-Za-z])'
+    r"|(?<![A-Za-z])'(?P<straight_single>(?:[^'\n]|(?<=[A-Za-z])'(?=[A-Za-z])){2,2500})'(?![A-Za-z])"
+)
 MOTIF_STOPWORDS = STOPWORDS | {
     "beren", "luthien", "lúthien", "thingol", "melian", "morgoth", "sauron", "finrod",
     "celegorm", "curufin", "huan", "hurin", "húrin", "doriath", "menegroth",
@@ -1298,9 +1303,37 @@ def _load_constraints(proj_dir: Path) -> dict:
     )
 
 
-def _quality_settings(constraints: dict) -> dict[str, Any]:
+def _quality_settings(constraints: dict, *, chapter: int | None = None) -> dict[str, Any]:
     raw = constraints.get("quality", {}) if isinstance(constraints, dict) else {}
-    quality = raw if isinstance(raw, dict) else {}
+    quality = dict(raw) if isinstance(raw, dict) else {}
+    if chapter is not None and isinstance(constraints, dict):
+        by_chapter = constraints.get("quality_by_chapter", {})
+        if isinstance(by_chapter, dict):
+            override = by_chapter.get(str(chapter), by_chapter.get(chapter, {}))
+            if isinstance(override, dict):
+                supported_keys = {
+                    "min_scene_words",
+                    "min_chapter_words",
+                    "target_scene_words",
+                    "min_dialogue_ratio",
+                    "target_dialogue_ratio",
+                    "min_event_sentence_ratio",
+                    "min_type_token_ratio",
+                    "target_avg_sentence_words",
+                    "max_avg_sentence_words",
+                    "max_repeated_paragraphs",
+                    "max_repeated_long_phrases",
+                    "repeated_long_phrase_words",
+                    "repeated_long_phrase_min_count",
+                    "max_dialogue_vocative_openings",
+                    "forbid_placeholder_terms",
+                    "forbid_out_of_domain_entities",
+                    "forbid_template_artifacts",
+                    "fail_lowercase_paragraph_starts",
+                }
+                quality.update(
+                    {key: value for key, value in override.items() if key in supported_keys}
+                )
     placeholders = quality.get("forbid_placeholder_terms", DEFAULT_PLACEHOLDER_TERMS)
     if placeholders is True:
         placeholders = DEFAULT_PLACEHOLDER_TERMS
@@ -1370,11 +1403,14 @@ def _missing_required_terms(text: str, required_terms: list[str]) -> list[str]:
 
 
 def _count_words(text: str) -> int:
-    return len(re.findall(r"\b[\w'-]+\b", str(text or "")))
+    return len(re.findall(r"\b[\w'’-]+\b", str(text or "")))
 
 
 def _dialogue_word_count(text: str) -> int:
-    return sum(_count_words(span) for span in DIALOGUE_QUOTE_RE.findall(str(text or "")))
+    return sum(
+        _count_words(next(span for span in match.groups() if span is not None))
+        for match in DIALOGUE_QUOTE_RE.finditer(str(text or ""))
+    )
 
 
 def _sentence_word_lengths(text: str) -> list[int]:
@@ -1486,16 +1522,53 @@ def _template_artifact_hits(text: str) -> list[str]:
         ("in_westward_road", r"\bIn\s+the\s+westward\s+road\b", re.IGNORECASE),
         ("about_road", r"\bAbout\s+Road\b", 0),
         ("about_westward_road", r"\bAbout\s+the\s+westward\s+road\b", re.IGNORECASE),
-        ("road_and_object", r"\bRoad\s+and\b", 0),
-        ("object_and_road", r"\band\s+Road\b", 0),
+        (
+            "road_and_object",
+            r"\bRoad\s+and\s+(?:branches?|cloak|fish bones?|folded letters?|lamps?|"
+            r"maps?|muddy water|rope|staff|weathered cloak)\b",
+            0,
+        ),
+        (
+            "object_and_road",
+            r"\b(?:branches?|cloak|fish bones?|folded letters?|lamps?|maps?|"
+            r"muddy water|rope|staff|weathered cloak)\s+and\s+Road\b",
+            0,
+        ),
         ("ring_as_physical_object", r"\bfish bones,\s+muddy water,\s+and\s+ring\b", re.IGNORECASE),
         ("repeated_old_powers_block", r"The old powers did not need to enter the road", re.IGNORECASE),
         ("repeated_practical_choice_block", r"Every practical choice cast a moral shadow", re.IGNORECASE),
         ("repeated_hidden_labour_block", r"So the hidden labour continued", re.IGNORECASE),
         ("repeated_bilbo_adventure_block", r"Bilbo's old adventure", re.IGNORECASE),
         ("repeated_road_grammar_block", r"The road had its own stern grammar", re.IGNORECASE),
+        (
+            "ordinal_sign_changed",
+            r"\b(?:first|second|third|fourth|fifth|sixth|"
+            r"seventh|eighth|ninth|tenth|eleventh|twelfth)\s+[\w'-]+\s+sign changed\b",
+            re.IGNORECASE,
+        ),
+        ("road_work_tested", r"\broad[-‐‑–—]work\s+tested\b", re.IGNORECASE),
+        (
+            "keyword_substitution_dialogue",
+            r"\b(?P<keyword>[A-Za-z][A-Za-z'-]*)\s+gives\s+(?P=keyword)\s+direction,\s+"
+            r"not\s+(?P=keyword)\s+answer\b",
+            re.IGNORECASE,
+        ),
+        (
+            "gollum_keyword_frame",
+            r"\b(?P<keyword>[A-Za-z][A-Za-z'-]*)\s+hurts first;\s+rope answers\s+(?P=keyword)\b",
+            re.IGNORECASE,
+        ),
+        ("meta_end_of_chapter", r"\bBy the end of the chapter\b", re.IGNORECASE),
+        ("meta_final_page", r"\bthe final page\b", re.IGNORECASE),
+        ("meta_chapter_could_not", r"\bThe chapter could not\b", re.IGNORECASE),
+        ("meta_three_movements", r"\bthree movements of the tale\b", re.IGNORECASE),
         ("meta_final_movement", r"The final movement holds", re.IGNORECASE),
         ("meta_reader_address", r"If the reader sought", re.IGNORECASE),
+        ("modern_stopping_rule", r"\bstopping rule\b", re.IGNORECASE),
+        ("modern_controlled_risk", r"\bcontrolled risk\b", re.IGNORECASE),
+        ("modern_trauma_response", r"\btrauma response\b", re.IGNORECASE),
+        ("modern_independent_uncertainties", r"\bindependent uncertainties\b", re.IGNORECASE),
+        ("modern_process_jargon", r"\b(?:provenance|compliance|protocol)\b", re.IGNORECASE),
     ]
     hits: list[str] = []
     for name, pattern, flags in checks:
@@ -1510,7 +1583,7 @@ def _lowercase_paragraph_start_samples(text: str, sample_size: int = 8) -> list[
         paragraph = block.strip()
         if not paragraph or paragraph.startswith("#") or paragraph == "* * *":
             continue
-        if re.match(r"^[a-z]", paragraph):
+        if re.match(r"^(?:[\"'“‘]\s*)?[a-z]", paragraph):
             samples.append(paragraph[:120])
             if len(samples) >= sample_size:
                 break
@@ -1558,7 +1631,7 @@ def _event_density_stats(text: str) -> dict[str, Any]:
     for sentence in sentences:
         lower = sentence.lower()
         words = set(re.findall(r"[a-z][a-z'-]*", lower))
-        has_dialogue = "'" in sentence or '"' in sentence
+        has_dialogue = bool(DIALOGUE_QUOTE_RE.search(sentence))
         has_event = bool(words & event_terms)
         has_concrete = bool(words & concrete_terms)
         if has_dialogue:
@@ -1580,8 +1653,14 @@ def _effective_min_type_token_ratio(configured_min: float, word_count: int, base
     return round(configured_min * math.sqrt(baseline_words / max(1, word_count)), 6)
 
 
-def _chapter_quality_failures(text: str, trace_sections: list[dict[str, Any]], constraints: dict[str, Any]) -> list[str]:
-    quality = _quality_settings(constraints)
+def _chapter_quality_failures(
+    text: str,
+    trace_sections: list[dict[str, Any]],
+    constraints: dict[str, Any],
+    *,
+    chapter: int | None = None,
+) -> list[str]:
+    quality = _quality_settings(constraints, chapter=chapter)
     failures: list[str] = []
     word_count = _count_words(text)
     words = re.findall(r"\b[\w'-]+\b", str(text or ""))
@@ -1773,6 +1852,10 @@ def _project_canon_entities(project_slug: str) -> list[str]:
             "Smeagol",
             "Bilbo",
             "Thranduil",
+            "Denethor",
+            "Isildur",
+            "Saruman",
+            "Sauron",
         ]
     if _is_shire_gap_project(slug):
         return [
@@ -1793,8 +1876,8 @@ def _out_of_domain_entities(project_slug: str) -> set[str]:
     if _is_hunt_gollum_project(slug):
         return {
             "frodo", "sam", "merry", "pippin", "boromir", "legolas", "gimli",
-            "elrond", "galadriel", "saruman", "fellowship", "council of elrond",
-            "rivendell", "minas tirith", "rohan", "gondor", "isengard", "orthanc",
+            "elrond", "galadriel", "fellowship", "council of elrond",
+            "rivendell", "rohan", "isengard", "orthanc",
             "helm's deep", "helms deep", "mount doom", "moria", "balrog",
             "ringwraith", "ringwraiths", "nazgul", "nazgûl", "black rider",
             "black riders",
@@ -1821,7 +1904,8 @@ def _non_character_entities(project_slug: str) -> set[str]:
         return {
             "anduin", "mirkwood", "rhovanion", "dead marshes", "mordor", "shire",
             "the shire", "bree", "prancing pony", "wood-elves", "woodland realm",
-            "road", "ring", "bilbo's ring", "baggins",
+            "minas tirith", "gondor", "dol guldur", "lórien", "lorien",
+            "road", "ring", "bilbo's ring", "isildur's record", "baggins",
         }
     if _is_shire_gap_project(slug):
         return {
@@ -9262,7 +9346,7 @@ def _render_grounded_chapter_text(
     plan_chapter = chapters_by_number.get(chapter)
     scene_beats_by_scene = _load_shadow_beats_by_scene(proj_dir)
     missing_terms_hint = list(missing_terms_hint or [])
-    quality = _quality_settings(_load_constraints(proj_dir))
+    quality = _quality_settings(_load_constraints(proj_dir), chapter=chapter)
     context_stats = _load_json(proj_dir / "context_stats.json", default={})
     timeline = _project_timeline(project)
     timeline_snapshot = context_stats.get("timeline", {}) if isinstance(context_stats.get("timeline"), dict) else {}
@@ -9361,6 +9445,7 @@ def _render_grounded_chapter_text(
                 story_era=timeline.get("story_era"),
                 story_year=timeline.get("story_year"),
                 voice_profiles=voice_profiles,
+                target_words=int(scene_quality.get("target_scene_words", 0) or 0) or None,
             )
         if not scene.text.strip():
             raise click.ClickException(
@@ -11320,7 +11405,12 @@ def story_draft(project_slug: str, chapter: int, grounded: bool, renderer: str, 
             timeline=timeline,
             entity_presence=entity_presence,
         )["future_mentions"]
-        quality_failures = _chapter_quality_failures(final_text, final_trace, constraints)
+        quality_failures = _chapter_quality_failures(
+            final_text,
+            final_trace,
+            constraints,
+            chapter=chapter,
+        )
         if not missing and not temporal_future_mentions and not quality_failures:
             break
 
@@ -11408,7 +11498,7 @@ def story_audit(project_slug: str, chapter: int, projects_dir: str, enforce_requ
     graph = _load_json(graph_path, default={})
     plan = _load_json(plan_path, default={})
     constraints = _load_constraints(proj_dir)
-    quality = _quality_settings(constraints)
+    quality = _quality_settings(constraints, chapter=chapter)
     context_stats = _load_json(proj_dir / "context_stats.json", default={})
     timeline = _project_timeline(project)
     timeline_snapshot = context_stats.get("timeline", {}) if isinstance(context_stats.get("timeline"), dict) else {}

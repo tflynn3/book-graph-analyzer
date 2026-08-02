@@ -197,6 +197,9 @@ Behavior:
 - Neo4j event retrieval is bounded by the project era/year, and source IDs plus source book/location are retained in the retrieved evidence.
 - Template-rendered scenes are marked `FLAGGED` with zero/unverified model scores. Passing prose-quality numbers are never fabricated for the deterministic renderer.
 - Runs configured hard quality gates during construction for minimum scene/chapter length, minimum dialogue share, minimum type-token ratio, and maximum average sentence length.
+- Passes `constraints.json.quality.target_scene_words` to the LLM as an explicit approximate length request. A scene's `target_words`, or its share of a chapter-level `target_words`, takes precedence when present in `plan.json`.
+- Supports chapter-specific quality overrides through `constraints.json.quality_by_chapter`. Keys are chapter numbers as strings and may override any supported `quality` setting; this is useful for intentionally quiet or dialogue-heavy chapters without weakening the project-wide gate.
+- Directs the LLM to express reasoning through observed signs, memory, disagreement, and decisions; to avoid modern analytical/process diction; and to treat canon evidence as a boundary rather than a source scene to reconstruct.
 - Persists deterministic scene IDs (`<project-slug>-<scene-id>`) so reruns update the same shadow-state / generation nodes instead of duplicating them.
 - Seeds chapter outline metadata into the generation graph before drafting so later scenes can retrieve active plot-thread context.
 - Injects story-time guidance into the scene goal. Past figures/events may be referenced when allowed by project timeline, but later-era names are explicitly forbidden.
@@ -255,4 +258,4 @@ Generates:
 
 ## Draft doctor strict gate
 
-`bga draft doctor --strict` blocks both high- and medium-severity findings in its structural, repetition, causality, register, voice, and ending-cadence categories. Low-severity findings remain revision guidance. A large set of material medium findings can no longer produce a strict PASS.
+`bga draft doctor --strict` blocks both high- and medium-severity findings in its structural, repetition, causality, register, voice, and ending-cadence categories. Its register checks include targeted editorial leaks and modern process language such as `stopping rule`, `controlled risk`, and `provenance`. Low-severity findings remain revision guidance. A large set of material medium findings can no longer produce a strict PASS.
