@@ -10,9 +10,8 @@ Validates:
 import json
 import os
 import tempfile
-from unittest.mock import MagicMock, call, patch
+from unittest.mock import MagicMock
 
-import pytest
 
 
 # ============================================================================
@@ -382,9 +381,7 @@ class TestBackwardCompat:
 
     def test_worldbible_model_imports(self):
         from book_graph_analyzer.worldbible import (
-            WorldBible, WorldRule, WorldBibleCategory,
-            CulturalProfile, MagicSystem, GeographyEntry,
-            WorldBibleExtractor, ExtractionConfig, PatternMatcher,
+            WorldBible,
         )
         assert WorldBible is not None
 

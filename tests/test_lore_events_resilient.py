@@ -1,7 +1,7 @@
 import json
 
 from book_graph_analyzer.lore import events as events_module
-from book_graph_analyzer.lore.events import EventExtractor
+from book_graph_analyzer.lore.events import Event, EventExtractor
 
 
 class _FakeLLM:
@@ -63,6 +63,18 @@ def test_resilient_resume_skips_completed_chunks(tmp_path, monkeypatch):
 
     checkpoint = tmp_path / "resume.checkpoint.json"
     ledger_path = tmp_path / "resume.checkpoint.json.ledger.json"
+    checkpoint.write_text(
+        json.dumps({
+            "next_chunk": 1,
+            "total_chunks": 3,
+            "events": [
+                Event(id="e1", description="x", source_book="Hobbit").to_dict()
+            ],
+            "relations": [],
+            "seen_keys": ["x"],
+        }),
+        encoding="utf-8",
+    )
     ledger_path.write_text(
         json.dumps({
             "chunks": [
@@ -73,7 +85,7 @@ def test_resilient_resume_skips_completed_chunks(tmp_path, monkeypatch):
     )
 
     extractor = EventExtractor(use_llm=True)
-    extractor.extract_from_book(
+    graph = extractor.extract_from_book(
         "B" * 7000,
         source_book="Hobbit",
         chunk_size=3000,
@@ -84,3 +96,52 @@ def test_resilient_resume_skips_completed_chunks(tmp_path, monkeypatch):
 
     # Should not process all chunks from scratch because one was already marked ok
     assert calls["n"] < 4
+    assert len(graph.events) == 1  # Identical payloads are deliberately deduplicated.
+    assert json.loads(checkpoint.read_text(encoding="utf-8"))["next_chunk"] == 3
+
+
+def test_resilient_resume_reprocesses_ledger_entry_without_durable_payload(
+    tmp_path,
+    monkeypatch,
+):
+    processed = []
+
+    def fake_once(self, text, source_book, chunk_index=0, model=None):
+        processed.append(chunk_index)
+        event = Event(
+            id=f"c{chunk_index}_e",
+            description=f"event {chunk_index}",
+            source_book=source_book,
+        )
+        return [event], [], "", "{}"
+
+    monkeypatch.setattr(events_module, "LLMClient", lambda **_kwargs: _FakeLLM())
+    monkeypatch.setattr(EventExtractor, "_extract_llm_once", fake_once)
+
+    checkpoint = tmp_path / "ledger-only.checkpoint.json"
+    checkpoint.with_suffix(".json.ledger.json").write_text(
+        json.dumps({
+            "chunks": [
+                {
+                    "chunk_index": 1,
+                    "status": "ok",
+                    "attempts": 1,
+                    "final_model": "primary",
+                }
+            ]
+        }),
+        encoding="utf-8",
+    )
+
+    graph = EventExtractor(use_llm=True).extract_from_book(
+        "C" * 7000,
+        source_book="Hobbit",
+        chunk_size=3000,
+        checkpoint_file=str(checkpoint),
+        resilient=True,
+        fallback_model="fallback",
+        parallel_workers=3,
+    )
+
+    assert sorted(processed) == [0, 1, 2]
+    assert len(graph.events) == 3

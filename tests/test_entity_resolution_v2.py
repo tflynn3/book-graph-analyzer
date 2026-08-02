@@ -10,8 +10,6 @@ Tests cover:
 """
 
 import json
-import pytest
-from pathlib import Path
 
 from book_graph_analyzer.extract.normalizer import (
     TextNormalizer,

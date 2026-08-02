@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import re
 from collections import defaultdict
-from typing import Optional
 
 from .models import Scene
 from ..voice.dialogue import extract_dialogue

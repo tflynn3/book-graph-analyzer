@@ -10,7 +10,6 @@ Also contains ThemeNode model and TOLKIEN_THEMES taxonomy.
 from __future__ import annotations
 
 from dataclasses import dataclass, field, asdict
-from typing import Optional
 
 
 # ---------------------------------------------------------------------------

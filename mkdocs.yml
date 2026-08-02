@@ -54,6 +54,7 @@ nav:
   - Story Pipeline:
       - Architecture: ARCHITECTURE.md
       - Pipeline Walkthrough: pipeline.md
+      - NLP Upgrade Roadmap: wiki/nlp-upgrade-roadmap.md
       - World-Building RFC: tolkien-worldbuilding-rfc.md
       - "Issue #47 Sociolinguistic Registers (Slice 1)": issue-47-socioreg-slice1.md
       - Story Generation: story-generation.md

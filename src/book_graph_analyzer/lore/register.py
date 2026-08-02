@@ -393,7 +393,6 @@ class RegisterClassifier:
         """Extract style metrics from text."""
         sentences = re.split(r'[.!?]+\s+', text.strip())
         sentences = [s for s in sentences if s.strip()]
-        word_count = len(text.split())
 
         if not sentences:
             return {
@@ -471,7 +470,7 @@ class RegisterClassifier:
             f"Register: {register}",
             f"Description: {tmpl.description}",
             f"Structural pattern: {tmpl.structural_pattern}",
-            f"Style metrics:",
+            "Style metrics:",
             f"  Avg sentence length: {tmpl.avg_sentence_length:.1f} words",
             f"  Passive ratio: {tmpl.passive_ratio:.0%}",
             f"  Dialogue density: {tmpl.dialogue_density:.0%}",

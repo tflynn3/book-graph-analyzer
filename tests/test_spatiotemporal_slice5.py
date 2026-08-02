@@ -10,7 +10,7 @@ import pytest
 
 from book_graph_analyzer.spatiotemporal.models import (
     CausalLink, NormalizedTime, SpatiotemporalEvent, TimelineConflict,
-    ConflictType, LocationNode,
+    ConflictType,
 )
 from book_graph_analyzer.spatiotemporal.llm_causal_extraction import (
     extract_causal_links,
@@ -231,6 +231,14 @@ class TestConfidenceCalibration:
         # "The Hobbit" -> 1.0, "Unfinished Tales" -> 0.7
         assert reg.get("the_hobbit") == 1.0
         assert reg.get("unfinished_tales") == pytest.approx(0.7, abs=0.01)
+
+    def test_source_title_lookup_is_case_and_whitespace_insensitive(self):
+        from book_graph_analyzer.models.worldbuilding import TOLKIEN_SOURCES
+
+        reg = SourceAuthorityRegistry.from_editorial_layers(TOLKIEN_SOURCES)
+
+        assert reg.get("The Silmarillion") == reg.get("the silmarillion")
+        assert reg.get("  UNFINISHED   TALES ") == pytest.approx(0.7, abs=0.01)
 
     def test_default_tolkien_registry(self):
         reg = SourceAuthorityRegistry.default_tolkien()

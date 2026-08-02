@@ -15,9 +15,9 @@ import httpx
 import spacy
 
 from ..config import get_settings
-from ..models.relationships import RelationshipType, ExtractedRelationship
+from ..models.relationships import ExtractedRelationship, RelationshipType
 from .resolver import EntityResolver, ResolvedEntity
-
+from .spacy_loader import load_spacy_model
 
 # Mapping from verb lemmas to relationship types
 # Using lemmas (base forms) for consistent matching
@@ -95,6 +95,54 @@ VERB_TO_RELATIONSHIP: dict[str, RelationshipType] = {
     "rule": RelationshipType.RULES,
     "guard": RelationshipType.GUARDS,
 }
+_INVALID_ENTITY_SURFACES = {
+    "i",
+    "me",
+    "my",
+    "you",
+    "your",
+    "he",
+    "him",
+    "his",
+    "she",
+    "her",
+    "it",
+    "its",
+    "we",
+    "us",
+    "our",
+    "they",
+    "them",
+    "their",
+    "to",
+    "from",
+    "with",
+    "at",
+    "by",
+    "in",
+    "on",
+    "of",
+    "for",
+    "into",
+    "onto",
+    "through",
+    "over",
+    "under",
+    "before",
+    "after",
+}
+_NONASSERTIVE_AUX_LEMMAS = {
+    "can",
+    "could",
+    "may",
+    "might",
+    "must",
+    "should",
+    "would",
+    "will",
+    "shall",
+}
+_NONASSERTIVE_HEAD_LEMMAS = {"wish", "hope", "want"}
 
 
 @dataclass
@@ -126,7 +174,7 @@ class RelationshipExtractor:
     def nlp(self) -> spacy.Language:
         """Lazy-load spaCy model."""
         if self._nlp is None:
-            self._nlp = spacy.load("en_core_web_sm")
+            self._nlp = load_spacy_model("en_core_web_sm")
         return self._nlp
 
     def extract_relationships(
@@ -190,6 +238,8 @@ class RelationshipExtractor:
                 continue
 
             rel_type = VERB_TO_RELATIONSHIP[verb_lemma]
+            if not self._is_asserted_relation(token):
+                continue
 
             # Find subject (nsubj)
             subject = None
@@ -201,14 +251,12 @@ class RelationshipExtractor:
 
             # Find object (dobj, pobj via prep)
             obj = None
-            prep_type = None
             for child in token.children:
                 if child.dep_ in ("dobj", "attr"):
                     obj = self._get_span_text(child)
                     break
                 # Check prepositional phrases (e.g., "traveled TO X", "spoke WITH Y")
                 if child.dep_ == "prep":
-                    prep_type = child.text.lower()
                     for pobj in child.children:
                         if pobj.dep_ == "pobj":
                             obj = self._get_span_text(pobj)
@@ -244,6 +292,28 @@ class RelationshipExtractor:
 
         return relationships
 
+    @staticmethod
+    def _is_asserted_relation(token) -> bool:
+        """Skip negated, modalized, or clearly non-asserted relation clauses."""
+        if any(child.dep_ == "neg" for child in token.children):
+            return False
+
+        aux_lemmas = {
+            child.lemma_.lower()
+            for child in token.children
+            if child.dep_ in {"aux", "auxpass"}
+        }
+        if aux_lemmas & _NONASSERTIVE_AUX_LEMMAS:
+            return False
+
+        if token.dep_ in {"xcomp", "ccomp"} and token.head.lemma_.lower() in _NONASSERTIVE_HEAD_LEMMAS:
+            return False
+
+        if any(child.dep_ == "mark" and child.lemma_.lower() in {"if", "unless"} for child in token.children):
+            return False
+
+        return True
+
     def _get_span_text(self, token) -> str:
         """Get the full text of a noun phrase from a token."""
         # Try to get the noun chunk containing this token
@@ -266,7 +336,9 @@ class RelationshipExtractor:
         entity_lookup: dict[str, ResolvedEntity],
     ) -> ResolvedEntity | None:
         """Find a resolved entity matching the text."""
-        text_lower = text.lower().strip()
+        text_lower = re.sub(r"\s+", " ", text.lower().strip())
+        if not text_lower or text_lower in _INVALID_ENTITY_SURFACES:
+            return None
 
         # Exact match
         if text_lower in entity_lookup:
@@ -281,6 +353,8 @@ class RelationshipExtractor:
 
         # Try partial match (entity text contains our text or vice versa)
         for key, entity in entity_lookup.items():
+            if min(len(key), len(text_lower)) < 4:
+                continue
             if key in text_lower or text_lower in key:
                 return entity
 

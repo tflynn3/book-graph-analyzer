@@ -111,16 +111,6 @@ def _dialogue_density(text: str) -> float:
     return _clamp(inside / total)
 
 
-def _passive_ratio(text: str) -> float:
-    """Heuristic passive voice ratio using 'was/were/been + past participle' pattern."""
-    passive_pat = re.compile(
-        r'\b(was|were|been|is|are|be)\s+\w+ed\b', re.IGNORECASE
-    )
-    sentences = _count_sentences(text)
-    matches = len(passive_pat.findall(text))
-    return _clamp(matches / max(1, sentences))
-
-
 def _detect_themes(text: str) -> list[str]:
     """Return list of theme IDs whose keywords appear in the text."""
     text_lower = text.lower()

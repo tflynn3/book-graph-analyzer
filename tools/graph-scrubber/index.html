@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Sentence Graph Review</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="app.js" defer></script>
+  </head>
+  <body>
+    <header class="app-header">
+      <div>
+        <p class="eyebrow">Book Graph Analyzer</p>
+        <h1>Sentence Graph Review</h1>
+      </div>
+      <div class="summary" aria-live="polite">
+        <span><strong id="totalSentences">0</strong> sentences</span>
+        <span><strong id="totalNodes">0</strong> nodes</span>
+        <span><strong id="totalEdges">0</strong> edges</span>
+      </div>
+    </header>
+
+    <main class="app-shell">
+      <section class="control-band" aria-label="Sentence controls">
+        <button class="icon-button" id="prevSentence" type="button" aria-label="Previous sentence">&lt;</button>
+        <div class="scrubber">
+          <div class="scrubber-top">
+            <span id="sentenceBadge">S1 / 1</span>
+            <span id="sentenceLocation">Chapter 0, paragraph 0</span>
+          </div>
+          <input id="sentenceRange" type="range" min="1" max="1" value="1" step="1" />
+          <div class="sentence-ticks" id="sentenceTicks"></div>
+        </div>
+        <button class="icon-button" id="nextSentence" type="button" aria-label="Next sentence">&gt;</button>
+        <label class="search-box">
+          <span>Search</span>
+          <input id="graphSearch" type="search" autocomplete="off" />
+        </label>
+      </section>
+
+      <section class="sentence-panel" aria-label="Selected sentence">
+        <div class="metric-row">
+          <span><strong id="newNodeCount">0</strong> new nodes</span>
+          <span><strong id="newEdgeCount">0</strong> new edges</span>
+          <span><strong id="visibleNodeCount">0</strong> visible nodes</span>
+          <span><strong id="visibleEdgeCount">0</strong> visible edges</span>
+        </div>
+        <p id="sentenceText"></p>
+      </section>
+
+      <section class="workspace">
+        <section class="graph-panel" aria-label="Graph">
+          <div class="legend" id="legend"></div>
+          <svg id="graphSvg" role="img" aria-label="Sentence graph"></svg>
+        </section>
+
+        <aside class="detail-panel" aria-label="Graph details">
+          <section>
+            <div class="panel-heading">
+              <h2 id="newHeading">New in S1</h2>
+            </div>
+            <div class="list-block">
+              <h3>Nodes</h3>
+              <div id="newNodesList" class="node-list"></div>
+            </div>
+            <div class="list-block">
+              <h3>Edges</h3>
+              <div id="newEdgesList" class="edge-list"></div>
+            </div>
+          </section>
+
+          <section class="inspector">
+            <h2>Inspector</h2>
+            <div id="inspectorBody" class="inspector-body"></div>
+          </section>
+        </aside>
+      </section>
+    </main>
+  </body>
+</html>

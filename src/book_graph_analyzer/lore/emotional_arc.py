@@ -10,7 +10,6 @@ Contains:
 
 from __future__ import annotations
 
-import re
 from typing import Optional
 
 from ..models.emotional_arc import (
@@ -22,7 +21,6 @@ from ..models.emotional_arc import (
     TolkienRegister,
     RelationshipSentiment,
     REGISTER_ANCHORS,
-    SENTIMENT_VALENCE,
 )
 
 

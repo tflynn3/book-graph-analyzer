@@ -1,9 +1,7 @@
 """Tests for temporal validity on graph relationships (issue #3)."""
 
-import pytest
 from book_graph_analyzer.graph.temporal import (
     TemporalValidity,
-    ERA_ORDER,
     canonicalize_era,
     era_to_order,
     era_before_or_equal,

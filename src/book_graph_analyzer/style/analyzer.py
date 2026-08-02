@@ -8,21 +8,16 @@ an AuthorStyleFingerprint.
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional, Callable
-import json
 
 import spacy
 from spacy.tokens import Doc
 
 from .metrics import (
-    SentenceMetrics, 
-    VocabularyProfile,
     calculate_sentence_metrics,
     calculate_vocabulary_profile,
     calculate_readability,
 )
 from .classifier import (
-    PassageType,
-    PassageClassification,
     classify_passage,
 )
 from .fingerprint import AuthorStyleFingerprint

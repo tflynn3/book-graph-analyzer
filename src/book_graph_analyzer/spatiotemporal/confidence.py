@@ -30,11 +30,22 @@ class SourceAuthorityRegistry:
 
     weights: dict[str, float] = field(default_factory=dict)
 
+    @staticmethod
+    def _normalize_key(source_book: str) -> str:
+        return " ".join(source_book.split()).casefold()
+
     def get(self, source_book: str | None) -> float:
         """Get authority weight for a source. Returns default if unknown."""
         if source_book is None:
             return _DEFAULT_AUTHORITY
-        return self.weights.get(source_book, _DEFAULT_AUTHORITY)
+        if source_book in self.weights:
+            return self.weights[source_book]
+
+        normalized_source = self._normalize_key(source_book)
+        for registered_source, weight in self.weights.items():
+            if self._normalize_key(str(registered_source)) == normalized_source:
+                return weight
+        return _DEFAULT_AUTHORITY
 
     @classmethod
     def from_editorial_layers(cls, layers: list) -> SourceAuthorityRegistry:

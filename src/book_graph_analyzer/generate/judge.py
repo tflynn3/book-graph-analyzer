@@ -3,8 +3,6 @@
 import json
 import re
 from dataclasses import dataclass
-from typing import Optional
-
 from ..llm import LLMClient
 from .models import SceneScores
 
@@ -27,9 +25,10 @@ class NarrativeJudgment:
 class NarrativeJudge:
     """Evaluates narrative quality using LLM-as-judge."""
     
-    JUDGE_PROMPT = '''You are a harsh literary critic specializing in fantasy fiction, particularly Tolkien's style.
+    JUDGE_PROMPT = '''You are a harsh literary critic specializing in historically grounded fantasy fiction.
 
-Rate this passage on a scale of 1-10 for each dimension. Be critical - Tolkien's bar is high.
+Rate this passage on a scale of 1-10 for each dimension. Reward original prose, concrete causality,
+character-specific speech, and evidence-consistent worldbuilding. Do not reward imitation or near-copying.
 
 PASSAGE:
 """
@@ -65,7 +64,8 @@ Respond in JSON format:
     "critique": "<one paragraph summary>"
 }}'''
 
-    STYLE_PROMPT = '''Compare this passage to Tolkien's writing style.
+    STYLE_PROMPT = '''Evaluate this original fantasy passage for an appropriate Middle-earth register.
+Do not reward imitation, near-copying, or generic archaism.
 
 PASSAGE:
 """
@@ -73,16 +73,18 @@ PASSAGE:
 """
 
 Consider:
-- Sentence structure and rhythm (Tolkien favors longer, flowing sentences with Anglo-Saxon cadence)
-- Vocabulary (archaic/formal register, nature imagery, compound words)
-- Narrative voice (omniscient, mythic tone, occasional direct address)
-- Dialogue style (formal, poetic, characters speak differently by race/status)
+- Sentence rhythm appropriate to the scene (plain travel, domestic comedy, elevated heroism, annal, lament)
+- Concrete landscape and material detail carrying history without a lore dump
+- Distinct dialogue by culture, rank, intimacy, education, and immediate purpose
+- Restraint around magic and invented archaic language
+- Absence of modern quips, therapeutic diction, RPG terminology, and film-only characterization
+- Originality: no recognizable source phrasing or close paraphrase
 
 Rate STYLE_MATCH from 1-10 where:
-- 10 = Indistinguishable from Tolkien
-- 7-9 = Clearly Tolkien-influenced, minor tells
-- 4-6 = Generic fantasy, not distinctly Tolkien
-- 1-3 = Clearly modern/wrong register
+- 10 = Original, controlled, culturally and situationally exact register
+- 7-9 = Strong register with minor generic or modern lapses
+- 4-6 = Generic fantasy or indiscriminately archaic
+- 1-3 = Modern, culturally inconsistent, derivative, or near-copying
 
 Respond in JSON:
 {{

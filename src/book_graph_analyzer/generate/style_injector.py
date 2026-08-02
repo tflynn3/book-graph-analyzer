@@ -38,11 +38,11 @@ class StyleInjector:
     ]
 
     STATIC_FALLBACK_BLOCK = """STYLE GUIDE (fallback):
-- Flowing, rhythmic prose with Anglo-Saxon cadence
-- Rich nature imagery and attention to landscape
-- Formal dialogue appropriate to each character's race and status
-- Mythic, omniscient narrative voice
-- Show don't tell - let actions and dialogue reveal character"""
+- Original high-fantasy prose with flowing, rhythmic sentences
+- Rich nature imagery and attention to landscape, weather, stone, light, and silence
+- Formal dialogue appropriate to each character's race, status, and story-era
+- Mythic, omniscient narrative voice grounded in the current scene
+- Do not quote, paraphrase, or continue source text; avoid modern idiom and placeholder names"""
 
     _SCENE_HINTS: dict[str, tuple[str, ...]] = {
         "battle": (

@@ -2,7 +2,9 @@
 
 import io
 import json
+import re
 import sys
+from collections import Counter, defaultdict
 from pathlib import Path
 
 # Fix Windows cp1252 encoding — ensure stdout/stderr always speak UTF-8
@@ -13,13 +15,27 @@ if hasattr(sys.stderr, "buffer") and getattr(sys.stderr, "encoding", "utf-8").lo
 
 import click
 from rich.console import Console
-from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn, TaskProgressColumn
+from rich.progress import BarColumn, Progress, SpinnerColumn, TaskProgressColumn, TextColumn
 from rich.table import Table
 
 from book_graph_analyzer import __version__
 from book_graph_analyzer.story_cli import story
 
 console = Console()
+
+
+def _top_unresolved_class_summary(counts: object, limit: int = 3) -> str:
+    if not isinstance(counts, dict):
+        return ""
+    items = [
+        (str(name), int(count))
+        for name, count in counts.items()
+        if count
+    ]
+    items.sort(key=lambda item: (-item[1], item[0]))
+    if not items:
+        return ""
+    return ", ".join(f"{name}={count}" for name, count in items[:limit])
 
 
 @click.group()
@@ -30,6 +46,66 @@ def main() -> None:
 
 
 main.add_command(story)
+
+
+@main.group()
+def draft() -> None:
+    """Draft revision and quality diagnostics."""
+    pass
+
+
+@draft.command(name="doctor")
+@click.argument("path", type=click.Path(exists=True, path_type=Path))
+@click.option("--profile", default="tolkien", show_default=True, help="Diagnostic profile to apply.")
+@click.option(
+    "--output",
+    "-o",
+    type=click.Path(dir_okay=False, path_type=Path),
+    help="JSON report path. A sibling Markdown report is written beside it.",
+)
+@click.option("--strict/--advisory", default=False, show_default=True, help="Exit nonzero when blocking draft issues remain.")
+@click.option("--min-chapter-words", type=int, default=None, help="Override profile minimum words per chapter.")
+@click.option("--min-scene-words", type=int, default=None, help="Override profile minimum words per scene.")
+@click.option("--min-total-words", type=int, default=None, help="Override profile minimum total draft words.")
+def draft_doctor(
+    path: Path,
+    profile: str,
+    output: Path | None,
+    strict: bool,
+    min_chapter_words: int | None,
+    min_scene_words: int | None,
+    min_total_words: int | None,
+) -> None:
+    """Analyze chapter markdown and emit a revision-oriented repair report."""
+    from book_graph_analyzer.draft_doctor import analyze_draft, write_report
+
+    report = analyze_draft(
+        path,
+        profile=profile,
+        min_chapter_words=min_chapter_words,
+        min_scene_words=min_scene_words,
+        min_total_words=min_total_words,
+    )
+    if output is None:
+        if path.is_dir():
+            output = path / "draft_doctor_report.json"
+        else:
+            output = path.with_name(f"{path.stem}_draft_doctor_report.json")
+    json_path, markdown_path = write_report(report, output)
+    summary = report["summary"]
+    console.print(
+        "[green]OK[/green] Draft doctor report written: "
+        f"{json_path} ({summary['issue_count']} issues; "
+        f"{summary['high_severity_count']} high severity)"
+    )
+    console.print(f"Markdown report: {markdown_path}")
+    validation = report.get("strict_validation", {})
+    if strict and not validation.get("pass"):
+        raise click.ClickException(
+            "Strict draft validation failed: "
+            f"{validation.get('blocking_issue_count', 0)} blocking issues remain. "
+            f"See {json_path}."
+        )
 
 
 @main.command()
@@ -434,7 +510,9 @@ def extract_relationships_cmd(
     """Extract relationships from a text file."""
     from collections import defaultdict
 
-    from book_graph_analyzer.extract import EntityExtractor, RelationshipExtractor
+    from book_graph_analyzer.extract import extract_book_graph
+    from book_graph_analyzer.ingest.loader import load_book
+    from book_graph_analyzer.ingest.splitter import split_into_passages
 
     file_path = Path(path)
     book_title = title or file_path.stem.replace("_", " ").replace("-", " ").title()
@@ -443,9 +521,17 @@ def extract_relationships_cmd(
     console.print(f"[dim]Source: {file_path}[/dim]")
     console.print(f"[dim]LLM: {'disabled' if no_llm else 'enabled'}[/dim]\n")
 
-    # First, extract entities
-    console.print("[bold]Step 1: Entity Extraction[/bold]")
-    entity_extractor = EntityExtractor(use_llm=not no_llm)
+    with console.status("Loading book..."):
+        text = load_book(file_path)
+
+    with console.status("Splitting into passages..."):
+        passages = split_into_passages(text, book_title)
+
+    if limit:
+        passages = passages[:limit]
+
+    console.print(f"  Passages queued: {len(passages):,}\n")
+    console.print("[bold]Running shared graph extraction pipeline[/bold]")
 
     with Progress(
         SpinnerColumn(),
@@ -454,53 +540,45 @@ def extract_relationships_cmd(
         TaskProgressColumn(),
         console=console,
     ) as progress:
-        task = progress.add_task("Extracting entities...", total=None)
-
-        def entity_progress(current: int, total: int) -> None:
-            progress.update(task, completed=current, total=total)
-
-        entity_results, entity_stats = entity_extractor.extract_from_file(
-            file_path,
-            book_title=book_title,
-            progress_callback=entity_progress,
+        task = progress.add_task(
+            "Extracting entities and relationships...",
+            total=len(passages),
         )
 
-    console.print(f"  Found {entity_stats.total_entities_resolved:,} resolved entities\n")
+        def update_progress(current: int, total: int, message: str) -> None:
+            progress.update(task, description=message, completed=current, total=total)
 
-    # Limit if requested
-    if limit:
-        entity_results = entity_results[:limit]
+        extraction = extract_book_graph(
+            passages,
+            use_llm=not no_llm,
+            progress_callback=update_progress,
+        )
 
-    # Now extract relationships
-    console.print("[bold]Step 2: Relationship Extraction[/bold]")
-    rel_extractor = RelationshipExtractor(
-        resolver=entity_extractor.resolver,
-        use_llm=not no_llm,
-    )
-
-    relationship_results = []
+    relationship_results = extraction.relationship_results
     rel_counts: dict[str, int] = defaultdict(int)
     total_relationships = 0
+    passages_with_relationships = 0
 
-    total_to_process = len(entity_results)
-    for i, rel_result in enumerate(rel_extractor.extract_from_results(entity_results)):
-        relationship_results.append(rel_result)
+    for rel_result in relationship_results:
+        if rel_result.relationships:
+            passages_with_relationships += 1
         for rel in rel_result.relationships:
             rel_counts[rel.predicate.value] += 1
             total_relationships += 1
-        
-        # Simple progress indicator every 100 passages
-        if (i + 1) % 100 == 0 or i + 1 == total_to_process:
-            console.print(f"  Processed {i + 1}/{total_to_process} passages, found {total_relationships} relationships")
+
+    console.print(f"  Unique entities: {extraction.unique_entity_count:,}")
+    console.print(f"  Resolved entity mentions: {extraction.resolved_mention_count:,}")
+    console.print(f"  Unresolved entity mentions: {extraction.unresolved_entity_count:,}\n")
 
     # Display results
-    console.print(f"\n[bold green]OK Extraction complete![/bold green]\n")
+    console.print("\n[bold green]OK Extraction complete![/bold green]\n")
 
     table = Table(title="Relationship Statistics")
     table.add_column("Metric", style="cyan")
     table.add_column("Value", style="green", justify="right")
 
-    table.add_row("Passages with 2+ entities", str(len(relationship_results)))
+    table.add_row("Passages processed", str(len(passages)))
+    table.add_row("Passages with relationships", str(passages_with_relationships))
     table.add_row("Total relationships found", str(total_relationships))
     table.add_row("Unique relationship types", str(len(rel_counts)))
 
@@ -534,7 +612,11 @@ def extract_relationships_cmd(
         output_data = {
             "book": book_title,
             "stats": {
-                "passages_processed": len(relationship_results),
+                "passages_processed": len(passages),
+                "passages_with_relationships": passages_with_relationships,
+                "unique_entities": extraction.unique_entity_count,
+                "resolved_entity_mentions": extraction.resolved_mention_count,
+                "unresolved_entity_mentions": extraction.unresolved_entity_count,
                 "total_relationships": total_relationships,
                 "relationship_counts": dict(rel_counts),
             },
@@ -560,7 +642,7 @@ def extract_relationships_cmd(
             ],
         }
 
-        with open(output_path, "w") as f:
+        with output_path.open("w", encoding="utf-8") as f:
             json.dump(output_data, f, indent=2)
 
         console.print(f"\n[green]OK[/green] Results saved to {output_path}")
@@ -633,7 +715,7 @@ def analyze(path: str, title: str | None, no_llm: bool, output: str | None) -> N
 
     console.print(f"[bold]Analyzing:[/bold] {book_title}")
     console.print(f"[dim]Source: {file_path}[/dim]")
-    console.print(f"[dim]Mode: Zero-seed generic extraction[/dim]")
+    console.print("[dim]Mode: Zero-seed generic extraction[/dim]")
     console.print(f"[dim]LLM: {'disabled' if no_llm else 'enabled'}[/dim]\n")
 
     extractor = GenericExtractor(use_llm=not no_llm)
@@ -656,7 +738,7 @@ def analyze(path: str, title: str | None, no_llm: bool, output: str | None) -> N
     )
 
     # Display results
-    console.print(f"\n[bold green]OK Analysis complete![/bold green]\n")
+    console.print("\n[bold green]OK Analysis complete![/bold green]\n")
 
     # Entity stats
     table = Table(title="Entity Statistics")
@@ -893,7 +975,6 @@ def style_batch(directory: str, author: str, pattern: str, output: str | None) -
         bga style batch data/texts/lotr-corpus/ -a "Tolkien" -p "*.txt" -o tolkien_combined.json
     """
     from book_graph_analyzer.style import StyleAnalyzer
-    import glob
     
     dir_path = Path(directory)
     files = list(dir_path.glob(pattern))
@@ -902,7 +983,7 @@ def style_batch(directory: str, author: str, pattern: str, output: str | None) -
         console.print(f"[red]No files matching '{pattern}' found in {directory}[/red]")
         return
     
-    console.print(f"[bold]Batch Style Analysis[/bold]")
+    console.print("[bold]Batch Style Analysis[/bold]")
     console.print(f"[dim]Author: {author}[/dim]")
     console.print(f"[dim]Files: {len(files)}[/dim]\n")
     
@@ -987,8 +1068,8 @@ def _generate_style_report(fingerprint) -> str:
     if fingerprint.sentence_length_dist:
         sl = fingerprint.sentence_length_dist
         lines.extend([
-            f"| Metric | Value |",
-            f"|--------|-------|",
+            "| Metric | Value |",
+            "|--------|-------|",
             f"| Mean sentence length | {sl.mean:.1f} words |",
             f"| Median | {sl.median:.1f} words |",
             f"| Range | {sl.min:.0f} - {sl.max:.0f} words |",
@@ -999,8 +1080,8 @@ def _generate_style_report(fingerprint) -> str:
     lines.extend([
         "## Style Characteristics",
         "",
-        f"| Characteristic | Percentage |",
-        f"|----------------|------------|",
+        "| Characteristic | Percentage |",
+        "|----------------|------------|",
         f"| Dialogue passages | {fingerprint.dialogue_ratio*100:.1f}% |",
         f"| Passive voice | {fingerprint.passive_voice_ratio*100:.1f}% |",
         f"| Questions | {fingerprint.question_ratio*100:.1f}% |",
@@ -1008,8 +1089,8 @@ def _generate_style_report(fingerprint) -> str:
         "",
         "## Readability",
         "",
-        f"| Metric | Score | Interpretation |",
-        f"|--------|-------|----------------|",
+        "| Metric | Score | Interpretation |",
+        "|--------|-------|----------------|",
         f"| Flesch Reading Ease | {fingerprint.flesch_reading_ease:.1f} | {_interpret_flesch(fingerprint.flesch_reading_ease)} |",
         f"| Flesch-Kincaid Grade | {fingerprint.flesch_kincaid_grade:.1f} | Grade {int(fingerprint.flesch_kincaid_grade)} reading level |",
         f"| Gunning Fog | {fingerprint.gunning_fog:.1f} | {int(fingerprint.gunning_fog)} years of education |",
@@ -1021,8 +1102,8 @@ def _generate_style_report(fingerprint) -> str:
         lines.extend([
             "## Vocabulary",
             "",
-            f"| Metric | Value |",
-            f"|--------|-------|",
+            "| Metric | Value |",
+            "|--------|-------|",
             f"| Unique words | {vp.unique_words:,} |",
             f"| Type-token ratio | {vp.type_token_ratio:.3f} |",
             f"| Average word length | {vp.avg_word_length:.2f} chars |",
@@ -1044,8 +1125,8 @@ def _generate_style_report(fingerprint) -> str:
         lines.extend([
             "## Passage Types",
             "",
-            f"| Type | Percentage |",
-            f"|------|------------|",
+            "| Type | Percentage |",
+            "|------|------------|",
         ])
         for ptype, ratio in sorted(fingerprint.passage_type_distribution.items(), key=lambda x: -x[1]):
             lines.append(f"| {ptype.title()} | {ratio*100:.1f}% |")
@@ -1113,13 +1194,13 @@ def voice_analyze(path: str, min_lines: int, output: str | None, verbose: bool) 
         result = analyzer.analyze_file(file_path)
     
     # Display results
-    console.print(f"\n[bold]Results:[/bold]")
+    console.print("\n[bold]Results:[/bold]")
     console.print(f"  Total dialogue lines: {result.total_dialogue_lines:,}")
     console.print(f"  Attribution rate: {result.attribution_rate*100:.1f}%")
     console.print(f"  Characters with profiles: {result.total_characters}")
     
     # Top speakers
-    console.print(f"\n[bold]Top Speakers:[/bold]")
+    console.print("\n[bold]Top Speakers:[/bold]")
     table = Table()
     table.add_column("Character", style="cyan")
     table.add_column("Lines", justify="right")
@@ -1167,7 +1248,7 @@ def voice_profile(results_path: str, character: str) -> None:
         # Try fuzzy match
         available = list(result.profiles.keys())
         console.print(f"[red]Character '{character}' not found.[/red]")
-        console.print(f"\nAvailable characters:")
+        console.print("\nAvailable characters:")
         for name in sorted(available):
             console.print(f"  - {name}")
         return
@@ -1231,7 +1312,7 @@ def voice_compare(results_path: str, char1: str, char2: str) -> None:
     console.print(f"\n[bold]Similarity Score:[/bold] {comparison['similarity_score']:.2f}")
     
     if comparison.get("shared_distinctive_words"):
-        console.print(f"\n[bold]Shared Distinctive Words:[/bold]")
+        console.print("\n[bold]Shared Distinctive Words:[/bold]")
         console.print(f"  {', '.join(comparison['shared_distinctive_words'])}")
 
 
@@ -1291,7 +1372,7 @@ def voice_identify(text: str, results: str | None, top: int) -> None:
         bga voice identify --text 'You shall not pass!'
         bga voice identify --text 'Precious, my precious.' --results hobbit_voices.json
     """
-    from book_graph_analyzer.voice import VoiceAnalyzer, VoiceAnalysisResult
+    from book_graph_analyzer.voice import VoiceAnalyzer
 
     analyzer = VoiceAnalyzer()
     
@@ -1300,8 +1381,6 @@ def voice_identify(text: str, results: str | None, top: int) -> None:
         profiles = result.profiles
     else:
         # Use built-in Tolkien character sketches for demo
-        from book_graph_analyzer.voice.profile import CharacterVoiceProfile
-        from collections import Counter
         
         # Bootstrap minimal profiles from known characteristics
         profiles = _build_demo_profiles()
@@ -1310,7 +1389,7 @@ def voice_identify(text: str, results: str | None, top: int) -> None:
         console.print("[red]No profiles available. Run 'bga voice analyze' first or provide --results.[/red]")
         return
     
-    console.print(f"\n[bold]Voice Identification[/bold]")
+    console.print("\n[bold]Voice Identification[/bold]")
     console.print(f'  Text: "{text[:100]}{"..." if len(text) > 100 else ""}"\n')
     
     candidates = analyzer.identify_speaker(text, profiles, top_n=top)
@@ -1485,19 +1564,19 @@ def pipeline_full(path: str, title: str | None, author: str, no_neo4j: bool, out
     Example:
         bga pipeline full data/texts/the_hobbit.txt -t "The Hobbit" -a "Tolkien" -o output/
     """
+    from book_graph_analyzer.extract import build_entity_id_map, extract_book_graph
+    from book_graph_analyzer.graph.connection import check_neo4j_connection
+    from book_graph_analyzer.graph.writer import GraphWriter
     from book_graph_analyzer.ingest.loader import load_book
     from book_graph_analyzer.ingest.splitter import split_into_passages
-    from book_graph_analyzer.extract import EntityExtractor, RelationshipExtractor
     from book_graph_analyzer.style import StyleAnalyzer
     from book_graph_analyzer.voice import VoiceAnalyzer
-    from book_graph_analyzer.graph.writer import GraphWriter
-    from book_graph_analyzer.graph.connection import check_neo4j_connection
 
     file_path = Path(path)
     book_title = title or file_path.stem.replace("_", " ").replace("-", " ").title()
     book_id = book_title.lower().replace(" ", "_").replace("'", "")
 
-    console.print(f"[bold]Full Analysis Pipeline[/bold]")
+    console.print("[bold]Full Analysis Pipeline[/bold]")
     console.print(f"  Book: {book_title}")
     console.print(f"  Author: {author}")
     console.print(f"  Source: {file_path}")
@@ -1505,9 +1584,9 @@ def pipeline_full(path: str, title: str | None, author: str, no_neo4j: bool, out
     # Check Neo4j
     neo4j_available = not no_neo4j and check_neo4j_connection()
     if not no_neo4j and not neo4j_available:
-        console.print(f"  [yellow]Neo4j not available - will save to JSON only[/yellow]")
+        console.print("  [yellow]Neo4j not available - will save to JSON only[/yellow]")
     elif neo4j_available:
-        console.print(f"  [green]Neo4j connected[/green]")
+        console.print("  [green]Neo4j connected[/green]")
     
     console.print()
 
@@ -1533,15 +1612,11 @@ def pipeline_full(path: str, title: str | None, author: str, no_neo4j: bool, out
     console.print(f"  Split into {len(passages):,} passages")
 
     # =========================================================================
-    # Phase 2-3: Entity & Relationship Extraction
+    # Phase 2-3: Entity, Relationship, and Proposition Extraction
     # =========================================================================
-    console.print("\n[bold]Phase 2-3: Entity & Relationship Extraction...[/bold]")
-    
-    extractor = EntityExtractor(use_llm=False)  # Fast mode
-    rel_extractor = RelationshipExtractor(resolver=extractor.resolver, use_llm=False)
-
-    entity_results = []
-    relationship_results = []
+    console.print(
+        "\n[bold]Phase 2-3: Entity, Relationship, and Proposition Extraction...[/bold]"
+    )
     
     with Progress(
         SpinnerColumn(),
@@ -1550,34 +1625,26 @@ def pipeline_full(path: str, title: str | None, author: str, no_neo4j: bool, out
         TaskProgressColumn(),
         console=console,
     ) as progress:
-        task = progress.add_task("Extracting entities...", total=len(passages))
-        
-        for passage in passages:
-            results = extractor.extract_from_passage(passage)
-            if results:
-                entity_results.append(results)
-                
-                # Extract relationships
-                rel_result = rel_extractor.extract_relationships(
-                    text=passage.text,
-                    passage_id=passage.id,
-                    entities=results.entities,
-                )
-                if rel_result.relationships:
-                    relationship_results.append(rel_result)
-            
-            progress.update(task, advance=1)
+        task = progress.add_task(
+            "Extracting entities, relationships, and propositions...",
+            total=len(passages),
+        )
 
-    # Count unique entities
-    entity_ids = set()
-    for result in entity_results:
-        for entity in result.entities:
-            if entity.canonical_id:
-                entity_ids.add(entity.canonical_id)
-    
-    total_rels = sum(len(r.relationships) for r in relationship_results)
-    console.print(f"  Unique entities: {len(entity_ids)}")
-    console.print(f"  Relationships: {total_rels}")
+        def _update_progress(current: int, total: int, message: str) -> None:
+            progress.update(task, description=message, completed=current, total=total)
+
+        extraction = extract_book_graph(
+            passages,
+            use_llm=False,
+            progress_callback=_update_progress,
+        )
+
+    entity_results = extraction.entity_results
+    relationship_results = extraction.relationship_results
+    proposition_results = extraction.proposition_results
+    console.print(f"  Unique entities: {extraction.unique_entity_count}")
+    console.print(f"  Relationships: {extraction.total_relationships}")
+    console.print(f"  Propositions: {extraction.total_propositions}")
 
     # =========================================================================
     # Phase 4: Style Analysis
@@ -1618,6 +1685,8 @@ def pipeline_full(path: str, title: str | None, author: str, no_neo4j: bool, out
     # =========================================================================
     # Write to Neo4j
     # =========================================================================
+    write_stats: dict[str, object] | None = None
+    voice_stats: dict[str, object] | None = None
     if neo4j_available:
         console.print("\n[bold]Writing to Neo4j...[/bold]")
         
@@ -1628,30 +1697,42 @@ def pipeline_full(path: str, title: str | None, author: str, no_neo4j: bool, out
         console.print("  Book style written")
 
         with console.status("Writing entities and relationships..."):
-            stats = writer.write_extraction_results(
+            write_stats = writer.write_extraction_results(
                 entity_results=entity_results,
                 relationship_results=relationship_results,
                 book=book_title,
+                proposition_results=proposition_results,
             )
-        console.print(f"  Entities: {stats['entities_written']}")
-        console.print(f"  Relationships: {stats['relationships_written']}")
+        console.print(f"  Unique entities: {write_stats['entities_written']}")
+        console.print(f"  Entity mentions: {write_stats['entity_mentions_written']}")
+        console.print(f"  Relationships: {write_stats['relationships_written']}")
+        console.print(f"  Propositions: {write_stats['propositions_written']}")
+        console.print(
+            f"  Proposition argument links: {write_stats['proposition_argument_links_written']}"
+        )
+        console.print(
+            f"  Unresolved references: {write_stats['unresolved_references_written']}"
+        )
+        breakdown = _top_unresolved_class_summary(write_stats.get("unresolved_reference_classes"))
+        if breakdown:
+            console.print(f"  Unresolved classes: {breakdown}")
 
-        # Build entity ID map for voice profiles
-        entity_map = {}
-        for result in entity_results:
-            for entity in result.entities:
-                if entity.canonical_id and entity.canonical_name:
-                    entity_map[entity.canonical_name] = entity.canonical_id
-                    # Also map extracted text
-                    entity_map[entity.extracted.text] = entity.canonical_id
+        entity_map = build_entity_id_map(entity_results)
 
         with console.status("Writing voice profiles..."):
             voice_stats = writer.write_voice_analysis_results(
                 voice_result=voice_result,
                 book_id=book_id,
                 entity_id_map=entity_map,
+                min_lines_for_profile=voice_analyzer.min_lines_for_profile,
             )
+        skipped_profiles = int(voice_stats.get("profiles_skipped_unmapped", 0) or 0)
+        merged_aliases = int(voice_stats.get("profiles_merged_aliases", 0) or 0)
         console.print(f"  Voice profiles: {voice_stats['profiles_written']}")
+        if skipped_profiles:
+            console.print(f"  Skipped unmatched voice profiles: {skipped_profiles}")
+        if merged_aliases:
+            console.print(f"  Merged speaker aliases: {merged_aliases}")
 
         writer.close()
 
@@ -1660,15 +1741,17 @@ def pipeline_full(path: str, title: str | None, author: str, no_neo4j: bool, out
     # =========================================================================
     console.print("\n[bold green]Pipeline Complete![/bold green]")
     console.print(f"\nOutput saved to: {out_path}")
-    console.print(f"  - style_fingerprint.json")
-    console.print(f"  - voice_profiles.json")
+    console.print("  - style_fingerprint.json")
+    console.print("  - voice_profiles.json")
     
-    if neo4j_available:
-        console.print(f"\nNeo4j populated with:")
-        console.print(f"  - Book node with style metrics")
-        console.print(f"  - {len(entity_ids)} entity nodes")
-        console.print(f"  - {total_rels} relationships")
-        console.print(f"  - {voice_result.total_characters} character voice profiles")
+    if neo4j_available and write_stats is not None:
+        console.print("\nNeo4j populated with:")
+        console.print("  - Book node with style metrics")
+        console.print(f"  - {write_stats['entities_written']} entity nodes")
+        console.print(f"  - {write_stats['relationships_written']} relationships")
+        console.print(f"  - {write_stats['propositions_written']} proposition nodes")
+        written_profiles = int(voice_stats.get("profiles_written", 0) or 0) if voice_stats else 0
+        console.print(f"  - {written_profiles} character voice profiles")
 
 
 # ============================================================================
@@ -1750,8 +1833,7 @@ def corpus_process(corpus_name: str, book: str | None, skip_processed: bool, no_
         bga corpus process tolkien_works -b the_hobbit
     """
     from book_graph_analyzer.corpus import CorpusManager, CrossBookResolver
-    from book_graph_analyzer.extract.dynamic_resolver import DynamicEntityResolver
-    from book_graph_analyzer.extract.ner import NERPipeline
+    from book_graph_analyzer.extract import build_entity_clusters, build_entity_id_map, extract_book_graph
     from book_graph_analyzer.ingest.loader import load_book
     from book_graph_analyzer.ingest.splitter import split_into_passages
     from book_graph_analyzer.style import StyleAnalyzer
@@ -1782,10 +1864,11 @@ def corpus_process(corpus_name: str, book: str | None, skip_processed: bool, no_
     neo4j_ok = check_neo4j_connection()
     if neo4j_ok:
         writer = GraphWriter()
-    
-    # Initialize NER pipeline once
-    ner_pipeline = NERPipeline(use_llm=not no_llm)
-    
+        corpus_voice_lines: dict[str, list] = defaultdict(list)
+        corpus_voice_names: dict[str, Counter[str]] = defaultdict(Counter)
+        corpus_voice_skipped = 0
+        corpus_voice_aliases = 0
+
     for book_info in books_to_process:
         console.print(f"\n[bold cyan]>>> {book_info.title}[/bold cyan]")
         
@@ -1794,28 +1877,39 @@ def corpus_process(corpus_name: str, book: str | None, skip_processed: bool, no_
         passages = split_into_passages(text, book_info.title)
         console.print(f"  Loaded {len(text):,} chars, {len(passages):,} passages")
         
-        # Entity extraction using DynamicEntityResolver (per-book)
-        dynamic_resolver = DynamicEntityResolver(use_llm=not no_llm)
-        
-        entity_ids = set()
-        
-        with console.status("Extracting entities..."):
-            for passage in passages:
-                ner_entities = ner_pipeline.extract_entities(passage.text)
-                for entity in ner_entities:
-                    cluster = dynamic_resolver.process_mention(
-                        entity=entity,
-                        passage_id=passage.id,
-                        passage_text=passage.text,
-                    )
-                    entity_ids.add(cluster.id)
-        
-        # Consolidate within-book aliases
-        merge_count = dynamic_resolver.consolidate_clusters()
-        console.print(f"  Extracted {len(dynamic_resolver.clusters)} unique entities ({merge_count} alias merges)")
-        
-        # Register book's entities with cross-book resolver
-        cross_resolver.register_book_entities(book_info.id, dynamic_resolver.clusters)
+        with Progress(
+            SpinnerColumn(),
+            TextColumn("[progress.description]{task.description}"),
+            BarColumn(),
+            TaskProgressColumn(),
+            console=console,
+        ) as progress:
+            task = progress.add_task(
+                "Extracting entities, relationships, and propositions...",
+                total=len(passages),
+            )
+
+            def _update_progress(current: int, total: int, message: str) -> None:
+                progress.update(task, description=message, completed=current, total=total)
+
+            extraction = extract_book_graph(
+                passages,
+                use_llm=not no_llm,
+                progress_callback=_update_progress,
+            )
+
+        entity_results = extraction.entity_results
+        relationship_results = extraction.relationship_results
+        proposition_results = extraction.proposition_results
+        book_clusters = build_entity_clusters(entity_results)
+        console.print(
+            "  Extracted "
+            f"{extraction.unique_entity_count} unique entities, "
+            f"{extraction.total_relationships} relationships, "
+            f"{extraction.total_propositions} propositions"
+        )
+
+        cross_resolver.register_book_entities(book_info.id, book_clusters)
         
         # Style analysis
         style_analyzer = StyleAnalyzer()
@@ -1827,24 +1921,61 @@ def corpus_process(corpus_name: str, book: str | None, skip_processed: bool, no_
         voice_result = voice_analyzer.analyze_text(text)
         console.print(f"  Voice: {voice_result.total_dialogue_lines} lines, {voice_result.total_characters} profiles")
         
+        # Write to Neo4j
+        stats: dict[str, object] = {}
+        if neo4j_ok:
+            writer.write_book_style(book_info.id, book_info.title, manager.corpus.author, fingerprint)
+            stats = writer.write_extraction_results(
+                entity_results=entity_results,
+                relationship_results=relationship_results,
+                book=book_info.title,
+                proposition_results=proposition_results,
+            )
+            entity_map = build_entity_id_map(entity_results)
+            grouped_voice = writer._group_voice_lines_by_entity(
+                voice_result=voice_result,
+                entity_id_map=entity_map,
+            )
+            if grouped_voice is not None:
+                for char_id, lines in grouped_voice["lines_by_character"].items():
+                    corpus_voice_lines[char_id].extend(lines)
+                    corpus_voice_names[char_id].update(grouped_voice["names_by_character"][char_id])
+                corpus_voice_skipped += int(grouped_voice["profiles_skipped_unmapped"])
+                corpus_voice_aliases += int(grouped_voice["profiles_merged_aliases"])
+            console.print(
+                "  Graph write: "
+                f"{stats['entities_written']} entities, "
+                f"{stats['relationships_written']} relationships, "
+                f"{stats['propositions_written']} propositions, "
+                f"{stats['unresolved_references_written']} unresolved references"
+            )
+            skipped_profiles = int(grouped_voice["profiles_skipped_unmapped"]) if grouped_voice is not None else 0
+            merged_aliases = int(grouped_voice["profiles_merged_aliases"]) if grouped_voice is not None else 0
+            if skipped_profiles:
+                console.print(f"  Skipped unmatched voice profiles: {skipped_profiles}")
+            if merged_aliases:
+                console.print(f"  Merged speaker aliases: {merged_aliases}")
+            breakdown = _top_unresolved_class_summary(stats.get("unresolved_reference_classes"))
+            if breakdown:
+                console.print(f"  Unresolved classes: {breakdown}")
+
         # Update book stats
         manager.update_book_stats(
             book_id=book_info.id,
             total_words=fingerprint.total_word_count,
             total_passages=len(passages),
-            entity_count=len(dynamic_resolver.clusters),
-            relationship_count=0,  # TODO: Add relationship extraction
+            entity_count=extraction.unique_entity_count,
+            relationship_count=extraction.total_relationships,
+            proposition_count=extraction.total_propositions,
+            unresolved_reference_count=int(stats.get("unresolved_references_written", 0) or 0),
+            unresolved_reference_classes=stats.get("unresolved_reference_classes") if isinstance(stats.get("unresolved_reference_classes"), dict) else {},
             dialogue_lines=voice_result.total_dialogue_lines,
             character_profiles=voice_result.total_characters,
             avg_sentence_length=fingerprint.sentence_length_dist.mean if fingerprint.sentence_length_dist else 0,
             flesch_kincaid_grade=fingerprint.flesch_kincaid_grade,
         )
         
-        # Write to Neo4j
-        if neo4j_ok:
-            writer.write_book_style(book_info.id, book_info.title, manager.corpus.author, fingerprint)
-        
-        console.print(f"  [green]OK[/green] Processed")
+        console.print("  [green]OK[/green] Processed")
     
     # Resolve cross-book entities
     console.print("\n[bold]Resolving cross-book entities...[/bold]")
@@ -1853,9 +1984,23 @@ def corpus_process(corpus_name: str, book: str | None, skip_processed: bool, no_
     console.print(f"  Merged across books: {resolution_stats['merged_entities']}")
     
     if neo4j_ok:
+        grouped_voice = {
+            "lines_by_character": corpus_voice_lines,
+            "names_by_character": corpus_voice_names,
+            "profiles_skipped_unmapped": corpus_voice_skipped,
+            "profiles_merged_aliases": corpus_voice_aliases,
+        }
+        merged_voice_profiles = writer._profiles_from_grouped_voice_lines(
+            grouped_voice=grouped_voice,
+            min_lines_for_profile=3,
+        )
+        for char_id, profile in merged_voice_profiles.items():
+            writer.write_character_voice(char_id, profile)
+        if merged_voice_profiles:
+            console.print(f"  Wrote {len(merged_voice_profiles)} merged voice profiles")
         writer.close()
     
-    console.print(f"\n[bold green]Corpus processing complete![/bold green]")
+    console.print("\n[bold green]Corpus processing complete![/bold green]")
     console.print(cross_resolver.summary())
 
 
@@ -1964,7 +2109,7 @@ def corpus_events(corpus_name: str, output: str | None, neo4j: bool, chunk_size:
         bga corpus events tolkien_works --neo4j
     """
     from book_graph_analyzer.corpus import CorpusManager
-    from book_graph_analyzer.lore import EventExtractor, EventGraph, Event, EventRelation
+    from book_graph_analyzer.lore import EventExtractor, EventGraph, EventRelation
     from book_graph_analyzer.ingest.loader import load_book
     from book_graph_analyzer.llm import LLMClient
     
@@ -2113,7 +2258,7 @@ def corpus_events(corpus_name: str, output: str | None, neo4j: bool, chunk_size:
     console.print(f"  Cross-book relations added: {cross_book_relations}")
     
     # Summary
-    console.print(f"\n[bold]Unified Event Graph:[/bold]")
+    console.print("\n[bold]Unified Event Graph:[/bold]")
     console.print(f"  Total events: {len(unified_graph.events)}")
     console.print(f"  Total relations: {len(unified_graph.relations)}")
     
@@ -2123,7 +2268,7 @@ def corpus_events(corpus_name: str, output: str | None, neo4j: bool, chunk_size:
         book = event.source_book or "Unknown"
         by_book[book] = by_book.get(book, 0) + 1
     
-    console.print(f"\n[bold]Events by book:[/bold]")
+    console.print("\n[bold]Events by book:[/bold]")
     for book, count in sorted(by_book.items()):
         console.print(f"  {book}: {count}")
     
@@ -2156,7 +2301,7 @@ def corpus_events(corpus_name: str, output: str | None, neo4j: bool, chunk_size:
         console.print(f"  Events written: {stats['events_written']}")
         console.print(f"  Relations written: {stats['relations_written']}")
         console.print(f"  Entity links created: {stats['entity_links']}")
-        console.print(f"[green]OK[/green] Events written to Neo4j")
+        console.print("[green]OK[/green] Events written to Neo4j")
 
 
 # ============================================================================
@@ -2184,7 +2329,7 @@ def worldbible_extract(path: str, world: str, use_llm: bool, output: str | None)
     
     file_path = Path(path)
     
-    console.print(f"[bold]World Bible Extraction[/bold]")
+    console.print("[bold]World Bible Extraction[/bold]")
     console.print(f"  World: {world}")
     console.print(f"  Source: {file_path.name}")
     console.print(f"  Mode: {'LLM-assisted' if use_llm else 'Keyword-based'}")
@@ -2394,9 +2539,9 @@ def lore_check(claim: str, bible: str | None, corpus: str | None, timeline: str 
     
     if neo4j:
         if checker.connect_neo4j():
-            console.print(f"[dim]Connected to Neo4j[/dim]")
+            console.print("[dim]Connected to Neo4j[/dim]")
         else:
-            console.print(f"[yellow]Could not connect to Neo4j[/yellow]")
+            console.print("[yellow]Could not connect to Neo4j[/yellow]")
     
     if not bible and not corpus and not timeline and not events and not neo4j:
         console.print("[yellow]Warning: No knowledge base loaded. Results will be limited.[/yellow]")
@@ -2486,12 +2631,12 @@ def lore_events(path: str, output: str, neo4j: bool, chunk_size: int, no_llm: bo
             )
     
     # Summary
-    console.print(f"\n[bold]Events extracted:[/bold]")
+    console.print("\n[bold]Events extracted:[/bold]")
     console.print(f"  Events: {len(graph.events)}")
     console.print(f"  Temporal relations: {len(graph.relations)}")
     
     if graph.events:
-        console.print(f"\n[bold]Sample events:[/bold]")
+        console.print("\n[bold]Sample events:[/bold]")
         for event in list(graph.events.values())[:10]:
             time_info = ""
             if event.year:
@@ -2501,7 +2646,7 @@ def lore_events(path: str, output: str, neo4j: bool, chunk_size: int, no_llm: bo
             console.print(f"  - {event.description}{time_info}")
     
     if graph.relations:
-        console.print(f"\n[bold]Sample temporal relations:[/bold]")
+        console.print("\n[bold]Sample temporal relations:[/bold]")
         for rel in graph.relations[:5]:
             e1 = graph.events.get(rel.event1_id, None)
             e2 = graph.events.get(rel.event2_id, None)
@@ -2556,7 +2701,7 @@ def lore_events(path: str, output: str, neo4j: bool, chunk_size: int, no_llm: bo
         console.print(f"  Events written: {stats['events_written']}")
         console.print(f"  Relations written: {stats['relations_written']}")
         console.print(f"  Entity links created: {stats['entity_links']}")
-        console.print(f"[green]OK[/green] Events written to Neo4j")
+        console.print("[green]OK[/green] Events written to Neo4j")
 
     if checkpoint and (not neo4j or neo4j_write_succeeded):
         extractor.finalize_checkpoint(checkpoint)
@@ -2649,12 +2794,12 @@ def lore_timeline(path: str, output: str) -> None:
         timeline = extractor.extract_from_text(text)
     
     # Summary
-    console.print(f"\n[bold]Timeline extracted:[/bold]")
+    console.print("\n[bold]Timeline extracted:[/bold]")
     console.print(f"  Entities: {len(timeline.entities)}")
     console.print(f"  Relations: {len(timeline.relations)}")
     
     if timeline.entities:
-        console.print(f"\n[bold]Sample entities:[/bold]")
+        console.print("\n[bold]Sample entities:[/bold]")
         for name, entity in list(timeline.entities.items())[:10]:
             era_info = ""
             if entity.birth_era:
@@ -2716,7 +2861,7 @@ def lore_validate(text_file: str, bible: str, corpus: str | None, output: str | 
     
     # Show issues
     if invalid > 0:
-        console.print(f"\n[bold red]Issues Found:[/bold red]")
+        console.print("\n[bold red]Issues Found:[/bold red]")
         for r in results:
             if r.status.value == "invalid":
                 console.print(r.summary())
@@ -2781,7 +2926,6 @@ def lore_weight(
         bga lore weight --text "Bilbo found a ring" --is-dialogue --themes
     """
     from book_graph_analyzer.lore.narrative_weight import NarrativeWeightComputer
-    from book_graph_analyzer.models.narrative_weight import TOLKIEN_THEMES
 
     computer = NarrativeWeightComputer()
 
@@ -3358,7 +3502,7 @@ def lore_arc(character: str, year: int | None) -> None:
 
     if not arc:
         console.print(f"[red]No canonical arc found for '{character}'.[/red]")
-        console.print(f"\n[bold]Characters with registered arcs:[/bold]")
+        console.print("\n[bold]Characters with registered arcs:[/bold]")
         for name in validator.all_characters():
             console.print(f"  {name}")
         return
@@ -3433,7 +3577,7 @@ def lore_validate_arc(
         bga lore validate-arc --character Sam --story-year 3019 --generated-state 'resolute'
     """
     from book_graph_analyzer.lore.emotional_arc import (
-        EmotionalArcValidator, extract_emotional_state_from_text
+        EmotionalArcValidator
     )
 
     validator = EmotionalArcValidator()
@@ -3451,9 +3595,9 @@ def lore_validate_arc(
         console.print(f"\n[bold]Arc Validation:[/bold] {character} at TA {story_year}\n")
         console.print(f"  Extracted register: [cyan]{detected_register}[/cyan]")
         if is_valid:
-            console.print(f"  [bold green]✓ PASS[/bold green]")
+            console.print("  [bold green]✓ PASS[/bold green]")
         else:
-            console.print(f"  [bold red]✗ VIOLATION[/bold red]")
+            console.print("  [bold red]✗ VIOLATION[/bold red]")
         console.print(f"\n  {explanation}")
     else:
         is_valid, explanation = validator.validate_arc(
@@ -3464,9 +3608,9 @@ def lore_validate_arc(
         console.print(f"\n[bold]Arc Validation:[/bold] {character} at TA {story_year}\n")
         console.print(f"  Proposed register: [cyan]{generated_state}[/cyan]")
         if is_valid:
-            console.print(f"  [bold green]✓ PASS[/bold green]")
+            console.print("  [bold green]✓ PASS[/bold green]")
         else:
-            console.print(f"  [bold red]✗ VIOLATION[/bold red]")
+            console.print("  [bold red]✗ VIOLATION[/bold red]")
         console.print(f"\n  {explanation}")
 
     # Show the expected checkpoint
@@ -3476,7 +3620,7 @@ def lore_validate_arc(
         console.print(f"  Valid: {cp.valid_registers}")
         if cp.invalid_registers:
             console.print(f"  [red]Invalid: {cp.invalid_registers}[/red]")
-        console.print(f"[/dim]")
+        console.print("[/dim]")
 
 
 @lore.command(name="sentiment")
@@ -3793,7 +3937,7 @@ def lore_rules_list(category: str | None, hardness: str | None, neo4j: bool) -> 
         bga lore rules list --hardness HARD
         bga lore rules list --neo4j
     """
-    from book_graph_analyzer.lore.rules import LoreRuleRegistry, LoreRuleNeo4jWriter, TOLKIEN_LORE_RULES
+    from book_graph_analyzer.lore.rules import LoreRuleRegistry, LoreRuleNeo4jWriter
     from book_graph_analyzer.graph.connection import check_neo4j_connection
 
     if neo4j:
@@ -3881,7 +4025,7 @@ def lore_rules_show(rule_id: str) -> None:
         console.print(f"[bold]Era scope:[/bold] {rule.scope_era}")
 
     if rule.cypher_check:
-        console.print(f"\n[bold]Cypher check:[/bold]")
+        console.print("\n[bold]Cypher check:[/bold]")
         console.print(f"[dim]{rule.cypher_check}[/dim]")
     else:
         console.print("\n[dim]No Cypher check defined (cultural/contextual rule).[/dim]")
@@ -4035,18 +4179,19 @@ def lore_validate_scene(
             console.print("[red]Cannot connect to Neo4j.[/red]")
             return
         console.print(f"[bold]Validating scene:[/bold] {scene_id} (via Neo4j Cypher checks)\n")
-        result = validator.validate_scene_neo4j(scene_id)
+        result = validator.validate_scene_neo4j(scene_id, categories=cats)
     elif text:
         console.print(f"[bold]Validating text:[/bold] \"{text[:80]}{'...' if len(text)>80 else ''}\"\n")
         result = validator.validate_text(
             text=text,
             scene_id=scene_id or "inline",
             story_era=era,
+            categories=cats,
         )
     elif scene_id:
         console.print("[yellow]No --neo4j flag — running offline heuristic validation.[/yellow]")
         console.print("[dim]For Cypher-based validation, add --neo4j[/dim]\n")
-        result = validator.validate_text(scene_id, scene_id, era)
+        result = validator.validate_text(scene_id, scene_id, era, categories=cats)
     else:
         console.print("[red]Cannot validate: provide --text or --scene-id --neo4j[/red]")
         return
@@ -4679,7 +4824,7 @@ def generate_scene(
     console.print(f"Word count: {scene.word_count}")
     console.print(f"Revisions: {scene.revision_count}")
     
-    console.print(f"\n[bold]Scores:[/bold]")
+    console.print("\n[bold]Scores:[/bold]")
     console.print(f"  Overall: {scene.scores.overall:.0%}")
     console.print(f"  Lore: {scene.scores.lore_score:.0%}")
     console.print(f"  Style: {scene.scores.style_score:.0%}")
@@ -4690,11 +4835,11 @@ def generate_scene(
     console.print(f"    - Imagery: {scene.scores.imagery:.0%}")
     
     if scene.critique_notes:
-        console.print(f"\n[bold]Notes:[/bold]")
+        console.print("\n[bold]Notes:[/bold]")
         for note in scene.critique_notes[:5]:
             console.print(f"  - {note[:100]}...")
     
-    console.print(f"\n[bold]Text:[/bold]")
+    console.print("\n[bold]Text:[/bold]")
     console.print("-" * 60)
     console.print(scene.text)
     console.print("-" * 60)
@@ -5105,7 +5250,7 @@ def embed_build(
 
     # Show store stats
     stats = store.stats()
-    console.print(f"\n[bold]Vector store totals:[/bold]")
+    console.print("\n[bold]Vector store totals:[/bold]")
     for col, count in stats.items():
         console.print(f"  {col}: {count:,}")
 
@@ -6229,6 +6374,7 @@ def lore_unresolved_refs(book: str | None, limit: int) -> None:
     table.add_column("ID", style="dim", width=24)
     table.add_column("Mention", style="cyan")
     table.add_column("Type")
+    table.add_column("Class")
     table.add_column("Book", style="dim")
     table.add_column("Score", justify="right")
     table.add_column("Top Candidate", style="magenta")
@@ -6243,11 +6389,175 @@ def lore_unresolved_refs(book: str | None, limit: int) -> None:
             r.get("id", "")[:24],
             r.get("mention_text", "")[:50],
             r.get("expected_type") or "-",
+            r.get("reference_class") or "-",
             r.get("source_book") or "-",
             f"{score:.2f}",
             top,
         )
     console.print(table)
+
+
+@lore.command(name="resolve-unresolved")
+@click.option("--book", "book", default=None, help="Filter by source book")
+@click.option("--limit", "limit", default=50, type=int, show_default=True, help="Max unresolved refs to process")
+@click.option("--model", default="Qwen/Qwen2.5-72B-Instruct", show_default=True, help="Hosted model to use")
+@click.option("--provider", default="auto", show_default=True, help="Hugging Face provider routing hint")
+@click.option("--timeout", default=180.0, show_default=True, type=float, help="Per-request timeout in seconds")
+@click.option("--prompt-prefix", default="", help="Optional prompt prefix (for /no_think style model controls)")
+@click.option("--candidate-limit", default=6, show_default=True, type=int, help="Max existing candidates shown to the model")
+@click.option("--apply-existing/--suggest-only", default=True, show_default=True, help="Auto-apply safe existing-character matches")
+@click.option(
+    "--include-reviewed/--skip-reviewed",
+    default=False,
+    show_default=True,
+    help="Reprocess unresolved refs that already have llm_resolution_* audit state",
+)
+@click.option("--json-out", "json_out", default="", help="Optional JSON report path")
+def lore_resolve_unresolved(
+    book: str | None,
+    limit: int,
+    model: str,
+    provider: str,
+    timeout: float,
+    prompt_prefix: str,
+    candidate_limit: int,
+    apply_existing: bool,
+    include_reviewed: bool,
+    json_out: str,
+) -> None:
+    """Run a staged hosted-model pass over the live unresolved-reference queue."""
+    from book_graph_analyzer.graph.writer import GraphWriter
+    from book_graph_analyzer.lore.unresolved_resolution import (
+        StagedHFUnresolvedResolver,
+        build_inventory_entities,
+        is_character_like_reference,
+    )
+
+    writer = GraphWriter()
+    inventory_rows = writer.query_character_inventory()
+    inventory = build_inventory_entities(inventory_rows)
+    if not inventory:
+        writer.close()
+        raise click.ClickException("No Character inventory found in Neo4j. Rebuild the graph first.")
+
+    fetch_limit = max(limit * 25, 500)
+    queue_rows = writer.query_unresolved_reference_queue(source_book=book, limit=fetch_limit)
+    if not include_reviewed:
+        queue_rows = [
+            row
+            for row in queue_rows
+            if not str(row.get("llm_resolution_action") or "").strip()
+        ]
+    queue_rows = [row for row in queue_rows if is_character_like_reference(row)]
+    queue_rows = queue_rows[:limit]
+
+    if not queue_rows:
+        writer.close()
+        console.print("[yellow]No character-like unresolved references found.[/yellow]")
+        return
+
+    resolver = StagedHFUnresolvedResolver(
+        model=model,
+        provider=provider,
+        timeout=timeout,
+        prompt_prefix=prompt_prefix,
+        candidate_limit=candidate_limit,
+    )
+    suggestions = resolver.resolve_batch(queue_rows, inventory, apply_existing=apply_existing)
+    applied = sum(1 for suggestion in suggestions if suggestion.applied and suggestion.entity_id)
+    writer.write_unresolved_resolution_suggestions(
+        [suggestion.to_write_payload() for suggestion in suggestions]
+    )
+    writer.close()
+
+    action_counts: Counter[str] = Counter(suggestion.action for suggestion in suggestions)
+    table = Table(title=f"Hosted Unresolved Resolution ({len(suggestions)})")
+    table.add_column("Mention", style="cyan")
+    table.add_column("Book", style="dim")
+    table.add_column("Action")
+    table.add_column("Entity", style="magenta")
+    table.add_column("Applied", justify="center")
+    for suggestion in suggestions[:20]:
+        table.add_row(
+            suggestion.mention_text[:40],
+            (suggestion.source_book or "-")[:18],
+            suggestion.action,
+            suggestion.entity_name or "-",
+            "yes" if suggestion.applied and suggestion.entity_id else "-",
+        )
+    console.print(table)
+    console.print(
+        "  "
+        f"existing={action_counts.get('existing', 0)} "
+        f"new_entity={action_counts.get('new_entity', 0)} "
+        f"reject={action_counts.get('reject', 0)} "
+        f"skipped={action_counts.get('skipped', 0)}"
+    )
+    console.print(f"  Applied existing matches: [green]{applied}[/green]")
+
+    if json_out:
+        payload = {
+            "model": model,
+            "provider": provider,
+            "book": book,
+            "limit": limit,
+            "apply_existing": apply_existing,
+            "processed": len(suggestions),
+            "applied": applied,
+            "results": [suggestion.to_write_payload() for suggestion in suggestions],
+        }
+        Path(json_out).write_text(json.dumps(payload, indent=2), encoding="utf-8")
+        console.print(f"[green]OK[/green] Saved resolution report to {json_out}")
+
+
+@lore.command(name="materialize-unresolved")
+@click.option("--limit", default=500, show_default=True, type=int, help="Max reviewed new-entity suggestions to scan")
+@click.option("--min-support", default=2, show_default=True, type=int, help="Minimum repeated suggestions required to materialize")
+@click.option("--min-score", default=0.6, show_default=True, type=float, help="Minimum average hosted-model score")
+@click.option("--json-out", "json_out", default="", help="Optional JSON report path")
+def lore_materialize_unresolved(limit: int, min_support: int, min_score: float, json_out: str) -> None:
+    """Materialize repeated hosted new-entity suggestions into Character nodes."""
+    from book_graph_analyzer.graph.writer import GraphWriter
+    from book_graph_analyzer.lore.unresolved_resolution import group_materializable_new_entity_suggestions
+
+    writer = GraphWriter()
+    rows = writer.query_llm_new_entity_suggestions(limit=limit)
+    candidates = group_materializable_new_entity_suggestions(
+        rows,
+        min_support=min_support,
+        min_score=min_score,
+    )
+    materialized = writer.materialize_llm_character_suggestions(candidates)
+    writer.close()
+
+    if not candidates:
+        console.print("[yellow]No materializable hosted new-entity suggestions found.[/yellow]")
+        return
+
+    table = Table(title=f"Materialized Hosted Characters ({materialized})")
+    table.add_column("Character", style="cyan")
+    table.add_column("Support", justify="right")
+    table.add_column("Avg Score", justify="right")
+    table.add_column("Aliases", style="magenta")
+    for candidate in candidates[:20]:
+        table.add_row(
+            str(candidate["canonical_name"]),
+            str(candidate["support"]),
+            f"{float(candidate['avg_score']):.2f}",
+            ", ".join(candidate["aliases"][:3]) or "-",
+        )
+    console.print(table)
+
+    if json_out:
+        payload = {
+            "limit": limit,
+            "min_support": min_support,
+            "min_score": min_score,
+            "materialized": materialized,
+            "results": candidates,
+        }
+        Path(json_out).write_text(json.dumps(payload, indent=2), encoding="utf-8")
+        console.print(f"[green]OK[/green] Saved materialization report to {json_out}")
 
 
 @lore.command(name="genealogy")
@@ -6281,9 +6591,6 @@ def lore_genealogy(
     from book_graph_analyzer.worldbible.genealogy import (
         extract_genealogy_from_text,
         load_genealogy_from_file,
-        genealogy_to_json,
-        build_ancestor_chain,
-        build_descendant_tree,
     )
 
     relations: list = []
@@ -6414,8 +6721,7 @@ def corpus_timeline_reconcile(
     """
     from book_graph_analyzer.corpus import CorpusManager
     from book_graph_analyzer.spatiotemporal import (
-        CorpusReconciler, LocationNode, LocationEdge, SpatiotemporalEvent,
-        TemporalGroundingGate,
+        CorpusReconciler, LocationNode, LocationEdge, TemporalGroundingGate,
     )
 
     manager = CorpusManager(corpus_name)
@@ -6784,7 +7090,7 @@ def pipeline_worldbuilding(path: str, title: str | None, pillars: tuple[str], ou
     out_dir = Path(output_dir) if output_dir else Path("data/output")
     out_dir.mkdir(parents=True, exist_ok=True)
 
-    console.print(f"[bold]World-Building Pipeline[/bold]")
+    console.print("[bold]World-Building Pipeline[/bold]")
     console.print(f"  Source: {path}")
     console.print(f"  Title: {book_title}")
     console.print(f"  Pillars: {', '.join(selected)}")
@@ -6970,4 +7276,3 @@ def workflow_post_open_failures_summary(
 
 if __name__ == "__main__":
     main()
-

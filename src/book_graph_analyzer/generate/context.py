@@ -64,21 +64,38 @@ class AssembledContext:
             "character_states": [
                 {
                     "name": s.name,
+                    "story_id": s.story_id,
                     "location": s.location,
-                    "possessions": s.possessions,
-                    "conditions": s.conditions,
+                    "possessions": list(s.possessions),
+                    "conditions": list(s.conditions),
+                    "last_scene": s.last_scene,
                 }
                 for s in self.character_states
             ],
-            "recent_summaries": self.recent_summaries,
-            "place_facts": self.place_facts,
-            "active_plot_threads": self.active_plot_threads,
+            "recent_summaries": list(self.recent_summaries),
+            "place_facts": dict(self.place_facts),
+            "active_plot_threads": list(self.active_plot_threads),
         }
 
     @classmethod
     def from_dict(cls, data: dict) -> "AssembledContext":
+        character_states = []
+        for state in data.get("character_states", []):
+            if not isinstance(state, dict) or not state.get("name"):
+                continue
+            character_states.append(
+                CharacterState(
+                    name=str(state["name"]),
+                    story_id=str(state.get("story_id") or ""),
+                    location=state.get("location"),
+                    possessions=list(state.get("possessions") or []),
+                    conditions=list(state.get("conditions") or []),
+                    last_scene=str(state.get("last_scene") or ""),
+                )
+            )
+
         return cls(
-            character_states=[],
+            character_states=character_states,
             recent_summaries=list(data.get("recent_summaries", [])),
             place_facts=dict(data.get("place_facts", {})),
             active_plot_threads=list(data.get("active_plot_threads", [])),
@@ -100,10 +117,19 @@ class ContextAssembler:
         chapter_num: int,
         scene_num: int,
     ) -> AssembledContext:
-        _ = scene_num  # reserved for future ranking and retrieval
-
         shadow = self._resolve_shadow_graph(story_id)
-        scene_state = shadow.get_scene_state(characters=characters, place=place) if shadow else None
+        chapter_boundary = chapter_num if chapter_num > 0 else None
+        scene_boundary = scene_num if chapter_boundary is not None and scene_num > 0 else None
+        scene_state = (
+            shadow.get_scene_state(
+                characters=characters,
+                place=place,
+                chapter_num=chapter_boundary,
+                scene_num=scene_boundary,
+            )
+            if shadow
+            else None
+        )
 
         return AssembledContext(
             character_states=(scene_state.characters if scene_state else []),
@@ -129,8 +155,8 @@ class ContextAssembler:
             result = session.run(
                 """
                 MATCH (p:Place)
-                WHERE toLower(p.name) CONTAINS toLower($name)
-                RETURN p.name as name,
+                WHERE toLower(coalesce(p.name, p.canonical_name, '')) CONTAINS toLower($name)
+                RETURN coalesce(p.name, p.canonical_name) as name,
                        p.description as description,
                        p.region as region,
                        p.type as type,

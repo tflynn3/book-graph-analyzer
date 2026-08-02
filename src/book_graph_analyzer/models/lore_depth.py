@@ -5,6 +5,8 @@ from __future__ import annotations
 from enum import Enum
 from pydantic import BaseModel, Field
 
+from .propositions import ReferenceClass
+
 
 class LoreArtifactType(str, Enum):
     """First-class artifact categories for deep lore references."""
@@ -45,6 +47,7 @@ class BrokenReference(BaseModel):
     context_before: str | None = None
     context_after: str | None = None
     expected_type: str | None = None
+    reference_class: ReferenceClass | None = None
     source_book: str | None = None
     passage_id: str | None = None
     resolved_entity_id: str | None = None

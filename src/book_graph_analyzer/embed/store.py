@@ -285,7 +285,6 @@ class VectorStore:
 
     def reset_collection(self, collection: str) -> None:
         """Delete and recreate a collection (useful for full rebuilds)."""
-        import chromadb
         self._client.delete_collection(collection)
         self._cols[collection] = self._client.get_or_create_collection(
             name=collection,

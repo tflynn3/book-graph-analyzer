@@ -477,7 +477,6 @@ class ConflictDetector:
             A new LoreConflict (not yet in registry).
         """
         import hashlib
-        import time
         id_src = f"{','.join(sorted(entity_ids))}__{new_statement[:30]}"
         conflict_id = "auto_" + hashlib.md5(id_src.encode()).hexdigest()[:8]
 

@@ -504,7 +504,7 @@ Answer only YES or NO:"""
             f"=== Cross-Book Entity Resolution: {self.corpus_name} ===",
             f"Total entities: {stats['total_entities']}",
             f"Multi-book entities: {stats['multi_book_entities']}",
-            f"",
+            "",
             "[By Type]",
         ]
         
@@ -517,7 +517,7 @@ Answer only YES or NO:"""
         # Show top multi-book entities
         multi = self.get_multi_book_entities()
         if multi:
-            lines.append(f"\n[Top Multi-Book Entities]")
+            lines.append("\n[Top Multi-Book Entities]")
             for entity in sorted(multi, key=lambda e: -e.total_mentions)[:10]:
                 books = list(entity.book_clusters.keys())
                 lines.append(f"  {entity.canonical_name}: {entity.total_mentions} mentions in {books}")

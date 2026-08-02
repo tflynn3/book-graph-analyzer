@@ -6,7 +6,6 @@ passages that contain world-building information.
 
 import re
 from dataclasses import dataclass
-from typing import Callable
 
 from .models import WorldBibleCategory
 

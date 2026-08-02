@@ -1,11 +1,11 @@
 """Tests for text splitting."""
 
-import pytest
 from book_graph_analyzer.ingest.splitter import (
-    split_into_sentences,
-    split_into_paragraphs,
+    is_structural_paragraph,
     split_into_chapters,
+    split_into_paragraphs,
     split_into_passages,
+    split_into_sentences,
 )
 
 
@@ -105,3 +105,45 @@ class TestFullSplitting:
                     and curr.sentence_num > prev.sentence_num
                 )
             )
+
+    def test_splitter_prefers_body_chapter_markers_over_toc_entries(self):
+        text = """
+CONTENTS
+Chapter 1 A Long-expected Party
+Chapter 2 The Shadow of the Past
+
+FOREWORD
+Editorial notes that should not be in the graph.
+
+PROLOGUE
+Hobbits are an unobtrusive but very ancient people.
+
+_Chapter 1_
+A Long-expected Party
+
+Mr. Bilbo never did a kinder deed.
+
+_Chapter 2_
+The Shadow of the Past
+
+Gandalf spoke quietly.
+
+APPENDICES
+A genealogical note.
+"""
+        passages = split_into_passages(text, "Test Book")
+        passage_texts = [passage.text for passage in passages]
+
+        assert "Mr. Bilbo never did a kinder deed." in passage_texts
+        assert "Gandalf spoke quietly." in passage_texts
+        assert "Hobbits are an unobtrusive but very ancient people." in passage_texts
+        assert all("Editorial notes" not in text for text in passage_texts)
+        assert all("A Long-expected Party" not in text for text in passage_texts)
+        assert all("The Shadow of the Past" not in text for text in passage_texts)
+        assert all("genealogical note" not in text for text in passage_texts)
+
+    def test_structural_paragraph_filter_rejects_short_heading_lines(self):
+        assert is_structural_paragraph("A Long-expected Party")
+        assert is_structural_paragraph("CONTENTS")
+        assert is_structural_paragraph("Christopher")
+        assert not is_structural_paragraph("Bilbo laughed.")

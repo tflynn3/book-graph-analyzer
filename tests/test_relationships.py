@@ -143,6 +143,29 @@ class TestRelationshipExtractor:
             assert key not in keys, f"Duplicate relationship: {key}"
             keys.add(key)
 
+    def test_find_entity_ignores_short_function_words(self, extractor):
+        """Short prepositions/pronouns should not bind to entities via substring matches."""
+        entity_lookup = {
+            "gandalf": self.make_entity("Gandalf", "gandalf", "character"),
+            "bag end": self.make_entity("Bag End", "bag_end", "place"),
+        }
+
+        assert extractor._find_entity("to", entity_lookup) is None
+        assert extractor._find_entity("he", entity_lookup) is None
+
+    def test_dependency_extraction_skips_negated_modal_relations(self, extractor):
+        """Counterfactual or negated modal clauses should not become canon edges."""
+        text = "Even if Bilbo could not kill Gollum, he still pitied him."
+        entities = [
+            self.make_entity("Bilbo", "bilbo", "character"),
+            self.make_entity("Gollum", "gollum", "character"),
+        ]
+
+        result = extractor.extract_relationships(text, "test_6", entities)
+
+        kill_rels = [r for r in result.relationships if r.predicate == RelationshipType.KILLED]
+        assert kill_rels == []
+
 
 class TestRelationshipTypes:
     """Tests for relationship type mapping."""

@@ -22,6 +22,9 @@ RETURN c
 
 _SET_LOCATION = """
 MATCH (c:Shadow_Character {name: $name, story_id: $story_id})
+OPTIONAL MATCH (c)-[existing:LOCATED_AT]->(:Shadow_Place)
+WITH c, collect(existing) AS existing_locations
+FOREACH (relation IN existing_locations | DELETE relation)
 MERGE (p:Shadow_Place {name: $location, story_id: $story_id})
 MERGE (c)-[:LOCATED_AT]->(p)
 """
@@ -86,9 +89,19 @@ RETURN c.name as name,
 _GET_RECENT_SUMMARIES = """
 MATCH (s:Shadow_Scene {story_id: $story_id})
 WHERE s.summary IS NOT NULL AND s.summary <> ""
-RETURN s.summary, s.chapter_num, s.scene_num
-ORDER BY s.chapter_num, s.scene_num DESC
-LIMIT 3
+  AND (
+    $chapter_num IS NULL
+    OR coalesce(s.chapter_num, 0) < $chapter_num
+    OR (
+      coalesce(s.chapter_num, 0) = $chapter_num
+      AND ($scene_num IS NULL OR coalesce(s.scene_num, 0) < $scene_num)
+    )
+  )
+RETURN s.summary AS summary, s.chapter_num AS chapter_num, s.scene_num AS scene_num
+ORDER BY coalesce(s.chapter_num, 0) DESC,
+         coalesce(s.scene_num, 0) DESC,
+         s.id DESC
+LIMIT $limit
 """
 
 _GET_INVENTED_ENTITIES = """
@@ -157,10 +170,16 @@ class ShadowGraph:
     All nodes are scoped to a story_id for clean multi-story isolation.
     """
 
-    def __init__(self, story_id: str, driver=None):
+    def __init__(
+        self,
+        story_id: str,
+        driver=None,
+        delta_max_chars: int | None = None,
+    ):
         self.story_id = story_id
         self._driver = driver or get_driver()
         self._llm = LLMClient()
+        self._delta_max_chars = delta_max_chars
 
     # ─── Write operations ────────────────────────────────────────────────────
 
@@ -275,7 +294,13 @@ class ShadowGraph:
             print(f"[ShadowGraph] Warning: character query failed: {e}")
             return None
 
-    def get_scene_state(self, characters: list[str], place: str) -> SceneState:
+    def get_scene_state(
+        self,
+        characters: list[str],
+        place: str,
+        chapter_num: int | None = None,
+        scene_num: int | None = None,
+    ) -> SceneState:
         """
         Assemble a full SceneState for the context assembler.
         Queries character states, recent summaries, and invented entities.
@@ -292,7 +317,10 @@ class ShadowGraph:
                     story_id=self.story_id,
                 ))
 
-        summaries = self._get_recent_summaries()
+        summaries = self._get_recent_summaries(
+            chapter_num=chapter_num,
+            scene_num=scene_num,
+        )
         invented = self.get_invented_entities()
 
         return SceneState(
@@ -331,14 +359,29 @@ class ShadowGraph:
             print(f"[ShadowGraph] Warning: entity query failed: {e}")
             return []
 
-    def _get_recent_summaries(self, limit: int = 3) -> list[str]:
+    def _get_recent_summaries(
+        self,
+        limit: int = 3,
+        chapter_num: int | None = None,
+        scene_num: int | None = None,
+    ) -> list[str]:
         if not self._driver:
             return []
 
         try:
             with self._driver.session() as session:
-                result = session.run(_GET_RECENT_SUMMARIES, story_id=self.story_id)
-                return [r["s.summary"] for r in result if r["s.summary"]]
+                result = session.run(
+                    _GET_RECENT_SUMMARIES,
+                    story_id=self.story_id,
+                    chapter_num=chapter_num,
+                    scene_num=scene_num,
+                    limit=max(0, limit),
+                )
+                # Neo4j selects newest-first so LIMIT keeps the truly latest scenes;
+                # present that small window in chronological order to the drafter.
+                summaries = [record["summary"] for record in result if record["summary"]]
+                summaries.reverse()
+                return summaries
         except Exception as e:
             print(f"[ShadowGraph] Warning: summary query failed: {e}")
             return []
@@ -357,8 +400,12 @@ class ShadowGraph:
         Ask the LLM to extract a StateDelta from a generated scene.
         Falls back gracefully to an empty delta on parse failure.
         """
+        extraction_text = scene_text
+        if self._delta_max_chars is not None:
+            extraction_text = scene_text[: max(0, self._delta_max_chars)]
+
         prompt = _EXTRACT_DELTA_PROMPT.format(
-            scene_text=scene_text[:3000],  # Limit to avoid overflow
+            scene_text=extraction_text,
             characters=", ".join(characters),
         )
 

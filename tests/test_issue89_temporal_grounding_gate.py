@@ -3,7 +3,10 @@ from pathlib import Path
 from book_graph_analyzer.lore.events import Event
 from book_graph_analyzer.spatiotemporal import (
     ExtractionBridge,
+    NormalizedTime,
+    SpatiotemporalEvent,
     TemporalGroundingGate,
+    backfill_temporal_grounding,
     compute_temporal_grounding_metrics,
 )
 
@@ -69,6 +72,25 @@ def test_issue89_hobbit_gate_can_fail_and_pass_with_explicit_thresholds():
     strict_result_no_backfill = strict_gate.evaluate(st_events_no_backfill)
 
     assert strict_result_no_backfill.passed is False
-    assert strict_result.passed is True
+    assert strict_result.passed is False
     assert permissive_result.passed is True
     assert permissive_result.metrics.to_dict()["metrics_version"] == "temporal-grounding-v1"
+
+
+def test_unknown_year_backfill_does_not_fabricate_year_zero():
+    events = [
+        SpatiotemporalEvent(
+            id="unknown-year",
+            entity_id="char_gandalf",
+            time=NormalizedTime(era="Third Age", confidence=0.5),
+            source_book="The Lord of the Rings",
+        )
+    ]
+
+    changes = backfill_temporal_grounding(events)
+    metrics = compute_temporal_grounding_metrics(events)
+
+    assert changes == 0
+    assert events[0].time.year_start is None
+    assert events[0].time.year_end is None
+    assert metrics.year_or_interval_ratio == 0.0

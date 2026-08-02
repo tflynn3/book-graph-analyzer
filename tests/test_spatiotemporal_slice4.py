@@ -6,16 +6,15 @@
 """
 
 import json
-import pytest
 
 from book_graph_analyzer.spatiotemporal.models import (
-    CausalLink, ConflictType, NormalizedTime, SpatiotemporalEvent, TimelineConflict,
+    CausalLink, ConflictType, NormalizedTime, SpatiotemporalEvent,
 )
 from book_graph_analyzer.spatiotemporal.causal_extraction import (
     extract_causal_links_heuristic,
 )
 from book_graph_analyzer.spatiotemporal.corpus_reconciler import (
-    CorpusReconciler, CorpusReconciliationResult, BookEvents,
+    CorpusReconciler,
 )
 from book_graph_analyzer.spatiotemporal.conflict_detector import ConflictDetector
 

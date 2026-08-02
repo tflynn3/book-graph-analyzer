@@ -8,13 +8,12 @@ This is the integration path: extract -> normalize -> detect conflicts.
 
 from __future__ import annotations
 
-import uuid
 from dataclasses import dataclass, field
 
 from ..graph.temporal import canonicalize_era
 from ..lore.events import Event
 from ..models.worldbuilding import infer_editorial_layer
-from .models import NormalizedTime, SpatiotemporalEvent
+from .models import SpatiotemporalEvent
 from .normalizer import TimeNormalizer
 from .grounding import (
     METRICS_VERSION,

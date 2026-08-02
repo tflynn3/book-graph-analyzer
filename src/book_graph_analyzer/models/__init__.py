@@ -16,6 +16,14 @@ from book_graph_analyzer.models.lore_depth import (
     LoreDepthExtractionResult,
     ReferenceCandidate,
 )
+from book_graph_analyzer.models.propositions import (
+    ArgumentRole,
+    ExtractedProposition,
+    NounPhraseRelation,
+    PropositionArgument,
+    PropositionKind,
+    ReferenceClass,
+)
 
 __all__ = [
     "Character",
@@ -35,4 +43,10 @@ __all__ = [
     "BrokenReference",
     "LoreDepthExtractionResult",
     "ReferenceCandidate",
+    "ArgumentRole",
+    "ExtractedProposition",
+    "NounPhraseRelation",
+    "PropositionArgument",
+    "PropositionKind",
+    "ReferenceClass",
 ]

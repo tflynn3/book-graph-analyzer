@@ -4,8 +4,11 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 from datetime import datetime
-from typing import Optional
+from typing import TYPE_CHECKING, Optional
 from enum import Enum
+
+if TYPE_CHECKING:
+    from .context import AssembledContext
 
 
 class GenerationStatus(Enum):

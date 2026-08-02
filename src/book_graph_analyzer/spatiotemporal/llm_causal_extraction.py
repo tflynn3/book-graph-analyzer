@@ -12,7 +12,6 @@ from __future__ import annotations
 import json
 import logging
 from enum import Enum
-from typing import Optional
 
 from .causal_extraction import extract_causal_links_heuristic
 from .models import CausalLink, SpatiotemporalEvent

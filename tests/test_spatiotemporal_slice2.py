@@ -6,12 +6,11 @@
 """
 
 import json
-import pytest
 
 from book_graph_analyzer.lore.events import Event
 from book_graph_analyzer.lore.temporal import Era
 from book_graph_analyzer.spatiotemporal.extraction_bridge import (
-    ExtractionBridge, BridgeReport, NormalizationResult,
+    ExtractionBridge,
 )
 from book_graph_analyzer.spatiotemporal.models import (
     ConflictType, NormalizedTime, SpatiotemporalEvent, TimelineConflict,

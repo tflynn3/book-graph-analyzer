@@ -5,8 +5,7 @@ Sentence-level and vocabulary-level metrics for author style analysis.
 Based on established stylometry research (Burrows' Delta, etc.)
 """
 
-from dataclasses import dataclass, field
-from typing import Optional
+from dataclasses import dataclass
 import re
 import statistics
 from collections import Counter

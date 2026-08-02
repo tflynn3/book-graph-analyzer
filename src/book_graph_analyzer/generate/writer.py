@@ -1,10 +1,7 @@
 """Write generated stories to Neo4j."""
 
-from typing import Optional
-from datetime import datetime
-
 from ..graph.connection import get_driver
-from .models import Story, Chapter, Scene
+from .models import Chapter, Scene, Story
 
 
 class GenerationWriter:
@@ -152,7 +149,7 @@ class GenerationWriter:
             result = session.run("""
                 MATCH (s:Scene {id: $scene_id})
                 MATCH (c:Character)
-                WHERE toLower(c.name) CONTAINS toLower($char_name)
+                WHERE toLower(coalesce(c.name, c.canonical_name, '')) CONTAINS toLower($char_name)
                 MERGE (s)-[:FEATURES]->(c)
                 RETURN count(*) as linked
             """, scene_id=scene.id, char_name=char_name)
@@ -163,7 +160,7 @@ class GenerationWriter:
             result = session.run("""
                 MATCH (s:Scene {id: $scene_id})
                 MATCH (p:Place)
-                WHERE toLower(p.name) CONTAINS toLower($place_name)
+                WHERE toLower(coalesce(p.name, p.canonical_name, '')) CONTAINS toLower($place_name)
                 MERGE (s)-[:SET_IN]->(p)
                 RETURN count(*) as linked
             """, scene_id=scene.id, place_name=place_name)
@@ -174,7 +171,7 @@ class GenerationWriter:
             result = session.run("""
                 MATCH (s:Scene {id: $scene_id})
                 MATCH (o:Object)
-                WHERE toLower(o.name) CONTAINS toLower($obj_name)
+                WHERE toLower(coalesce(o.name, o.canonical_name, '')) CONTAINS toLower($obj_name)
                 MERGE (s)-[:USES]->(o)
                 RETURN count(*) as linked
             """, scene_id=scene.id, obj_name=obj_name)
@@ -213,7 +210,7 @@ class GenerationWriter:
                 MATCH (s:Scene {status: 'flagged'})
                 OPTIONAL MATCH (s)-[:FEATURES]->(c:Character)
                 RETURN s.id as id, s.summary as summary, s.quality_score as score,
-                       s.text as text, collect(c.name) as characters
+                       s.text as text, collect(coalesce(c.name, c.canonical_name)) as characters
                 ORDER BY s.quality_score ASC
                 LIMIT $limit
             """, limit=limit)
@@ -244,10 +241,10 @@ class GenerationWriter:
         with self.driver.session() as session:
             result = session.run("""
                 MATCH (s:Scene)-[:FEATURES]->(c:Character)
-                WHERE toLower(c.name) CONTAINS toLower($name)
+                WHERE toLower(coalesce(c.name, c.canonical_name, '')) CONTAINS toLower($name)
                   AND s.quality_score >= $min_quality
                 RETURN s.id as id, s.summary as summary, s.text as text,
-                       s.quality_score as score, c.name as character
+                       s.quality_score as score, coalesce(c.name, c.canonical_name) as character
                 ORDER BY s.quality_score DESC
             """, name=character_name, min_quality=min_quality)
             

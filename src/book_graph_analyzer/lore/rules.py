@@ -12,7 +12,6 @@ from __future__ import annotations
 
 import re
 from dataclasses import dataclass
-from typing import Optional
 
 from ..models.lore_rule import (
     LoreRule,
@@ -491,21 +490,28 @@ class LoreRuleValidator:
         return None
 
     def validate_text(
-        self, text: str, scene_id: str = "inline", story_era: str | None = None
+        self,
+        text: str,
+        scene_id: str = "inline",
+        story_era: str | None = None,
+        categories: list[str] | None = None,
     ) -> LoreValidationResult:
         """Validate free text by extracting entities heuristically.
 
         Useful for quick offline checking of draft passages.
         """
         context = _extract_context_from_text(text, scene_id, story_era)
-        return self.validate_scene_context(context)
+        return self.validate_scene_context(context, categories=categories)
 
     # ------------------------------------------------------------------
     # Neo4j cypher_check validation
     # ------------------------------------------------------------------
 
     def validate_scene_neo4j(
-        self, scene_id: str, driver=None
+        self,
+        scene_id: str,
+        driver=None,
+        categories: list[str] | None = None,
     ) -> LoreValidationResult:
         """Run all cypher_check queries for applicable rules against Neo4j.
 
@@ -523,6 +529,8 @@ class LoreRuleValidator:
                 raise ConnectionError("Cannot connect to Neo4j")
 
         rules_with_cypher = [r for r in self._registry.all() if r.cypher_check]
+        if categories:
+            rules_with_cypher = [r for r in rules_with_cypher if r.category in categories]
         hard_violations: list[LoreViolation] = []
         soft_warnings: list[LoreViolation] = []
         rules_checked = 0

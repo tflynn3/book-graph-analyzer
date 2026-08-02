@@ -17,10 +17,9 @@ from .causal_extraction import extract_causal_links_heuristic
 from .conflict_detector import ConflictDetector
 from .extraction_bridge import ExtractionBridge
 from .models import (
-    CausalLink, ConflictType, LocationEdge, LocationNode,
+    CausalLink, LocationEdge, LocationNode,
     SpatiotemporalEvent, TimelineConflict,
 )
-from .report import ReconciliationReport
 from .confidence import SourceAuthorityRegistry
 from .grounding import compute_temporal_grounding_metrics
 

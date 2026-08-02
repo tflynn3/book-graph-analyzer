@@ -46,8 +46,8 @@ pip install -e .
 # Development dependencies
 pip install -e ".[dev]"
 
-# Local LLM support (optional)
-pip install -e ".[local-llm]"
+# Local Ollama support uses the base HTTP client; no Python extra is required
+pip install -e .
 ```
 
 ### 4. Start Neo4j

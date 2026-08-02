@@ -1,4 +1,3 @@
-import json
 
 from book_graph_analyzer.worldbible.lineage_density import (
     LineageThreshold,

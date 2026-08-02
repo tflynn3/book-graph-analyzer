@@ -8,7 +8,6 @@ Validates:
 5. Existing pipeline behaviour is not broken
 """
 
-import pytest
 
 
 # ============================================================================
@@ -269,6 +268,10 @@ class TestGraphWriterStubs:
         mock_session = MagicMock()
         mock_driver.session.return_value.__enter__ = MagicMock(return_value=mock_session)
         mock_driver.session.return_value.__exit__ = MagicMock(return_value=False)
+        mock_session.run.side_effect = [
+            [{"node_id": 1, "id": "entity_1", "score": 4}],
+            MagicMock(),
+        ]
         writer = GraphWriter(driver=mock_driver)
 
         writer.write_editorial_provenance("entity_1", TOLKIEN_SOURCES[0], confidence=0.8)
@@ -362,11 +365,6 @@ class TestBackwardCompatibility:
     def test_entity_models_unchanged(self):
         from book_graph_analyzer.models.entities import (
             Character,
-            Concept,
-            EntityBase,
-            Event,
-            Object,
-            Place,
         )
 
         char = Character(id="test", canonical_name="Test")
@@ -375,8 +373,6 @@ class TestBackwardCompatibility:
 
     def test_relationship_models_unchanged(self):
         from book_graph_analyzer.models.relationships import (
-            ExtractedRelationship,
-            RelationshipTriple,
             RelationshipType,
         )
 

@@ -353,30 +353,30 @@ class CharacterVoiceProfile:
         """Generate human-readable summary."""
         summary_lines = [
             f"=== Voice Profile: {self.character_name} ===",
-            f"",
-            f"[Corpus]",
+            "",
+            "[Corpus]",
             f"   Total lines: {self.total_lines} (prose: {self.prose_lines}, verse: {self.verse_lines})",
             f"   Total words: {self.total_words}",
-            f"",
-            f"[Speech Patterns]",
+            "",
+            "[Speech Patterns]",
             f"   Avg utterance: {self.avg_utterance_length:.1f} words",
             f"   Range: {self.min_utterance_length} - {self.max_utterance_length} words",
             f"   Questions: {self.question_ratio*100:.1f}%  Exclamations: {self.exclamation_ratio*100:.1f}%  Imperatives: {self.imperative_ratio*100:.1f}%",
             f"   Rhetorical density: {self.rhetorical_density:.2f}",
-            f"",
-            f"[Formality & Register]",
+            "",
+            "[Formality & Register]",
             f"   Formality score: {self.formality_score:.2f}  (0=informal, 1=formal)",
             f"   Archaism rate: {self.archaism_rate:.2f}/100w",
             f"   Contractions: {self.contraction_ratio*100:.1f}%",
-            f"",
-            f"[Vocabulary]",
+            "",
+            "[Vocabulary]",
             f"   Unique words: {self.unique_words}",
             f"   Type-token ratio: {self.type_token_ratio:.3f}",
-            f"",
+            "",
         ]
         
         if self.formality_by_audience:
-            summary_lines.append(f"[Audience-Variant Formality]")
+            summary_lines.append("[Audience-Variant Formality]")
             for aud, score in sorted(self.formality_by_audience.items(), key=lambda x: -x[1]):
                 avg_len = self.length_by_audience.get(aud, 0)
                 reg = self.register_by_audience.get(aud, "-")
@@ -384,34 +384,34 @@ class CharacterVoiceProfile:
             summary_lines.append("")
         
         if self.top_words:
-            summary_lines.append(f"[Top Words]")
+            summary_lines.append("[Top Words]")
             for word, count in self.top_words[:10]:
                 summary_lines.append(f"   {word}: {count}")
             summary_lines.append("")
         
         if self.distinctive_words:
-            summary_lines.append(f"[Distinctive Words]")
+            summary_lines.append("[Distinctive Words]")
             summary_lines.append(f"   {', '.join(self.distinctive_words[:10])}")
             summary_lines.append("")
         
         if self.never_says:
-            summary_lines.append(f"[Never Says]")
+            summary_lines.append("[Never Says]")
             summary_lines.append(f"   {', '.join(self.never_says[:10])}")
             summary_lines.append("")
         
         if self.topic_distribution:
-            summary_lines.append(f"[Topic Distribution]")
+            summary_lines.append("[Topic Distribution]")
             for topic, ratio in self.topic_distribution.items():
                 summary_lines.append(f"   {topic}: {ratio*100:.0f}%")
             summary_lines.append("")
         
         if self.archaisms_used:
-            summary_lines.append(f"[Archaic Language]")
+            summary_lines.append("[Archaic Language]")
             summary_lines.append(f"   {', '.join(self.archaisms_used)}")
             summary_lines.append("")
         
         if self.sample_quotes:
-            summary_lines.append(f"[Sample Quotes]")
+            summary_lines.append("[Sample Quotes]")
             for quote in self.sample_quotes[:3]:
                 # Truncate long quotes
                 display = quote[:80] + "..." if len(quote) > 80 else quote

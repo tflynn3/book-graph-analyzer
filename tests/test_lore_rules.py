@@ -11,7 +11,6 @@ All tests run without Neo4j — covers:
   - classify_hardness
 """
 
-import pytest
 from book_graph_analyzer.models.lore_rule import (
     LoreRule,
     LoreViolation,
@@ -270,7 +269,7 @@ class TestTolkienLoreRules:
 
     def test_all_rules_have_ids(self):
         for rule in TOLKIEN_LORE_RULES:
-            assert rule.id, f"Rule missing ID"
+            assert rule.id, "Rule missing ID"
 
     def test_all_rules_have_statements(self):
         for rule in TOLKIEN_LORE_RULES:
@@ -511,6 +510,20 @@ class TestLoreRuleValidator:
         result_magic = self.validator.validate_scene_context(ctx, categories=["magic"])
         assert result_magic.rules_checked < result_all.rules_checked
 
+    def test_validate_text_forwards_category_filter(self):
+        text = "Bilbo destroyed the One Ring in the library of Rivendell."
+
+        result_magic = self.validator.validate_text(text, categories=["magic"])
+        result_history = self.validator.validate_text(text, categories=["history"])
+
+        assert "magic_ring_destruction" in {
+            violation.rule_id for violation in result_magic.hard_violations
+        }
+        assert "magic_ring_destruction" not in {
+            violation.rule_id for violation in result_history.hard_violations
+        }
+        assert result_magic.rules_checked != result_history.rules_checked
+
     def test_validation_result_has_scene_id(self):
         ctx = make_context(scene_id="scene_xyz")
         result = self.validator.validate_scene_context(ctx)
@@ -549,7 +562,6 @@ class TestWorldBibleRuleMapper:
 
     def test_mapper_creates_lore_rule(self):
         """Test that mapper works with a mock WorldRule object."""
-        from book_graph_analyzer.lore.rules import WorldBibleRuleMapper
         from unittest.mock import MagicMock
 
         mapper = WorldBibleRuleMapper()
@@ -570,7 +582,6 @@ class TestWorldBibleRuleMapper:
 
     def test_mapper_soft_rule(self):
         """Test soft rule classification."""
-        from book_graph_analyzer.lore.rules import WorldBibleRuleMapper
         from unittest.mock import MagicMock
 
         mapper = WorldBibleRuleMapper()
@@ -585,7 +596,6 @@ class TestWorldBibleRuleMapper:
 
     def test_mapper_generates_valid_id(self):
         """Mapped rule ID should be a valid Python identifier fragment."""
-        from book_graph_analyzer.lore.rules import WorldBibleRuleMapper
         from unittest.mock import MagicMock
 
         mapper = WorldBibleRuleMapper()

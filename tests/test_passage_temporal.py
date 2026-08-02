@@ -9,7 +9,6 @@ All tests in this module run without a Neo4j connection — they cover:
   - era_approx_years_back
 """
 
-import pytest
 from book_graph_analyzer.models.passage import Passage
 from book_graph_analyzer.models.era_reference import EraReference, TemporalZoomResult
 from book_graph_analyzer.graph.passage_writer import (

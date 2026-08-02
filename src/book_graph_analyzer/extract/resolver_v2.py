@@ -33,7 +33,6 @@ from dataclasses import dataclass, field
 from pathlib import Path
 from typing import Optional
 
-from rapidfuzz import fuzz
 
 from .bootstrap import EntityBootstrapper, EntityCluster, BootstrapResult
 from .normalizer import TextNormalizer
@@ -293,7 +292,6 @@ class EntityResolverV2:
 
         # Annotate accepted/flagged entities with coreference info
         for entity in result.accepted + result.flagged:
-            name_lower = entity.canonical_name.lower()
             if entity.canonical_name in coref_chains:
                 chain = coref_chains[entity.canonical_name]
                 entity.coref_resolved = [m.text for m in chain.mentions[:5]]

@@ -6,7 +6,6 @@ Extracts world-building rules and patterns from text using:
 3. Entity linking for connecting rules to characters/places
 """
 
-import json
 import re
 from dataclasses import dataclass, field
 from datetime import datetime
@@ -351,16 +350,6 @@ JSON array:"""
         for people_id, people_passages in by_people.items():
             if len(people_passages) < 1:
                 continue
-            
-            # Extract values/customs from passages
-            values = []
-            customs = []
-            
-            for p in people_passages:
-                # Look for value/custom indicators
-                if any(word in p.text.lower() for word in ["love", "honor", "value", "cherish"]):
-                    # Extract what they value
-                    pass  # Would need more sophisticated extraction
             
             cultures.append(CulturalProfile(
                 id=people_id,

@@ -10,7 +10,6 @@ All tests are pure-Python — no Neo4j required. Covers:
   - author_period field on Passage model
 """
 
-import pytest
 from book_graph_analyzer.models.lore_conflict import (
     LoreConflict,
     ConflictClaim,
@@ -254,7 +253,6 @@ class TestLoreConflict:
 
     def test_from_dict_claims_as_json_string(self):
         """from_dict should handle claims stored as JSON string (Neo4j format)."""
-        import json
         c = make_conflict()
         d = c.to_neo4j_props()
         # to_neo4j_props stores claims as JSON string
@@ -610,7 +608,7 @@ class TestConflictAwareValidator:
 
         # Set up a conflict that suppresses race_elf_immortal for glorfindel
         conflict_reg = ConflictRegistry()
-        from book_graph_analyzer.models.lore_conflict import LoreConflict, ConflictClaim
+        from book_graph_analyzer.models.lore_conflict import LoreConflict
         conflict_reg.add(LoreConflict(
             id="test_suppressor",
             summary="Test suppression",
@@ -647,7 +645,7 @@ class TestConflictAwareValidator:
         from book_graph_analyzer.lore.conflicts import ConflictRegistry, ConflictAwareValidator
 
         conflict_reg = ConflictRegistry()
-        from book_graph_analyzer.models.lore_conflict import LoreConflict, ConflictClaim
+        from book_graph_analyzer.models.lore_conflict import LoreConflict
         conflict_reg.add(LoreConflict(
             id="test_downgrader",
             summary="Test downgrade",

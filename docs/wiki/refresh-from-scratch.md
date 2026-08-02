@@ -42,7 +42,7 @@ docker compose up -d
 
 ## 5) Rebuild core graph from canonical books
 
-(Using pipeline full to guarantee graph writes)
+Either use `pipeline full` per canonical text or `corpus process` for a corpus-wide rebuild. Both paths now write the shared seeded graph extraction results to Neo4j, including the dense proposition layer.
 
 ```powershell
 $env:PYTHONUTF8='1'
@@ -56,6 +56,8 @@ $env:PYTHONUTF8='1'
 ```powershell
 docker exec bga-neo4j cypher-shell -u neo4j -p bookgraph123 "MATCH (n) RETURN labels(n)[0] AS label, count(n) AS c ORDER BY c DESC LIMIT 20;"
 docker exec bga-neo4j cypher-shell -u neo4j -p bookgraph123 "MATCH ()-[r]->() RETURN type(r) AS rel, count(r) AS c ORDER BY c DESC LIMIT 20;"
+docker exec bga-neo4j cypher-shell -u neo4j -p bookgraph123 "MATCH (p:Proposition) RETURN p.book AS book, p.kind AS kind, count(*) AS c ORDER BY book, c DESC LIMIT 20;"
+docker exec bga-neo4j cypher-shell -u neo4j -p bookgraph123 "MATCH (:Proposition)-[r:HAS_UNRESOLVED_ARGUMENT]->(:UnresolvedReference) RETURN count(r) AS proposition_unresolved_links;"
 ```
 
 ## 7) Smoke tests + docs build
@@ -67,6 +69,8 @@ $env:PYTHONUTF8='1'; $env:PYTHONIOENCODING='utf-8'; .\.venv\Scripts\mkdocs build
 
 ## Known gotchas
 
-- `bga corpus process` can complete corpus extraction but may not fully populate entity/relationship graph by itself.
-- For guaranteed graph refresh after schema changes, use `pipeline full` per canonical text as above.
+- `bga corpus process` now writes entity/relationship graph data again, so it is a valid corpus-wide refresh path.
+- `bga corpus process` also updates per-book `proposition_count` and corpus `total_propositions`, so check `data/corpus/<name>.json` if counts look suspicious.
+- `pipeline full` is still the best focused rebuild path when you want to verify one canonical text at a time.
+- The proposition layer is intentionally dense; direct entity-to-entity relationship counts will stay much lower than proposition counts.
 - If MkDocs fails on Windows with unicode output, set `PYTHONUTF8=1` and `PYTHONIOENCODING=utf-8`.

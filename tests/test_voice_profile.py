@@ -17,7 +17,6 @@ import pytest
 from book_graph_analyzer.voice.audience import (
     classify_audience_type,
     classify_context_type,
-    classify_dialogue_line,
     AUDIENCE_TYPES,
     CONTEXT_TYPES,
 )
@@ -30,7 +29,6 @@ from book_graph_analyzer.voice.dialogue import (
 from book_graph_analyzer.voice.profile import (
     CharacterVoiceProfile,
     _compute_topic_distribution,
-    _find_never_says,
 )
 from book_graph_analyzer.voice.analyzer import VoiceAnalyzer
 
@@ -190,6 +188,61 @@ class TestExtractDialogueNewFields:
         # The line starts with "Run" — an imperative
         line = result.dialogue_lines[0]
         assert line.is_imperative is True
+
+    def test_extract_does_not_attribute_pronoun_as_speaker(self):
+        text = '"Run, you fools!" he cried.'
+        result = extract_dialogue(text)
+        assert len(result.dialogue_lines) >= 1
+        assert result.dialogue_lines[0].speaker is None
+
+    def test_extract_keeps_named_speaker_attribution(self):
+        text = '"Let me go!" said Wormtongue.'
+        result = extract_dialogue(text)
+        assert len(result.dialogue_lines) >= 1
+        assert result.dialogue_lines[0].speaker == "Wormtongue"
+
+    def test_extract_reads_named_speaker_after_quote_with_addressee(self):
+        text = '"You must go," Aragorn said to Frodo.'
+        result = extract_dialogue(text)
+        assert len(result.dialogue_lines) == 1
+        assert result.dialogue_lines[0].speaker == "Aragorn"
+
+    def test_extract_reads_named_speaker_before_quote_with_addressee(self):
+        text = 'Gandalf said to Frodo, "You must keep it secret."'
+        result = extract_dialogue(text)
+        assert len(result.dialogue_lines) == 1
+        assert result.dialogue_lines[0].speaker == "Gandalf"
+
+    def test_extract_skips_scare_quotes_without_dialogue_context(self):
+        text = 'They referred to the people of the Shire as "colonists" in those days.'
+        result = extract_dialogue(text)
+        assert result.dialogue_lines == []
+
+    def test_extract_carries_speaker_across_adjacent_quotes(self):
+        text = '"Fear not," said Gandalf. "All shall be well in the end."'
+        result = extract_dialogue(text)
+        assert len(result.dialogue_lines) == 2
+        assert result.dialogue_lines[0].speaker == "Gandalf"
+        assert result.dialogue_lines[1].speaker == "Gandalf"
+
+    def test_extract_reads_inverted_attribution_with_timing_phrase(self):
+        text = "'Come here,' said Bilbo one day; 'and then we can celebrate.'"
+        result = extract_dialogue(text)
+        assert len(result.dialogue_lines) == 2
+        assert result.dialogue_lines[0].speaker == "Bilbo"
+        assert result.dialogue_lines[1].speaker == "Bilbo"
+
+    def test_extract_handles_named_saying_lead_in(self):
+        text = 'Aragorn arose, saying: "Lo! already Minas Tirith is assailed."'
+        result = extract_dialogue(text)
+        assert len(result.dialogue_lines) == 1
+        assert result.dialogue_lines[0].speaker == "Aragorn"
+
+    def test_extract_reads_single_quoted_dialogue(self):
+        text = "'Good afternoon, Mr. Maggot!' said Pippin."
+        result = extract_dialogue(text)
+        assert len(result.dialogue_lines) == 1
+        assert result.dialogue_lines[0].speaker == "Pippin"
 
 
 # ---------------------------------------------------------------------------
@@ -577,6 +630,18 @@ class TestVoiceProfileIntegration:
         result = analyzer.analyze_text(self._sample_text)
         # Should find some characters
         assert result.total_characters > 0
+
+    def test_analyze_text_does_not_promote_scare_quotes_to_speakers(self):
+        analyzer = VoiceAnalyzer(min_lines_for_profile=1)
+        text = """
+        They referred to the people of the Shire as "colonists".
+        "Fear not," said Gandalf. "All shall be well in the end."
+        """
+        result = analyzer.analyze_text(text)
+        assert "Shire" not in result.dialogue_by_speaker
+        assert "colonists" not in result.dialogue_by_speaker
+        assert "Gandalf" in result.dialogue_by_speaker
+        assert len(result.dialogue_by_speaker["Gandalf"]) == 2
 
     def test_profiles_have_new_fields(self):
         analyzer = VoiceAnalyzer(min_lines_for_profile=1)

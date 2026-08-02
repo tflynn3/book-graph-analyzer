@@ -206,7 +206,6 @@ class EntityExtractor:
             Dict mapping entity type to list of unique resolved entities
         """
         seen_ids: set[str] = set()
-        seen_texts: set[str] = set()
         by_type: dict[str, list[ResolvedEntity]] = defaultdict(list)
 
         for result in results:

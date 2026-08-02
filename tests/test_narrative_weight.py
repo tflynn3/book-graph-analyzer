@@ -9,7 +9,6 @@ Covers:
   - compute_overall / weakest_components / improvement_suggestions
 """
 
-import pytest
 from book_graph_analyzer.models.narrative_weight import (
     NarrativeWeight,
     ThemeNode,

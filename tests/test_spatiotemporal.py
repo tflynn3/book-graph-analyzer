@@ -1,7 +1,6 @@
 """Tests for spatiotemporal engine (Issue #48)."""
 
 import json
-import pytest
 
 from book_graph_analyzer.spatiotemporal.models import (
     ConflictType, LocationEdge, LocationNode,

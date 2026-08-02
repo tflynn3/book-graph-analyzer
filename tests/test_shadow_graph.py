@@ -1,8 +1,7 @@
 """Tests for Shadow Graph story state tracking."""
 
 import json
-import pytest
-from unittest.mock import MagicMock, patch, call
+from unittest.mock import MagicMock
 
 
 # ─── Fixtures ────────────────────────────────────────────────────────────────
@@ -136,11 +135,8 @@ class TestShadowGraphGetCharacterState:
         sg1.get_character_state("Tuor")
         sg2.get_character_state("Tuor")
 
-        # Both calls should pass their own story_id
         calls = session.run.call_args_list
-        story_ids_used = [c.kwargs.get("story_id") or (c.args[1] if len(c.args) > 1 else None)
-                          for c in calls]
-        # At minimum, the two story IDs should both appear
+        # Both calls should pass their own story_id.
         assert "story-A" in str(calls)
         assert "story-B" in str(calls)
 

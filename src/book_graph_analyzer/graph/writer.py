@@ -1,16 +1,92 @@
 """Write entities and relationships to Neo4j."""
 
-from typing import Iterator
-from collections import defaultdict
+import hashlib
 import re
+from collections import Counter, defaultdict
 
 from neo4j import Driver
 
-from .connection import get_driver, init_schema
-from .temporal import TemporalValidity, ERA_ORDER, canonicalize_era
-from ..extract.resolver import ResolvedEntity
+from ..extract.propositions import PropositionExtractionResult, PropositionExtractor
 from ..extract.relationships import RelationshipExtractionResult
-from ..models.relationships import ExtractedRelationship, RelationshipTriple
+from ..extract.resolver import ResolvedEntity
+from ..models.lore_depth import BrokenReference
+from ..models.propositions import ArgumentRole, ExtractedProposition
+from ..models.propositions import ReferenceClass
+from ..models.relationships import ExtractedRelationship
+from ..models.relationships import RelationshipType
+from ..voice.profile import CharacterVoiceProfile
+from .connection import get_driver, init_schema
+from .temporal import TemporalValidity, canonicalize_era
+
+_CHARACTER_CHARACTER_RELATIONSHIPS = {
+    RelationshipType.SPOKE_WITH,
+    RelationshipType.SPOKE_TO,
+    RelationshipType.TRAVELED_WITH,
+    RelationshipType.FOUGHT,
+    RelationshipType.FOUGHT_AGAINST,
+    RelationshipType.ALLIED_WITH,
+    RelationshipType.BETRAYED,
+    RelationshipType.HELPED,
+    RelationshipType.CAPTURED,
+    RelationshipType.FREED,
+    RelationshipType.KILLED,
+    RelationshipType.MET,
+    RelationshipType.PARENT_OF,
+    RelationshipType.CHILD_OF,
+    RelationshipType.SIBLING_OF,
+    RelationshipType.MARRIED_TO,
+    RelationshipType.FRIEND_OF,
+    RelationshipType.ENEMY_OF,
+    RelationshipType.SERVES,
+    RelationshipType.LEADS,
+}
+_CHARACTER_OBJECT_RELATIONSHIPS = {
+    RelationshipType.POSSESSES,
+    RelationshipType.POSSESSED,
+    RelationshipType.GAVE,
+    RelationshipType.RECEIVED,
+    RelationshipType.FOUND,
+    RelationshipType.LOST,
+    RelationshipType.CREATED,
+    RelationshipType.DESTROYED,
+    RelationshipType.USED,
+    RelationshipType.STOLE,
+}
+_CHARACTER_PLACE_RELATIONSHIPS = {
+    RelationshipType.TRAVELED_TO,
+    RelationshipType.TRAVELED_FROM,
+    RelationshipType.LIVES_IN,
+    RelationshipType.VISITED,
+    RelationshipType.ENTERED,
+    RelationshipType.LEFT,
+    RelationshipType.RULES,
+    RelationshipType.GUARDS,
+}
+_PLACE_PLACE_RELATIONSHIPS = {
+    RelationshipType.LOCATED_IN,
+    RelationshipType.NEAR,
+}
+_CHARACTER_EVENT_RELATIONSHIPS = {
+    RelationshipType.PARTICIPATED_IN,
+    RelationshipType.WITNESSED,
+    RelationshipType.CAUSED,
+}
+_PROJECTABLE_RELATIONSHIP_PAIRS = {
+    rel: {("character", "character")}
+    for rel in _CHARACTER_CHARACTER_RELATIONSHIPS
+}
+_PROJECTABLE_RELATIONSHIP_PAIRS.update(
+    {rel: {("character", "object")} for rel in _CHARACTER_OBJECT_RELATIONSHIPS}
+)
+_PROJECTABLE_RELATIONSHIP_PAIRS.update(
+    {rel: {("character", "place")} for rel in _CHARACTER_PLACE_RELATIONSHIPS}
+)
+_PROJECTABLE_RELATIONSHIP_PAIRS.update(
+    {rel: {("place", "place")} for rel in _PLACE_PLACE_RELATIONSHIPS}
+)
+_PROJECTABLE_RELATIONSHIP_PAIRS.update(
+    {rel: {("character", "event")} for rel in _CHARACTER_EVENT_RELATIONSHIPS}
+)
 
 
 class GraphWriter:
@@ -253,7 +329,7 @@ class GraphWriter:
         Args:
             rel: The extracted relationship to write
         """
-        if not rel.subject_id or not rel.object_id:
+        if not self._relationship_is_projectable(rel):
             return  # Need both entities resolved
 
         # Build temporal props from the relationship model
@@ -310,7 +386,7 @@ class GraphWriter:
         # Group by relationship type (Neo4j needs separate queries per type)
         by_type: dict[str, list[ExtractedRelationship]] = defaultdict(list)
         for rel in relationships:
-            if rel.subject_id and rel.object_id:
+            if self._relationship_is_projectable(rel):
                 by_type[rel.predicate.value].append(rel)
 
         count = 0
@@ -366,6 +442,7 @@ class GraphWriter:
         chapter_num: int,
         paragraph_num: int,
         sentence_num: int,
+        chapter_title: str | None = None,
         source_id: str | None = None,
         source_title: str | None = None,
         source_stratum: str | None = None,
@@ -382,27 +459,55 @@ class GraphWriter:
             paragraph_num: Paragraph number
             sentence_num: Sentence number
         """
+        book_id = self._slug_id(book)
+        chapter_id = f"{book_id}_c{chapter_num}"
+        paragraph_id = f"{chapter_id}_p{paragraph_num}"
+        chapter_title = chapter_title or f"Chapter {chapter_num}"
+
         query = """
-        MERGE (p:Passage {id: $id})
-        ON CREATE SET
-            p.text = $text,
-            p.book = $book,
-            p.chapter_num = $chapter_num,
-            p.paragraph_num = $paragraph_num,
-            p.sentence_num = $sentence_num
-        SET p.source_id = coalesce($source_id, p.source_id),
-            p.source_title = coalesce($source_title, p.source_title),
-            p.source_stratum = coalesce($source_stratum, p.source_stratum),
-            p.source_authority_weight = coalesce($source_authority_weight, p.source_authority_weight),
-            p.provenance_tags = coalesce($provenance_tags, p.provenance_tags)
+        MERGE (b:Book {id: $book_id})
+        SET b.title = $book,
+            b.updated_at = datetime()
+        MERGE (c:Chapter {id: $chapter_id})
+        SET c.book_id = $book_id,
+            c.number = $chapter_num,
+            c.title = $chapter_title,
+            c.updated_at = datetime()
+        MERGE (pg:Paragraph {id: $paragraph_id})
+        SET pg.book_id = $book_id,
+            pg.chapter_id = $chapter_id,
+            pg.chapter_num = $chapter_num,
+            pg.number = $paragraph_num,
+            pg.updated_at = datetime()
+        MERGE (s:Sentence:Passage {id: $id})
+        SET s.text = $text,
+            s.book = $book,
+            s.chapter = $chapter_title,
+            s.chapter_num = $chapter_num,
+            s.paragraph_num = $paragraph_num,
+            s.sentence_num = $sentence_num,
+            s.number = $sentence_num,
+            s.source_id = coalesce($source_id, s.source_id),
+            s.source_title = coalesce($source_title, s.source_title),
+            s.source_stratum = coalesce($source_stratum, s.source_stratum),
+            s.source_authority_weight = coalesce($source_authority_weight, s.source_authority_weight),
+            s.provenance_tags = coalesce($provenance_tags, s.provenance_tags),
+            s.updated_at = datetime()
+        MERGE (b)-[:HAS_CHAPTER]->(c)
+        MERGE (c)-[:HAS_PARAGRAPH]->(pg)
+        MERGE (pg)-[:HAS_SENTENCE]->(s)
         """
 
         with self.driver.session() as session:
             session.run(
                 query,
                 id=passage_id,
+                book_id=book_id,
+                chapter_id=chapter_id,
+                paragraph_id=paragraph_id,
                 text=text[:500],  # Truncate for storage
                 book=book,
+                chapter_title=chapter_title,
                 chapter_num=chapter_num,
                 paragraph_num=paragraph_num,
                 sentence_num=sentence_num,
@@ -412,6 +517,11 @@ class GraphWriter:
                 source_authority_weight=source_authority_weight,
                 provenance_tags=provenance_tags,
             )
+
+    @staticmethod
+    def _slug_id(value: str) -> str:
+        slug = re.sub(r"[^a-z0-9]+", "_", value.lower()).strip("_")
+        return slug or "unknown"
 
     def write_passage_provenance(
         self,
@@ -486,6 +596,7 @@ class GraphWriter:
         entity_results: list,  # List of ExtractionResult
         relationship_results: list[RelationshipExtractionResult],
         book: str,
+        proposition_results: list[PropositionExtractionResult] | None = None,
         progress_callback=None,
     ) -> dict:
         """Write complete extraction results to the graph.
@@ -501,13 +612,23 @@ class GraphWriter:
         """
         self.initialize()
 
-        stats = {
+        stats: dict[str, int | dict[str, int]] = {
             "entities_written": 0,
+            "entity_mentions_written": 0,
             "relationships_written": 0,
             "passages_written": 0,
+            "mention_links_written": 0,
+            "unresolved_references_written": 0,
+            "propositions_written": 0,
+            "proposition_argument_links_written": 0,
+            "proposition_unresolved_links_written": 0,
+            "noun_phrase_nodes_written": 0,
+            "noun_phrase_argument_links_written": 0,
+            "noun_phrase_relation_links_written": 0,
+            "unresolved_reference_classes": {},
         }
 
-        total_steps = 3
+        total_steps = 4 if proposition_results else 3
         current_step = 0
 
         # Step 1: Write entities
@@ -521,12 +642,9 @@ class GraphWriter:
                 if entity.canonical_id:
                     all_entities.append(entity)
 
-        # Deduplicate by canonical_id
-        unique_entities = {e.canonical_id: e for e in all_entities}
-        stats["entities_written"] = self.write_entities_batch(
-            list(unique_entities.values()),
-            book,
-        )
+        unique_entities = {e.canonical_id for e in all_entities if e.canonical_id}
+        stats["entities_written"] = len(unique_entities)
+        stats["entity_mentions_written"] = self.write_entities_batch(all_entities, book)
 
         # Step 2: Write relationships
         current_step += 1
@@ -534,37 +652,652 @@ class GraphWriter:
             progress_callback(current_step, total_steps, "Writing relationships...")
 
         all_relationships = []
+        unresolved_refs = {}
         for result in relationship_results:
-            all_relationships.extend(result.relationships)
+            for rel in result.relationships:
+                if rel.subject_id and rel.object_id:
+                    if self._relationship_is_projectable(rel):
+                        all_relationships.append(rel)
+                    continue
 
+                for ref in self._relationship_broken_references(rel, book):
+                    unresolved_refs[ref.id] = ref
+
+        relationship_unresolved = list(unresolved_refs.values())
         stats["relationships_written"] = self.write_relationships_batch(all_relationships)
+        stats["unresolved_references_written"] = self.write_broken_references_batch(relationship_unresolved)
+        stats["unresolved_reference_classes"] = self._count_reference_classes(relationship_unresolved)
 
         # Step 3: Write passages with entity links
         current_step += 1
         if progress_callback:
             progress_callback(current_step, total_steps, "Writing passages...")
 
-        # Only write passages that have relationships (to save space)
-        passage_ids_with_rels = {r.passage_id for r in relationship_results if r.relationships}
-
         for result in entity_results:
-            if result.passage.id in passage_ids_with_rels:
-                self.write_passage(
-                    passage_id=result.passage.id,
-                    text=result.passage.text,
-                    book=result.passage.book,
-                    chapter_num=result.passage.chapter_num,
-                    paragraph_num=result.passage.paragraph_num,
-                    sentence_num=result.passage.sentence_num,
-                    source_id=getattr(result.passage, "source_id", None),
-                    source_title=getattr(result.passage, "source_title", None),
-                    source_stratum=getattr(result.passage, "source_stratum", None),
-                    source_authority_weight=getattr(result.passage, "source_authority_weight", None),
-                    provenance_tags=getattr(result.passage, "provenance_tags", None),
-                )
-                stats["passages_written"] += 1
+            self.write_passage(
+                passage_id=result.passage.id,
+                text=result.passage.text,
+                book=result.passage.book,
+                chapter_num=result.passage.chapter_num,
+                paragraph_num=result.passage.paragraph_num,
+                sentence_num=result.passage.sentence_num,
+                chapter_title=getattr(result.passage, "chapter", None),
+                source_id=getattr(result.passage, "source_id", None),
+                source_title=getattr(result.passage, "source_title", None),
+                source_stratum=getattr(result.passage, "source_stratum", None),
+                source_authority_weight=getattr(result.passage, "source_authority_weight", None),
+                provenance_tags=getattr(result.passage, "provenance_tags", None),
+            )
+            stats["passages_written"] += 1
+
+            for entity in result.entities:
+                if not entity.canonical_id:
+                    continue
+                self.link_entity_to_passage(entity.canonical_id, result.passage.id)
+                stats["mention_links_written"] += 1
+
+        if proposition_results:
+            current_step += 1
+            if progress_callback:
+                progress_callback(current_step, total_steps, "Writing propositions...")
+            prop_stats = self.write_proposition_results(proposition_results, book)
+            stats["propositions_written"] = prop_stats["propositions_written"]
+            stats["proposition_argument_links_written"] = prop_stats["argument_links_written"]
+            stats["proposition_unresolved_links_written"] = prop_stats["unresolved_links_written"]
+            stats["noun_phrase_nodes_written"] = prop_stats["noun_phrase_nodes_written"]
+            stats["noun_phrase_argument_links_written"] = prop_stats["noun_phrase_argument_links_written"]
+            stats["noun_phrase_relation_links_written"] = prop_stats["noun_phrase_relation_links_written"]
+            stats["unresolved_references_written"] += prop_stats["unresolved_references_written"]
+            stats["unresolved_reference_classes"] = self._merge_reference_class_counts(
+                stats["unresolved_reference_classes"],
+                prop_stats["unresolved_reference_classes"],
+            )
 
         return stats
+
+    @staticmethod
+    def _relationship_broken_references(rel: ExtractedRelationship, book: str) -> list[BrokenReference]:
+        """Convert partially resolved relationships into reviewable unresolved references."""
+        refs: list[BrokenReference] = []
+        base_conf = max(0.0, min(1.0, float(getattr(rel, "confidence", 0.6) or 0.6) * 0.8))
+
+        def _make_ref(role: str, mention_text: str, expected_type: str | None) -> BrokenReference:
+            stable_key = "|".join(
+                [
+                    book,
+                    rel.passage_id,
+                    rel.predicate.value,
+                    role,
+                    rel.subject_text,
+                    rel.object_text,
+                ]
+            )
+            digest = hashlib.sha1(stable_key.encode("utf-8")).hexdigest()[:16]
+            arg_role = {
+                "subject": ArgumentRole.SUBJECT,
+                "object": ArgumentRole.PATIENT,
+            }.get(role)
+            return BrokenReference(
+                id=f"unresolved-rel-{digest}",
+                mention_text=mention_text,
+                context_text=rel.passage_text,
+                expected_type=expected_type,
+                reference_class=PropositionExtractor.classify_unresolved_reference(
+                    mention_text,
+                    role=arg_role,
+                    expected_type=expected_type,
+                ),
+                source_book=book,
+                passage_id=rel.passage_id,
+                confidence=base_conf,
+                provenance_notes=[
+                    f"relationship:{rel.predicate.value}",
+                    f"role:{role}",
+                ],
+            )
+
+        if not rel.subject_id and rel.subject_text:
+            refs.append(_make_ref("subject", rel.subject_text, rel.subject_type))
+        if not rel.object_id and rel.object_text:
+            refs.append(_make_ref("object", rel.object_text, rel.object_type))
+
+        return refs
+
+    @staticmethod
+    def _relationship_is_projectable(rel: ExtractedRelationship) -> bool:
+        """Persist only direct canon edges with a valid entity-type signature."""
+        if not rel.subject_id or not rel.object_id:
+            return False
+
+        allowed_pairs = _PROJECTABLE_RELATIONSHIP_PAIRS.get(rel.predicate)
+        if not allowed_pairs:
+            return False
+
+        subject_type = str(getattr(rel, "subject_type", "") or "").strip().lower()
+        object_type = str(getattr(rel, "object_type", "") or "").strip().lower()
+        return (subject_type, object_type) in allowed_pairs
+
+    def write_proposition_results(
+        self,
+        proposition_results: list[PropositionExtractionResult],
+        book: str,
+    ) -> dict[str, int | dict[str, int]]:
+        """Persist dense proposition nodes, argument links, and unresolved argument refs."""
+        proposition_batch: list[dict] = []
+        quote_batch: dict[str, dict] = {}
+        argument_batch: list[dict] = []
+        noun_phrase_batch: dict[str, dict] = {}
+        noun_phrase_argument_batch: list[dict] = []
+        noun_phrase_relation_batch: list[dict] = []
+        unresolved_batch: dict[str, BrokenReference] = {}
+        unresolved_links: list[dict] = []
+
+        for result in proposition_results:
+            for quote in getattr(result, "quotes", None) or []:
+                quote_batch[quote.id] = {
+                    "id": quote.id,
+                    "passage_id": quote.passage_id,
+                    "text": quote.text,
+                    "quote_start": quote.quote_start,
+                    "quote_end": quote.quote_end,
+                    "speaker_name": quote.speaker_name,
+                    "speaker_entity_id": quote.speaker_entity_id,
+                    "speaker_canonical_name": quote.speaker_canonical_name,
+                    "addressee_entity_id": quote.addressee_entity_id,
+                    "addressee_canonical_name": quote.addressee_canonical_name,
+                    "speech_verb": quote.speech_verb,
+                    "attribution_confidence": float(quote.attribution_confidence or 0.0),
+                    "is_question": bool(quote.is_question),
+                    "is_exclamation": bool(quote.is_exclamation),
+                    "is_imperative": bool(quote.is_imperative),
+                    "is_verse": bool(quote.is_verse),
+                    "audience_type": quote.audience_type,
+                    "context_type": quote.context_type,
+                    "audience_confidence": float(quote.audience_confidence or 0.0),
+                }
+            for proposition in result.propositions:
+                proposition_batch.append(
+                    {
+                        "id": proposition.id,
+                        "passage_id": proposition.passage_id,
+                        "book": proposition.book or book,
+                        "sentence_num": proposition.sentence_num,
+                        "clause_index": proposition.clause_index,
+                        "kind": proposition.kind.value,
+                        "predicate_lemma": proposition.predicate_lemma,
+                        "predicate_text": proposition.predicate_text,
+                        "predicate_span_start": proposition.predicate_span_start,
+                        "predicate_span_end": proposition.predicate_span_end,
+                        "clause_text": proposition.clause_text,
+                        "quote_id": proposition.quote_id,
+                        "confidence": proposition.confidence,
+                        "extraction_method": proposition.extraction_method,
+                        "modality": proposition.modality,
+                        "polarity": proposition.polarity,
+                    }
+                )
+
+                for arg in proposition.arguments:
+                    if arg.entity_id:
+                        argument_batch.append(
+                            {
+                                "proposition_id": proposition.id,
+                                "entity_id": arg.entity_id,
+                                "role": arg.role.value,
+                                "surface": arg.surface,
+                                "prep": getattr(arg, "prep", None),
+                                "entity_type": arg.entity_type,
+                                "confidence": float(arg.confidence or 0.0),
+                            }
+                        )
+                        continue
+
+                    phrase_id = getattr(arg, "phrase_id", None)
+                    if phrase_id:
+                        noun_phrase_batch[phrase_id] = self._noun_phrase_batch_item(
+                            phrase_id=phrase_id,
+                            argument=arg,
+                            proposition=proposition,
+                            book=book,
+                        )
+                        noun_phrase_argument_batch.append(
+                            {
+                                "proposition_id": proposition.id,
+                                "phrase_id": phrase_id,
+                                "role": arg.role.value,
+                                "surface": arg.surface,
+                                "prep": getattr(arg, "prep", None),
+                                "confidence": float(arg.confidence or 0.0),
+                            }
+                        )
+                        continue
+
+                    ref = self._proposition_broken_reference(proposition, arg, book)
+                    if ref is None:
+                        continue
+                    unresolved_batch[ref.id] = ref
+                    unresolved_links.append(
+                        {
+                            "proposition_id": proposition.id,
+                            "ref_id": ref.id,
+                            "role": arg.role.value,
+                            "surface": arg.surface,
+                            "prep": getattr(arg, "prep", None),
+                        }
+                    )
+
+                for relation in getattr(proposition, "noun_phrase_relations", []) or []:
+                    target_phrase_id = getattr(relation, "target_phrase_id", None)
+                    if target_phrase_id:
+                        noun_phrase_batch.setdefault(
+                            target_phrase_id,
+                            {
+                                "id": target_phrase_id,
+                                "surface": getattr(relation, "target_surface", ""),
+                                "head": getattr(relation, "target_phrase_head", None),
+                                "modifiers": list(getattr(relation, "target_phrase_modifiers", None) or []),
+                                "book": proposition.book or book,
+                                "passage_id": proposition.passage_id,
+                                "mention_start": None,
+                                "mention_end": None,
+                                "expected_type": None,
+                                "reference_class": None,
+                                "confidence": float(getattr(relation, "confidence", 0.0) or 0.0),
+                            },
+                        )
+
+                    noun_phrase_relation_batch.append(
+                        {
+                            "proposition_id": proposition.id,
+                            "source_phrase_id": relation.source_phrase_id,
+                            "relation_type": self._safe_relationship_type(relation.relation_type),
+                            "target_surface": relation.target_surface,
+                            "prep": relation.prep,
+                            "target_entity_id": relation.target_entity_id,
+                            "target_entity_type": relation.target_entity_type,
+                            "target_phrase_id": relation.target_phrase_id,
+                            "confidence": float(relation.confidence or 0.0),
+                        }
+                    )
+
+        self._write_quote_nodes(list(quote_batch.values()))
+        self._write_proposition_nodes(proposition_batch)
+        self._write_quote_proposition_links(proposition_batch)
+        self._write_proposition_argument_links(argument_batch)
+        self._write_noun_phrase_nodes(list(noun_phrase_batch.values()))
+        self._write_noun_phrase_argument_links(noun_phrase_argument_batch)
+        self._write_noun_phrase_relations(noun_phrase_relation_batch)
+        unresolved_written = self.write_broken_references_batch(list(unresolved_batch.values()))
+        self._write_proposition_unresolved_links(unresolved_links)
+
+        return {
+            "propositions_written": len(proposition_batch),
+            "quotes_written": len(quote_batch),
+            "argument_links_written": len(argument_batch),
+            "noun_phrase_nodes_written": len(noun_phrase_batch),
+            "noun_phrase_argument_links_written": len(noun_phrase_argument_batch),
+            "noun_phrase_relation_links_written": len(noun_phrase_relation_batch),
+            "unresolved_links_written": len(unresolved_links),
+            "unresolved_references_written": unresolved_written,
+            "unresolved_reference_classes": self._count_reference_classes(list(unresolved_batch.values())),
+        }
+
+    def _noun_phrase_batch_item(
+        self,
+        *,
+        phrase_id: str,
+        argument,
+        proposition: ExtractedProposition,
+        book: str,
+    ) -> dict:
+        return {
+            "id": phrase_id,
+            "surface": argument.surface,
+            "head": getattr(argument, "phrase_head", None),
+            "modifiers": list(getattr(argument, "phrase_modifiers", None) or []),
+            "book": proposition.book or book,
+            "passage_id": proposition.passage_id,
+            "mention_start": getattr(argument, "mention_start", None),
+            "mention_end": getattr(argument, "mention_end", None),
+            "expected_type": getattr(argument, "expected_type", None),
+            "reference_class": self._reference_class_value(getattr(argument, "reference_class", None)),
+            "confidence": float(getattr(argument, "confidence", 0.0) or 0.0),
+        }
+
+    def _write_proposition_nodes(self, proposition_batch: list[dict]) -> None:
+        if not proposition_batch:
+            return
+
+        batch_size = 1000
+        with self.driver.session() as session:
+            for i in range(0, len(proposition_batch), batch_size):
+                chunk = proposition_batch[i: i + batch_size]
+                session.run(
+                    """
+                    UNWIND $batch AS item
+                    MERGE (pr:Proposition {id: item.id})
+                    SET pr.passage_id = item.passage_id,
+                        pr.book = item.book,
+                        pr.sentence_num = item.sentence_num,
+                        pr.clause_index = item.clause_index,
+                        pr.kind = item.kind,
+                        pr.predicate_lemma = item.predicate_lemma,
+                        pr.predicate_text = item.predicate_text,
+                        pr.predicate_span_start = item.predicate_span_start,
+                        pr.predicate_span_end = item.predicate_span_end,
+                        pr.clause_text = item.clause_text,
+                        pr.quote_id = item.quote_id,
+                        pr.confidence = item.confidence,
+                        pr.extraction_method = item.extraction_method,
+                        pr.modality = item.modality,
+                        pr.polarity = item.polarity,
+                        pr.updated_at = datetime()
+                    WITH item, pr
+                    MATCH (p:Passage {id: item.passage_id})
+                    MERGE (p)-[:HAS_PROPOSITION]->(pr)
+                    """,
+                    batch=chunk,
+                )
+
+    def _write_quote_nodes(self, quote_batch: list[dict]) -> None:
+        if not quote_batch:
+            return
+
+        batch_size = 1000
+        with self.driver.session() as session:
+            for i in range(0, len(quote_batch), batch_size):
+                chunk = quote_batch[i: i + batch_size]
+                session.run(
+                    """
+                    UNWIND $batch AS item
+                    MERGE (q:Quote {id: item.id})
+                    SET q.passage_id = item.passage_id,
+                        q.text = item.text,
+                        q.quote_start = item.quote_start,
+                        q.quote_end = item.quote_end,
+                        q.speaker_name = item.speaker_name,
+                        q.speaker_entity_id = item.speaker_entity_id,
+                        q.speaker_canonical_name = item.speaker_canonical_name,
+                        q.addressee_entity_id = item.addressee_entity_id,
+                        q.addressee_canonical_name = item.addressee_canonical_name,
+                        q.speech_verb = item.speech_verb,
+                        q.attribution_confidence = item.attribution_confidence,
+                        q.is_question = item.is_question,
+                        q.is_exclamation = item.is_exclamation,
+                        q.is_imperative = item.is_imperative,
+                        q.is_verse = item.is_verse,
+                        q.audience_type = item.audience_type,
+                        q.context_type = item.context_type,
+                        q.audience_confidence = item.audience_confidence,
+                        q.updated_at = datetime()
+                    WITH q, item
+                    MATCH (s:Sentence:Passage {id: item.passage_id})
+                    MERGE (s)-[:HAS_QUOTE]->(q)
+                    WITH q, item
+                    OPTIONAL MATCH (speaker {id: item.speaker_entity_id})
+                    FOREACH (_ IN CASE WHEN speaker IS NULL THEN [] ELSE [1] END |
+                        MERGE (speaker)-[:SPOKE]->(q)
+                    )
+                    WITH q, item
+                    OPTIONAL MATCH (addressee {id: item.addressee_entity_id})
+                    FOREACH (_ IN CASE WHEN addressee IS NULL THEN [] ELSE [1] END |
+                        MERGE (q)-[:ADDRESSED_TO]->(addressee)
+                    )
+                    """,
+                    batch=chunk,
+                )
+
+    def _write_quote_proposition_links(self, proposition_batch: list[dict]) -> None:
+        quote_links = [
+            {"quote_id": item.get("quote_id"), "proposition_id": item.get("id")}
+            for item in proposition_batch
+            if item.get("quote_id")
+        ]
+        if not quote_links:
+            return
+
+        batch_size = 5000
+        with self.driver.session() as session:
+            for i in range(0, len(quote_links), batch_size):
+                chunk = quote_links[i: i + batch_size]
+                session.run(
+                    """
+                    UNWIND $batch AS item
+                    MATCH (q:Quote {id: item.quote_id})
+                    MATCH (pr:Proposition {id: item.proposition_id})
+                    MERGE (q)-[:EXPRESSES]->(pr)
+                    """,
+                    batch=chunk,
+                )
+
+    def _write_proposition_argument_links(self, argument_batch: list[dict]) -> None:
+        if not argument_batch:
+            return
+
+        label_map = {
+            "character": "Character",
+            "place": "Place",
+            "object": "Object",
+            "event": "Event",
+        }
+        by_label: dict[str | None, list[dict]] = defaultdict(list)
+        for item in argument_batch:
+            entity_type = str(item.get("entity_type") or "").strip().lower()
+            by_label[label_map.get(entity_type)].append(item)
+
+        batch_size = 5000
+        with self.driver.session() as session:
+            for label, items in by_label.items():
+                if label is None:
+                    match_clause = "MATCH (e {id: item.entity_id})"
+                else:
+                    match_clause = f"MATCH (e:{label} {{id: item.entity_id}})"
+
+                query = f"""
+                    UNWIND $batch AS item
+                    MATCH (pr:Proposition {{id: item.proposition_id}})
+                    {match_clause}
+                    MERGE (e)-[r:ARGUMENT_IN {{proposition_id: item.proposition_id, role: item.role}}]->(pr)
+                    SET r.surface = item.surface,
+                        r.prep = item.prep,
+                        r.entity_type = item.entity_type,
+                        r.confidence = item.confidence
+                """
+
+                for i in range(0, len(items), batch_size):
+                    chunk = items[i: i + batch_size]
+                    session.run(query, batch=chunk)
+
+    def _write_noun_phrase_nodes(self, noun_phrase_batch: list[dict]) -> None:
+        if not noun_phrase_batch:
+            return
+
+        batch_size = 1000
+        with self.driver.session() as session:
+            for i in range(0, len(noun_phrase_batch), batch_size):
+                chunk = noun_phrase_batch[i: i + batch_size]
+                session.run(
+                    """
+                    UNWIND $batch AS item
+                    MERGE (np:NounPhrase {id: item.id})
+                    SET np.surface = item.surface,
+                        np.head = item.head,
+                        np.modifiers = item.modifiers,
+                        np.book = item.book,
+                        np.passage_id = item.passage_id,
+                        np.mention_start = item.mention_start,
+                        np.mention_end = item.mention_end,
+                        np.expected_type = item.expected_type,
+                        np.reference_class = item.reference_class,
+                        np.confidence = item.confidence,
+                        np.updated_at = datetime()
+                    WITH np, item
+                    UNWIND item.modifiers AS modifier
+                    WITH np, item, modifier
+                    WHERE modifier IS NOT NULL AND modifier <> ''
+                    MERGE (m:Modifier {id: item.id + "::modifier::" + modifier})
+                    SET m.surface = modifier,
+                        m.updated_at = datetime()
+                    MERGE (np)-[:HAS_MODIFIER]->(m)
+                    """,
+                    batch=chunk,
+                )
+
+    def _write_noun_phrase_argument_links(self, noun_phrase_argument_batch: list[dict]) -> None:
+        if not noun_phrase_argument_batch:
+            return
+
+        batch_size = 5000
+        with self.driver.session() as session:
+            for i in range(0, len(noun_phrase_argument_batch), batch_size):
+                chunk = noun_phrase_argument_batch[i: i + batch_size]
+                session.run(
+                    """
+                    UNWIND $batch AS item
+                    MATCH (pr:Proposition {id: item.proposition_id})
+                    MATCH (np:NounPhrase {id: item.phrase_id})
+                    MERGE (np)-[r:ARGUMENT_IN {proposition_id: item.proposition_id, role: item.role}]->(pr)
+                    SET r.surface = item.surface,
+                        r.prep = item.prep,
+                        r.entity_type = 'noun_phrase',
+                        r.confidence = item.confidence
+                    """,
+                    batch=chunk,
+                )
+
+    def _write_noun_phrase_relations(self, noun_phrase_relation_batch: list[dict]) -> None:
+        if not noun_phrase_relation_batch:
+            return
+
+        by_rel_and_target: dict[tuple[str, str | None], list[dict]] = defaultdict(list)
+        label_map = {
+            "character": "Character",
+            "place": "Place",
+            "object": "Object",
+            "event": "Event",
+        }
+        for item in noun_phrase_relation_batch:
+            if item.get("target_entity_id"):
+                target_label = label_map.get(str(item.get("target_entity_type") or "").strip().lower())
+                by_rel_and_target[(item["relation_type"], target_label)].append(item)
+            elif item.get("target_phrase_id"):
+                by_rel_and_target[(item["relation_type"], "NounPhrase")].append(item)
+
+        batch_size = 5000
+        with self.driver.session() as session:
+            for (relation_type, target_label), items in by_rel_and_target.items():
+                if target_label == "NounPhrase":
+                    match_clause = "MATCH (target:NounPhrase {id: item.target_phrase_id})"
+                elif target_label:
+                    match_clause = f"MATCH (target:{target_label} {{id: item.target_entity_id}})"
+                else:
+                    match_clause = "MATCH (target {id: item.target_entity_id})"
+
+                query = f"""
+                    UNWIND $batch AS item
+                    MATCH (source:NounPhrase {{id: item.source_phrase_id}})
+                    {match_clause}
+                    MERGE (source)-[r:{relation_type} {{proposition_id: item.proposition_id, prep: item.prep}}]->(target)
+                    SET r.target_surface = item.target_surface,
+                        r.confidence = item.confidence
+                """
+                for i in range(0, len(items), batch_size):
+                    chunk = items[i: i + batch_size]
+                    session.run(query, batch=chunk)
+
+    def _write_proposition_unresolved_links(self, unresolved_links: list[dict]) -> None:
+        if not unresolved_links:
+            return
+
+        batch_size = 5000
+        with self.driver.session() as session:
+            for i in range(0, len(unresolved_links), batch_size):
+                chunk = unresolved_links[i: i + batch_size]
+                session.run(
+                    """
+                    UNWIND $batch AS item
+                    MATCH (pr:Proposition {id: item.proposition_id})
+                    MATCH (u:UnresolvedReference {id: item.ref_id})
+                    MERGE (pr)-[r:HAS_UNRESOLVED_ARGUMENT {role: item.role}]->(u)
+                    SET r.surface = item.surface,
+                        r.prep = item.prep
+                    """,
+                    batch=chunk,
+                )
+
+    @staticmethod
+    def _proposition_broken_reference(
+        proposition: ExtractedProposition,
+        argument,
+        book: str,
+    ) -> BrokenReference | None:
+        surface = str(getattr(argument, "surface", "") or "").strip()
+        expected_type = getattr(argument, "expected_type", None)
+        if not surface or not expected_type:
+            return None
+
+        role = getattr(argument, "role", None)
+        role_value = role.value if hasattr(role, "value") else str(role or "unknown")
+
+        stable_key = "|".join(
+            [
+                proposition.id,
+                role_value,
+                surface.lower(),
+            ]
+        )
+        digest = hashlib.sha1(stable_key.encode("utf-8")).hexdigest()[:16]
+        return BrokenReference(
+            id=f"unresolved-prop-{digest}",
+            mention_text=surface,
+            context_text=proposition.clause_text or proposition.passage_text,
+            expected_type=expected_type,
+            reference_class=getattr(argument, "reference_class", None) or ReferenceClass.UNKNOWN,
+            source_book=proposition.book or book,
+            passage_id=proposition.passage_id,
+            confidence=max(0.35, min(0.85, float(getattr(argument, "confidence", 0.0) or 0.0) + 0.35)),
+            provenance_notes=[
+                f"proposition:{proposition.kind.value}",
+                f"predicate:{proposition.predicate_lemma}",
+                f"role:{role_value}",
+            ],
+        )
+
+    @staticmethod
+    def _reference_class_value(reference_class: object) -> str:
+        if hasattr(reference_class, "value"):
+            return str(getattr(reference_class, "value"))
+        if reference_class:
+            return str(reference_class)
+        return ReferenceClass.UNKNOWN.value
+
+    @staticmethod
+    def _safe_relationship_type(value: str) -> str:
+        rel_type = re.sub(r"[^A-Z0-9_]+", "_", str(value or "").upper()).strip("_")
+        return rel_type or "RELATED_TO"
+
+    @classmethod
+    def _count_reference_classes(cls, refs: list[BrokenReference]) -> dict[str, int]:
+        counts: Counter[str] = Counter()
+        for ref in refs:
+            counts[cls._reference_class_value(getattr(ref, "reference_class", None))] += 1
+        return {
+            ref_class: count
+            for ref_class, count in sorted(counts.items(), key=lambda item: (-item[1], item[0]))
+        }
+
+    @classmethod
+    def _merge_reference_class_counts(cls, *mappings: object) -> dict[str, int]:
+        counts: Counter[str] = Counter()
+        for mapping in mappings:
+            if not isinstance(mapping, dict):
+                continue
+            for key, value in mapping.items():
+                counts[cls._reference_class_value(key)] += int(value or 0)
+        return {
+            ref_class: count
+            for ref_class, count in sorted(counts.items(), key=lambda item: (-item[1], item[0]))
+        }
 
     def close(self) -> None:
         """Close the driver connection."""
@@ -767,6 +1500,7 @@ class GraphWriter:
         book_id: str,
         entity_id_map: dict[str, str],  # speaker_name -> canonical_id
         progress_callback=None,
+        min_lines_for_profile: int = 3,
     ) -> dict:
         """Write complete voice analysis results to the graph.
 
@@ -782,7 +1516,30 @@ class GraphWriter:
         stats = {
             "profiles_written": 0,
             "dialogue_lines_written": 0,
+            "profiles_skipped_unmapped": 0,
+            "profiles_merged_aliases": 0,
         }
+
+        grouped_voice = self._group_voice_lines_by_entity(
+            voice_result=voice_result,
+            entity_id_map=entity_id_map,
+        )
+        if grouped_voice is not None:
+            merged_profiles = self._profiles_from_grouped_voice_lines(
+                grouped_voice=grouped_voice,
+                min_lines_for_profile=min_lines_for_profile,
+            )
+            total_profiles = len(merged_profiles)
+            stats["profiles_skipped_unmapped"] = grouped_voice["profiles_skipped_unmapped"]
+            stats["profiles_merged_aliases"] = grouped_voice["profiles_merged_aliases"]
+
+            for i, (char_id, profile) in enumerate(merged_profiles.items()):
+                if progress_callback:
+                    progress_callback(i + 1, total_profiles, f"Writing {profile.character_name} profile...")
+                self.write_character_voice(char_id, profile)
+                stats["profiles_written"] += 1
+
+            return stats
 
         total_profiles = len(voice_result.profiles)
 
@@ -794,24 +1551,78 @@ class GraphWriter:
             # Try to find canonical ID
             char_id = entity_id_map.get(name) or entity_id_map.get(name.lower())
             if not char_id:
-                # Create a simple ID if not mapped
-                char_id = f"char_{name.lower().replace(' ', '_')}"
-                # Ensure character node exists
-                self._ensure_character_exists(char_id, name)
+                stats["profiles_skipped_unmapped"] += 1
+                continue
 
             self.write_character_voice(char_id, profile)
             stats["profiles_written"] += 1
 
         return stats
 
-    def _ensure_character_exists(self, char_id: str, name: str) -> None:
-        """Ensure a character node exists."""
-        query = """
-        MERGE (c:Character {id: $id})
-        ON CREATE SET c.canonical_name = $name
-        """
-        with self.driver.session() as session:
-            session.run(query, id=char_id, name=name)
+    def _group_voice_lines_by_entity(
+        self,
+        *,
+        voice_result,
+        entity_id_map: dict[str, str],
+    ) -> dict[str, object] | None:
+        """Merge speaker aliases that resolve to the same character before writing."""
+        dialogue_by_speaker = getattr(voice_result, "dialogue_by_speaker", None)
+        if not isinstance(dialogue_by_speaker, dict) or not dialogue_by_speaker:
+            return None
+
+        lines_by_character: dict[str, list] = defaultdict(list)
+        names_by_character: dict[str, Counter[str]] = defaultdict(Counter)
+        skipped_unmapped = 0
+
+        for speaker_name, lines in dialogue_by_speaker.items():
+            if speaker_name == "UNKNOWN":
+                continue
+            char_id = entity_id_map.get(speaker_name) or entity_id_map.get(speaker_name.lower())
+            if not char_id:
+                skipped_unmapped += 1
+                continue
+            lines_by_character[char_id].extend(lines)
+            names_by_character[char_id][speaker_name] += len(lines)
+
+        merged_aliases = sum(max(0, len(name_counts) - 1) for name_counts in names_by_character.values())
+
+        return {
+            "lines_by_character": lines_by_character,
+            "names_by_character": names_by_character,
+            "profiles_skipped_unmapped": skipped_unmapped,
+            "profiles_merged_aliases": merged_aliases,
+        }
+
+    def _profiles_from_grouped_voice_lines(
+        self,
+        *,
+        grouped_voice: dict[str, object],
+        min_lines_for_profile: int,
+    ) -> dict[str, CharacterVoiceProfile]:
+        lines_by_character = grouped_voice["lines_by_character"]
+        names_by_character = grouped_voice["names_by_character"]
+
+        all_character_words: dict[str, Counter[str]] = {}
+        for char_id, lines in lines_by_character.items():
+            word_counter: Counter[str] = Counter()
+            for line in lines:
+                word_counter.update(line.text.lower().split())
+            all_character_words[char_id] = word_counter
+
+        profiles: dict[str, CharacterVoiceProfile] = {}
+        for char_id, lines in lines_by_character.items():
+            if len(lines) < min_lines_for_profile:
+                continue
+            name_counts = names_by_character[char_id]
+            canonical_name = name_counts.most_common(1)[0][0]
+            profiles[char_id] = CharacterVoiceProfile.from_dialogue_lines(
+                character_name=canonical_name,
+                character_id=char_id,
+                lines=lines,
+                all_character_words=all_character_words,
+            )
+
+        return profiles
 
     # =========================================================================
     # Event Graph Integration (Phase 6+)
@@ -843,8 +1654,19 @@ class GraphWriter:
             e.agent = $agent,
             e.action = $action,
             e.patient = $patient,
+            e.location = $location,
+            e.polarity = $polarity,
+            e.modality = $modality,
+            e.epistemic_status = $epistemic_status,
+            e.knowledge_holder = $knowledge_holder,
+            e.certainty = $certainty,
             e.era = $era,
             e.year = $year,
+            e.year_text = $year_text,
+            e.source_text = $source_text,
+            e.source_location = $source_location,
+            e.source_span_start = $source_span_start,
+            e.source_span_end = $source_span_end,
             e.source_book = $book,
             e.confidence = $confidence
         """
@@ -857,8 +1679,19 @@ class GraphWriter:
                 agent=event.agent,
                 action=event.action,
                 patient=event.patient,
+                location=getattr(event, "location", None),
+                polarity=getattr(event, "polarity", "positive"),
+                modality=getattr(event, "modality", "asserted"),
+                epistemic_status=getattr(event, "epistemic_status", "narrator_assertion"),
+                knowledge_holder=getattr(event, "knowledge_holder", None),
+                certainty=getattr(event, "certainty", "certain"),
                 era=event.era.value if event.era else None,
                 year=event.year,
+                year_text=getattr(event, "year_text", None),
+                source_text=getattr(event, "source_text", ""),
+                source_location=getattr(event, "source_location", ""),
+                source_span_start=getattr(event, "source_span_start", None),
+                source_span_end=getattr(event, "source_span_end", None),
                 book=self._resolve_event_book(event, book),
                 confidence=event.confidence,
             )
@@ -887,9 +1720,19 @@ class GraphWriter:
                 "agent": e.agent,
                 "action": e.action,
                 "patient": e.patient,
+                "location": getattr(e, "location", None),
+                "polarity": getattr(e, "polarity", "positive"),
+                "modality": getattr(e, "modality", "asserted"),
+                "epistemic_status": getattr(e, "epistemic_status", "narrator_assertion"),
+                "knowledge_holder": getattr(e, "knowledge_holder", None),
+                "certainty": getattr(e, "certainty", "certain"),
                 "source_text": e.source_text,
+                "source_location": getattr(e, "source_location", ""),
+                "source_span_start": getattr(e, "source_span_start", None),
+                "source_span_end": getattr(e, "source_span_end", None),
                 "era": e.era.value if e.era else None,
                 "year": e.year,
+                "year_text": getattr(e, "year_text", None),
                 "confidence": e.confidence,
                 "source_book": self._resolve_event_book(e, book),
             }
@@ -903,9 +1746,19 @@ class GraphWriter:
             e.agent = item.agent,
             e.action = item.action,
             e.patient = item.patient,
+            e.location = item.location,
+            e.polarity = item.polarity,
+            e.modality = item.modality,
+            e.epistemic_status = item.epistemic_status,
+            e.knowledge_holder = item.knowledge_holder,
+            e.certainty = item.certainty,
             e.source_text = item.source_text,
+            e.source_location = item.source_location,
+            e.source_span_start = item.source_span_start,
+            e.source_span_end = item.source_span_end,
             e.era = item.era,
             e.year = item.year,
+            e.year_text = item.year_text,
             e.confidence = item.confidence
         """
 
@@ -949,6 +1802,7 @@ class GraphWriter:
                     "event1_book": (event_book_by_id or {}).get(r.event1_id, default_book or ""),
                     "event2_book": (event_book_by_id or {}).get(r.event2_id, default_book or ""),
                     "confidence": r.confidence,
+                    "source_text": getattr(r, "source_text", ""),
                 }
                 for r in type_rels
             ]
@@ -958,7 +1812,8 @@ class GraphWriter:
             MATCH (e1:Event {{id: item.event1_id, source_book: item.event1_book}})
             MATCH (e2:Event {{id: item.event2_id, source_book: item.event2_book}})
             MERGE (e1)-[r:{rel_type}]->(e2)
-            SET r.confidence = item.confidence
+            SET r.confidence = item.confidence,
+                r.source_text = item.source_text
             RETURN count(r) AS rel_count
             """
 
@@ -1123,9 +1978,15 @@ class GraphWriter:
         MATCH (e:Event)
         WHERE {where_clause}
         RETURN e.id as id, e.description as description, e.agent as agent,
-               e.action as action, e.patient as patient, e.era as era,
-               e.year as year, e.source_book as source_book,
-               e.confidence as confidence
+               e.action as action, e.patient as patient, e.location as location,
+               e.polarity as polarity, e.modality as modality,
+               e.epistemic_status as epistemic_status,
+               e.knowledge_holder as knowledge_holder, e.certainty as certainty,
+               e.era as era, e.year as year, e.year_text as year_text,
+               e.source_text as source_text, e.source_location as source_location,
+               e.source_span_start as source_span_start,
+               e.source_span_end as source_span_end,
+               e.source_book as source_book, e.confidence as confidence
         ORDER BY e.era, e.year
         LIMIT $limit
         """
@@ -1472,6 +2333,7 @@ class GraphWriter:
         with self.driver.session() as session:
             session.run(
                 query,
+                entity_id=entity_id,
                 entity_node_id=resolved["node_id"],
                 source_id=source_id,
                 source_title=source_props["source_title"],
@@ -1609,38 +2471,55 @@ class GraphWriter:
         if not refs:
             return 0
 
+        batch_data = []
+        for ref in refs:
+            expected_type = getattr(ref, "expected_type", None)
+            batch_data.append(
+                {
+                    "id": ref.id,
+                    "mention_text": getattr(ref, "mention_text", ""),
+                    "context_text": getattr(ref, "context_text", None),
+                    "context_before": getattr(ref, "context_before", None),
+                    "context_after": getattr(ref, "context_after", None),
+                    "expected_type": getattr(expected_type, "value", None) or expected_type,
+                    "reference_class": self._reference_class_value(getattr(ref, "reference_class", None)),
+                    "source_book": getattr(ref, "source_book", None),
+                    "passage_id": getattr(ref, "passage_id", None),
+                    "resolved_entity_id": getattr(ref, "resolved_entity_id", None) or "",
+                    "confidence": float(getattr(ref, "confidence", 0.6) or 0.6),
+                    "candidates": [
+                        c.model_dump() if hasattr(c, "model_dump") else c
+                        for c in (getattr(ref, "candidates", None) or [])
+                    ],
+                    "provenance_notes": list(getattr(ref, "provenance_notes", None) or []),
+                    "conflict_weight": float(getattr(ref, "conflict_weight", 0.0) or 0.0),
+                }
+            )
+
+        batch_size = 1000
         with self.driver.session() as session:
-            for ref in refs:
+            for i in range(0, len(batch_data), batch_size):
+                chunk = batch_data[i: i + batch_size]
                 session.run(
                     """
-                    MERGE (u:UnresolvedReference {id: $id})
-                    SET u.mention_text = $mention_text,
-                        u.context_text = $context_text,
-                        u.context_before = $context_before,
-                        u.context_after = $context_after,
-                        u.expected_type = $expected_type,
-                        u.source_book = $source_book,
-                        u.passage_id = $passage_id,
-                        u.resolved_entity_id = $resolved_entity_id,
-                        u.confidence = $confidence,
-                        u.candidates = $candidates,
-                        u.provenance_notes = $provenance_notes,
-                        u.conflict_weight = $conflict_weight,
+                    UNWIND $batch AS item
+                    MERGE (u:UnresolvedReference {id: item.id})
+                    SET u.mention_text = item.mention_text,
+                        u.context_text = item.context_text,
+                        u.context_before = item.context_before,
+                        u.context_after = item.context_after,
+                        u.expected_type = item.expected_type,
+                        u.reference_class = item.reference_class,
+                        u.source_book = item.source_book,
+                        u.passage_id = item.passage_id,
+                        u.resolved_entity_id = item.resolved_entity_id,
+                        u.confidence = item.confidence,
+                        u.candidates = item.candidates,
+                        u.provenance_notes = item.provenance_notes,
+                        u.conflict_weight = item.conflict_weight,
                         u.updated_at = datetime()
                     """,
-                    id=ref.id,
-                    mention_text=getattr(ref, "mention_text", ""),
-                    context_text=getattr(ref, "context_text", None),
-                    context_before=getattr(ref, "context_before", None),
-                    context_after=getattr(ref, "context_after", None),
-                    expected_type=getattr(ref, "expected_type", None),
-                    source_book=getattr(ref, "source_book", None),
-                    passage_id=getattr(ref, "passage_id", None),
-                    resolved_entity_id=getattr(ref, "resolved_entity_id", None),
-                    confidence=float(getattr(ref, "confidence", 0.6) or 0.6),
-                    candidates=[c.model_dump() if hasattr(c, "model_dump") else c for c in (getattr(ref, "candidates", None) or [])],
-                    provenance_notes=list(getattr(ref, "provenance_notes", None) or []),
-                    conflict_weight=float(getattr(ref, "conflict_weight", 0.0) or 0.0),
+                    batch=chunk,
                 )
         return len(refs)
 
@@ -1669,7 +2548,7 @@ class GraphWriter:
 
     def query_unresolved_references(self, source_book: str | None = None, limit: int = 100) -> list[dict]:
         """Query unresolved references, filtered by source book if provided."""
-        where = "u.resolved_entity_id IS NULL"
+        where = "u.resolved_entity_id = ''"
         params: dict = {"limit": limit}
         if source_book:
             where += " AND toLower(coalesce(u.source_book,'')) CONTAINS toLower($source_book)"
@@ -1682,10 +2561,16 @@ class GraphWriter:
                 WHERE {where}
                 RETURN u.id AS id, u.mention_text AS mention_text,
                        u.expected_type AS expected_type,
+                       u.reference_class AS reference_class,
                        u.source_book AS source_book,
                        u.passage_id AS passage_id,
+                       u.context_text AS context_text,
+                       u.context_before AS context_before,
+                       u.context_after AS context_after,
                        u.confidence AS confidence,
                        coalesce(u.conflict_weight, 0.0) AS conflict_weight,
+                       coalesce(u.llm_resolution_action, '') AS llm_resolution_action,
+                       coalesce(u.llm_resolution_applied, false) AS llm_resolution_applied,
                        coalesce(u.candidates, []) AS candidates,
                        coalesce(u.provenance_notes, []) AS provenance_notes
                 ORDER BY (coalesce(u.conflict_weight, 0.0) + coalesce(u.confidence, 0.0)) DESC
@@ -1698,6 +2583,166 @@ class GraphWriter:
     def query_unresolved_reference_queue(self, source_book: str | None = None, limit: int = 100) -> list[dict]:
         """Alias query optimized for downstream generation/review queue."""
         return self.query_unresolved_references(source_book=source_book, limit=limit)
+
+    def query_character_inventory(self) -> list[dict]:
+        """Return canonical character inventory for downstream resolution passes."""
+        with self.driver.session() as session:
+            result = session.run(
+                """
+                MATCH (c:Character)
+                RETURN coalesce(c.id, c.canonical_id, c.canonical_name) AS entity_id,
+                       coalesce(c.canonical_name, c.name, c.id) AS canonical_name,
+                       coalesce(c.aliases, []) AS aliases
+                ORDER BY canonical_name
+                """
+            )
+            return [dict(r) for r in result]
+
+    def write_unresolved_resolution_suggestions(self, suggestions: list[dict]) -> int:
+        """Persist hosted-model suggestions onto unresolved-reference nodes."""
+        if not suggestions:
+            return 0
+
+        batch_size = 500
+        with self.driver.session() as session:
+            for i in range(0, len(suggestions), batch_size):
+                chunk = suggestions[i: i + batch_size]
+                session.run(
+                    """
+                    UNWIND $batch AS item
+                    MATCH (u:UnresolvedReference {id: item.id})
+                    SET u.llm_resolution_action = item.action,
+                        u.llm_resolution_stage1 = item.stage1_verdict,
+                        u.llm_resolution_entity_id = coalesce(item.entity_id, ''),
+                        u.llm_resolution_entity_name = coalesce(item.entity_name, ''),
+                        u.llm_resolution_shortlist = coalesce(item.shortlist, []),
+                        u.llm_resolution_notes = coalesce(item.notes, []),
+                        u.llm_resolution_model = coalesce(item.model, ''),
+                        u.llm_resolution_provider = coalesce(item.provider, ''),
+                        u.llm_resolution_score = coalesce(item.score, 0.0),
+                        u.llm_resolution_applied = coalesce(item.applied, false),
+                        u.llm_resolution_error = coalesce(item.error, ''),
+                        u.llm_resolution_updated_at = datetime(),
+                        u.resolved_entity_id = CASE
+                            WHEN coalesce(item.applied, false) AND coalesce(item.entity_id, '') <> ''
+                            THEN item.entity_id
+                            ELSE u.resolved_entity_id
+                        END
+                    """,
+                    batch=chunk,
+                )
+        return len(suggestions)
+
+    def query_llm_new_entity_suggestions(self, limit: int = 500) -> list[dict]:
+        """Return unresolved refs that the hosted model classified as new entities."""
+        with self.driver.session() as session:
+            result = session.run(
+                """
+                MATCH (u:UnresolvedReference)
+                WHERE coalesce(u.resolved_entity_id, '') = ''
+                  AND coalesce(u.llm_resolution_action, '') = 'new_entity'
+                  AND trim(coalesce(u.llm_resolution_entity_name, '')) <> ''
+                RETURN u.id AS id,
+                       u.mention_text AS mention_text,
+                       u.source_book AS source_book,
+                       u.llm_resolution_entity_name AS llm_resolution_entity_name,
+                       coalesce(u.llm_resolution_score, 0.0) AS llm_resolution_score
+                ORDER BY llm_resolution_score DESC, id
+                LIMIT $limit
+                """,
+                limit=limit,
+            )
+            return [dict(r) for r in result]
+
+    def materialize_llm_character_suggestions(self, candidates: list[dict]) -> int:
+        """Create/update Character nodes from hosted new-entity suggestions."""
+        if not candidates:
+            return 0
+
+        count = 0
+        with self.driver.session() as session:
+            for candidate in candidates:
+                canonical_name = str(candidate.get("canonical_name") or "").strip()
+                entity_id = str(candidate.get("entity_id") or "").strip()
+                aliases = [
+                    str(alias).strip()
+                    for alias in (candidate.get("aliases") or [])
+                    if str(alias).strip()
+                ]
+                ref_ids = [
+                    str(ref_id).strip()
+                    for ref_id in (candidate.get("ref_ids") or [])
+                    if str(ref_id).strip()
+                ]
+                if not canonical_name or not entity_id or not ref_ids:
+                    continue
+
+                existing = session.run(
+                    """
+                    MATCH (c:Character)
+                    WHERE toLower(coalesce(c.canonical_name, '')) = toLower($name)
+                       OR any(a IN coalesce(c.aliases, []) WHERE toLower(a) = toLower($name))
+                    RETURN coalesce(c.id, c.canonical_id, c.canonical_name) AS entity_id
+                    LIMIT 1
+                    """,
+                    name=canonical_name,
+                ).single()
+                materialized_id = str(existing["entity_id"]) if existing and existing["entity_id"] else entity_id
+
+                session.run(
+                    """
+                    MERGE (c:Character {id: $entity_id})
+                    ON CREATE SET c.canonical_id = $entity_id,
+                                  c.canonical_name = $canonical_name,
+                                  c.aliases = $aliases,
+                                  c.mention_count = coalesce(c.mention_count, 0),
+                                  c.materialized_from_llm = true,
+                                  c.created_at = datetime()
+                    SET c.updated_at = datetime(),
+                        c.canonical_id = coalesce(c.canonical_id, $entity_id),
+                        c.canonical_name = coalesce(c.canonical_name, $canonical_name),
+                        c.aliases = reduce(
+                            acc = coalesce(c.aliases, []),
+                            alias IN $aliases |
+                            CASE WHEN alias IN acc THEN acc ELSE acc + alias END
+                        ),
+                        c.materialized_from_llm = true,
+                        c.llm_support_count = $support,
+                        c.llm_avg_score = $avg_score,
+                        c.llm_source_books = $source_books
+                    """,
+                    entity_id=materialized_id,
+                    canonical_name=canonical_name,
+                    aliases=aliases,
+                    support=int(candidate.get("support") or 0),
+                    avg_score=float(candidate.get("avg_score") or 0.0),
+                    source_books=list(candidate.get("source_books") or []),
+                )
+                session.run(
+                    """
+                    UNWIND $ref_ids AS ref_id
+                    MATCH (u:UnresolvedReference {id: ref_id})
+                    SET u.resolved_entity_id = $entity_id,
+                        u.llm_resolution_applied = true,
+                        u.llm_materialized = true,
+                        u.llm_materialized_name = $canonical_name,
+                        u.llm_materialized_at = datetime(),
+                        u.llm_resolution_action = 'existing',
+                        u.llm_resolution_entity_id = $entity_id,
+                        u.llm_resolution_entity_name = $canonical_name,
+                        u.llm_resolution_notes = reduce(
+                            acc = coalesce(u.llm_resolution_notes, []),
+                            note IN ['materialized_new_entity'] |
+                            CASE WHEN note IN acc THEN acc ELSE acc + note END
+                        )
+                    """,
+                    ref_ids=ref_ids,
+                    entity_id=materialized_id,
+                    canonical_name=canonical_name,
+                )
+                count += 1
+
+        return count
 
     # =========================================================================
     # Sociolinguistic Registers (Issue #47 slice 1)
@@ -1858,146 +2903,6 @@ class GraphWriter:
             )
 
     def query_register_drift(
-        self,
-        entity_id: str,
-        min_delta: float = 0.2,
-        limit: int = 20,
-    ) -> list[dict]:
-        """Query consecutive register observations and calculate drift deltas."""
-        from ..lore.sociolinguistic_registers import ground_character_entity_id
-
-        entity_id = ground_character_entity_id(entity_id)
-        if not entity_id:
-            return []
-
-        with self.driver.session() as session:
-            result = session.run(
-                """
-                MATCH (e {id: $entity_id})-[:HAS_REGISTER_OBSERVATION]->(obs:RegisterObservation)
-                RETURN obs.observed_at AS observed_at,
-                       obs.dominant_register AS dominant_register,
-                       obs.formality_score AS formality_score,
-                       obs.archaism_rate AS archaism_rate,
-                       obs.confidence AS confidence
-                ORDER BY obs.observed_at ASC
-                LIMIT $limit
-                """,
-                entity_id=entity_id,
-                limit=limit,
-            )
-            rows = [dict(r) for r in result]
-
-        drifts: list[dict] = []
-        for i in range(1, len(rows)):
-            prev = rows[i - 1]
-            cur = rows[i]
-            delta = {
-                "from": prev.get("observed_at"),
-                "to": cur.get("observed_at"),
-                "from_register": prev.get("dominant_register"),
-                "to_register": cur.get("dominant_register"),
-                "formality_shift": (cur.get("formality_score") or 0.0) - (prev.get("formality_score") or 0.0),
-                "archaism_shift": (cur.get("archaism_rate") or 0.0) - (prev.get("archaism_rate") or 0.0),
-            }
-            magnitude = max(abs(delta["formality_shift"]), abs(delta["archaism_shift"]))
-            if delta["from_register"] != delta["to_register"]:
-                magnitude = max(magnitude, 0.3)
-            if magnitude >= min_delta:
-                delta["magnitude"] = round(magnitude, 4)
-                drifts.append(delta)
-        return drifts
-
-    # =========================================================================
-    # Sociolinguistic Registers (Issue #47 slice 1)
-    # =========================================================================
-
-    def _deprecated_duplicate_write_register_profile(
-        self,
-        entity_id: str,
-        profile,
-        source_passage_id: str | None = None,
-    ) -> None:
-        """Persist the current sociolinguistic register profile for an entity."""
-        from ..lore.sociolinguistic_registers import ground_character_entity_id
-
-        entity_id = ground_character_entity_id(entity_id)
-        if not entity_id:
-            raise ValueError("Register profiles require a canonical character entity id")
-
-        with self.driver.session() as session:
-            session.run(
-                """
-                MATCH (e {id: $entity_id})
-                MERGE (rp:RegisterProfile {entity_id: $entity_id})
-                SET rp.dominant_register = $dominant_register,
-                    rp.confidence = $confidence,
-                    rp.formality_score = $formality_score,
-                    rp.archaism_rate = $archaism_rate,
-                    rp.contraction_rate = $contraction_rate,
-                    rp.avg_sentence_length = $avg_sentence_length,
-                    rp.token_count = $token_count,
-                    rp.source_passage_id = $source_passage_id,
-                    rp.updated_at = datetime()
-                MERGE (e)-[:HAS_REGISTER_PROFILE]->(rp)
-                """,
-                entity_id=entity_id,
-                dominant_register=profile.dominant_register,
-                confidence=profile.confidence,
-                formality_score=profile.formality_score,
-                archaism_rate=profile.archaism_rate,
-                contraction_rate=profile.contraction_rate,
-                avg_sentence_length=profile.avg_sentence_length,
-                token_count=profile.token_count,
-                source_passage_id=source_passage_id,
-            )
-
-    def _deprecated_duplicate_write_register_observation(
-        self,
-        entity_id: str,
-        profile,
-        observed_at: str,
-        source_passage_id: str | None = None,
-    ) -> None:
-        """Write a time-stamped register observation for later drift analysis."""
-        from ..lore.sociolinguistic_registers import ground_character_entity_id
-
-        entity_id = ground_character_entity_id(entity_id)
-        if not entity_id:
-            raise ValueError("Register observations require a canonical character entity id")
-
-        with self.driver.session() as session:
-            session.run(
-                """
-                MATCH (e {id: $entity_id})
-                CREATE (obs:RegisterObservation {
-                    id: randomUUID(),
-                    entity_id: $entity_id,
-                    observed_at: $observed_at,
-                    dominant_register: $dominant_register,
-                    confidence: $confidence,
-                    formality_score: $formality_score,
-                    archaism_rate: $archaism_rate,
-                    contraction_rate: $contraction_rate,
-                    avg_sentence_length: $avg_sentence_length,
-                    token_count: $token_count,
-                    source_passage_id: $source_passage_id,
-                    created_at: datetime()
-                })
-                MERGE (e)-[:HAS_REGISTER_OBSERVATION]->(obs)
-                """,
-                entity_id=entity_id,
-                observed_at=observed_at,
-                dominant_register=profile.dominant_register,
-                confidence=profile.confidence,
-                formality_score=profile.formality_score,
-                archaism_rate=profile.archaism_rate,
-                contraction_rate=profile.contraction_rate,
-                avg_sentence_length=profile.avg_sentence_length,
-                token_count=profile.token_count,
-                source_passage_id=source_passage_id,
-            )
-
-    def _deprecated_duplicate_query_register_drift(
         self,
         entity_id: str,
         min_delta: float = 0.2,

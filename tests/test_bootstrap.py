@@ -1,10 +1,7 @@
 """Tests for the generic entity bootstrapper (issue #2)."""
 
-import pytest
 from book_graph_analyzer.extract.bootstrap import (
     EntityBootstrapper,
-    EntityCandidate,
-    EntityCluster,
     BootstrapResult,
 )
 

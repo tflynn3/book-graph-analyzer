@@ -11,8 +11,8 @@ from typing import Optional, Callable
 from collections import Counter
 import json
 
+from ..extract.normalizer import normalize_text
 from .dialogue import (
-    DialogueExtraction,
     DialogueLine,
     extract_dialogue,
     merge_dialogue_extractions,
@@ -101,6 +101,7 @@ class VoiceAnalyzer:
             VoiceAnalysisResult with profiles for each character
         """
         result = VoiceAnalysisResult(source_file=source_name)
+        text = normalize_text(text)
         
         self._report_progress("Extracting dialogue...")
         
@@ -287,9 +288,9 @@ class VoiceAnalyzer:
         text_contractions = sum(1 for w in words if any(p in w for p in contraction_patterns))
         text_contraction_ratio = text_contractions / word_count if word_count > 0 else 0
         
-        # Question / exclamation
-        text_is_question = text.rstrip().endswith('?')
-        text_is_exclamation = text.rstrip().endswith('!')
+        # Question / exclamation cadence for single-line voice matching.
+        text_is_question = float(text.rstrip().endswith('?'))
+        text_is_exclamation = float(text.rstrip().endswith('!'))
         
         # Word length
         clean_words = [w.strip('.,!?"\'') for w in words if w.strip('.,!?"\'')]
@@ -342,8 +343,16 @@ class VoiceAnalyzer:
                 if phrase_hits > 0:
                     score += min(phrase_hits / 2, 1.0) * 0.10
             weight_total += 0.10
+
+            # 6. Utterance cadence proximity (weight: 0.05)
+            punctuation_score = 1.0 - (
+                abs(text_is_question - profile.question_ratio)
+                + abs(text_is_exclamation - profile.exclamation_ratio)
+            ) / 2.0
+            score += max(0.0, punctuation_score) * 0.05
+            weight_total += 0.05
             
-            # 6. Penalty: text uses "never_says" words (weight: -0.05 per hit)
+            # 7. Penalty: text uses "never_says" words (weight: -0.05 per hit)
             if profile.never_says:
                 never_set = set(profile.never_says)
                 penalty = sum(1 for w in text_word_set if w in never_set)

@@ -8,15 +8,14 @@ Two-pass extraction:
 from collections import defaultdict
 from dataclasses import dataclass, field
 from pathlib import Path
-from typing import Iterator
 
 from ..config import get_settings
 from ..ingest.loader import load_book
-from ..ingest.splitter import split_into_passages, Passage
-from .ner import NERPipeline
-from .dynamic_resolver import DynamicEntityResolver, EntityCluster
-from .relationships import RelationshipExtractor, RelationshipExtractionResult
+from ..ingest.splitter import Passage, split_into_passages
 from ..models.relationships import ExtractedRelationship
+from .dynamic_resolver import DynamicEntityResolver, EntityCluster
+from .ner import NERPipeline
+from .relationships import RelationshipExtractor
 
 
 @dataclass
@@ -112,26 +111,23 @@ class GenericExtractor:
             progress_callback("entities", 0, total_passages, "Extracting entities...")
         
         resolver = DynamicEntityResolver(use_llm=self.use_llm)
-        passage_entities: dict[str, list[EntityCluster]] = {}
+        passage_mentions = {}
         
         for i, passage in enumerate(passages):
             # Extract entities from passage
             entities = self.ner.extract_entities(passage.text)
             
-            # Process each mention with dynamic resolver
-            clusters = []
             for entity in entities:
-                cluster = resolver.process_mention(
+                resolver.process_mention(
                     entity=entity,
                     passage_id=passage.id,
                     passage_text=passage.text,
                 )
-                clusters.append(cluster)
             
             # Check for explicit alias statements
             resolver.detect_aliases_from_text(passage.text, passage.id)
             
-            passage_entities[passage.id] = clusters
+            passage_mentions[passage.id] = entities
             
             if progress_callback and (i + 1) % 100 == 0:
                 progress_callback("entities", i + 1, total_passages, 
@@ -161,38 +157,46 @@ class GenericExtractor:
         )
         
         for i, passage in enumerate(passages):
-            clusters = passage_entities.get(passage.id, [])
+            raw_mentions = passage_mentions.get(passage.id, [])
+            resolved_entities = []
+            clusters = []
+            seen_cluster_ids: set[str] = set()
             
-            # Skip passages with <2 entities
-            if len(clusters) < 2:
+            # Re-resolve mentions after consolidation so each passage uses the current
+            # canonical cluster, not a pre-merge object snapshot from earlier in the book.
+            from .resolver import ResolvedEntity
+
+            for mention in raw_mentions:
+                cluster_id, canonical_name, confidence = resolver.resolve(mention.text)
+                if not cluster_id:
+                    continue
+                cluster = resolver.clusters.get(cluster_id)
+                if cluster is None:
+                    continue
+
+                if cluster_id not in seen_cluster_ids:
+                    seen_cluster_ids.add(cluster_id)
+                    clusters.append(cluster)
+
+                resolved_entities.append(
+                    ResolvedEntity(
+                        extracted=mention,
+                        canonical_id=cluster.id,
+                        canonical_name=canonical_name,
+                        entity_type=cluster.entity_type,
+                        confidence=confidence,
+                        is_new=False,
+                    )
+                )
+
+            # Skip passages with <2 resolved entities
+            if len(resolved_entities) < 2:
                 passage_results.append(GenericExtractionResult(
                     passage=passage,
                     entities=clusters,
                     relationships=[],
                 ))
                 continue
-            
-            # Build fake ResolvedEntity objects for the relationship extractor
-            from .resolver import ResolvedEntity
-            from .ner import ExtractedEntity
-            
-            resolved_entities = []
-            for cluster in clusters:
-                if cluster.mentions:
-                    mention = cluster.mentions[-1]  # Most recent mention in this passage
-                    resolved_entities.append(ResolvedEntity(
-                        extracted=ExtractedEntity(
-                            text=mention.text,
-                            label=mention.label,
-                            start_char=mention.char_offset,
-                            end_char=mention.char_offset + len(mention.text),
-                        ),
-                        canonical_id=cluster.id,
-                        canonical_name=cluster.canonical_name,
-                        entity_type=cluster.entity_type,
-                        confidence=1.0,
-                        is_new=False,
-                    ))
             
             # Extract relationships
             rel_result = rel_extractor.extract_relationships(

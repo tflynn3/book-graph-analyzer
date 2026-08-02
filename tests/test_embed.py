@@ -14,8 +14,13 @@ All tests use ephemeral Chroma + DuckDB in-memory so no disk state is created.
 
 import json
 import pytest
-from pathlib import Path
-from collections import namedtuple
+
+# The semantic-retrieval stack is deliberately optional because its model and
+# vector-database dependencies are large. Base installs skip this integration
+# module; `pip install -e '.[dev,embeddings]'` enables the complete suite.
+pytest.importorskip("chromadb", reason="install the embeddings extra to test semantic retrieval")
+pytest.importorskip("duckdb", reason="install the embeddings extra to test semantic retrieval")
+pytest.importorskip("sentence_transformers", reason="install the embeddings extra to test semantic retrieval")
 
 from book_graph_analyzer.embed import (
     Embedder,

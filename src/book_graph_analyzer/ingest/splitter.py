@@ -3,6 +3,29 @@
 import re
 from dataclasses import dataclass
 
+_STANDALONE_CHAPTER_RE = re.compile(
+    r"^\s*_?(Chapter[ \t]+[IVXLC\d]+)_?\s*$",
+    re.MULTILINE | re.IGNORECASE,
+)
+_PROLOGUE_RE = re.compile(r"^\s*PROLOGUE\s*$", re.MULTILINE | re.IGNORECASE)
+_APPENDIX_RE = re.compile(r"^\s*APPENDICES?\s*$", re.MULTILINE | re.IGNORECASE)
+_INDEX_RE = re.compile(r"^\s*INDEXES?\s*$", re.MULTILINE | re.IGNORECASE)
+_STRUCTURAL_TOKENS = {
+    "appendix",
+    "appendices",
+    "book",
+    "chapter",
+    "contents",
+    "epilogue",
+    "foreword",
+    "index",
+    "indexes",
+    "part",
+    "preface",
+    "prologue",
+}
+_LOWERCASE_TITLE_WORDS = {"a", "an", "and", "at", "in", "of", "on", "the", "to"}
+
 
 @dataclass
 class Passage:
@@ -50,6 +73,10 @@ def split_into_passages(text: str, book_title: str) -> list[Passage]:
         paragraphs = split_into_paragraphs(chapter_text)
 
         for para_num, paragraph in enumerate(paragraphs, start=1):
+            if is_structural_paragraph(paragraph):
+                char_offset += len(paragraph) + 1
+                continue
+
             # Split paragraph into sentences
             sentences = split_into_sentences(paragraph)
 
@@ -84,6 +111,12 @@ def split_into_chapters(text: str) -> list[tuple[str, str]]:
 
     Returns list of (chapter_title, chapter_text) tuples.
     """
+    text = normalize_text_structure(text)
+
+    standalone_chapters = list(_STANDALONE_CHAPTER_RE.finditer(text))
+    if standalone_chapters:
+        return _split_on_standalone_chapters(text, standalone_chapters)
+
     # Common chapter patterns
     # NOTE: use [ \t]* (not \s*) before .* to prevent matching across newlines,
     # since re.MULTILINE makes ^ / $ line-anchored but \s also matches \n.
@@ -124,6 +157,143 @@ def split_into_chapters(text: str) -> list[tuple[str, str]]:
             chapters.insert(0, ("Prologue", preamble))
 
     return chapters if chapters else [("Chapter 1", text)]
+
+
+def normalize_text_structure(text: str) -> str:
+    """Trim obvious structural envelope noise from raw public-domain text dumps."""
+    normalized = text.replace("\r\n", "\n").replace("\r", "\n")
+    standalone_chapters = list(_STANDALONE_CHAPTER_RE.finditer(normalized))
+    if not standalone_chapters:
+        return normalized
+
+    start = standalone_chapters[0].start()
+    prologue_matches = [
+        match
+        for match in _PROLOGUE_RE.finditer(normalized)
+        if match.start() < start
+    ]
+    if prologue_matches:
+        start = prologue_matches[-1].start()
+
+    end = len(normalized)
+    for pattern in (_APPENDIX_RE, _INDEX_RE):
+        match = pattern.search(normalized, pos=start)
+        if match:
+            end = min(end, match.start())
+
+    return normalized[start:end].strip()
+
+
+def is_structural_paragraph(paragraph: str) -> bool:
+    """Drop headings, TOC fragments, and other non-narrative structural paragraphs."""
+    cleaned = " ".join(paragraph.split()).strip()
+    if not cleaned:
+        return True
+
+    tokens = re.findall(r"[A-Za-z0-9][A-Za-z0-9'_-]*", cleaned)
+    lowered = [token.lower() for token in tokens]
+    if not lowered:
+        return True
+
+    if sum(token == "chapter" for token in lowered) >= 1:
+        return True
+    if sum(token in _STRUCTURAL_TOKENS for token in lowered) >= 2:
+        return True
+    if any(token.isdigit() for token in tokens) and any(
+        token in _STRUCTURAL_TOKENS for token in lowered
+    ):
+        return True
+    if cleaned.lower() == "prologue":
+        return True
+    if len(tokens) == 1 and tokens[0][:1].isupper() and not _has_sentence_ending(cleaned):
+        return True
+    if len(tokens) <= 8 and _looks_like_heading_line(cleaned):
+        return True
+    return False
+
+
+def _split_on_standalone_chapters(text: str, matches: list[re.Match[str]]) -> list[tuple[str, str]]:
+    chapters: list[tuple[str, str]] = []
+    if matches[0].start() > 0:
+        preamble = text[: matches[0].start()].strip()
+        if preamble:
+            title, body = _split_leading_section(preamble, fallback_title="Prologue")
+            if body:
+                chapters.append((title, body))
+
+    for idx, match in enumerate(matches):
+        title = _clean_heading(match.group(1))
+        start = match.end()
+        title_line, start = _consume_following_title_line(text, start)
+        if title_line:
+            title = f"{title} {title_line}".strip()
+        end = matches[idx + 1].start() if idx + 1 < len(matches) else len(text)
+        chapter_text = text[start:end].strip()
+        if chapter_text:
+            chapters.append((title, chapter_text))
+
+    return chapters if chapters else [("Chapter 1", text)]
+
+
+def _split_leading_section(section_text: str, fallback_title: str) -> tuple[str, str]:
+    lines = [line.strip() for line in section_text.splitlines() if line.strip()]
+    if not lines:
+        return fallback_title, ""
+
+    first = _clean_heading(lines[0])
+    if _looks_like_heading_line(first):
+        body = "\n".join(lines[1:]).strip()
+        return first.title() if first.isupper() else first, body
+
+    return fallback_title, section_text.strip()
+
+
+def _consume_following_title_line(text: str, start: int) -> tuple[str, int]:
+    index = start
+    length = len(text)
+    while index < length and text[index] in {" ", "\t", "\n"}:
+        index += 1
+
+    line_end = text.find("\n", index)
+    if line_end == -1:
+        line_end = length
+
+    line = _clean_heading(text[index:line_end])
+    if not _looks_like_heading_line(line):
+        return "", index
+
+    return line, line_end
+
+
+def _looks_like_heading_line(text: str) -> bool:
+    cleaned = _clean_heading(text)
+    if not cleaned or _has_sentence_ending(cleaned):
+        return False
+
+    tokens = re.findall(r"[A-Za-z][A-Za-z'_-]*", cleaned)
+    if not tokens or len(tokens) > 10:
+        return False
+
+    if any(token.lower() in _STRUCTURAL_TOKENS for token in tokens):
+        return True
+
+    titleish = 0
+    for token in tokens:
+        lowered = token.lower()
+        if lowered in _LOWERCASE_TITLE_WORDS:
+            titleish += 1
+        elif token[:1].isupper() or token.isupper():
+            titleish += 1
+    return titleish / len(tokens) >= 0.8
+
+
+def _has_sentence_ending(text: str) -> bool:
+    return text.endswith((".", "!", "?"))
+
+
+def _clean_heading(text: str) -> str:
+    cleaned = text.strip().strip("_").strip()
+    return re.sub(r"\s+", " ", cleaned)
 
 
 def split_into_paragraphs(text: str) -> list[str]:

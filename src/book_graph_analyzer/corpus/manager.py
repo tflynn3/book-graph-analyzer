@@ -28,6 +28,9 @@ class BookInfo:
     total_passages: int = 0
     entity_count: int = 0
     relationship_count: int = 0
+    proposition_count: int = 0
+    unresolved_reference_count: int = 0
+    unresolved_reference_classes: dict[str, int] = field(default_factory=dict)
     dialogue_lines: int = 0
     character_profiles: int = 0
     
@@ -61,6 +64,9 @@ class CorpusInfo:
     total_words: int = 0
     total_entities: int = 0
     total_relationships: int = 0
+    total_propositions: int = 0
+    total_unresolved_references: int = 0
+    unresolved_reference_classes: dict[str, int] = field(default_factory=dict)
     
     def to_dict(self) -> dict:
         d = asdict(self)
@@ -185,6 +191,9 @@ class CorpusManager:
         total_passages: int = 0,
         entity_count: int = 0,
         relationship_count: int = 0,
+        proposition_count: int = 0,
+        unresolved_reference_count: int = 0,
+        unresolved_reference_classes: Optional[dict[str, int]] = None,
         dialogue_lines: int = 0,
         character_profiles: int = 0,
         avg_sentence_length: float = 0.0,
@@ -200,6 +209,9 @@ class CorpusManager:
         book.total_passages = total_passages
         book.entity_count = entity_count
         book.relationship_count = relationship_count
+        book.proposition_count = proposition_count
+        book.unresolved_reference_count = unresolved_reference_count
+        book.unresolved_reference_classes = dict(unresolved_reference_classes or {})
         book.dialogue_lines = dialogue_lines
         book.character_profiles = character_profiles
         book.avg_sentence_length = avg_sentence_length
@@ -214,6 +226,16 @@ class CorpusManager:
         self.corpus.total_words = sum(b.total_words for b in self.corpus.books)
         self.corpus.total_entities = sum(b.entity_count for b in self.corpus.books)
         self.corpus.total_relationships = sum(b.relationship_count for b in self.corpus.books)
+        self.corpus.total_propositions = sum(b.proposition_count for b in self.corpus.books)
+        self.corpus.total_unresolved_references = sum(b.unresolved_reference_count for b in self.corpus.books)
+
+        class_totals: dict[str, int] = {}
+        for book in self.corpus.books:
+            for ref_class, count in (book.unresolved_reference_classes or {}).items():
+                class_totals[ref_class] = class_totals.get(ref_class, 0) + int(count or 0)
+        self.corpus.unresolved_reference_classes = dict(
+            sorted(class_totals.items(), key=lambda item: (-item[1], item[0]))
+        )
     
     def get_unprocessed_books(self) -> list[BookInfo]:
         """Get books that haven't been processed yet."""
@@ -229,19 +251,31 @@ class CorpusManager:
             f"=== Corpus: {self.corpus.name} ===",
             f"Author: {self.corpus.author}",
             f"Books: {len(self.corpus.books)}",
-            f"",
-            f"[Aggregate Stats]",
+            "",
+            "[Aggregate Stats]",
             f"  Total words: {self.corpus.total_words:,}",
             f"  Total entities: {self.corpus.total_entities:,}",
             f"  Total relationships: {self.corpus.total_relationships:,}",
-            f"",
-            f"[Books]",
+            f"  Total propositions: {self.corpus.total_propositions:,}",
+            f"  Total unresolved refs: {self.corpus.total_unresolved_references:,}",
+            "",
+            "[Books]",
         ]
         
         for book in self.corpus.books:
             status = "OK" if book.processed_at else "pending"
             lines.append(f"  [{status}] {book.title}")
             if book.processed_at:
-                lines.append(f"       {book.total_words:,} words, {book.entity_count} entities")
-        
+                lines.append(
+                    "       "
+                    f"{book.total_words:,} words, "
+                    f"{book.entity_count} entities, "
+                    f"{book.proposition_count} propositions"
+                )
+                if book.unresolved_reference_count:
+                    lines.append(
+                        "       "
+                        f"{book.unresolved_reference_count} unresolved refs"
+                    )
+
         return "\n".join(lines)

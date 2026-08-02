@@ -12,7 +12,6 @@ Implements the Passage Temporal Zoom model from Issue #4:
 from __future__ import annotations
 
 import statistics
-from typing import Optional
 
 from .connection import get_driver
 from .temporal import ERA_ORDER, canonicalize_era, era_to_order

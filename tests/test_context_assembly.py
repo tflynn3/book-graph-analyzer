@@ -112,6 +112,7 @@ def test_scene_generator_accepts_assembled_context():
     generator.driver = None
     generator.llm = MagicMock()
     generator.llm.generate.return_value = "Scene text"
+    generator.llm.provider_label = "stub:test-model"
     from book_graph_analyzer.generate.models import SceneScores
 
     generator.judge = MagicMock()
@@ -136,3 +137,230 @@ def test_scene_generator_accepts_assembled_context():
     assert scene.scene_type == "discovery"
     assert "STYLE GUIDE (fallback):" in scene.generation_prompt
     assert scene.style_constraints_used is None
+    assert scene.model_used == "stub:test-model"
+
+
+def test_scene_generator_does_not_award_unverified_lore_or_voice_scores():
+    from book_graph_analyzer.generate.generator import SceneGenerator
+    from book_graph_analyzer.generate.models import Scene, SceneScores
+
+    generator = SceneGenerator()
+    generator.judge = MagicMock()
+    generator.judge.full_evaluation.return_value = (
+        SceneScores(style_score=0.8, narrative_score=0.8),
+        "",
+        [],
+    )
+    scene = Scene(
+        id="unverified",
+        number=1,
+        text="A road ran east.",
+        pipeline_stages_run=["drafter"],
+    )
+
+    scores = generator._score_scene(scene, context="", lore_violations=[], voice_profiles={})
+
+    assert scores.lore_score == 0.0
+    assert scores.consistency_score == 0.0
+    assert any("unverified" in note.lower() for note in scene.critique_notes)
+
+
+def test_placeholder_world_bible_does_not_award_lore_score():
+    from book_graph_analyzer.generate.context import AssembledContext
+    from book_graph_analyzer.generate.generator import SceneGenerator
+    from book_graph_analyzer.generate.models import Scene, SceneScores
+    from book_graph_analyzer.generate.shadow.models import CharacterState
+    from book_graph_analyzer.worldbible.models import WorldBible
+
+    generator = SceneGenerator()
+    generator.world_bible = WorldBible.from_markdown(
+        "# Story Bible\n\n## World Rules\n- (add non-negotiable rules)\n"
+    )
+    generator._critique_scene = MagicMock(return_value=[])
+    generator.judge = MagicMock()
+    generator.judge.full_evaluation.return_value = (
+        SceneScores(style_score=0.8, narrative_score=0.8),
+        "",
+        [],
+    )
+    scene = Scene(
+        id="placeholder-bible",
+        number=1,
+        text="Beren walked east.",
+        context_snapshot=AssembledContext(
+            character_states=[CharacterState(name="Beren", story_id="story-1")],
+            place_facts={"name": "Beleriand"},
+        ),
+    )
+
+    scene, violations = generator.pipeline.run(
+        scene,
+        neo4j_context={},
+        voice_profiles={},
+    )
+    scores = generator._score_scene(
+        scene,
+        context="",
+        lore_violations=violations,
+        voice_profiles={},
+    )
+
+    assert scene.pipeline_stages_run == ["drafter"]
+    assert scores.lore_score == 0.0
+    assert any("lore score is unverified" in note.lower() for note in scene.critique_notes)
+
+
+def test_scene_generator_requires_an_attributed_profile_match_for_consistency_score():
+    from book_graph_analyzer.generate.generator import SceneGenerator
+    from book_graph_analyzer.generate.models import Scene, SceneScores
+    from book_graph_analyzer.voice.profile import CharacterVoiceProfile
+
+    generator = SceneGenerator()
+    generator.judge = MagicMock()
+    generator.judge.full_evaluation.return_value = (
+        SceneScores(style_score=0.8, narrative_score=0.8),
+        "",
+        [],
+    )
+    bilbo_profile = CharacterVoiceProfile(
+        character_name="Bilbo",
+        contraction_ratio=0.0,
+        formality_score=0.8,
+        avg_utterance_length=5.0,
+    )
+    scene = Scene(
+        id="no-profile-match",
+        number=1,
+        text='"The road runs east," said Beren.',
+        characters=["Beren"],
+        pipeline_stages_run=["drafter"],
+    )
+
+    scores = generator._score_scene(
+        scene,
+        context="",
+        lore_violations=[],
+        voice_profiles={"Bilbo": bilbo_profile},
+    )
+
+    assert scores.consistency_score == 0.0
+    assert any("no attributed dialogue matched" in note.lower() for note in scene.critique_notes)
+
+
+def test_scene_generator_scores_consistency_when_an_attributed_profile_matches():
+    from book_graph_analyzer.generate.generator import SceneGenerator
+    from book_graph_analyzer.generate.models import Scene, SceneScores
+    from book_graph_analyzer.voice.profile import CharacterVoiceProfile
+
+    generator = SceneGenerator()
+    generator.judge = MagicMock()
+    generator.judge.full_evaluation.return_value = (
+        SceneScores(style_score=0.8, narrative_score=0.8),
+        "",
+        [],
+    )
+    beren_profile = CharacterVoiceProfile(
+        character_name="Beren",
+        contraction_ratio=0.0,
+        formality_score=0.8,
+        avg_utterance_length=4.0,
+    )
+    scene = Scene(
+        id="profile-match",
+        number=1,
+        text='"The road runs east," said Beren.',
+        characters=["Beren"],
+        pipeline_stages_run=["drafter"],
+    )
+
+    scores = generator._score_scene(
+        scene,
+        context="",
+        lore_violations=[],
+        voice_profiles={"Beren": beren_profile},
+    )
+
+    assert scores.consistency_score > 0.0
+    assert not any(
+        "no attributed dialogue matched" in note.lower()
+        for note in scene.critique_notes
+    )
+
+
+def test_scene_generator_normalizes_event_era_storage_in_temporal_query():
+    from book_graph_analyzer.generate.generator import SceneGenerator
+
+    generator = SceneGenerator()
+    driver = MagicMock()
+    session = MagicMock()
+    driver.session.return_value.__enter__.return_value = session
+    driver.session.return_value.__exit__.return_value = False
+    generator.driver = driver
+
+    empty_single = MagicMock()
+    empty_single.single.return_value = None
+    empty_rows = MagicMock()
+    empty_rows.__iter__.return_value = iter([])
+    event_queries: list[str] = []
+
+    def run_side_effect(query, **_kwargs):
+        if "MATCH (e:Event)" in query:
+            event_queries.append(query)
+            return empty_rows
+        return empty_single
+
+    session.run.side_effect = run_side_effect
+
+    generator.get_context_from_neo4j(
+        ["Aragorn"],
+        "The Angle",
+        story_era="Third Age",
+        story_year=3017,
+    )
+
+    assert len(event_queries) == 1
+    assert "replace(toLower(coalesce(e.era, '')), '_', ' ')" in event_queries[0]
+    assert "replace(toLower($story_era), '_', ' ')" in event_queries[0]
+
+
+def test_scene_generator_uses_canonical_name_fallback_from_graph():
+    from book_graph_analyzer.generate.generator import SceneGenerator
+
+    generator = SceneGenerator()
+
+    driver = MagicMock()
+    session = MagicMock()
+    driver.session.return_value.__enter__.return_value = session
+    driver.session.return_value.__exit__.return_value = False
+    generator.driver = driver
+
+    char_result = MagicMock()
+    char_result.single.return_value = {
+        "name": "Gandalf",
+        "type": "wizard",
+        "desc": "A grey wanderer.",
+        "relations": [{"rel": "KNOWS", "target": "Frodo Baggins"}],
+    }
+    place_result = MagicMock()
+    place_result.single.return_value = {
+        "name": "Rivendell",
+        "desc": "A hidden valley.",
+        "region": "Eriador",
+    }
+    empty_events = MagicMock()
+    empty_events.__iter__.return_value = iter([])
+
+    def run_side_effect(query, **_kwargs):
+        if "MATCH (c:Character)" in query:
+            return char_result
+        if "MATCH (p:Place)" in query:
+            return place_result
+        return empty_events
+
+    session.run.side_effect = run_side_effect
+
+    context = generator.get_context_from_neo4j(["Gandalf"], "Rivendell")
+
+    assert context["characters"][0]["name"] == "Gandalf"
+    assert context["characters"][0]["relations"][0]["target"] == "Frodo Baggins"
+    assert context["place"]["name"] == "Rivendell"

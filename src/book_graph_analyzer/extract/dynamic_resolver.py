@@ -7,7 +7,6 @@ This module enables zero-seed entity extraction for any novel by:
 4. Building a canonical entity database dynamically
 """
 
-import json
 import re
 from collections import defaultdict
 from dataclasses import dataclass, field
@@ -17,7 +16,6 @@ import httpx
 from rapidfuzz import fuzz
 
 from ..config import get_settings
-from ..models.entities import Character, Place, Object
 from .ner import ExtractedEntity
 
 
@@ -83,12 +81,6 @@ class DynamicEntityResolver:
         
         # Lookup tables for fast matching
         self._name_to_cluster: dict[str, str] = {}  # lowercase name -> cluster id
-        
-        # Co-occurrence tracking for alias detection
-        self._cooccurrence: dict[str, dict[str, int]] = defaultdict(lambda: defaultdict(int))
-        
-        # Passage context for LLM queries
-        self._recent_passages: list[str] = []
     
     def process_mention(
         self,
@@ -125,30 +117,35 @@ class DynamicEntityResolver:
             # Create new cluster
             cluster = self._create_cluster(mention)
         
-        # Track co-occurrence for later alias detection
-        self._track_cooccurrence(mention, passage_id)
-        
         return cluster
     
     def _find_matching_cluster(self, mention: EntityMention) -> EntityCluster | None:
         """Find an existing cluster that matches this mention."""
         text_lower = mention.text.lower().strip()
+        mention_type = self._entity_type_from_label(mention.label)
         
         # Exact match on name or alias
         if text_lower in self._name_to_cluster:
-            return self.clusters[self._name_to_cluster[text_lower]]
+            cluster = self.clusters[self._name_to_cluster[text_lower]]
+            if self._types_compatible(mention_type, cluster.entity_type):
+                return cluster
         
         # Try without articles
         for prefix in ["the ", "a ", "an "]:
             if text_lower.startswith(prefix):
                 stripped = text_lower[len(prefix):]
                 if stripped in self._name_to_cluster:
-                    return self.clusters[self._name_to_cluster[stripped]]
+                    cluster = self.clusters[self._name_to_cluster[stripped]]
+                    if self._types_compatible(mention_type, cluster.entity_type):
+                        return cluster
         
         # Fuzzy match for typos/variations
         for name, cluster_id in self._name_to_cluster.items():
-            if fuzz.ratio(text_lower, name) >= 90:
-                return self.clusters[cluster_id]
+            cluster = self.clusters[cluster_id]
+            if not self._types_compatible(mention_type, cluster.entity_type):
+                continue
+            if fuzz.ratio(text_lower, name) >= 92:
+                return cluster
         
         return None
     
@@ -159,17 +156,7 @@ class DynamicEntityResolver:
         base_name = re.sub(r"[^a-z0-9_]", "", base_name)
         cluster_id = f"{base_name}_{len(self.clusters)}"
         
-        # Determine entity type from label
-        type_map = {
-            "PERSON": "character",
-            "GPE": "place",
-            "LOC": "place", 
-            "FAC": "place",
-            "ORG": "character",  # Often groups/peoples
-            "PRODUCT": "object",
-            "WORK_OF_ART": "object",
-        }
-        entity_type = type_map.get(mention.label, "unknown")
+        entity_type = self._entity_type_from_label(mention.label)
         
         cluster = EntityCluster(
             id=cluster_id,
@@ -183,20 +170,11 @@ class DynamicEntityResolver:
         
         return cluster
     
-    def _track_cooccurrence(self, mention: EntityMention, passage_id: str) -> None:
-        """Track which entities appear together for alias detection."""
-        text_lower = mention.text.lower()
-        
-        # Find other entities in the same passage
-        for cluster_id, cluster in self.clusters.items():
-            for m in cluster.mentions:
-                if m.passage_id == passage_id and m.text.lower() != text_lower:
-                    self._cooccurrence[text_lower][m.text.lower()] += 1
-    
     def consolidate_clusters(self, min_cooccurrence: int = 3) -> int:
         """Consolidate clusters that likely refer to the same entity.
         
-        Uses co-occurrence patterns and optionally LLM to detect aliases.
+        Uses explicit aliases, conservative string matching, and optional LLM
+        verification. `min_cooccurrence` is retained for CLI compatibility.
         
         Args:
             min_cooccurrence: Minimum co-occurrences to consider merging
@@ -205,39 +183,39 @@ class DynamicEntityResolver:
             Number of merges performed
         """
         merges = 0
-        
-        # Find high co-occurrence pairs
-        merge_candidates = []
-        for name1, cooccurs in self._cooccurrence.items():
-            for name2, count in cooccurs.items():
-                if count >= min_cooccurrence and name1 < name2:
-                    merge_candidates.append((name1, name2, count))
-        
-        # Sort by co-occurrence count
-        merge_candidates.sort(key=lambda x: -x[2])
-        
-        # Process candidates
-        for name1, name2, count in merge_candidates:
-            cluster1_id = self._name_to_cluster.get(name1)
-            cluster2_id = self._name_to_cluster.get(name2)
-            
-            if not cluster1_id or not cluster2_id:
-                continue
-            if cluster1_id == cluster2_id:
-                continue  # Already merged
-            
-            cluster1 = self.clusters.get(cluster1_id)
-            cluster2 = self.clusters.get(cluster2_id)
-            
-            if not cluster1 or not cluster2:
-                continue
-            
-            # Check if they should be merged
-            should_merge = self._should_merge(cluster1, cluster2)
-            
-            if should_merge:
-                self._merge_clusters(cluster1, cluster2)
-                merges += 1
+
+        changed = True
+        while changed:
+            changed = False
+            ordered_ids = sorted(
+                self.clusters,
+                key=lambda cid: (
+                    -self.clusters[cid].mention_count,
+                    self.clusters[cid].canonical_name.lower(),
+                ),
+            )
+
+            for idx, left_id in enumerate(ordered_ids):
+                left = self.clusters.get(left_id)
+                if left is None:
+                    continue
+
+                for right_id in ordered_ids[idx + 1:]:
+                    right = self.clusters.get(right_id)
+                    if right is None or left.id == right.id:
+                        continue
+
+                    if not self._should_merge(left, right):
+                        continue
+
+                    keep, merge = self._merge_order(left, right)
+                    self._merge_clusters(keep, merge)
+                    merges += 1
+                    changed = True
+                    break
+
+                if changed:
+                    break
         
         return merges
     
@@ -246,22 +224,44 @@ class DynamicEntityResolver:
         # Same type required
         if c1.entity_type != c2.entity_type and c1.entity_type != "unknown" and c2.entity_type != "unknown":
             return False
-        
-        # If LLM enabled, ask it
-        if self.use_llm:
-            return self._llm_check_alias(c1, c2)
-        
-        # Heuristic: if one is a substring of the other, likely same
+
+        names1 = {c1.canonical_name.lower(), *(a.lower() for a in c1.aliases)}
+        names2 = {c2.canonical_name.lower(), *(a.lower() for a in c2.aliases)}
+        if names1 & names2:
+            return True
+
         n1 = c1.canonical_name.lower()
         n2 = c2.canonical_name.lower()
-        if n1 in n2 or n2 in n1:
+        token_overlap = fuzz.token_set_ratio(n1, n2)
+        char_overlap = fuzz.ratio(n1, n2)
+        if token_overlap >= 96 or char_overlap >= 96:
             return True
-        
+
         # Check for common patterns like "X" and "the X"
         if n1 == f"the {n2}" or n2 == f"the {n1}":
             return True
-        
+
+        # If LLM enabled, ask it
+        if self.use_llm and max(token_overlap, char_overlap) >= 80:
+            return self._llm_check_alias(c1, c2)
+
         return False
+
+    def _merge_order(self, c1: EntityCluster, c2: EntityCluster) -> tuple[EntityCluster, EntityCluster]:
+        """Choose a stable keep/merge order for two clusters."""
+        left = (
+            c1.mention_count,
+            len(c1.canonical_name),
+            c1.canonical_name.lower(),
+        )
+        right = (
+            c2.mention_count,
+            len(c2.canonical_name),
+            c2.canonical_name.lower(),
+        )
+        if left >= right:
+            return c1, c2
+        return c2, c1
     
     def _llm_check_alias(self, c1: EntityCluster, c2: EntityCluster) -> bool:
         """Use LLM to check if two entities are the same."""
@@ -299,6 +299,7 @@ Answer only YES or NO:"""
     def _merge_clusters(self, keep: EntityCluster, merge: EntityCluster) -> None:
         """Merge one cluster into another."""
         keep.merge_with(merge)
+        keep.confidence = max(keep.confidence, merge.confidence)
         
         # Update lookup table
         self._name_to_cluster[merge.canonical_name.lower()] = keep.id
@@ -348,6 +349,27 @@ Answer only YES or NO:"""
                         self._merge_clusters(c1, c2)
         
         return aliases
+
+    def _entity_type_from_label(self, label: str) -> Literal["character", "place", "object", "unknown"]:
+        type_map = {
+            "PERSON": "character",
+            "ORG": "character",  # Peoples and named groups usually behave like actors downstream.
+            "PLACE": "place",
+            "GPE": "place",
+            "LOC": "place",
+            "FAC": "place",
+            "OBJECT": "object",
+            "PRODUCT": "object",
+            "WORK_OF_ART": "object",
+        }
+        return type_map.get(label, "unknown")
+
+    def _types_compatible(self, mention_type: str, cluster_type: str) -> bool:
+        return (
+            mention_type == "unknown"
+            or cluster_type == "unknown"
+            or mention_type == cluster_type
+        )
     
     def resolve(self, text: str) -> tuple[str | None, str | None, float]:
         """Resolve a text mention to a cluster.

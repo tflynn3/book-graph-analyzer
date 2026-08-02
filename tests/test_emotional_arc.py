@@ -11,7 +11,6 @@ All tests are pure-Python — no Neo4j or LLM required. Covers:
   - FeltEdge and RelationalSentimentEdge models
 """
 
-import pytest
 from book_graph_analyzer.models.emotional_arc import (
     EmotionalState,
     ArcCheckpoint,
@@ -27,7 +26,6 @@ from book_graph_analyzer.lore.emotional_arc import (
     EmotionalArcValidator,
     TOLKIEN_CHARACTER_ARCS,
     TOLKIEN_RELATIONSHIP_SENTIMENTS,
-    CHARACTER_NAME_MAP,
     extract_emotional_state_from_text,
     text_to_emotional_state,
 )

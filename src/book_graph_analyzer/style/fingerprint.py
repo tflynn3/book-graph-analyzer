@@ -11,8 +11,8 @@ import json
 import statistics
 from collections import Counter
 
-from .metrics import Distribution, VocabularyProfile, SentenceMetrics, FUNCTION_WORDS
-from .classifier import PassageType, PassageClassification
+from .metrics import Distribution, VocabularyProfile, SentenceMetrics
+from .classifier import PassageClassification
 
 
 @dataclass
@@ -342,59 +342,59 @@ class AuthorStyleFingerprint:
         """Generate a human-readable summary of the fingerprint."""
         lines = [
             f"=== Author Style Fingerprint: {self.author_name} ===",
-            f"",
-            f"[Corpus Statistics]",
+            "",
+            "[Corpus Statistics]",
             f"   Total words: {self.total_word_count:,}",
             f"   Total sentences: {self.total_sentence_count:,}",
             f"   Source texts: {len(self.source_texts)}",
-            f"",
+            "",
         ]
         
         if self.sentence_length_dist:
             lines.extend([
-                f"[Sentence Structure]",
+                "[Sentence Structure]",
                 f"   Avg sentence length: {self.sentence_length_dist.mean:.1f} words",
                 f"   Sentence length range: {self.sentence_length_dist.min:.0f} - {self.sentence_length_dist.max:.0f}",
                 f"   Avg clause depth: {self.clause_depth_dist.mean:.2f}" if self.clause_depth_dist else "",
-                f"",
+                "",
             ])
         
         lines.extend([
-            f"[Style Ratios]",
+            "[Style Ratios]",
             f"   Dialogue: {self.dialogue_ratio*100:.1f}%",
             f"   Passive voice: {self.passive_voice_ratio*100:.1f}%",
             f"   Questions: {self.question_ratio*100:.1f}%",
             f"   Exclamations: {self.exclamation_ratio*100:.1f}%",
-            f"",
-            f"[Readability]",
+            "",
+            "[Readability]",
             f"   Flesch Reading Ease: {self.flesch_reading_ease:.1f}",
             f"   Flesch-Kincaid Grade: {self.flesch_kincaid_grade:.1f}",
             f"   Gunning Fog Index: {self.gunning_fog:.1f}",
-            f"",
+            "",
         ])
         
         if self.vocabulary_profile:
             vp = self.vocabulary_profile
             lines.extend([
-                f"[Vocabulary]",
+                "[Vocabulary]",
                 f"   Unique words: {vp.unique_words:,}",
                 f"   Type-token ratio: {vp.type_token_ratio:.3f}",
                 f"   Avg word length: {vp.avg_word_length:.2f} chars",
                 f"   Hapax legomena: {vp.hapax_count:,} ({vp.hapax_ratio*100:.1f}%)",
-                f"",
+                "",
             ])
             
             if vp.archaisms_found:
                 lines.extend([
-                    f"[Archaic Language]",
+                    "[Archaic Language]",
                     f"   Archaisms found: {', '.join(vp.archaisms_found[:10])}{'...' if len(vp.archaisms_found) > 10 else ''}",
                     f"   Archaism density: {self.archaism_density:.2f} per 1000 words",
-                    f"",
+                    "",
                 ])
         
         if self.passage_type_distribution:
             lines.extend([
-                f"[Scene Types]",
+                "[Scene Types]",
             ])
             for ptype, ratio in sorted(self.passage_type_distribution.items(), key=lambda x: -x[1]):
                 lines.append(f"   {ptype}: {ratio*100:.1f}%")

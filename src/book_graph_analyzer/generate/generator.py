@@ -5,12 +5,13 @@ import re
 import uuid
 from typing import Optional
 
-from ..llm import LLMClient
 from ..graph.connection import get_driver
+from ..llm import LLMClient
+from ..voice.dialogue import extract_dialogue
 from ..worldbible import WorldBible
 from .context import AssembledContext, ContextAssembler
-from .models import Scene, SceneScores, GenerationConfig, GenerationStatus
 from .judge import NarrativeJudge
+from .models import GenerationConfig, GenerationStatus, Scene, SceneScores
 from .pipeline import StagedPipeline
 from .style_injector import StyleInjector
 from .voice_patcher import VoicePatcher
@@ -19,7 +20,9 @@ from .voice_patcher import VoicePatcher
 class SceneGenerator:
     """Generates scenes grounded in Neo4j knowledge graph."""
 
-    FOG_OF_WAR_PROMPT = '''You are writing a scene in the style of J.R.R. Tolkien.
+    FOG_OF_WAR_PROMPT = '''Write an original high-fantasy scene in a Tolkien-inspired register.
+Do not quote, paraphrase, or continue any source passage. Use only the canon facts and
+scene constraints below as grounding.
 
 SETTING: {setting}
 CHARACTERS PRESENT: {characters}
@@ -34,11 +37,11 @@ WORLD RULES TO RESPECT:
 {world_rules}
 
 Write this scene from a position of UNCERTAINTY. The character does not know the history of
-this place or the nature of what they encounter. Write as Tolkien wrote Moria before the
-Fellowship knew what happened to Balin: let the atmosphere speak, let the architecture hint
-at past greatness or horror, let silence carry weight. Do not explain — suggest.
+this place or the nature of what they encounter. Let physical evidence and architecture hint
+at past greatness or horror, and let silence carry weight. Do not explain what the viewpoint
+character cannot know.
 
-Tolkien's style in scenes of mystery:
+Register guidance for scenes of mystery:
 - The landscape itself feels conscious and watching
 - Details are physical and sensory — cold stone, old smell, soundlessness
 - The character notices without understanding
@@ -47,7 +50,9 @@ Tolkien's style in scenes of mystery:
 
 Write 400-800 words. Begin the scene directly, no preamble.'''
 
-    GENERATION_PROMPT = '''You are writing a scene in the style of J.R.R. Tolkien.
+    GENERATION_PROMPT = '''Write an original high-fantasy scene in a Tolkien-inspired register.
+Do not quote, paraphrase, or continue any source passage. Keep the prose original while
+respecting the canon facts, timeline, and scene constraints below.
 
 SETTING: {setting}
 CHARACTERS PRESENT: {characters}
@@ -63,7 +68,8 @@ WORLD RULES TO RESPECT:
 
 {style_constraints}
 
-Write 400-800 words. Begin the scene directly, no preamble.'''
+Write 400-800 words. Begin the scene directly, no preamble. Avoid modern idiom,
+placeholder names, and characters who do not belong to this story-time.'''
 
     CRITIQUE_PROMPT = '''Review this passage for lore violations and inconsistencies.
 
@@ -79,6 +85,9 @@ KNOWN FACTS:
 - Characters: {characters}
 - Setting: {setting}
 - Timeline: {timeline}
+
+KNOWN CURRENT STATE AND EVIDENCE:
+{known_state}
 
 Check for:
 1. LORE VIOLATIONS: Does anything contradict established world rules?
@@ -107,7 +116,7 @@ ORIGINAL:
 ISSUES TO FIX:
 {issues}
 
-Rewrite the passage fixing these issues while maintaining Tolkien's style.
+Rewrite the passage fixing these issues while maintaining its established register and narrative intent.
 Keep the same general content and length, just fix the problems.'''
 
     def __init__(self, config: Optional[GenerationConfig] = None, shadow_graph=None):
@@ -139,6 +148,8 @@ Keep the same general content and length, just fix the problems.'''
         place: str,
         limit: int = 10,
         fog_of_war: bool = False,
+        story_era: Optional[str] = None,
+        story_year: Optional[int] = None,
     ) -> dict:
         """Query Neo4j for relevant context.
 
@@ -153,6 +164,7 @@ Keep the same general content and length, just fix the problems.'''
             "objects": [],
             "recent_events": [],
             "relationships": [],
+            "timeline": {"era": story_era, "year": story_year},
         }
         
         if not self.driver:
@@ -163,10 +175,12 @@ Keep the same general content and length, just fix the problems.'''
             for char_name in characters:
                 result = session.run("""
                     MATCH (c:Character)
-                    WHERE toLower(c.name) CONTAINS toLower($name)
+                    WHERE toLower(coalesce(c.name, c.canonical_name, '')) CONTAINS toLower($name)
                     OPTIONAL MATCH (c)-[r]-(related)
-                    RETURN c.name as name, c.type as type, c.description as desc,
-                           collect(DISTINCT {rel: type(r), target: related.name})[..5] as relations
+                    RETURN coalesce(c.name, c.canonical_name) as name,
+                           c.type as type,
+                           c.description as desc,
+                           collect(DISTINCT {rel: type(r), target: coalesce(related.name, related.canonical_name)})[..5] as relations
                     LIMIT 1
                 """, name=char_name)
                 record = result.single()
@@ -186,13 +200,14 @@ Keep the same general content and length, just fix the problems.'''
                             "description": record["desc"],
                             "relations": record["relations"],
                         })
+                        context["relationships"].extend(record["relations"] or [])
             
             # Place: always fetch physical description
             if place:
                 result = session.run("""
                     MATCH (p:Place)
-                    WHERE toLower(p.name) CONTAINS toLower($name)
-                    RETURN p.name as name, p.description as desc, p.region as region
+                    WHERE toLower(coalesce(p.name, p.canonical_name, '')) CONTAINS toLower($name)
+                    RETURN coalesce(p.name, p.canonical_name) as name, p.description as desc, p.region as region
                     LIMIT 1
                 """, name=place)
                 record = result.single()
@@ -208,12 +223,26 @@ Keep the same general content and length, just fix the problems.'''
                 result = session.run("""
                     MATCH (e:Event)
                     WHERE any(c IN $characters WHERE toLower(e.agent) CONTAINS toLower(c))
-                    RETURN e.description as desc, e.era as era, e.year as year
+                      AND (
+                        $story_era IS NULL
+                        OR replace(toLower(coalesce(e.era, '')), '_', ' ')
+                           = replace(toLower($story_era), '_', ' ')
+                      )
+                      AND ($story_year IS NULL OR e.year IS NULL OR e.year <= $story_year)
+                    RETURN e.id as id, e.description as desc, e.era as era, e.year as year,
+                           e.source_book as source_book, e.source_location as source_location
                     ORDER BY e.year DESC
                     LIMIT $limit
-                """, characters=characters, limit=limit)
+                """, characters=characters, story_era=story_era, story_year=story_year, limit=limit)
                 context["recent_events"] = [
-                    {"description": r["desc"], "era": r["era"], "year": r["year"]}
+                    {
+                        "id": r["id"],
+                        "description": r["desc"],
+                        "era": r["era"],
+                        "year": r["year"],
+                        "source_book": r["source_book"],
+                        "source_location": r["source_location"],
+                    }
                     for r in result
                 ]
         
@@ -230,7 +259,7 @@ Keep the same general content and length, just fix the problems.'''
         """
         lines = []
         if previous_context:
-            lines.append(f"What has happened so far (from the character's perspective):")
+            lines.append("What has happened so far (from the character's perspective):")
             lines.append(previous_context.strip())
         else:
             lines.append(f"{', '.join(characters)} approach this place knowing only what they have witnessed on their journey.")
@@ -262,6 +291,9 @@ Keep the same general content and length, just fix the problems.'''
         story_id: Optional[str] = None,
         chapter_num: int = 0,
         scene_num: int = 0,
+        story_era: Optional[str] = None,
+        story_year: Optional[int] = None,
+        voice_profiles: Optional[dict] = None,
     ) -> Scene:
         """Generate a scene with full pipeline.
 
@@ -274,7 +306,11 @@ Keep the same general content and length, just fix the problems.'''
         
         # 1. Get context from Neo4j (restricted in fog_of_war mode)
         neo4j_context = self.get_context_from_neo4j(
-            characters, place, fog_of_war=fog_of_war
+            characters,
+            place,
+            fog_of_war=fog_of_war,
+            story_era=story_era,
+            story_year=story_year,
         )
         
         # Format context for prompt
@@ -285,6 +321,14 @@ Keep the same general content and length, just fix the problems.'''
                 desc += f" ({c['type']})"
             if c.get("description"):
                 desc += f": {c['description'][:100]}"
+            relations = c.get("relations") or []
+            relation_text = ", ".join(
+                f"{row.get('rel')} {row.get('target')}"
+                for row in relations[:3]
+                if isinstance(row, dict) and row.get("rel") and row.get("target")
+            )
+            if relation_text:
+                desc += f"; relations: {relation_text}"
             char_descriptions.append(desc)
         
         place_desc = ""
@@ -313,9 +357,13 @@ Keep the same general content and length, just fix the problems.'''
                     scene_num=scene_num,
                 )
 
-        context_text = previous_context
+        previous_context_text = str(previous_context or "").strip()
+        context_parts = [previous_context_text] if previous_context_text else []
         if assembled_context:
-            context_text = assembled_context.to_prompt_block()
+            context_parts.append(assembled_context.to_prompt_block())
+        if events_text:
+            context_parts.append("CANON EVENT EVIDENCE:\n" + events_text)
+        context_text = "\n\n".join(part for part in context_parts if part)
 
         scene_type: Optional[str] = None
         style_constraints_obj = None
@@ -361,7 +409,7 @@ Keep the same general content and length, just fix the problems.'''
             characters=characters,
             places=[place] if place else [],
             objects=objects or [],
-            model_used=self.config.model,
+            model_used=getattr(self.llm, "provider_label", self.config.model),
             generation_prompt=prompt,
             context_snapshot=assembled_context,
             scene_type=scene_type,
@@ -376,11 +424,16 @@ Keep the same general content and length, just fix the problems.'''
         scene, lore_violations = self.pipeline.run(
             scene=scene,
             neo4j_context=neo4j_context,
-            voice_profiles={},
+            voice_profiles=voice_profiles or {},
         )
 
         # 6. Score the scene
-        scene.scores = self._score_scene(scene, context_text, lore_violations=lore_violations)
+        scene.scores = self._score_scene(
+            scene,
+            context_text,
+            lore_violations=lore_violations,
+            voice_profiles=voice_profiles or {},
+        )
         
         # 7. Flag if below threshold
         if scene.scores.overall < self.config.min_quality_score:
@@ -388,51 +441,97 @@ Keep the same general content and length, just fix the problems.'''
         
         return scene
 
-    def _run_lore_enforcement(self, scene: Scene, context: dict) -> tuple[Scene, list[dict]]:
-        """Run constitutional critique loop and revisions."""
-        last_violations: list[dict] = []
-        for _ in range(self.config.max_critique_iterations):
-            violations = self._critique_scene(scene, context)
-            if not violations:
+    def _run_lore_enforcement(
+        self,
+        scene: Scene,
+        context: dict,
+    ) -> tuple[Scene, list[dict], bool]:
+        """Run constitutional critique loop and return only the final check."""
+        final_violations: list[dict] = []
+        revisions = 0
+        max_revisions = max(0, int(self.config.max_critique_iterations))
+
+        while True:
+            critique_result = self._critique_scene(scene, context)
+            # Preserve compatibility with callers/tests that replace the critic
+            # with the former list-only contract.
+            if isinstance(critique_result, tuple) and len(critique_result) == 2:
+                violations, verified = critique_result
+            else:
+                violations, verified = critique_result, True
+
+            if not verified:
+                scene.critique_notes.append(
+                    "Lore verification failed: the critic response could not be parsed."
+                )
+                scene.word_count = len(scene.text.split())
+                return scene, [], False
+
+            final_violations = list(violations or [])
+            major_violations = [
+                violation
+                for violation in final_violations
+                if str(violation.get("severity") or "").lower() == "major"
+            ]
+            if not major_violations or revisions >= max_revisions:
                 break
 
-            last_violations = violations
-            scene.critique_notes.extend([v["description"] for v in violations])
             scene.revision_count += 1
-            scene.text = self._revise_scene(scene.text, violations)
+            scene.text = self._revise_scene(scene.text, major_violations)
+            revisions += 1
+            # Loop once more even after the last permitted revision: scoring
+            # must describe the revised text, not the stale pre-revision check.
 
+        scene.critique_notes.extend(
+            str(violation.get("description") or "Lore issue detected.")
+            for violation in final_violations
+        )
         scene.word_count = len(scene.text.split())
-        return scene, last_violations
+        return scene, final_violations, True
     
-    def _critique_scene(self, scene: Scene, context: dict) -> list[dict]:
-        """Run constitutional critique on scene."""
+    def _critique_scene(self, scene: Scene, context: dict) -> tuple[list[dict], bool]:
+        """Run constitutional critique and report whether its output was verified."""
         prompt = self.CRITIQUE_PROMPT.format(
             passage=scene.text,
             world_rules=self.get_world_rules(),
             characters=", ".join(scene.characters),
             setting=", ".join(scene.places),
-            timeline="Third Age" if not context.get("recent_events") else 
-                     context["recent_events"][0].get("era", "Unknown"),
+            timeline=(
+                f"{context.get('timeline', {}).get('era') or 'Unknown'}"
+                f" {context.get('timeline', {}).get('year') or ''}"
+            ).strip(),
+            known_state=(
+                scene.context_snapshot.to_prompt_block()
+                if scene.context_snapshot is not None
+                else "No structured scene state supplied."
+            ),
         )
         
         response = self.llm.generate(prompt, temperature=0.2)
         
         try:
             json_match = re.search(r'\{[\s\S]*\}', response)
-            if json_match:
-                data = json.loads(json_match.group())
-                violations = data.get("violations", [])
-                # Filter to major violations only for revision
-                return [v for v in violations if v.get("severity") == "major"]
-        except (json.JSONDecodeError, KeyError):
+            if not json_match:
+                return [], False
+            data = json.loads(json_match.group())
+            if not isinstance(data, dict):
+                return [], False
+            violations = data.get("violations", [])
+            if not isinstance(violations, list) or any(
+                not isinstance(violation, dict) for violation in violations
+            ):
+                return [], False
+            return violations, True
+        except (json.JSONDecodeError, KeyError, TypeError):
             pass
         
-        return []
+        return [], False
     
     def _revise_scene(self, text: str, violations: list[dict]) -> str:
         """Revise scene to fix violations."""
         issues = "\n".join(
-            f"- [{v['type'].upper()}] {v['description']}"
+            f"- [{str(v.get('type') or 'lore').upper()}] "
+            f"{str(v.get('description') or 'Lore issue detected.')}"
             for v in violations
         )
         
@@ -443,22 +542,52 @@ Keep the same general content and length, just fix the problems.'''
         
         return self.llm.generate(prompt, temperature=0.7)
     
-    def _score_scene(self, scene: Scene, context: str, lore_violations: Optional[list[dict]] = None) -> SceneScores:
+    def _score_scene(
+        self,
+        scene: Scene,
+        context: str,
+        lore_violations: Optional[list[dict]] = None,
+        voice_profiles: Optional[dict] = None,
+    ) -> SceneScores:
         """Score scene on all dimensions."""
         # Get narrative + style scores from judge
         scores, critique, weaknesses = self.judge.full_evaluation(scene.text, context)
         
         # Get lore score from staged-lore pass
         violations = lore_violations if lore_violations is not None else []
-        if not violations:
+        lore_was_checked = "lore_enforce" in scene.pipeline_stages_run
+        if not lore_was_checked:
+            scores.lore_score = 0.0
+            scene.critique_notes.append("Lore score is unverified: no evidence-backed lore pass ran.")
+        elif not violations:
             scores.lore_score = 1.0
         else:
             # Deduct based on violation count and severity
             deduction = sum(0.2 if v.get("severity") == "major" else 0.1 for v in violations)
             scores.lore_score = max(0.0, 1.0 - deduction)
         
-        # Consistency score (placeholder - could check voice profiles)
-        scores.consistency_score = 0.8  # TODO: Implement voice profile matching
+        supplied_voice_profiles = voice_profiles or {}
+        matched_speakers: set[str] = set()
+        if supplied_voice_profiles:
+            dialogue = extract_dialogue(scene.text, passage_id=scene.id)
+            matched_speakers = {
+                line.speaker
+                for line in dialogue.dialogue_lines
+                if line.speaker and line.speaker in supplied_voice_profiles
+            }
+        if matched_speakers:
+            matched_profiles = {
+                speaker: supplied_voice_profiles[speaker]
+                for speaker in matched_speakers
+            }
+            deviation = self.voice_patcher.estimate_max_deviation(scene, matched_profiles)
+            scores.consistency_score = max(0.0, 1.0 - deviation)
+        else:
+            scores.consistency_score = 0.0
+            scene.critique_notes.append(
+                "Consistency score is unverified: no attributed dialogue matched "
+                "a supplied voice profile."
+            )
         
         # Compute overall
         scores.compute_overall(self.config)

@@ -2,10 +2,11 @@
 
 import pytest
 
-from book_graph_analyzer.extract.ner import NERPipeline, ExtractedEntity
-from book_graph_analyzer.extract.resolver import EntityResolver, EntityDatabase
+from book_graph_analyzer.extract.dynamic_resolver import DynamicEntityResolver
 from book_graph_analyzer.extract.extractor import EntityExtractor
-from book_graph_analyzer.models.entities import Character, Place, Object
+from book_graph_analyzer.extract.ner import ExtractedEntity, NERPipeline
+from book_graph_analyzer.extract.resolver import EntityDatabase, EntityResolver
+from book_graph_analyzer.models.entities import Character
 
 
 class TestNERPipeline:
@@ -211,6 +212,28 @@ class TestEntityExtractor:
         # Should only have one Gandalf despite multiple mentions
         character_count = len(unique.get("character", []))
         assert character_count <= 1  # May be 0 or 1 depending on extraction
+
+
+class TestDynamicEntityResolver:
+    """Tests for the zero-seed dynamic resolver."""
+
+    def test_maps_normalized_place_and_object_labels(self):
+        """PLACE and OBJECT labels from NER should preserve graph typing."""
+        resolver = DynamicEntityResolver(use_llm=False)
+
+        place = resolver.process_mention(
+            ExtractedEntity("Bag End", "PLACE", 0, 7),
+            passage_id="p1",
+            passage_text="Bag End stood quiet in the Hill.",
+        )
+        obj = resolver.process_mention(
+            ExtractedEntity("Sting", "OBJECT", 0, 5),
+            passage_id="p1",
+            passage_text="Sting flashed in the dark.",
+        )
+
+        assert place.entity_type == "place"
+        assert obj.entity_type == "object"
 
 
 class TestEntityDatabase:

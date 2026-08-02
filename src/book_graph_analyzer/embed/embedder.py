@@ -65,8 +65,6 @@ class Embedder:
                 ) from e
         elif self.provider == "ollama":
             # Ollama: we use the REST API directly (no extra library)
-            import urllib.request
-            import json as _json
             # Verify Ollama is reachable
             try:
                 from book_graph_analyzer.config import get_settings

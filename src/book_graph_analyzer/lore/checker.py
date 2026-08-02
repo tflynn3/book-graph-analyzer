@@ -16,7 +16,7 @@ import json
 from rapidfuzz import fuzz
 
 from ..llm import LLMClient
-from ..worldbible import WorldBible, WorldBibleCategory
+from ..worldbible import WorldBible
 from ..corpus import CrossBookResolver
 from ..graph.connection import get_driver
 from .parser import ClaimParser, ParsedClaim, ClaimType
@@ -135,7 +135,7 @@ class ValidationResult:
                 lines.append(f"      - {e.text[:80]}... [{e.source}]")
         
         if self.suggestions:
-            lines.append(f"    Suggestions:")
+            lines.append("    Suggestions:")
             for s in self.suggestions:
                 lines.append(f"      - {s}")
         
@@ -446,7 +446,7 @@ class LoreChecker:
                 if neo4j_result["found"]:
                     result.status = ValidationStatus.VALID
                     result.confidence = 0.95
-                    result.explanation = f"Relationship found in knowledge graph"
+                    result.explanation = "Relationship found in knowledge graph"
                     result.supporting.append(Evidence(
                         text=f"{claim.subject} -> {claim.predicate} -> {claim.object}",
                         source=f"Neo4j ({neo4j_result.get('count', 1)} matches)",
@@ -456,7 +456,7 @@ class LoreChecker:
                 elif neo4j_result.get("entities_exist"):
                     # Entities exist but relationship not found
                     result.status = ValidationStatus.UNKNOWN
-                    result.explanation = f"Entities exist but relationship not confirmed"
+                    result.explanation = "Entities exist but relationship not confirmed"
         
         # Fall back to world bible
         return self._check_against_rules(claim, result)
@@ -664,7 +664,7 @@ class LoreChecker:
                         ))
                 else:
                     vr.status = ValidationStatus.UNKNOWN
-                    vr.explanation = f"Cannot determine ordering between events"
+                    vr.explanation = "Cannot determine ordering between events"
                 
                 return vr
                 

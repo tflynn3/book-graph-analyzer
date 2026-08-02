@@ -10,9 +10,9 @@ from typing import Literal
 
 import httpx
 import spacy
-from spacy.tokens import Doc
 
 from ..config import get_settings
+from .spacy_loader import load_spacy_model
 
 
 @dataclass
@@ -65,14 +65,7 @@ class NERPipeline:
     def nlp(self) -> spacy.Language:
         """Lazy-load spaCy model."""
         if self._nlp is None:
-            try:
-                self._nlp = spacy.load("en_core_web_sm")
-            except OSError:
-                # Model not installed, download it
-                import subprocess
-
-                subprocess.run(["python", "-m", "spacy", "download", "en_core_web_sm"], check=True)
-                self._nlp = spacy.load("en_core_web_sm")
+            self._nlp = load_spacy_model("en_core_web_sm")
         return self._nlp
 
     def extract_entities(self, text: str) -> list[ExtractedEntity]:

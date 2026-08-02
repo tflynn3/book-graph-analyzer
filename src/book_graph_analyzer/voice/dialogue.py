@@ -9,7 +9,6 @@ from typing import Optional
 import re
 
 import spacy
-from spacy.tokens import Doc
 
 from .audience import classify_dialogue_line
 
@@ -76,6 +75,68 @@ SPEECH_VERBS = {
     # Archaic (Tolkien-relevant)
     "spake", "quoth", "cried out",
 }
+_SPEECH_VERB_PATTERN = "|".join(sorted((re.escape(verb) for verb in SPEECH_VERBS), key=len, reverse=True))
+_NAME_TOKEN_PATTERN = (
+    r"[A-Z\u00C0-\u00D6\u00D8-\u00DE]"
+    r"[a-z\u00E0-\u00F6\u00F8-\u00FF]+"
+    r"(?:['\u2019-][A-Z\u00C0-\u00D6\u00D8-\u00DE]?"
+    r"[a-z\u00E0-\u00F6\u00F8-\u00FF]+)*"
+)
+_NAME_PATTERN = rf"{_NAME_TOKEN_PATTERN}(?:\s+{_NAME_TOKEN_PATTERN})?"
+_NON_SPEAKER_WORDS = {
+    # Pronouns
+    "he", "she", "it", "they", "we", "i", "you",
+    "him", "her", "them", "us", "me",
+    # Determiners/articles
+    "the", "a", "an", "this", "that", "these", "those",
+    # Conjunctions/prepositions
+    "but", "and", "or", "then", "so", "yet", "for",
+    "to", "from", "with", "at", "by", "in", "on", "of", "after", "before",
+    # Common adverbs
+    "there", "here", "where", "when", "what", "how", "why",
+    "now", "then", "just", "still", "even", "also",
+    # Other common words
+    "one", "all", "some", "any", "no", "not", "only",
+    "old", "young", "little", "other", "first", "last",
+    "yes", "no", "well", "aye", "nay",
+}
+_SPEECH_INTRO_VERBS = {
+    "saying",
+    "speaking",
+    "calling",
+    "crying",
+    "shouting",
+    "whispering",
+    "muttering",
+    "murmuring",
+    "answering",
+    "replying",
+    "asking",
+    "telling",
+    "declaring",
+    "announcing",
+    "explaining",
+    "continuing",
+    "adding",
+}
+_SPEECH_INTRO_PATTERN = "|".join(sorted((re.escape(verb) for verb in _SPEECH_INTRO_VERBS), key=len, reverse=True))
+_LEXICAL_QUOTE_CONTEXT_PATTERNS = (
+    r"\b(?:called|named|known as|referred to as|refer to as)\s*$",
+    r"\b(?:word|words|term|phrase|phrases|title|nickname)\s*$",
+)
+_CONTINUATION_GAP_PATTERN = re.compile(
+    rf"""
+    ^[\s,;:.!?'"`\-()]*
+    (?:
+        (?:(?:he|she|they|we|i)\s+)?
+        (?:(?i:{_SPEECH_VERB_PATTERN})|(?i:{_SPEECH_INTRO_PATTERN}))
+        (?:\s+(?:again|softly|quietly|grimly|gently|then|aloud|briefly))*
+        (?:\s+(?:he|she|they|we|i))?
+    )?
+    [\s,;:.!?'"`\-()]*$
+    """,
+    re.VERBOSE,
+)
 
 
 @dataclass
@@ -89,6 +150,8 @@ class DialogueLine:
     # Context
     passage_id: Optional[str] = None    # Source passage ID
     position: int = 0                   # Position in passage (0-indexed)
+    quote_start: Optional[int] = None   # Start offset of the quoted span in the passage
+    quote_end: Optional[int] = None     # End offset of the quoted span in the passage
     context_before: str = ""            # Text before the quote
     context_after: str = ""             # Text after the quote
     
@@ -152,35 +215,17 @@ def extract_dialogue(
         total_text_chars=len(text),
     )
     
-    # Find all quoted text
-    # Pattern handles "...", '...', and "..." (curly quotes)
-    quote_patterns = [
-        r'"([^"]+)"',                    # Standard double quotes
-        r'\u201c([^\u201d]+)\u201d',     # Curly double quotes
-        r"'([^']+)'",                    # Single quotes (be careful - apostrophes)
-        r'\u2018([^\u2019]+)\u2019',     # Curly single quotes
-        # Mangled encoding patterns (double-encoded UTF-8)
-        r'\xe2\x80\x9c([^\xe2]+)\xe2\x80\x9d',  # â€œ...â€
-        r'â€œ([^â]+)â€',                # Same but as decoded characters
-    ]
-    
-    # Combine patterns, prefer double quotes
-    # Use the most common pattern first: "..."
-    all_quotes = []
-    
-    for pattern in quote_patterns[:2]:  # Focus on double quotes
-        for match in re.finditer(pattern, text):
-            quote_text = match.group(1).strip()
-            if len(quote_text) > 1:  # Skip single characters
-                all_quotes.append({
-                    'text': quote_text,
-                    'start': match.start(),
-                    'end': match.end(),
-                })
+    # Find all quoted text. These Tolkien sources use both double- and single-
+    # quoted dialogue, but straight single quotes also appear as apostrophes, so
+    # we scan them with a boundary-aware parser instead of a loose regex.
+    all_quotes = _find_double_quoted_spans(text) + _find_single_quoted_spans(text)
     
     # Sort by position
     all_quotes.sort(key=lambda x: x['start'])
     
+    previous_line: DialogueLine | None = None
+    previous_quote_end: int | None = None
+
     # Process each quote
     for i, quote in enumerate(all_quotes):
         quote_text = quote['text']
@@ -192,11 +237,24 @@ def extract_dialogue(
         context_end = min(len(text), end + 100)
         context_before = text[context_start:start].strip()
         context_after = text[end:context_end].strip()
+
+        if not _is_probable_dialogue_quote(quote_text, context_before, context_after):
+            previous_quote_end = end
+            continue
         
         # Try to attribute speaker
         speaker, speech_verb, confidence = _attribute_speaker(
             context_before, context_after, text, nlp
         )
+        if speaker is None and previous_line and previous_quote_end is not None:
+            carried = _carry_forward_speaker(
+                full_text=text,
+                quote_start=start,
+                previous_quote_end=previous_quote_end,
+                previous_line=previous_line,
+            )
+            if carried is not None:
+                speaker, speech_verb, confidence = carried
         
         # Classify the dialogue
         is_question = quote_text.rstrip().endswith('?')
@@ -222,6 +280,8 @@ def extract_dialogue(
             speech_verb=speech_verb,
             passage_id=passage_id,
             position=i,
+            quote_start=start,
+            quote_end=end,
             context_before=context_before[-50:] if len(context_before) > 50 else context_before,
             context_after=context_after[:50] if len(context_after) > 50 else context_after,
             is_question=is_question,
@@ -237,12 +297,82 @@ def extract_dialogue(
         
         result.dialogue_lines.append(line)
         result.total_dialogue_chars += len(quote_text)
+        previous_line = line
+        previous_quote_end = end
     
     # Calculate dialogue ratio
     if result.total_text_chars > 0:
         result.dialogue_ratio = result.total_dialogue_chars / result.total_text_chars
     
     return result
+
+
+def _find_double_quoted_spans(text: str) -> list[dict[str, int | str]]:
+    quote_patterns = [
+        r'"([^"]+)"',                    # Standard double quotes
+        r'\u201c([^\u201d]+)\u201d',     # Curly double quotes
+        # Mangled encoding patterns (double-encoded UTF-8)
+        r'\xe2\x80\x9c([^\xe2]+)\xe2\x80\x9d',  # â€œ...â€
+        r'â€œ([^â]+)â€',                # Same but as decoded characters
+    ]
+
+    spans: list[dict[str, int | str]] = []
+    for pattern in quote_patterns:
+        for match in re.finditer(pattern, text):
+            quote_text = match.group(1).strip()
+            if len(quote_text) <= 1:
+                continue
+            spans.append({
+                "text": quote_text,
+                "start": match.start(),
+                "end": match.end(),
+            })
+    return spans
+
+
+def _find_single_quoted_spans(text: str) -> list[dict[str, int | str]]:
+    """Extract single-quoted spans while ignoring apostrophes inside words."""
+    spans: list[dict[str, int | str]] = []
+    i = 0
+    while i < len(text):
+        if text[i] != "'":
+            i += 1
+            continue
+
+        prev_char = text[i - 1] if i > 0 else ""
+        next_char = text[i + 1] if i + 1 < len(text) else ""
+        if _is_word_apostrophe(prev_char, next_char) or not _is_single_quote_open(prev_char, next_char):
+            i += 1
+            continue
+
+        j = i + 1
+        while j < len(text):
+            if text[j] != "'":
+                j += 1
+                continue
+
+            prev_inner = text[j - 1] if j > 0 else ""
+            next_inner = text[j + 1] if j + 1 < len(text) else ""
+            if _is_word_apostrophe(prev_inner, next_inner):
+                j += 1
+                continue
+            if not _is_single_quote_close(prev_inner, next_inner):
+                j += 1
+                continue
+
+            quote_text = text[i + 1:j].strip()
+            if len(quote_text) > 1:
+                spans.append({
+                    "text": quote_text,
+                    "start": i,
+                    "end": j + 1,
+                })
+            i = j + 1
+            break
+        else:
+            i += 1
+
+    return spans
 
 
 def _attribute_speaker(
@@ -264,83 +394,206 @@ def _attribute_speaker(
     # Pattern 1: "..." said NAME
     # Look in context_after for speech verb + name
     after_match = re.search(
-        r'^[,.]?\s*(' + '|'.join(SPEECH_VERBS) + r')\s+([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)',
+        rf"^[,.]?\s*((?i:{_SPEECH_VERB_PATTERN}))\s+({_NAME_PATTERN})",
         context_after,
-        re.IGNORECASE
     )
     if after_match:
         speech_verb = after_match.group(1).lower()
-        speaker = after_match.group(2)
-        confidence = 0.9
-        return speaker, speech_verb, confidence
+        speaker = _sanitize_speaker_candidate(after_match.group(2))
+        if speaker:
+            confidence = 0.9
+            return speaker, speech_verb, confidence
+
+    # Pattern 1b: "..." NAME said to ADDRESSEE
+    after_named_speaker_match = re.search(
+        rf"^[,.]?\s*({_NAME_PATTERN})\s+((?i:{_SPEECH_VERB_PATTERN}))(?:\s+(?:to|at)\s+{_NAME_PATTERN})?",
+        context_after,
+    )
+    if after_named_speaker_match:
+        speaker = _sanitize_speaker_candidate(after_named_speaker_match.group(1))
+        speech_verb = after_named_speaker_match.group(2).lower()
+        if speaker:
+            confidence = 0.86
+            return speaker, speech_verb, confidence
     
     # Pattern 2: NAME said, "..."
     # Look in context_before for name + speech verb
     before_match = re.search(
-        r'([A-Z][a-z]+(?:\s+[A-Z][a-z]+)?)\s+(' + '|'.join(SPEECH_VERBS) + r')[,.]?\s*$',
+        rf"({_NAME_PATTERN})\s+((?i:{_SPEECH_VERB_PATTERN}))[:,;.]?\s*$",
         context_before,
-        re.IGNORECASE
     )
     if before_match:
-        speaker = before_match.group(1)
+        speaker = _sanitize_speaker_candidate(before_match.group(1))
         speech_verb = before_match.group(2).lower()
-        confidence = 0.9
-        return speaker, speech_verb, confidence
+        if speaker:
+            confidence = 0.9
+            return speaker, speech_verb, confidence
+
+    # Pattern 2a: NAME said to ADDRESSEE, "..."
+    before_named_speaker_with_addressee = re.search(
+        rf"({_NAME_PATTERN})\s+((?i:{_SPEECH_VERB_PATTERN}))(?:\s+(?:to|at)\s+{_NAME_PATTERN})[:,;.]?\s*$",
+        context_before,
+    )
+    if before_named_speaker_with_addressee:
+        speaker = _sanitize_speaker_candidate(before_named_speaker_with_addressee.group(1))
+        speech_verb = before_named_speaker_with_addressee.group(2).lower()
+        if speaker:
+            confidence = 0.86
+            return speaker, speech_verb, confidence
+
+    # Pattern 2b: "..." [said NAME.] "..."
+    before_inverted_match = re.search(
+        rf"((?i:{_SPEECH_VERB_PATTERN}))\s+({_NAME_PATTERN})(?:\s+[a-z][a-z'-]*){{0,3}}[:,;.]?\s*$",
+        context_before,
+    )
+    if before_inverted_match:
+        speech_verb = before_inverted_match.group(1).lower()
+        speaker = _sanitize_speaker_candidate(before_inverted_match.group(2))
+        if speaker:
+            confidence = 0.85
+            return speaker, speech_verb, confidence
+
+    # Pattern 2c: NAME arose, saying: "..."
+    lead_in_match = re.search(
+        rf"({_NAME_PATTERN})(?:\s+[a-z][a-z'-]*){{0,3}},?\s+((?i:{_SPEECH_INTRO_PATTERN}))[:;,]?\s*$",
+        context_before,
+    )
+    if lead_in_match:
+        speaker = _sanitize_speaker_candidate(lead_in_match.group(1))
+        speech_verb = lead_in_match.group(2).lower()
+        if speaker:
+            confidence = 0.78
+            return speaker, speech_verb, confidence
     
     # Pattern 3: said NAME (without quote immediately before/after)
     after_verb_match = re.search(
-        r'(' + '|'.join(SPEECH_VERBS) + r')\s+([A-Z][a-z]+)',
+        rf"((?i:{_SPEECH_VERB_PATTERN}))\s+({_NAME_PATTERN})",
         context_after,
-        re.IGNORECASE
     )
     if after_verb_match:
         speech_verb = after_verb_match.group(1).lower()
-        speaker = after_verb_match.group(2)
-        confidence = 0.7
-        return speaker, speech_verb, confidence
-    
-    # Pattern 4: Look for any capitalized name near the quote
-    # Lower confidence since it might be wrong
-    name_pattern = r'\b([A-Z][a-z]+)\b'
-    
-    # Common words to filter out
-    non_names = {
-        # Pronouns
-        'he', 'she', 'it', 'they', 'we', 'i', 'you',
-        'him', 'her', 'them', 'us', 'me',
-        # Determiners/articles
-        'the', 'a', 'an', 'this', 'that', 'these', 'those',
-        # Conjunctions/prepositions
-        'but', 'and', 'or', 'then', 'so', 'yet', 'for',
-        'to', 'from', 'with', 'at', 'by', 'in', 'on', 'of', 'after', 'before',
-        # Common adverbs
-        'there', 'here', 'where', 'when', 'what', 'how', 'why',
-        'now', 'then', 'just', 'still', 'even', 'also',
-        # Other common words
-        'one', 'all', 'some', 'any', 'no', 'not', 'only',
-        # Descriptions that might be capitalized at sentence start
-        'old', 'young', 'little', 'other', 'first', 'last',
-    }
-    
-    # Check after first
-    after_names = re.findall(name_pattern, context_after[:30])
-    if after_names:
-        filtered = [n for n in after_names if n.lower() not in non_names and len(n) > 1]
-        if filtered:
-            speaker = filtered[0]
-            confidence = 0.4
+        speaker = _sanitize_speaker_candidate(after_verb_match.group(2))
+        if speaker:
+            confidence = 0.7
             return speaker, speech_verb, confidence
-    
-    # Check before
-    before_names = re.findall(name_pattern, context_before[-30:])
-    if before_names:
-        filtered = [n for n in before_names if n.lower() not in non_names and len(n) > 1]
-        if filtered:
-            speaker = filtered[-1]  # Take the last one (closest to quote)
-            confidence = 0.3
-            return speaker, speech_verb, confidence
-    
+
     return None, None, 0.0
+
+
+def _is_word_apostrophe(prev_char: str, next_char: str) -> bool:
+    return prev_char.isalpha() and next_char.isalpha()
+
+
+def _is_single_quote_open(prev_char: str, next_char: str) -> bool:
+    if not next_char or next_char.isspace():
+        return False
+    if prev_char and prev_char.isalpha():
+        return False
+    return not prev_char or prev_char.isspace() or prev_char in "([{-:;,.!?\n"
+
+
+def _is_single_quote_close(prev_char: str, next_char: str) -> bool:
+    if not prev_char or prev_char.isspace():
+        return False
+    if next_char and next_char.isalpha():
+        return False
+    return not next_char or next_char.isspace() or next_char in ")]}-:;,.!?\n"
+
+
+def _is_probable_dialogue_quote(
+    quote_text: str,
+    context_before: str,
+    context_after: str,
+) -> bool:
+    """Filter out scare quotes and other quoted fragments that are not dialogue."""
+    stripped = quote_text.strip()
+    if not stripped:
+        return False
+
+    nearby_before = context_before[-60:].lower()
+    nearby_after = context_after[:60].lower()
+    if any(re.search(pattern, nearby_before) for pattern in _LEXICAL_QUOTE_CONTEXT_PATTERNS):
+        return False
+
+    words = re.findall(
+        r"[A-Za-z\u00C0-\u00D6\u00D8-\u00DE\u00E0-\u00F6\u00F8-\u00FF]+(?:['\u2019-]"
+        r"[A-Za-z\u00C0-\u00D6\u00D8-\u00DE\u00E0-\u00F6\u00F8-\u00FF]+)*",
+        stripped,
+    )
+    if not words:
+        return False
+
+    has_end_punctuation = stripped[-1] in "?!.,;:"
+    has_speech_cue = bool(
+        re.search(rf"(?i)\b(?:{_SPEECH_VERB_PATTERN}|{_SPEECH_INTRO_PATTERN})\b", nearby_before)
+        or re.search(rf"(?i)\b(?:{_SPEECH_VERB_PATTERN}|{_SPEECH_INTRO_PATTERN})\b", nearby_after)
+        or context_before.rstrip().endswith(":")
+    )
+    lowered = stripped.lower()
+    has_dialogue_pronoun = bool(
+        re.search(r"\b(?:i|you|we|my|your|our|me|us|thou|thee|thy|shall|must|cannot|can't|won't|don't|am|are|is)\b", lowered)
+    )
+
+    if len(words) <= 2 and not has_end_punctuation:
+        return False
+    if len(words) <= 3 and not (has_speech_cue or has_end_punctuation):
+        return False
+    if not has_speech_cue and not has_end_punctuation and len(words) < 5 and not has_dialogue_pronoun:
+        return False
+
+    return True
+
+
+def _carry_forward_speaker(
+    *,
+    full_text: str,
+    quote_start: int,
+    previous_quote_end: int,
+    previous_line: DialogueLine,
+) -> tuple[str, Optional[str], float] | None:
+    """Reuse the previous speaker only across tight same-speaker quote continuations."""
+    if not previous_line.speaker:
+        return None
+    if previous_line.attribution_confidence < 0.7:
+        return None
+
+    gap = full_text[previous_quote_end:quote_start]
+    if len(gap) > 80:
+        return None
+    if re.search(_NAME_PATTERN, gap):
+        return None
+    if not _CONTINUATION_GAP_PATTERN.match(gap):
+        return None
+
+    return previous_line.speaker, previous_line.speech_verb, 0.65
+
+
+def _sanitize_speaker_candidate(candidate: str | None) -> str | None:
+    """Discard obvious non-speaker tokens from loose quote attribution."""
+    if not candidate:
+        return None
+
+    tokens = re.findall(
+        r"[A-Za-z\u00C0-\u00D6\u00D8-\u00DE\u00E0-\u00F6\u00F8-\u00FF]+(?:['\u2019-]"
+        r"[A-Za-z\u00C0-\u00D6\u00D8-\u00DE\u00E0-\u00F6\u00F8-\u00FF]+)*",
+        candidate.strip(),
+    )
+    if not tokens:
+        return None
+
+    normalized = " ".join(tokens)
+    lowered = [token.lower() for token in tokens]
+    if any(token in _NON_SPEAKER_WORDS for token in lowered):
+        return None
+
+    if len(tokens) == 1:
+        token = tokens[0]
+        if len(token) < 3:
+            return None
+        if not re.search(r"[aeiouy\u00E0-\u00F6\u00F8-\u00FF]", token.lower()):
+            return None
+
+    return normalized
 
 
 def _detect_imperative(text: str) -> bool:

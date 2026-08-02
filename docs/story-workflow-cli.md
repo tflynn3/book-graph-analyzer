@@ -18,6 +18,8 @@ bga story init \
   --slug mithrandir-east \
   --premise "A covert mission beyond Rhun." \
   --genre fantasy \
+  --story-era "Third Age" \
+  --story-year 3018 \
   --target-chapters 8 \
   --scenes-per-chapter 3 \
   --non-interactive
@@ -29,6 +31,9 @@ Creates scaffold under:
 - `data/projects/<slug>/constraints.json`
 - `data/projects/<slug>/story_bible.md`
 - `data/projects/<slug>/plan.json` (placeholder)
+
+`project.json` now carries a `timeline` block. This is the hard story-time scope used by
+`context`, `grow-shadow`, `solve`, `draft`, and `audit`.
 
 ## 2) Auto-generate a plan
 
@@ -72,7 +77,13 @@ Stats include:
 - event transition probabilities
 - motif/reference density priors
 - character participation priors
+- per-entity temporal presence (`entity_temporal_presence`)
+- story-time guardrails (`timeline.future_guardrail_entities`)
+- hybrid local canon neighborhood (`local_story_neighborhood`) built from project seed entities
+- resolvable event evidence (`canon_evidence`) with source file, event ID, book/location provenance, era, and year
 - register/style budgets
+
+Events known to occur after `project.json.timeline` are excluded from these priors. Unknown dates remain unknown; the context builder does not synthesize a year.
 
 ## 5) Grow probabilistic shadow graph
 
@@ -90,6 +101,11 @@ Statistical engine v1 hardening:
 - Deterministic seed uses a stable SHA-256 hash of `(project_slug, plan, constraints)`.
 - Candidate sampling scales to large pools (default target: `max(500, scenes*24)`), overridable by `constraints.search.target_candidates`.
 - `shadow_candidates.json` includes `seed`, `sampling`, per-candidate interpretable `score_components` + `score_total`, and `elites_grid` behavior-cell winners.
+- Candidate cast selection now hard-filters temporally invalid present actors.
+  Example: a First Age project may remember older lore, but Bilbo/Frodo/Gandalf are rejected as active scene participants.
+- Candidate selection now prefers the project's local canon neighborhood over corpus-global popularity.
+  The command first looks for matching seed entities in Neo4j propositions/passages, then falls back to matching event artifacts when the live graph is incomplete.
+- `CanonEvidence` nodes are materialized in `shadow_graph.json`; candidate and beat `source_canon_node_ids` must resolve to these records. Character and motif names alone are not treated as evidence.
 
 ## 6) Solve best valid trajectory
 
@@ -101,7 +117,10 @@ Generates:
 
 - `data/projects/<slug>/shadow_solution.json`
 
-## 7) Draft grounded chapter prose
+Solver now re-checks temporal validity before accepting a candidate path, so stale or hand-edited
+candidate artifacts cannot bypass story-time gating.
+
+When `sample-shadow`, `score-shadow`, and `select-shadow` artifacts exist, the selected whole-story samples are converted into scene priors and contribute to beam solving. The sampling branch is therefore advisory but no longer disconnected from `solve`.
 
 ## 6.5) Expand scene beats (deterministic/template)
 
@@ -157,11 +176,30 @@ bga story beats clean --project mithrandir-east --chapter 1
 bga story draft --project mithrandir-east --chapter 1 --grounded
 ```
 
+For reproducible local chapter generation without a live LLM or Neo4j writer, use the deterministic template renderer:
+
+```bash
+bga story draft --project beren-luthien-expanded --chapter 1 --grounded --renderer template
+```
+
 Generates:
 
 - `data/projects/<slug>/chapter_01.md`
 - `data/projects/<slug>/chapter_01_trace.json`
 - `data/projects/<slug>/chapter_01_draft.json`
+
+Behavior:
+
+- Uses the real `generate.SceneGenerator` stack to draft per-scene prose from the solved shadow trajectory.
+- With `--renderer template`, emits deterministic grounded prose through the same chapter/trace/audit artifacts and skips graph writes.
+- Loads the project `story_bible.md` as structured manual constraints (asserted bullets under World Rules, Continuity Rules, Geography, Culture, and related rule headings).
+- A project may set `voice_profiles_file` in `project.json`; otherwise the checked-in Hobbit profile artifact is used when available. Only matching speakers are patched/scored.
+- Neo4j event retrieval is bounded by the project era/year, and source IDs plus source book/location are retained in the retrieved evidence.
+- Template-rendered scenes are marked `FLAGGED` with zero/unverified model scores. Passing prose-quality numbers are never fabricated for the deterministic renderer.
+- Runs configured hard quality gates during construction for minimum scene/chapter length, minimum dialogue share, minimum type-token ratio, and maximum average sentence length.
+- Persists deterministic scene IDs (`<project-slug>-<scene-id>`) so reruns update the same shadow-state / generation nodes instead of duplicating them.
+- Seeds chapter outline metadata into the generation graph before drafting so later scenes can retrieve active plot-thread context.
+- Injects story-time guidance into the scene goal. Past figures/events may be referenced when allowed by project timeline, but later-era names are explicitly forbidden.
 
 Required-term enforcement behavior:
 
@@ -196,6 +234,11 @@ Grounding hardening checks:
 - Audit reports per-scene required-term coverage (`constraints.required_scene_coverage`).
 - Semantic evidence alignment checks verify trace excerpts align with chapter text.
 - Trace sections must carry non-empty `source_canon_node_ids`.
+- Every canon source ref must resolve to a node in `shadow_graph.json`; empty or invented refs fail the audit.
+- Quality checks fail placeholder prose, too-short scenes/chapters when `constraints.quality.min_scene_words` or `constraints.quality.min_chapter_words` are set, low dialogue share when `constraints.quality.min_dialogue_ratio` is set, overlong average sentence length when `constraints.quality.max_avg_sentence_words` is set, and out-of-domain Tolkien names when `constraints.quality.forbid_out_of_domain_entities` is enabled.
+- Audit now reports `temporal_alignment` separately:
+  - `past_references`: older-era names mentioned in a historically valid way
+  - `future_mentions`: later-era contamination that fails the chapter
 
 Generates:
 
@@ -208,3 +251,8 @@ Generates:
 - Canon integration is read-only in this iteration (uses configured canon file when present).
 - `story plan` currently supports `--auto` mode only.
 - `story grow-shadow` currently supports `--auto` mode only.
+- Install semantic retrieval with `pip install -e '.[embeddings]'`. The extra contains Chroma, DuckDB, and Sentence Transformers; its integration tests are skipped in a base installation.
+
+## Draft doctor strict gate
+
+`bga draft doctor --strict` blocks both high- and medium-severity findings in its structural, repetition, causality, register, voice, and ending-cadence categories. Low-severity findings remain revision guidance. A large set of material medium findings can no longer produce a strict PASS.

@@ -95,7 +95,6 @@ def extract_causal_links_heuristic(
                     break
 
     # Cross-entity causal links: if event A mentions event B's entity or location
-    events_by_id = {e.id: e for e in events}
     all_events = list(events)
 
     for i, ev_a in enumerate(all_events):

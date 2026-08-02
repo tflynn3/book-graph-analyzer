@@ -9,22 +9,88 @@ Extracts structured events from text:
 import json
 import logging
 import re
-from pathlib import Path
-from dataclasses import dataclass, field
-from typing import Optional
 from collections import defaultdict
 from concurrent.futures import ThreadPoolExecutor, as_completed
+from dataclasses import dataclass, field
+from pathlib import Path
+from typing import Optional
 
-from ..llm import LLMClient
 from ..extract.resilient_chunk_runner import (
-    ResilientChunkRunner,
     ChunkAttemptResult,
+    ChunkLedgerEntry,
     ChunkStatus,
+    ResilientChunkRunner,
 )
+from ..llm import LLMClient
 from .temporal import Era
 
 
 logger = logging.getLogger(__name__)
+
+
+_IRREGULAR_VERB_LEMMAS = {
+    "became": "become",
+    "broke": "break",
+    "brought": "bring",
+    "came": "come",
+    "did": "do",
+    "died": "die",
+    "fled": "flee",
+    "forged": "forge",
+    "found": "find",
+    "fought": "fight",
+    "gave": "give",
+    "left": "leave",
+    "lost": "lose",
+    "made": "make",
+    "met": "meet",
+    "said": "say",
+    "stole": "steal",
+    "told": "tell",
+    "took": "take",
+    "won": "win",
+}
+
+
+def _normalize_verb(value: str) -> str:
+    """Return a conservative verb lemma without character-set stripping.
+
+    ``str.rstrip("ed")`` removes any trailing run of ``e`` and ``d``
+    characters rather than the suffix itself (for example, ``made`` became
+    ``ma``). This helper handles common irregular event verbs and otherwise
+    removes one grammatical suffix at most.
+    """
+    normalized = " ".join(value.casefold().split())
+    if not normalized:
+        return normalized
+
+    prefix, separator, token = normalized.rpartition(" ")
+    lemma = _IRREGULAR_VERB_LEMMAS.get(token)
+    if lemma is None:
+        if token.endswith("ied") and len(token) > 4:
+            lemma = token[:-3] + "y"
+        elif token.endswith("ed") and len(token) > 4:
+            lemma = token[:-2]
+            if (
+                len(lemma) >= 3
+                and lemma[-1] == lemma[-2]
+                and lemma[-1] not in "aeioulsz"
+            ):
+                lemma = lemma[:-1]
+        elif token.endswith("ies") and len(token) > 4:
+            lemma = token[:-3] + "y"
+        elif token.endswith(("ches", "shes", "sses", "xes", "zes", "oes")):
+            lemma = token[:-2]
+        elif (
+            token.endswith("s")
+            and len(token) > 3
+            and not token.endswith(("ss", "us", "is"))
+        ):
+            lemma = token[:-1]
+        else:
+            lemma = token
+
+    return f"{prefix}{separator}{lemma}" if prefix else lemma
 
 
 @dataclass
@@ -37,6 +103,14 @@ class Event:
     agent: Optional[str] = None  # Who did it (Bilbo)
     action: Optional[str] = None  # What they did (found)
     patient: Optional[str] = None  # What it was done to (the Ring)
+    location: Optional[str] = None  # In-world location, when asserted
+
+    # Assertion semantics
+    polarity: str = "positive"
+    modality: str = "asserted"
+    epistemic_status: str = "narrator_assertion"
+    knowledge_holder: Optional[str] = None
+    certainty: str = "certain"
     
     # Temporal info
     era: Optional[Era] = None
@@ -47,6 +121,8 @@ class Event:
     source_text: str = ""
     source_book: str = ""
     source_location: str = ""
+    source_span_start: Optional[int] = None
+    source_span_end: Optional[int] = None
     
     # Confidence
     confidence: float = 1.0
@@ -69,10 +145,20 @@ class Event:
             "agent": _s(self.agent),
             "action": _s(self.action),
             "patient": _s(self.patient),
+            "location": _s(self.location),
+            "polarity": self.polarity,
+            "modality": self.modality,
+            "epistemic_status": self.epistemic_status,
+            "knowledge_holder": _s(self.knowledge_holder),
+            "certainty": self.certainty,
             "era": era_val,
             "year": self.year,
             "year_text": self.year_text,
             "source_text": self.source_text,
+            "source_book": self.source_book,
+            "source_location": self.source_location,
+            "source_span_start": self.source_span_start,
+            "source_span_end": self.source_span_end,
             "confidence": self.confidence,
         }
     
@@ -84,10 +170,20 @@ class Event:
             agent=d.get("agent"),
             action=d.get("action"),
             patient=d.get("patient"),
+            location=d.get("location"),
+            polarity=d.get("polarity", "positive"),
+            modality=d.get("modality", "asserted"),
+            epistemic_status=d.get("epistemic_status", "narrator_assertion"),
+            knowledge_holder=d.get("knowledge_holder"),
+            certainty=d.get("certainty", "certain"),
             era=Era(d["era"]) if d.get("era") else None,
             year=d.get("year"),
             year_text=d.get("year_text"),
             source_text=d.get("source_text", ""),
+            source_book=d.get("source_book", ""),
+            source_location=d.get("source_location", ""),
+            source_span_start=d.get("source_span_start"),
+            source_span_end=d.get("source_span_end"),
             confidence=d.get("confidence", 1.0),
         )
 
@@ -156,8 +252,8 @@ class EventGraph:
                     matches = False
             
             if action and matches:
-                action_lower = action.lower().rstrip('ed').rstrip('s')  # Normalize verb
-                event_action = (event.action or "").lower().rstrip('ed').rstrip('s')
+                action_lower = _normalize_verb(action)
+                event_action = _normalize_verb(event.action or "")
                 if action_lower != event_action and action_lower not in event_action:
                     matches = False
             
@@ -240,15 +336,7 @@ class EventGraph:
     def to_dict(self) -> dict:
         return {
             "events": {k: v.to_dict() for k, v in self.events.items()},
-            "relations": [
-                {
-                    "event1_id": r.event1_id,
-                    "relation": r.relation,
-                    "event2_id": r.event2_id,
-                    "confidence": r.confidence,
-                }
-                for r in self.relations
-            ],
+            "relations": [r.to_dict() for r in self.relations],
         }
     
     @classmethod
@@ -354,7 +442,7 @@ class EventExtractor:
             checkpoint = self._load_checkpoint(checkpoint_file)
             if checkpoint:
                 start_chunk = checkpoint.get("next_chunk", 0)
-                all_events = [Event(**e) for e in checkpoint.get("events", [])]
+                all_events = [Event.from_dict(e) for e in checkpoint.get("events", [])]
                 all_relations = [EventRelation(**r) for r in checkpoint.get("relations", [])]
                 self._seen_events = set(checkpoint.get("seen_keys", []))
                 print(f"  Resuming from checkpoint: chunk {start_chunk}/{total_chunks} ({len(all_events)} events)", flush=True)
@@ -368,6 +456,7 @@ class EventExtractor:
                 all_relations=all_relations,
                 fallback_model=fallback_model,
                 total_chunks=total_chunks,
+                start_chunk=start_chunk,
                 parallel_workers=parallel_workers,
                 max_inflight=max_inflight,
             )
@@ -377,6 +466,7 @@ class EventExtractor:
                 max_inflight = max(1, max_inflight or parallel_workers)
                 in_flight = {}
                 chunk_payloads: dict[int, tuple[list[Event], list[EventRelation]]] = {}
+                next_merge_chunk = start_chunk
                 with ThreadPoolExecutor(max_workers=parallel_workers) as pool:
                     pending_iter = iter(pending)
                     while True:
@@ -400,13 +490,25 @@ class EventExtractor:
 
                         for idx, (events, relations) in finished:
                             chunk_payloads[idx] = (events, relations)
-                            if checkpoint_file:
-                                next_chunk = len([j for j in chunk_payloads if j >= start_chunk]) + start_chunk
-                                self._save_checkpoint(checkpoint_file, next_chunk, total_chunks, all_events, all_relations)
-
-                for idx in sorted(chunk_payloads.keys()):
-                    events, relations = chunk_payloads[idx]
-                    self._merge_chunk_payload(events, relations, all_events, all_relations)
+                            advanced = False
+                            while next_merge_chunk in chunk_payloads:
+                                ready_events, ready_relations = chunk_payloads.pop(next_merge_chunk)
+                                self._merge_chunk_payload(
+                                    ready_events,
+                                    ready_relations,
+                                    all_events,
+                                    all_relations,
+                                )
+                                next_merge_chunk += 1
+                                advanced = True
+                            if checkpoint_file and advanced:
+                                self._save_checkpoint(
+                                    checkpoint_file,
+                                    next_merge_chunk,
+                                    total_chunks,
+                                    all_events,
+                                    all_relations,
+                                )
             else:
                 for i, chunk in pending:
                     if self.progress_callback:
@@ -461,7 +563,7 @@ class EventExtractor:
     def graph_from_checkpoint_payload(self, events_payload: list[dict], relations_payload: list[dict]) -> EventGraph:
         """Build an EventGraph from checkpoint payload data."""
         graph = EventGraph()
-        all_events = [Event(**e) for e in events_payload]
+        all_events = [Event.from_dict(e) for e in events_payload]
         all_relations = [EventRelation(**r) for r in relations_payload]
 
         for event in all_events:
@@ -482,6 +584,7 @@ class EventExtractor:
         all_relations: list[EventRelation],
         fallback_model: Optional[str],
         total_chunks: int,
+        start_chunk: int,
         parallel_workers: int,
         max_inflight: Optional[int],
     ) -> None:
@@ -496,12 +599,34 @@ class EventExtractor:
             fallback_model = "gpt-4o" if default_llm.provider == "openai" else "llama3.1:70b"
 
         runner = ResilientChunkRunner(ledger_file)
+
+        # The event checkpoint is the durable payload boundary. A ledger may
+        # have been written for an out-of-order worker just before a crash, but
+        # without a corresponding checkpoint payload that chunk is not safely
+        # resumable and must be processed again.
+        for chunk_index in range(start_chunk):
+            if not runner.is_done(chunk_index):
+                runner.state.ledger[chunk_index] = ChunkLedgerEntry(
+                    chunk_index=chunk_index,
+                    status=ChunkStatus.OK,
+                    attempts=0,
+                    final_model="checkpoint",
+                )
+        for chunk_index in list(runner.state.ledger):
+            if chunk_index >= start_chunk and runner.is_done(chunk_index):
+                del runner.state.ledger[chunk_index]
+
         pending_payloads: dict[int, tuple[list[Event], list[EventRelation]]] = {}
-        merged_upto = -1
+        merged_upto = start_chunk - 1
 
         def persist_artifact() -> None:
-            completed = len(runner.state.ledger)
-            self._save_checkpoint(checkpoint_file, completed, total_chunks, all_events, all_relations)
+            self._save_checkpoint(
+                checkpoint_file,
+                merged_upto + 1,
+                total_chunks,
+                all_events,
+                all_relations,
+            )
 
         def process_attempt(chunk_index: int, chunk: str, model: str, attempt_no: int) -> ChunkAttemptResult:
             if self.progress_callback:
@@ -594,8 +719,7 @@ class EventExtractor:
         if agent:
             parts.append(agent)
         if event.action:
-            action = self._coerce_str(event.action).lower().strip()
-            action = action.rstrip('ed').rstrip('s')
+            action = _normalize_verb(self._coerce_str(event.action))
             parts.append(action)
         if event.patient:
             patient = self._coerce_str(event.patient).lower().strip()
@@ -627,8 +751,10 @@ class EventExtractor:
             "relations": [r.to_dict() for r in relations],
             "seen_keys": list(self._seen_events),
         }
-        with open(checkpoint_file, 'w', encoding='utf-8') as f:
-            json.dump(checkpoint, f)
+        path = Path(checkpoint_file)
+        temporary_path = path.with_suffix(path.suffix + ".tmp")
+        temporary_path.write_text(json.dumps(checkpoint), encoding="utf-8")
+        temporary_path.replace(path)
     
     def _clear_checkpoint(self, checkpoint_file: str) -> None:
         """Remove checkpoint file on successful completion."""
@@ -762,37 +888,6 @@ class EventExtractor:
         """Extract events using LLM."""
         # Limit text for prompt (should already be chunked but ensure limit)
         text = text[:4000]
-        
-        prompt = f"""Extract key events from this fantasy text. For each event identify:
-- description: Short description (e.g., "Bilbo found the Ring")
-- agent: Who did it (e.g., "Bilbo")
-- action: The verb/action (e.g., "found")
-- patient: What was acted upon (e.g., "the Ring")
-- year: Year if mentioned (e.g., 2941)
-- era: Age if mentioned (first_age, second_age, third_age, fourth_age)
-
-Also identify temporal relationships between events:
-- If one event clearly happened before another
-- If one event caused another
-
-Text:
-{text}
-
-Return JSON with two arrays:
-{{
-  "events": [
-    {{"id": "unique_id", "description": "...", "agent": "...", "action": "...", "patient": "...", "year": null, "era": null}},
-    ...
-  ],
-  "relations": [
-    {{"event1": "id1", "relation": "before", "event2": "id2"}},
-    ...
-  ]
-}}
-
-Focus on significant plot events, not minor actions. Include 5-15 events.
-
-JSON:"""
 
         events, relations, _reason, _raw = self._extract_llm_once(
             text,
@@ -817,8 +912,16 @@ JSON:"""
 - agent: Who did it (e.g., "Bilbo")
 - action: The verb/action (e.g., "found")
 - patient: What was acted upon (e.g., "the Ring")
+- location: In-world place where it occurs, or null
 - year: Year if mentioned (e.g., 2941)
 - era: Age if mentioned (first_age, second_age, third_age, fourth_age)
+- polarity: positive or negative (do not turn negated actions into positive facts)
+- modality: asserted, reported, believed, possible, intended, commanded, or hypothetical
+- epistemic_status: narrator_assertion, character_belief, reported_speech, tradition, prophecy, or speculation
+- knowledge_holder: Character whose belief/report this is, or null for narrator assertion
+- certainty: certain, uncertain, or disputed
+- source_text: Exact supporting excerpt from the supplied text, at most 40 words
+- confidence: Evidence confidence from 0.0 to 1.0
 
 Also identify temporal relationships between events:
 - If one event clearly happened before another
@@ -830,11 +933,11 @@ Text:
 Return JSON with two arrays:
 {{
   "events": [
-    {{"id": "unique_id", "description": "...", "agent": "...", "action": "...", "patient": "...", "year": null, "era": null}},
+    {{"id": "unique_id", "description": "...", "agent": "...", "action": "...", "patient": "...", "location": null, "year": null, "era": null, "polarity": "positive", "modality": "asserted", "epistemic_status": "narrator_assertion", "knowledge_holder": null, "certainty": "certain", "source_text": "exact words", "confidence": 0.8}},
     ...
   ],
   "relations": [
-    {{"event1": "id1", "relation": "before", "event2": "id2"}},
+    {{"event1": "id1", "relation": "before", "event2": "id2", "source_text": "exact supporting words", "confidence": 0.8}},
     ...
   ]
 }}
@@ -872,18 +975,51 @@ JSON:"""
                         event_id = f"c{chunk_index}_{base_id}" if chunk_index > 0 else base_id
                         era = None
                         if e.get("era"):
-                            era = Era.from_text(e["era"])
+                            era = Era.from_text(str(e["era"]).replace("_", " "))
                         
+                        source_text = self._validated_source_excerpt(text, e.get("source_text"))
+                        source_span_start = text.find(source_text) if source_text else None
+                        source_span_end = (
+                            source_span_start + len(source_text)
+                            if source_span_start is not None
+                            else None
+                        )
+                        confidence = self._coerce_confidence(e.get("confidence"), default=0.8)
+                        if not source_text:
+                            confidence = min(confidence, 0.55)
+
                         events.append(Event(
                             id=event_id,
                             description=e["description"],
                             agent=e.get("agent"),
                             action=e.get("action"),
                             patient=e.get("patient"),
+                            location=e.get("location"),
+                            polarity=self._choice(e.get("polarity"), {"positive", "negative"}, "positive"),
+                            modality=self._choice(
+                                e.get("modality"),
+                                {"asserted", "reported", "believed", "possible", "intended", "commanded", "hypothetical"},
+                                "asserted",
+                            ),
+                            epistemic_status=self._choice(
+                                e.get("epistemic_status"),
+                                {"narrator_assertion", "character_belief", "reported_speech", "tradition", "prophecy", "speculation"},
+                                "narrator_assertion",
+                            ),
+                            knowledge_holder=e.get("knowledge_holder"),
+                            certainty=self._choice(e.get("certainty"), {"certain", "uncertain", "disputed"}, "certain"),
                             year=e.get("year"),
                             era=era,
+                            source_text=source_text,
                             source_book=source_book,
-                            confidence=0.8,
+                            source_location=(
+                                f"chunk {chunk_index}, chars {source_span_start}-{source_span_end}"
+                                if source_span_start is not None
+                                else f"chunk {chunk_index}"
+                            ),
+                            source_span_start=source_span_start,
+                            source_span_end=source_span_end,
+                            confidence=confidence,
                         ))
                     else:
                         dropped_events += 1
@@ -906,11 +1042,22 @@ JSON:"""
                             continue
                         e1_id = id_map.get(e1_raw, e1_raw)
                         e2_id = id_map.get(e2_raw, e2_raw)
+                        relation_source_text = self._validated_source_excerpt(
+                            text,
+                            r.get("source_text"),
+                        )
+                        relation_confidence = self._coerce_confidence(
+                            r.get("confidence"),
+                            default=0.7,
+                        )
+                        if not relation_source_text:
+                            relation_confidence = min(relation_confidence, 0.55)
                         relations.append(EventRelation(
                             event1_id=e1_id,
                             relation=r.get("relation", "before"),
                             event2_id=e2_id,
-                            confidence=0.7,
+                            confidence=relation_confidence,
+                            source_text=relation_source_text,
                         ))
                     else:
                         dropped_relations += 1
@@ -937,6 +1084,40 @@ JSON:"""
             return [], [], "empty_response", ""
 
         return events, relations, "", response
+
+    @staticmethod
+    def _choice(value, allowed: set[str], default: str) -> str:
+        normalized = str(value or "").strip().casefold()
+        return normalized if normalized in allowed else default
+
+    @staticmethod
+    def _coerce_confidence(value, default: float) -> float:
+        try:
+            return max(0.0, min(1.0, float(value)))
+        except (TypeError, ValueError):
+            return default
+
+    @staticmethod
+    def _validated_source_excerpt(source_text: str, candidate) -> str:
+        excerpt = " ".join(str(candidate or "").split()).strip()
+        if not excerpt or len(excerpt.split()) > 40:
+            return ""
+        direct_start = source_text.find(excerpt)
+        if direct_start >= 0:
+            return source_text[direct_start : direct_start + len(excerpt)]
+        folded_start = source_text.casefold().find(excerpt.casefold())
+        if folded_start >= 0:
+            return source_text[folded_start : folded_start + len(excerpt)]
+
+        # JSON/LLM transport commonly collapses line breaks and repeated spaces.
+        # Accept that variation only when the same token sequence occurs in the
+        # source, and return the exact source substring so its offsets remain valid.
+        tokens = excerpt.split()
+        flexible_pattern = r"\s+".join(re.escape(token) for token in tokens)
+        match = re.search(flexible_pattern, source_text, flags=re.IGNORECASE)
+        if match:
+            return source_text[match.start() : match.end()]
+        return ""
     
     def _extract_patterns(self, text: str, source_book: str) -> list[Event]:
         """Extract events using pattern matching."""
@@ -960,6 +1141,9 @@ JSON:"""
                     patient=patient,
                     source_text=match.group(0),
                     source_book=source_book,
+                    source_location=f"chars {match.start()}-{match.end()}",
+                    source_span_start=match.start(),
+                    source_span_end=match.end(),
                     confidence=0.6,
                 ))
         

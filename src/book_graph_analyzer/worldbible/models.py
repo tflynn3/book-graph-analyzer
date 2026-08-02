@@ -9,6 +9,7 @@ from enum import Enum
 from typing import Optional
 import json
 from pathlib import Path
+import re
 
 
 class WorldBibleCategory(Enum):
@@ -352,13 +353,13 @@ class WorldBible:
         lines = [
             f"=== World Bible: {self.name} ===",
             f"Sources: {', '.join(self.sources) if self.sources else 'None'}",
-            f"",
-            f"[Content Summary]",
+            "",
+            "[Content Summary]",
             f"  Total rules: {total_rules}",
             f"  Cultures: {len(self.cultures)}",
             f"  Magic systems: {len(self.magic_systems)}",
             f"  Geography entries: {len(self.geography)}",
-            f"",
+            "",
         ]
         
         if self.rules:
@@ -375,6 +376,72 @@ class WorldBible:
     
     @classmethod
     def load(cls, path: Path) -> "WorldBible":
-        """Load world bible from JSON file."""
+        """Load a structured JSON bible or a human-editable Markdown bible."""
+        path = Path(path)
+        if path.suffix.lower() in {".md", ".markdown"}:
+            return cls.from_markdown(path.read_text(encoding="utf-8"), source_name=path.name)
         with open(path, 'r', encoding='utf-8') as f:
             return cls.from_dict(json.load(f))
+
+    @classmethod
+    def from_markdown(cls, text: str, source_name: str = "story_bible.md") -> "WorldBible":
+        """Parse Markdown bullet rules into the structured constraint model.
+
+        The parser intentionally ignores character wish-lists and open questions;
+        only asserted bullets under rule-like sections become hard constraints.
+        """
+        heading = ""
+        name = "Story World"
+        rules: dict[WorldBibleCategory, list[WorldRule]] = {}
+        category_by_heading = {
+            "magic": WorldBibleCategory.MAGIC,
+            "culture": WorldBibleCategory.CULTURE,
+            "geography": WorldBibleCategory.GEOGRAPHY,
+            "technology": WorldBibleCategory.TECHNOLOGY,
+            "cosmology": WorldBibleCategory.COSMOLOGY,
+            "history": WorldBibleCategory.HISTORY,
+            "language": WorldBibleCategory.LANGUAGE,
+            "creatures": WorldBibleCategory.CREATURES,
+            "objects": WorldBibleCategory.OBJECTS,
+            "themes": WorldBibleCategory.THEMES,
+            "world rules": WorldBibleCategory.THEMES,
+            "continuity rules": WorldBibleCategory.HISTORY,
+        }
+        ignored_headings = {"core characters", "characters", "open questions", "premise"}
+        rule_index = 0
+        for line_number, raw_line in enumerate(text.splitlines(), start=1):
+            line = raw_line.strip()
+            if line.startswith("# "):
+                name = line[2:].strip() or name
+                continue
+            if line.startswith("##"):
+                heading = re.sub(r"^#+\s*", "", line).strip().lower()
+                continue
+            bullet_match = re.match(r"^[-*+]\s+(.+)$", line)
+            if not bullet_match or heading in ignored_headings:
+                continue
+            description = bullet_match.group(1).strip()
+            if not description or re.match(r"^\(add\b", description, flags=re.IGNORECASE):
+                continue
+            category = category_by_heading.get(heading)
+            if category is None:
+                continue
+            rule_index += 1
+            title = description.split(".", 1)[0][:80].strip()
+            rule = WorldRule(
+                id=f"manual-rule-{rule_index:04d}",
+                title=title or f"Manual rule {rule_index}",
+                description=description,
+                category=category,
+                source_passages=[
+                    SourcePassage(
+                        text=description,
+                        book=source_name,
+                        location=f"line {line_number}",
+                    )
+                ],
+                confidence=1.0,
+                keywords=re.findall(r"[A-Za-z][A-Za-z'-]{2,}", description.lower())[:12],
+            )
+            rules.setdefault(category, []).append(rule)
+        return cls(name=name, rules=rules, sources=[source_name])

@@ -22,6 +22,7 @@ wheels/
 
 # Virtual environments
 .venv/
+.venv-*/
 venv/
 ENV/
 
@@ -34,6 +35,8 @@ ENV/
 
 # Testing
 .pytest_cache/
+.ruff_cache/
+.hypothesis/
 .coverage
 htmlcov/
 .tox/
@@ -58,9 +61,45 @@ neo4j/
 models/*.bin
 models/*.gguf
 
-# Exports
-data/exports/*.json
-data/exports/*.graphml
+# Generated analytics and graph exports
+data/bga_analytics.duckdb
+data/bga_analytics.duckdb.*
+data/exports/*
+!data/exports/.gitkeep
+data/evals/
+data/corpus/lotr_trilogy*.json
+
+# Generated review and benchmark datasets
+tools/graph-scrubber/graph_review.json
+benchmarks/thermo_suite_autogen_v*/
+experiments/field_snapshots/
+experiments/reports/
+experiments/preflight_omitted_cases_*.json
+experiments/thermo_eval_matrix.jsonl
+experiments/thermo_readiness_log.jsonl
+
+# Generated experiment runs (keep harnesses and curated inputs tracked)
+experiments/thermo-explore-*/
+
+# Rebuildable Remotion dependencies and renders
+remotion-bar-chart/node_modules/
+remotion-bar-chart/out/
+
+# Generated audiobook renders
+data/projects/*/audio/**/*.wav
+data/projects/*/audio/**/*.mp3
+data/projects/*/audio/**/*.flac
+data/projects/*/audio/**/*.pcm
+data/projects/*/audio/**/*.concat.txt
+data/projects/*/audio/**/chunks/
+data/projects/*/audio/**/manifest.json
+data/projects/*/*_reader.html
+data/projects/*/story_reader.html
+
+# Local LOTR paragraph-audio inputs and generated alignment/render artifacts
+lotr_paragraph_audio/output/
+lotr_paragraph_audio/work/
+lotr_paragraph_audio/source_texts/
 
 # OS
 .DS_Store

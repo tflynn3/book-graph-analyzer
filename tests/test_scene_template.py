@@ -11,7 +11,6 @@ All tests are pure-Python — no Neo4j or LLM required. Covers:
   - Cross-register distinctiveness (registers produce different metrics)
 """
 
-import pytest
 from book_graph_analyzer.models.scene_template import (
     SceneTemplate,
     RegisterClassification,
